@@ -1,0 +1,23 @@
+# Gradle / build
+.gradle/
+build/
+out/
+bin/
+# Dev runtime folders (worlds, logs, configs from runClient/runServer)
+run/
+runs/
+# IDEs
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.project
+.classpath
+# OS
+.DS_Store
+Thumbs.db
+# Decompiled / extracted legacy jars (keep original source, not these)
+legacy/**/*.jar
+legacy/**/decompiled/

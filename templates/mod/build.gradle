@@ -1,0 +1,8 @@
+plugins {
+    id 'mod.conventions'
+}
+
+dependencies {
+    // Extra dependencies for this mod only, e.g. another mod's API:
+    // compileOnly "mezz.jei:jei-1.21.1-neoforge-api:19.21.0.247"
+}

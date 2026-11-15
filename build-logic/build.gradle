@@ -1,0 +1,13 @@
+plugins {
+    id 'groovy-gradle-plugin'
+}
+
+repositories {
+    gradlePluginPortal()
+    maven { url = 'https://maven.neoforged.net/releases' }
+}
+
+dependencies {
+    // ModDevGradle: the official NeoForge Gradle plugin.
+    implementation 'net.neoforged:moddev-gradle:2.0.148'
+}
