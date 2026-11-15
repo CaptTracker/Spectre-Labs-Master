@@ -1,0 +1,2 @@
+// Intentionally empty. All mod build logic lives in build-logic/src/main/groovy/mod.conventions.gradle
+// so every mod is built the same way. Per-mod settings go in that mod's gradle.properties.

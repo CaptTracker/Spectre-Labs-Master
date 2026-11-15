@@ -1,0 +1,27 @@
+pluginManagement {
+    includeBuild 'build-logic'
+    repositories {
+        gradlePluginPortal()
+        maven { url = 'https://maven.neoforged.net/releases' }
+    }
+}
+
+plugins {
+    // Lets Gradle download a JDK 21 automatically if one isn't installed.
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.9.0'
+}
+
+rootProject.name = 'spectre-labs-master'
+
+// Every folder in libs/ and mods/ that has a build.gradle becomes a subproject
+// named after the folder (e.g. mods/coolmod -> :coolmod). No manual list to keep up to date.
+['libs', 'mods'].each { group ->
+    def dir = file(group)
+    if (!dir.isDirectory()) return
+    dir.listFiles().findAll { it.isDirectory() && new File(it, 'build.gradle').exists() }
+            .sort { it.name }
+            .each { d ->
+                include ":${d.name}"
+                project(":${d.name}").projectDir = d
+            }
+}

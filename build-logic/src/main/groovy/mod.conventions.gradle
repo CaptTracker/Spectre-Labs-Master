@@ -1,0 +1,116 @@
+// Shared build setup applied by every mod and library in this repo:
+//   plugins { id 'mod.conventions' }
+// Per-mod values (mod_id, mod_name, mod_version, mod_description) come from the
+// mod's own gradle.properties; everything else comes from the root gradle.properties.
+plugins {
+    id 'java-library'
+    id 'net.neoforged.moddev'
+}
+
+def prop = { String key -> project.property(key).toString() }
+
+def modId        = prop('mod_id')
+def libId        = prop('lib_mod_id')
+def isLibrary    = modId == libId
+def mcVersion    = prop('minecraft_version')
+
+version = prop('mod_version')
+group = prop('mod_group_id')
+base { archivesName = "${modId}-${mcVersion}" }
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
+    withSourcesJar()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 21
+}
+
+// Every mod except the library itself depends on the library.
+if (!isLibrary) {
+    evaluationDependsOn(":${libId}")
+    dependencies {
+        implementation project(":${libId}")
+    }
+}
+
+neoForge {
+    version = prop('neo_version')
+
+    parchment {
+        mappingsVersion = prop('parchment_mappings_version')
+        minecraftVersion = prop('parchment_minecraft_version')
+    }
+
+    runs {
+        client {
+            client()
+            systemProperty 'neoforge.enabledGameTestNamespaces', modId
+        }
+        server {
+            server()
+            programArgument '--nogui'
+            systemProperty 'neoforge.enabledGameTestNamespaces', modId
+        }
+        data {
+            data()
+            programArguments.addAll '--mod', modId, '--all',
+                    '--output', file('src/generated/resources/').absolutePath,
+                    '--existing', file('src/main/resources/').absolutePath
+        }
+        configureEach {
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            logLevel = org.slf4j.event.Level.DEBUG
+        }
+    }
+
+    mods {
+        create(modId) {
+            sourceSet(sourceSets.main)
+        }
+        if (!isLibrary) {
+            // Load the library alongside this mod in runClient/runServer.
+            create(libId) {
+                sourceSet(project(":${libId}").sourceSets.main)
+            }
+        }
+    }
+}
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+// Fill in ${...} placeholders in src/main/templates (neoforge.mods.toml).
+def generateModMetadata = tasks.register('generateModMetadata', ProcessResources) {
+    def replaceProperties = [
+            minecraft_version      : mcVersion,
+            minecraft_version_range: prop('minecraft_version_range'),
+            neo_version            : prop('neo_version'),
+            neo_version_range      : prop('neo_version_range'),
+            loader_version_range   : prop('loader_version_range'),
+            mod_id                 : modId,
+            mod_name               : prop('mod_name'),
+            mod_license            : prop('mod_license'),
+            mod_version            : prop('mod_version'),
+            mod_authors            : prop('mod_authors'),
+            mod_description        : prop('mod_description'),
+            lib_mod_id             : libId,
+            lib_version_range      : prop('lib_version_range'),
+    ]
+    inputs.properties replaceProperties
+    expand replaceProperties
+    from 'src/main/templates'
+    into layout.buildDirectory.dir('generated/sources/modMetadata')
+}
+sourceSets.main.resources.srcDir generateModMetadata
+neoForge.ideSyncTask generateModMetadata
+
+tasks.named('jar') {
+    manifest.attributes([
+            'Specification-Title'   : modId,
+            'Specification-Vendor'  : prop('mod_authors'),
+            'Implementation-Title'  : prop('mod_name'),
+            'Implementation-Version': project.version,
+    ])
+}
