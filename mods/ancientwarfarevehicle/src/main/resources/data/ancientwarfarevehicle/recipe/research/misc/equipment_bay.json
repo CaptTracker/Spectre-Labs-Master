@@ -1,0 +1,21 @@
+{
+  "type": "ancientwarfare:shapeless_research_recipe",
+  "research": "ancientwarfare:engineering",
+  "ingredients": [
+    {
+      "tag": "c:ingots/iron",
+      "count": 6
+    },
+    {
+      "tag": "minecraft:wool",
+      "count": 2
+    },
+    {
+      "tag": "minecraft:planks",
+      "count": 2
+    }
+  ],
+  "result": {
+    "id": "ancientwarfarevehicle:equipment_bay"
+  }
+}

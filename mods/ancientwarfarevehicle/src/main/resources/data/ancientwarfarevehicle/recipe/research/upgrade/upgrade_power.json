@@ -1,0 +1,17 @@
+{
+  "type": "ancientwarfare:shapeless_research_recipe",
+  "research": "ancientwarfare:machinery",
+  "ingredients": [
+    {
+      "tag": "minecraft:planks",
+      "count": 2
+    },
+    {
+      "tag": "c:ingots/iron",
+      "count": 5
+    }
+  ],
+  "result": {
+    "id": "ancientwarfarevehicle:vehicle_upgrade_power"
+  }
+}

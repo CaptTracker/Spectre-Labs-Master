@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "B W",
+    "RLY",
+    " L "
+  ],
+  "key": {
+    "B": {
+      "tag": "c:dyes/black"
+    },
+    "W": {
+      "tag": "c:dyes/white"
+    },
+    "R": {
+      "tag": "c:dyes/red"
+    },
+    "Y": {
+      "tag": "c:dyes/yellow"
+    },
+    "L": {
+      "tag": "minecraft:logs_that_burn"
+    }
+  },
+  "result": {
+    "id": "ancientwarfarestructure:totem_part_base",
+    "count": 1
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "keybind.category.awCore": "Ancient Warfare",
+  "keybind.awCore.alt.item.use.1": "Alt. Item Function 1",
+  "keybind.awCore.alt.item.use.2": "Alt. Item Function 2",
+  "keybind.awCore.alt.item.use.3": "Alt. Item Function 3",
+  "keybind.awCore.alt.item.use.4": "Alt. Item Function 4",
+  "keybind.awCore.alt.item.use.5": "Alt. Item Function 5",
+  "item.ancientwarfare.manual.tooltip": "Ancient Warfare Manual",
+  "item.ancientwarfare.worksite_upgrade.size_medium": "Medium Bounds Upgrade",
+  "item.ancientwarfare.worksite_upgrade.size_large": "Large Bounds Upgrade",
+  "item.ancientwarfare.worksite_upgrade.quarry_medium": "Medium Quarry Upgrade",
+  "item.ancientwarfare.worksite_upgrade.quarry_large": "Large Quarry Upgrade",
+  "item.ancientwarfare.worksite_upgrade.enchanted_tools_1": "Lightly Enchanted Tools Upgrade",
+  "item.ancientwarfare.worksite_upgrade.enchanted_tools_2": "Highly Enchanted Tools Upgrade",
+  "item.ancientwarfare.worksite_upgrade.tool_quality_1": "Basic Tool Quality Upgrade",
+  "item.ancientwarfare.worksite_upgrade.tool_quality_2": "Intermediate Tool Quality Upgrade",
+  "item.ancientwarfare.worksite_upgrade.tool_quality_3": "Advanced Tool Quality Upgrade",
+  "item.ancientwarfare.worksite_upgrade.basic_chunk_loader": "Basic Chunkloader Upgrade",
+  "item.ancientwarfare.worksite_upgrade.quarry_chunk_loader": "Quarry Chunkloader Upgrade"
+}

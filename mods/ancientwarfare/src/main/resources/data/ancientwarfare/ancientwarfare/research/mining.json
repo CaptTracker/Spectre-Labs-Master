@@ -1,0 +1,24 @@
+{
+  "time": 200,
+  "dependencies": [
+    "ancientwarfare:engineering"
+  ],
+  "resources": [
+    {
+      "item": "minecraft:iron_pickaxe",
+      "count": 1
+    },
+    {
+      "item": "minecraft:furnace_minecart",
+      "count": 1
+    },
+    {
+      "item": "minecraft:powered_rail",
+      "count": 6
+    },
+    {
+      "item": "minecraft:bucket",
+      "count": 1
+    }
+  ]
+}

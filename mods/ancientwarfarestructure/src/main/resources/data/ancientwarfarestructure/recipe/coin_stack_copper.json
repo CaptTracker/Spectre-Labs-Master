@@ -1,0 +1,29 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "ancientwarfarenpc"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "CCC",
+    "C C",
+    "CCC"
+  ],
+  "key": {
+    "C": {
+      "item": "ancientwarfarenpc:coin_copper"
+    }
+  },
+  "result": {
+    "id": "ancientwarfarestructure:coin_stack_copper",
+    "count": 1,
+    "components": {
+      "minecraft:block_state": {
+        "size": "1"
+      }
+    }
+  }
+}

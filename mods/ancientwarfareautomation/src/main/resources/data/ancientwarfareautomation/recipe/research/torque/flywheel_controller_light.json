@@ -1,0 +1,20 @@
+{
+  "type": "ancientwarfare:research_recipe",
+  "research": "ancientwarfare:theory_of_gravity",
+  "pattern": [
+    "PGP",
+    "PPP",
+    "PGP"
+  ],
+  "key": {
+    "P": {
+      "tag": "minecraft:planks"
+    },
+    "G": {
+      "tag": "c:gears/wooden"
+    }
+  },
+  "result": {
+    "id": "ancientwarfareautomation:flywheel_controller_light"
+  }
+}

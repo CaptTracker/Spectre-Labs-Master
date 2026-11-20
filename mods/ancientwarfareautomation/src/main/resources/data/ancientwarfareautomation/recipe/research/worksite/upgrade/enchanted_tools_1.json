@@ -1,0 +1,28 @@
+{
+  "type": "ancientwarfare:research_recipe",
+  "research": "ancientwarfare:mathematics",
+  "pattern": [
+    " B ",
+    "III"
+  ],
+  "key": {
+    "B": {
+      "type": "neoforge:components",
+      "items": "minecraft:enchanted_book",
+      "components": {
+        "minecraft:stored_enchantments": {
+          "levels": {
+            "minecraft:fortune": 1
+          }
+        }
+      },
+      "strict": false
+    },
+    "I": {
+      "tag": "c:ingots/iron"
+    }
+  },
+  "result": {
+    "id": "ancientwarfareautomation:worksite_upgrade_enchanted_tools_1"
+  }
+}

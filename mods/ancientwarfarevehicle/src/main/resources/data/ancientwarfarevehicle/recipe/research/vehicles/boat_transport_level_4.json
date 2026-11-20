@@ -1,0 +1,29 @@
+{
+  "type": "ancientwarfare:shapeless_research_recipe",
+  "research": "ancientwarfare:seafaring",
+  "ingredients": [
+    {
+      "item": "ancientwarfarevehicle:rough_iron",
+      "count": 5
+    },
+    {
+      "tag": "c:chests/wooden",
+      "count": 8
+    },
+    {
+      "item": "ancientwarfarevehicle:equipment_bay"
+    },
+    {
+      "item": "minecraft:cactus",
+      "count": 2
+    }
+  ],
+  "result": {
+    "id": "ancientwarfarevehicle:boat_transport_spawner",
+    "components": {
+      "ancientwarfarevehicle:vehicle_spawn_data": {
+        "level": 4
+      }
+    }
+  }
+}

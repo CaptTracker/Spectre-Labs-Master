@@ -1,0 +1,29 @@
+{
+  "type": "ancientwarfare:research_recipe",
+  "research": "ancientwarfare:animal_husbandry",
+  "pattern": [
+    "FFF",
+    "GHG",
+    "_C_"
+  ],
+  "key": {
+    "F": {
+      "tag": "minecraft:wooden_fences"
+    },
+    "G": {
+      "tag": "c:gears/wooden"
+    },
+    "H": {
+      "item": "minecraft:hay_block"
+    },
+    "C": {
+      "tag": "c:chests/wooden"
+    },
+    "_": {
+      "tag": "minecraft:planks"
+    }
+  },
+  "result": {
+    "id": "ancientwarfareautomation:stable"
+  }
+}

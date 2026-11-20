@@ -1,0 +1,29 @@
+{
+  "type": "ancientwarfare:research_recipe",
+  "research": "ancientwarfare:leadership",
+  "pattern": [
+    "GF",
+    "GT"
+  ],
+  "key": {
+    "T": {
+      "item": "minecraft:wooden_pickaxe"
+    },
+    "F": {
+      "tag": "ancientwarfarenpc:food_bundles"
+    },
+    "G": {
+      "tag": "c:ingots/gold"
+    }
+  },
+  "result": {
+    "id": "ancientwarfarenpc:npc_spawner",
+    "components": {
+      "ancientwarfarenpc:npc_spawner": {
+        "npcType": "worker",
+        "npcSubtype": ""
+      },
+      "minecraft:custom_model_data": 11
+    }
+  }
+}

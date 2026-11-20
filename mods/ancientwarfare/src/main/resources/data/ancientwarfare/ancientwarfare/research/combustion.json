@@ -1,0 +1,25 @@
+{
+  "time": 200,
+  "dependencies": [
+    "ancientwarfare:mining",
+    "ancientwarfare:the_wheel"
+  ],
+  "resources": [
+    {
+      "item": "minecraft:coal",
+      "count": 10
+    },
+    {
+      "item": "minecraft:charcoal",
+      "count": 8
+    },
+    {
+      "tag": "c:ingots/iron",
+      "count": 5
+    },
+    {
+      "tag": "c:netherracks",
+      "count": 12
+    }
+  ]
+}

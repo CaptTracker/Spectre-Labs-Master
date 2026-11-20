@@ -1,0 +1,29 @@
+{
+  "type": "ancientwarfare:research_recipe",
+  "research": "ancientwarfare:trade",
+  "pattern": [
+    "PPP",
+    "GBG",
+    "_C_"
+  ],
+  "key": {
+    "P": {
+      "tag": "minecraft:planks"
+    },
+    "G": {
+      "tag": "c:gears/wooden"
+    },
+    "B": {
+      "item": "minecraft:barrel"
+    },
+    "C": {
+      "tag": "c:chests/wooden"
+    },
+    "_": {
+      "tag": "minecraft:wool"
+    }
+  },
+  "result": {
+    "id": "ancientwarfareautomation:inn"
+  }
+}

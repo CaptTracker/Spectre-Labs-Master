@@ -1,0 +1,24 @@
+{
+  "time": 200,
+  "dependencies": [
+    "ancientwarfare:theory_of_gravity"
+  ],
+  "resources": [
+    {
+      "tag": "c:strings",
+      "count": 6
+    },
+    {
+      "tag": "c:dyes/black",
+      "count": 6
+    },
+    {
+      "item": "minecraft:paper",
+      "count": 12
+    },
+    {
+      "item": "minecraft:torch",
+      "count": 6
+    }
+  ]
+}

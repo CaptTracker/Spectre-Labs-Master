@@ -1,0 +1,13 @@
+{
+  "loader": "neoforge:obj",
+  "model": "ancientwarfareautomation:models/block/automation/parts/stirling_generator_piston_crank.obj",
+  "flip_v": true,
+  "automatic_culling": false,
+  "shade_quads": true,
+  "emissive_ambient": false,
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "texture": "ancientwarfareautomation:block/automation/stirling_generator",
+    "particle": "ancientwarfareautomation:block/automation/stirling_generator"
+  }
+}

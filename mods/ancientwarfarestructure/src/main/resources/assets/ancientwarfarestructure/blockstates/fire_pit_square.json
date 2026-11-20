@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "lit=true": {
+      "model": "ancientwarfarestructure:block/decor/fire_pit_square"
+    },
+    "lit=false": {
+      "model": "ancientwarfarestructure:block/decor/fire_pit_square_unlit"
+    }
+  }
+}

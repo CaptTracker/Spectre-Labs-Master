@@ -1,0 +1,6 @@
+{
+  "parent": "ancientwarfarestructure:block/decor/coin_stack_56",
+  "textures": {
+    "0": "ancientwarfarestructure:block/decor/dragon_stack"
+  }
+}

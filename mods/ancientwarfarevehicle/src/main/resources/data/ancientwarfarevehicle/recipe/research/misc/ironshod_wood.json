@@ -1,0 +1,21 @@
+{
+  "type": "ancientwarfare:shapeless_research_recipe",
+  "research": "ancientwarfare:engineering",
+  "ingredients": [
+    {
+      "tag": "c:leathers"
+    },
+    {
+      "tag": "c:ingots/iron",
+      "count": 3
+    },
+    {
+      "tag": "minecraft:planks",
+      "count": 4
+    }
+  ],
+  "result": {
+    "id": "ancientwarfarevehicle:ironshod_wood",
+    "count": 8
+  }
+}

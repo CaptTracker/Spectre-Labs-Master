@@ -1,0 +1,24 @@
+{
+  "time": 200,
+  "dependencies": [
+    "ancientwarfare:engineering"
+  ],
+  "resources": [
+    {
+      "item": "minecraft:hopper",
+      "count": 1
+    },
+    {
+      "item": "minecraft:dropper",
+      "count": 1
+    },
+    {
+      "tag": "c:stones",
+      "count": 4
+    },
+    {
+      "tag": "minecraft:planks",
+      "count": 4
+    }
+  ]
+}

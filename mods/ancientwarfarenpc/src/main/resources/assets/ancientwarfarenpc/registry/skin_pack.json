@@ -1,0 +1,5616 @@
+{
+ "type": "skin_pack",
+ "default_pack": true,
+ "folder": "ancientwarfarenpc:skin_pack",
+ "types": {
+  "amazon.archer": [
+   "amazon_archer_1",
+   "amazon_archer_2",
+   "amazon_archer_3"
+  ],
+  "amazon.archer.elite": [
+   "amazon_sentry_archer_1",
+   "amazon_sentry_archer_2"
+  ],
+  "amazon.bard": [
+   "amazon_singer"
+  ],
+  "amazon.cavalry": [
+   "amazon_cataphract_1",
+   "amazon_cataphract_2",
+   "amazon_cataphract_3",
+   "amazon_cataphract_4",
+   "amazon_cataphract_5"
+  ],
+  "amazon.civilian.female": [
+   "amazon_childbearer_1",
+   "amazon_childbearer_2"
+  ],
+  "amazon.civilian.male": [
+   "amazon_male_slave_1",
+   "amazon_male_slave_2"
+  ],
+  "amazon.leader": [
+   "amazon_chief_1",
+   "amazon_chief_2",
+   "amazon_princess"
+  ],
+  "amazon.leader.elite": [
+   "amazon_queen_1",
+   "amazon_queen_2",
+   "amazon_queen_3",
+   "amazon_queen_4"
+  ],
+  "amazon.mounted_archer": [
+   "amazon_archer",
+   "amazon_cavalry_1",
+   "amazon_rider"
+  ],
+  "amazon.priest": [
+   "amazon_healer_1",
+   "amazon_healer_2",
+   "amazon_priestess"
+  ],
+  "amazon.siege_engineer": [
+   "amazon_weapon_tinker"
+  ],
+  "amazon.soldier": [
+   "amazon_warrior_1",
+   "amazon_warrior_2",
+   "amazon_warrior_3"
+  ],
+  "amazon.soldier.elite": [
+   "amazon_swordsmistress_1",
+   "amazon_swordsmistress_2",
+   "amazon_swordsmistress_3"
+  ],
+  "amazon.spellcaster": [
+   "custom_adventurer_enchantress"
+  ],
+  "amazon.spellcaster.1": [
+   "custom_enchantress_1"
+  ],
+  "amazon.spellcaster.2": [
+   "custom_enchantress_2"
+  ],
+  "amazon.spellcaster.3": [
+   "custom_enchantress_1"
+  ],
+  "amazon.spellcaster.4": [
+   "custom_enchantress_2"
+  ],
+  "amazon.trader": [
+   "amazon_trader_1",
+   "amazon_trader_2"
+  ],
+  "barbarian.archer": [
+   "barbarian_archer_1",
+   "barbarian_archer_10",
+   "barbarian_archer_2",
+   "barbarian_archer_3",
+   "barbarian_archer_4",
+   "barbarian_archer_5",
+   "barbarian_archer_6",
+   "barbarian_archer_7",
+   "barbarian_archer_8",
+   "barbarian_archer_9"
+  ],
+  "barbarian.leader": [
+   "barbarian_chief_1",
+   "barbarian_chief_10",
+   "barbarian_chief_2",
+   "barbarian_chief_3",
+   "barbarian_chief_4",
+   "barbarian_chief_5",
+   "barbarian_chief_6",
+   "barbarian_chief_7",
+   "barbarian_chief_8",
+   "barbarian_chief_9",
+   "barbarian_lord_1",
+   "barbarian_lord_2",
+   "barbarian_lord_3",
+   "barbarian_lord_4"
+  ],
+  "barbarian.leader.elite": [
+   "barbarian_warlord_1",
+   "barbarian_warlord_2",
+   "barbarian_warlord_3",
+   "barbarian_warlord_4",
+   "barbarian_warlord_5",
+   "barbarian_warlord_6",
+   "barbarian_warlord_7"
+  ],
+  "barbarian.priest": [
+   "barbarian_druidess",
+   "barbarian_shaman_1",
+   "barbarian_shaman_2",
+   "barbarian_shaman_3",
+   "barbarian_shaman_4",
+   "barbarian_shaman_5"
+  ],
+  "barbarian.soldier": [
+   "barbarian_1",
+   "barbarian_10",
+   "barbarian_11",
+   "barbarian_12",
+   "barbarian_13",
+   "barbarian_14",
+   "barbarian_15",
+   "barbarian_16",
+   "barbarian_17",
+   "barbarian_18",
+   "barbarian_19",
+   "barbarian_2",
+   "barbarian_20",
+   "barbarian_3",
+   "barbarian_4",
+   "barbarian_5",
+   "barbarian_6",
+   "barbarian_7",
+   "barbarian_8",
+   "barbarian_9"
+  ],
+  "barbarian.spellcaster": [
+   "barbarian_shaman_1"
+  ],
+  "bard": [
+   "po_bard"
+  ],
+  "innkeeper": [
+   "po_innkeeper_1",
+   "po_innkeeper_2"
+  ],
+  "stable_hand": [
+   "po_stable_hand_1",
+   "po_stable_hand_2"
+  ],
+  "guard_captain": [
+   "po_guard_captain_1",
+   "po_guard_captain_2"
+  ],
+  "beast.leader": [
+   "custom_monster_owlbear_1"
+  ],
+  "beast.leader.elite": [
+   "custom_monster_forest_possessed_tree_2"
+  ],
+  "beast.soldier": [
+   "custom_monster_kobold"
+  ],
+  "beast.soldier.elite": [
+   "custom_monster_gargoyle"
+  ],
+  "beast.spellcaster": [
+   "custom_monster_troll_grendel_troll"
+  ],
+  "brigand.archer": [
+   "brigand_1",
+   "brigand_10",
+   "brigand_11",
+   "brigand_2",
+   "brigand_3",
+   "brigand_4",
+   "brigand_5",
+   "brigand_6",
+   "brigand_7",
+   "brigand_8",
+   "brigand_9"
+  ],
+  "brigand.archer.elite": [
+   "brigand_1",
+   "brigand_10",
+   "brigand_11",
+   "brigand_2",
+   "brigand_3",
+   "brigand_4",
+   "brigand_5",
+   "brigand_6",
+   "brigand_7",
+   "brigand_8",
+   "brigand_9"
+  ],
+  "brigand.bard": [],
+  "brigand.cavalry": [
+   "brigand_1",
+   "brigand_10",
+   "brigand_11",
+   "brigand_2",
+   "brigand_3",
+   "brigand_4",
+   "brigand_5",
+   "brigand_6",
+   "brigand_7",
+   "brigand_8",
+   "brigand_9"
+  ],
+  "brigand.civilian.female": [
+   "brigand_woman_1",
+   "brigand_woman_2"
+  ],
+  "brigand.civilian.male": [
+   "brigand_1",
+   "brigand_2"
+  ],
+  "brigand.leader": [
+   "brigand_armoured_1",
+   "brigand_armoured_2",
+   "brigand_chief_1"
+  ],
+  "brigand.leader.elite": [
+   "brigand_chief_2",
+   "brigand_chief_3",
+   "brigand_chief_4",
+   "brigand_chief_5",
+   "brigand_chief_6"
+  ],
+  "brigand.mounted_archer": [
+   "brigand_1",
+   "brigand_10",
+   "brigand_11",
+   "brigand_2",
+   "brigand_3",
+   "brigand_4",
+   "brigand_5",
+   "brigand_6",
+   "brigand_7",
+   "brigand_8",
+   "brigand_9"
+  ],
+  "brigand.priest": [
+   "brigand_heretic_priest"
+  ],
+  "brigand.siege_engineer": [
+   "brigand_1",
+   "brigand_2",
+   "brigand_3",
+   "brigand_4"
+  ],
+  "brigand.soldier": [
+   "brigand_1",
+   "brigand_10",
+   "brigand_11",
+   "brigand_2",
+   "brigand_3",
+   "brigand_4",
+   "brigand_5",
+   "brigand_6",
+   "brigand_7",
+   "brigand_8",
+   "brigand_9"
+  ],
+  "brigand.soldier.elite": [
+   "brigand_1",
+   "brigand_10",
+   "brigand_11",
+   "brigand_2",
+   "brigand_3",
+   "brigand_4",
+   "brigand_5",
+   "brigand_6",
+   "brigand_7",
+   "brigand_8",
+   "brigand_9"
+  ],
+  "brigand.spellcaster": [
+   "brigand_evil_dark_sorceror"
+  ],
+  "brigand.trader": [
+   "brigand_trader"
+  ],
+  "buffloka.archer": [
+   "buffloka_1",
+   "buffloka_10",
+   "buffloka_11",
+   "buffloka_12",
+   "buffloka_13",
+   "buffloka_14",
+   "buffloka_15",
+   "buffloka_16",
+   "buffloka_17",
+   "buffloka_18",
+   "buffloka_19",
+   "buffloka_2",
+   "buffloka_20",
+   "buffloka_3",
+   "buffloka_4",
+   "buffloka_5",
+   "buffloka_6",
+   "buffloka_7",
+   "buffloka_8",
+   "buffloka_9"
+  ],
+  "buffloka.archer.elite": [
+   "buffloka_1",
+   "buffloka_10",
+   "buffloka_11",
+   "buffloka_12",
+   "buffloka_13",
+   "buffloka_14",
+   "buffloka_15",
+   "buffloka_16",
+   "buffloka_17",
+   "buffloka_18",
+   "buffloka_19",
+   "buffloka_2",
+   "buffloka_20",
+   "buffloka_3",
+   "buffloka_4",
+   "buffloka_5",
+   "buffloka_6",
+   "buffloka_7",
+   "buffloka_8",
+   "buffloka_9"
+  ],
+  "buffloka.bard": [
+   "buffloka_spirit_creature_1",
+   "buffloka_spirit_creature_2",
+   "buffloka_spirit_creature_3",
+   "buffloka_spirit_creature_5",
+   "buffloka_totem_spirit",
+   "buffloka_totem_spirit_2"
+  ],
+  "buffloka.cavalry": [
+   "buffloka_1",
+   "buffloka_10",
+   "buffloka_11",
+   "buffloka_12",
+   "buffloka_13",
+   "buffloka_14",
+   "buffloka_2",
+   "buffloka_3",
+   "buffloka_4",
+   "buffloka_5",
+   "buffloka_6",
+   "buffloka_7",
+   "buffloka_8",
+   "buffloka_9"
+  ],
+  "buffloka.civilian.female": [
+   "buffloka_woman_1",
+   "buffloka_woman_2",
+   "buffloka_woman_3",
+   "buffloka_woman_4",
+   "buffloka_woman_5"
+  ],
+  "buffloka.civilian.male": [
+   "buffloka_man_1",
+   "buffloka_man_2",
+   "buffloka_man_3",
+   "buffloka_man_4",
+   "buffloka_man_5"
+  ],
+  "buffloka.leader": [
+   "buffloka_chief_1",
+   "buffloka_chief_2",
+   "buffloka_chief_3",
+   "buffloka_chief_4",
+   "buffloka_chief_6",
+   "buffloka_chief_7"
+  ],
+  "buffloka.leader.elite": [
+   "buffloka_chief_1",
+   "buffloka_chief_2",
+   "buffloka_chief_3",
+   "buffloka_chief_4",
+   "buffloka_chief_6",
+   "buffloka_chief_7"
+  ],
+  "buffloka.mounted_archer": [
+   "buffloka_1",
+   "buffloka_10",
+   "buffloka_11",
+   "buffloka_12",
+   "buffloka_13",
+   "buffloka_14",
+   "buffloka_2",
+   "buffloka_3",
+   "buffloka_4",
+   "buffloka_5",
+   "buffloka_6",
+   "buffloka_7",
+   "buffloka_8",
+   "buffloka_9"
+  ],
+  "buffloka.priest": [
+   "buffloka_shaman_1",
+   "buffloka_shaman_2",
+   "buffloka_shaman_3",
+   "buffloka_shaman_4",
+   "buffloka_shaman_5"
+  ],
+  "buffloka.siege_engineer": [
+   "buffloka_1",
+   "buffloka_2",
+   "buffloka_3",
+   "buffloka_4",
+   "buffloka_5"
+  ],
+  "buffloka.soldier": [
+   "buffloka_1",
+   "buffloka_10",
+   "buffloka_11",
+   "buffloka_12",
+   "buffloka_13",
+   "buffloka_14",
+   "buffloka_15",
+   "buffloka_16",
+   "buffloka_17",
+   "buffloka_18",
+   "buffloka_19",
+   "buffloka_2",
+   "buffloka_20",
+   "buffloka_3",
+   "buffloka_4",
+   "buffloka_5",
+   "buffloka_6",
+   "buffloka_7",
+   "buffloka_8",
+   "buffloka_9"
+  ],
+  "buffloka.soldier.elite": [
+   "buffloka_1",
+   "buffloka_10",
+   "buffloka_11",
+   "buffloka_12",
+   "buffloka_13",
+   "buffloka_14",
+   "buffloka_15",
+   "buffloka_16",
+   "buffloka_17",
+   "buffloka_18",
+   "buffloka_19",
+   "buffloka_2",
+   "buffloka_20",
+   "buffloka_3",
+   "buffloka_4",
+   "buffloka_5",
+   "buffloka_6",
+   "buffloka_7",
+   "buffloka_8",
+   "buffloka_9"
+  ],
+  "buffloka.spellcaster": [
+   "buffloka_totem_spirit"
+  ],
+  "buffloka.spellcaster.1": [
+   "buffloka_totem_spirit"
+  ],
+  "buffloka.spellcaster.2": [
+   "buffloka_totem_spirit_2"
+  ],
+  "buffloka.spellcaster.3": [
+   "buffloka_animal_spirit"
+  ],
+  "buffloka.spellcaster.4": [
+   "buffloka_totem_spirit_1"
+  ],
+  "buffloka.trader": [
+   "buffloka_trader_1",
+   "buffloka_trader_2",
+   "buffloka_trader_3"
+  ],
+  "combat": [
+   "po_soldier_1",
+   "po_soldier_2",
+   "po_soldier_3",
+   "po_soldier_4"
+  ],
+  "combat.archer": [
+   "po_archer"
+  ],
+  "combat.commander": [
+   "po_commander_1",
+   "po_commander_2",
+   "po_commander_3"
+  ],
+  "combat.engineer": [
+   "po_engineer"
+  ],
+  "combat.medic": [
+   "po_medic"
+  ],
+  "combat.soldier": [
+   "po_soldier_1",
+   "po_soldier_2",
+   "po_soldier_3",
+   "po_soldier_4"
+  ],
+  "courier": [
+   "po_courier"
+  ],
+  "coven.archer": [
+   "coven_satyr_1",
+   "coven_satyr_2",
+   "coven_satyr_3",
+   "coven_satyr_4"
+  ],
+  "coven.archer.elite": [
+   "coven_dryad_1",
+   "coven_dryad_2",
+   "coven_dryad_3",
+   "coven_faun"
+  ],
+  "coven.cavalry": [
+   "coven_headless_horseman_1",
+   "coven_headless_horseman_2",
+   "coven_headless_horseman_3",
+   "coven_headless_horseman_4"
+  ],
+  "coven.leader": [
+   "coven_beast_black_cat",
+   "coven_cheshire_cat",
+   "coven_familiar_cat",
+   "coven_familiar_cat_2",
+   "coven_garfield_familiar"
+  ],
+  "coven.leader.elite": [
+   "coven_count_pumpkin",
+   "coven_halloween_lord",
+   "coven_pumpkin_king_1",
+   "coven_pumpkin_king_2",
+   "coven_warlock",
+   "coven_warlock_king",
+   "coven_werewolf"
+  ],
+  "coven.priest": [
+   "coven_frost_witch",
+   "coven_nasty_witch",
+   "coven_night_witch",
+   "coven_town_witch",
+   "coven_witch_1",
+   "coven_witch_3",
+   "coven_witch_woods"
+  ],
+  "coven.soldier": [
+   "coven_scarecrow_1",
+   "coven_scarecrow_2",
+   "coven_scarecrow_3",
+   "coven_scarecrow_4",
+   "coven_scarecrow_5",
+   "coven_scarecrow_6",
+   "coven_scarecrow_7",
+   "coven_scarecrow_8"
+  ],
+  "coven.soldier.elite": [
+   "coven_witch_golem_1",
+   "coven_witch_golem_2",
+   "coven_witch_golem_3",
+   "coven_witch_puppet_2",
+   "coven_witch_puppet_3",
+   "coven_witch_puppet_4"
+  ],
+  "coven.spellcaster": [
+   "coven_warlock_king"
+  ],
+  "coven.spellcaster.1": [
+   "coven_witch_3"
+  ],
+  "coven.spellcaster.2": [
+   "coven_hag",
+   "coven_old_hag"
+  ],
+  "coven.spellcaster.3": [
+   "coven_witch_2"
+  ],
+  "coven.spellcaster.4": [
+   "coven_enchantress"
+  ],
+  "coven.trader": [
+   "coven_enchantress",
+   "coven_fair_witch",
+   "coven_nymph",
+   "coven_old_hag"
+  ],
+  "demon.archer": [
+   "demon_goatkin"
+  ],
+  "demon.archer.elite": [
+   "demon_guard"
+  ],
+  "demon.bard": [
+   "demon_jester"
+  ],
+  "demon.cavalry": [
+   "demon_chevalier_dlenfer",
+   "demon_infernal_horseman",
+   "demon_possessed_witchbane"
+  ],
+  "demon.civilian.female": [
+   "demon_succubus"
+  ],
+  "demon.civilian.male": [
+   "demon_damned_soul"
+  ],
+  "demon.leader": [
+   "demon_king",
+   "demon_lord_1",
+   "demon_lord_2",
+   "demon_lord_3"
+  ],
+  "demon.leader.elite": [
+   "demon_archfiend_baphomet",
+   "demon_archfiend_mephistopheles",
+   "demon_archfiend_prince_of_darkness",
+   "demon_prince"
+  ],
+  "demon.mounted_archer": [
+   "demon_warrior_1",
+   "demon_warrior_2",
+   "demon_warrior_3"
+  ],
+  "demon.priest": [
+   "demon_fire_queen",
+   "demon_liche"
+  ],
+  "demon.siege_engineer": [
+   "demoness_1",
+   "demoness_2"
+  ],
+  "demon.soldier": [
+   "demon_devil_1",
+   "demon_devil_2",
+   "demon_devil_3"
+  ],
+  "demon.soldier.elite": [
+   "demon_1",
+   "demon_2",
+   "demon_beast",
+   "demon_guardian",
+   "demon_horror"
+  ],
+  "demon.spellcaster": [
+   "demon_archfiend_baphomet"
+  ],
+  "demon.spellcaster.1": [
+   "demon_archfiend_baphomet"
+  ],
+  "demon.spellcaster.2": [
+   "demon_archfiend_mephistopheles"
+  ],
+  "demon.spellcaster.3": [
+   "demon_archfiend_prince_of_darkness"
+  ],
+  "demon.spellcaster.4": [
+   "demon_prince"
+  ],
+  "demon.trader": [
+   "demon_soul_thief"
+  ],
+  "dwarf.archer": [
+   "dwarf_10",
+   "dwarf_11",
+   "dwarf_12",
+   "dwarf_4",
+   "dwarf_5",
+   "dwarf_6",
+   "dwarf_7",
+   "dwarf_8",
+   "dwarf_9"
+  ],
+  "dwarf.archer.elite": [
+   "dwarf_warrior_1",
+   "dwarf_warrior_2",
+   "dwarf_warrior_3",
+   "dwarf_warrior_4",
+   "dwarf_warrior_5",
+   "dwarf_warrior_6",
+   "dwarf_warrior_7",
+   "dwarf_warrior_8"
+  ],
+  "dwarf.bard": [
+   "dwarf_1",
+   "dwarf_2",
+   "dwarf_3"
+  ],
+  "dwarf.civilian.female": [
+   "dwarf_woman_1",
+   "dwarf_woman_2",
+   "dwarf_woman_3"
+  ],
+  "dwarf.civilian.male": [
+   "dwarf_1",
+   "dwarf_11",
+   "dwarf_12",
+   "dwarf_13",
+   "dwarf_14",
+   "dwarf_15",
+   "dwarf_16",
+   "dwarf_17",
+   "dwarf_2",
+   "dwarf_3"
+  ],
+  "dwarf.leader": [
+   "dwarf_berserker",
+   "dwarf_berserker_2",
+   "dwarf_berserker_3",
+   "dwarf_heavy_armour",
+   "dwarf_kings_guard",
+   "dwarf_palace_guard",
+   "dwarf_palace_guard_2"
+  ],
+  "dwarf.leader.elite": [
+   "dwarf_king_1",
+   "dwarf_king_2",
+   "dwarf_king_3",
+   "dwarf_queen"
+  ],
+  "dwarf.priest": [
+   "dwarf_mage",
+   "dwarf_priest",
+   "dwarf_priest_old"
+  ],
+  "dwarf.siege_engineer": [
+   "dwarf_miner_1",
+   "dwarf_miner_2"
+  ],
+  "dwarf.soldier": [
+   "dwarf_warrior_1",
+   "dwarf_warrior_2",
+   "dwarf_warrior_3",
+   "dwarf_warrior_4",
+   "dwarf_warrior_5",
+   "dwarf_warrior_6",
+   "dwarf_warrior_7",
+   "dwarf_warrior_8"
+  ],
+  "dwarf.soldier.elite": [
+   "dwarf_hero_balin",
+   "dwarf_hero_bifur",
+   "dwarf_hero_bofur",
+   "dwarf_hero_bombur",
+   "dwarf_hero_dori",
+   "dwarf_hero_dwalin",
+   "dwarf_hero_fili",
+   "dwarf_hero_gimli",
+   "dwarf_hero_gloin",
+   "dwarf_hero_kili",
+   "dwarf_hero_nori",
+   "dwarf_hero_oin",
+   "dwarf_hero_ori",
+   "dwarf_hero_thorin"
+  ],
+  "dwarf.spellcaster": [
+   "dwarf_wizard"
+  ],
+  "dwarf.trader": [
+   "dwarf_blacksmith",
+   "dwarf_goldsmith",
+   "dwarf_miner_1",
+   "dwarf_miner_2",
+   "dwarf_trader_1",
+   "dwarf_trader_2",
+   "dwarf_trader_3"
+  ],
+  "elf.archer": [
+   "elf_archer_1",
+   "elf_archer_2",
+   "elf_archer_3",
+   "elf_archer_4",
+   "elf_archer_5",
+   "elf_archer_6",
+   "elf_archer_7",
+   "elf_archer_8",
+   "elf_archeress"
+  ],
+  "elf.archer.elite": [
+   "elf_archer_1",
+   "elf_archer_2",
+   "elf_archer_3",
+   "elf_archer_4",
+   "elf_archer_5",
+   "elf_archer_6",
+   "elf_archer_7",
+   "elf_archer_8",
+   "elf_archeress"
+  ],
+  "elf.bard": [
+   "elf_rogue_1",
+   "elf_rogue_2"
+  ],
+  "elf.cavalry": [
+   "elf_lancer"
+  ],
+  "elf.civilian.female": [
+   "elf_maiden_1",
+   "elf_maiden_2",
+   "elf_maiden_3",
+   "elf_woman_1",
+   "elf_woman_2",
+   "elf_woman_3",
+   "elf_woman_4"
+  ],
+  "elf.civilian.male": [
+   "elf_archer_1",
+   "elf_archer_2",
+   "elf_archer_3",
+   "elf_archer_4",
+   "elf_archer_5",
+   "elf_archer_6",
+   "elf_archer_7",
+   "elf_archer_8"
+  ],
+  "elf.leader": [
+   "elf_king_1",
+   "elf_king_2",
+   "elf_noble_1",
+   "elf_noble_2",
+   "elf_noble_3",
+   "elf_princess",
+   "elf_warrioress"
+  ],
+  "elf.leader.elite": [
+   "elf_enchantress",
+   "elf_mage_1",
+   "elf_mage_2",
+   "elf_mage_3",
+   "elf_oracle"
+  ],
+  "elf.mounted_archer": [
+   "elf_warrior_1",
+   "elf_warrior_2"
+  ],
+  "elf.priest": [
+   "elf_druid",
+   "elf_healer",
+   "elf_priestess"
+  ],
+  "elf.siege_engineer": [
+   "elf_blacksmith"
+  ],
+  "elf.soldier": [
+   "elf_warrior_1",
+   "elf_warrior_2",
+   "elf_warrior_3",
+   "elf_warrior_4",
+   "elf_warrior_5",
+   "elf_warrior_6",
+   "elf_warrior_7",
+   "elf_warrioress"
+  ],
+  "elf.soldier.elite": [
+   "elf_lord_1",
+   "elf_lord_2",
+   "elf_lord_3",
+   "elf_lord_4",
+   "elf_ranger"
+  ],
+  "elf.spellcaster": [
+   "elf_enchantress"
+  ],
+  "elf.spellcaster.1": [
+   "elf_mage_1"
+  ],
+  "elf.spellcaster.2": [
+   "elf_mage_2"
+  ],
+  "elf.spellcaster.3": [
+   "elf_mage_3"
+  ],
+  "elf.spellcaster.4": [
+   "elf_oracle"
+  ],
+  "elf.trader": [
+   "elf_blacksmith",
+   "elf_trader_1",
+   "elf_trader_2"
+  ],
+  "empire.archer": [
+   "empire_peasant_1",
+   "empire_peasant_2",
+   "empire_peasant_3",
+   "empire_peasant_4",
+   "empire_peasant_5",
+   "empire_peasant_6"
+  ],
+  "empire.archer.elite": [
+   "empire_archer_1",
+   "empire_archer_2",
+   "empire_archer_3",
+   "empire_archer_4"
+  ],
+  "empire.bard": [
+   "empire_peasant_1",
+   "empire_peasant_2",
+   "empire_peasant_3",
+   "empire_peasant_4",
+   "empire_peasant_5",
+   "empire_peasant_6"
+  ],
+  "empire.cavalry": [
+   "empire_knight_1",
+   "empire_knight_2",
+   "empire_knight_3",
+   "empire_knight_4",
+   "empire_knight_5",
+   "empire_knight_6",
+   "empire_knight_7",
+   "empire_knight_8"
+  ],
+  "empire.civilian.female": [
+   "empire_woman_1",
+   "empire_woman_2",
+   "empire_woman_3",
+   "empire_woman_4",
+   "empire_woman_5"
+  ],
+  "empire.civilian.male": [
+   "empire_peasant_1",
+   "empire_peasant_2",
+   "empire_peasant_3",
+   "empire_peasant_4",
+   "empire_peasant_5",
+   "empire_peasant_6"
+  ],
+  "empire.leader": [
+   "empire_noble_1",
+   "empire_noble_2",
+   "empire_noble_3"
+  ],
+  "empire.leader.elite": [
+   "empire_champion_1",
+   "empire_champion_2"
+  ],
+  "empire.mounted_archer": [
+   "empire_archer_1",
+   "empire_archer_2",
+   "empire_archer_3",
+   "empire_archer_4"
+  ],
+  "empire.priest": [
+   "empire_priest_1",
+   "empire_priest_2"
+  ],
+  "empire.siege_engineer": [
+   "empire_soldier_1",
+   "empire_soldier_2",
+   "empire_soldier_3",
+   "empire_soldier_4",
+   "empire_soldier_5"
+  ],
+  "empire.soldier": [
+   "empire_soldier_1",
+   "empire_soldier_10",
+   "empire_soldier_2",
+   "empire_soldier_3",
+   "empire_soldier_4",
+   "empire_soldier_5",
+   "empire_soldier_6",
+   "empire_soldier_7",
+   "empire_soldier_8",
+   "empire_soldier_9"
+  ],
+  "empire.soldier.elite": [
+   "empire_foot_knight_1",
+   "empire_foot_knight_2",
+   "empire_foot_knight_3",
+   "empire_foot_knight_4",
+   "empire_knight_1",
+   "empire_knight_10",
+   "empire_knight_11",
+   "empire_knight_2",
+   "empire_knight_3",
+   "empire_knight_4",
+   "empire_knight_5",
+   "empire_knight_6",
+   "empire_knight_7",
+   "empire_knight_8",
+   "empire_knight_9"
+  ],
+  "empire.spellcaster": [
+   "empire_magician_2"
+  ],
+  "empire.spellcaster.1": [
+   "empire_conjurer_1",
+   "empire_conjurer_2"
+  ],
+  "empire.spellcaster.2": [
+   "empire_enchanter_1",
+   "empire_enchanter_2",
+   "empire_enchanter_3"
+  ],
+  "empire.spellcaster.3": [
+   "empire_magician_1",
+   "empire_magician_2",
+   "empire_magician_3",
+   "empire_magician_4"
+  ],
+  "empire.spellcaster.4": [
+   "empire_wizard_1",
+   "empire_wizard_2",
+   "empire_wizard_3",
+   "empire_wizard_4"
+  ],
+  "empire.trader": [
+   "empire_trader_1",
+   "empire_trader_10",
+   "empire_trader_11",
+   "empire_trader_12",
+   "empire_trader_13",
+   "empire_trader_14",
+   "empire_trader_15",
+   "empire_trader_16",
+   "empire_trader_2",
+   "empire_trader_3",
+   "empire_trader_4",
+   "empire_trader_5",
+   "empire_trader_6",
+   "empire_trader_7",
+   "empire_trader_8",
+   "empire_trader_9"
+  ],
+  "ent.archer": [
+   "ent_wosey"
+  ],
+  "ent.leader": [
+   "ent_ent_mother_1",
+   "ent_ent_mother_2",
+   "ent_ent_mother_3",
+   "ent_ent_mother_4",
+   "ent_ent_mother_5",
+   "ent_ent_mother_6"
+  ],
+  "ent.leader.elite": [
+   "ent_ent_father_1",
+   "ent_ent_father_10",
+   "ent_ent_father_11",
+   "ent_ent_father_12",
+   "ent_ent_father_3",
+   "ent_ent_father_4",
+   "ent_ent_father_5",
+   "ent_ent_father_6",
+   "ent_ent_father_7",
+   "ent_ent_father_8",
+   "ent_ent_father_9"
+  ],
+  "ent.priest": [
+   "ent_druidess"
+  ],
+  "ent.soldier": [
+   "ent_spriggan_1",
+   "ent_spriggan_2",
+   "ent_spriggan_3",
+   "ent_spriggan_4",
+   "ent_spriggan_5"
+  ],
+  "ent.soldier.elite": [
+   "ent_entling_1",
+   "ent_entling_2",
+   "ent_entling_3",
+   "ent_entling_4",
+   "ent_entling_5",
+   "ent_entling_6",
+   "ent_entling_7"
+  ],
+  "ent.spellcaster": [
+   "ent_ent_father_1"
+  ],
+  "ent.spellcaster.1": [
+   "ent_ent_father_10",
+   "ent_ent_father_3"
+  ],
+  "ent.spellcaster.2": [
+   "ent_ent_father_11",
+   "ent_ent_father_4"
+  ],
+  "ent.spellcaster.3": [
+   "ent_ent_father_12",
+   "ent_ent_father_5"
+  ],
+  "ent.spellcaster.4": [
+   "ent_ent_father_6"
+  ],
+  "ent.trader": [
+   "ent_ancient_forest_druid",
+   "ent_druid_1",
+   "ent_druid_2",
+   "ent_druid_3"
+  ],
+  "evil.archer": [
+   "evil_chaos_warrior_1",
+   "evil_creeper_worshipper",
+   "evil_foot_knight_3",
+   "evil_guard_2"
+  ],
+  "evil.archer.elite": [
+   "evil_servant_of_evil_1",
+   "evil_servant_of_evil_2",
+   "evil_servant_of_evil_3"
+  ],
+  "evil.bard": [
+   "evil_banshee",
+   "evil_shadow_queen"
+  ],
+  "evil.cavalry": [
+   "evil_black_knight",
+   "evil_knight_1",
+   "evil_knight_2",
+   "evil_knight_3",
+   "evil_knight_4",
+   "evil_knight_5",
+   "evil_knight_black",
+   "evil_knight_ghost",
+   "evil_knight_ice_dragon"
+  ],
+  "evil.civilian.female": [
+   "evil_dame_blanche"
+  ],
+  "evil.civilian.male": [
+   "evil_servant_of_evil_1",
+   "evil_servant_of_evil_2",
+   "evil_servant_of_evil_3"
+  ],
+  "evil.leader": [
+   "evil_bringer",
+   "evil_death",
+   "evil_death_knight",
+   "evil_death_knight_2",
+   "evil_death_knight_3",
+   "evil_death_knight_4",
+   "evil_death_knight_red",
+   "evil_death_knight_yellow",
+   "evil_gold_knight",
+   "evil_knight",
+   "evil_lord"
+  ],
+  "evil.leader.elite": [
+   "evil_beetlejuice",
+   "evil_chaos_lord",
+   "evil_cthuloid",
+   "evil_dark_lord",
+   "evil_dark_sorceror"
+  ],
+  "evil.leader_elite": [
+   "evil_king"
+  ],
+  "evil.mounted_archer": [
+   "evil_horse_archer_1",
+   "evil_horse_archer_2",
+   "evil_horse_archer_3",
+   "evil_horse_archer_4"
+  ],
+  "evil.priest": [
+   "evil_dark_priest",
+   "evil_death_priest",
+   "evil_robed_priest"
+  ],
+  "evil.siege_engineer": [
+   "evil_blacksmith",
+   "evil_executioner",
+   "evil_torturer"
+  ],
+  "evil.soldier": [
+   "evil_chaos_warrior_1",
+   "evil_chaos_warrior_2",
+   "evil_foot_knight_1",
+   "evil_foot_knight_2",
+   "evil_foot_knight_3",
+   "evil_foot_knight_4",
+   "evil_grave_ghoul",
+   "evil_guard_1",
+   "evil_guard_2"
+  ],
+  "evil.soldier.elite": [
+   "evil_flesh_golem",
+   "evil_flesh_golem_2"
+  ],
+  "evil.spellcaster": [
+   "evil_beetlejuice",
+   "evil_chaos_lord",
+   "evil_cthuloid",
+   "evil_dark_lord",
+   "evil_dark_sorceror"
+  ],
+  "evil.spellcaster.1": [
+   "malice_mage"
+  ],
+  "evil.spellcaster.2": [
+   "malice_warlock"
+  ],
+  "evil.spellcaster.3": [
+   "malice_demonist"
+  ],
+  "evil.spellcaster.4": [
+   "malice_sorceror"
+  ],
+  "evil.trader": [
+   "evil_shadow",
+   "evil_trader_2",
+   "evil_trader_3",
+   "evil_trader_4",
+   "evil_trader_5"
+  ],
+  "giant.leader": [
+   "fire_giant_1",
+   "fire_giant_2",
+   "fire_giant_king"
+  ],
+  "giant.leader.elite": [
+   "mountain_giant"
+  ],
+  "giant.soldier": [
+   "hill_giant_1",
+   "hill_giant_2",
+   "hill_giant_3",
+   "hill_giant_4",
+   "hill_giant_5",
+   "hill_giant_6",
+   "hill_giant_7",
+   "hill_giant_8"
+  ],
+  "giant.soldier.elite": [
+   "frost_giant_1",
+   "frost_giant_2",
+   "frost_giant_3",
+   "frost_giant_4",
+   "frost_giant_5",
+   "frost_giant_6",
+   "frost_giant_king",
+   "ice_giant"
+  ],
+  "giant.spellcaster": [
+   "custom_monster_ogre_magi"
+  ],
+  "gnome.archer": [
+   "gnome_1",
+   "gnome_2",
+   "gnome_3",
+   "gnome_4",
+   "gnome_5",
+   "gnome_6"
+  ],
+  "gnome.cavalry": [
+   "gnome_1",
+   "gnome_13",
+   "gnome_2"
+  ],
+  "gnome.leader": [
+   "gnome_mole_beast"
+  ],
+  "gnome.leader.elite": [
+   "gnome_mole_rat"
+  ],
+  "gnome.mounted_archer": [
+   "gnome_1",
+   "gnome_13",
+   "gnome_2"
+  ],
+  "gnome.priest": [
+   "gnome_4"
+  ],
+  "gnome.soldier": [
+   "gnome_10",
+   "gnome_11",
+   "gnome_12",
+   "gnome_7",
+   "gnome_8",
+   "gnome_9"
+  ],
+  "gnome.soldier.elite": [
+   "gnomepoleon"
+  ],
+  "gnome.spellcaster": [
+   "gnome_5"
+  ],
+  "gnome.trader": [
+   "gnome_3"
+  ],
+  "good.archer": [
+   "good_greenwood_ranger_1",
+   "good_greenwood_ranger_2",
+   "good_greenwood_ranger_3",
+   "good_greenwood_ranger_4",
+   "good_greenwood_ranger_5",
+   "good_greenwood_ranger_6",
+   "good_greenwood_ranger_7",
+   "good_greenwood_ranger_8",
+   "good_greenwood_ranger_9"
+  ],
+  "good.archer.elite": [
+   "good_ranger_1",
+   "good_ranger_2",
+   "good_ranger_3",
+   "good_ranger_4"
+  ],
+  "good.bard": [
+   "good_bard"
+  ],
+  "good.cavalry": [
+   "good_knight_blue",
+   "good_knight_chequered",
+   "good_knight_gold",
+   "good_knight_purple",
+   "good_knight_red",
+   "good_knight_scarlet"
+  ],
+  "good.civilian.female": [
+   "good_girl",
+   "good_wife_1",
+   "good_wife_2",
+   "good_wife_3",
+   "good_wife_4",
+   "good_woman_1",
+   "good_woman_2"
+  ],
+  "good.civilian.male": [
+   "good_man_1",
+   "good_man_2",
+   "good_man_3",
+   "good_man_4",
+   "good_man_5",
+   "good_man_6"
+  ],
+  "good.leader": [
+   "good_knight_paladin",
+   "good_knight_questing",
+   "good_knight_veteran",
+   "good_ranger_captain_1",
+   "good_ranger_captain_2",
+   "good_ranger_captain_3"
+  ],
+  "good.leader.elite": [
+   "good_guardian_wizard_1",
+   "good_guardian_wizard_2",
+   "good_guardian_wizard_3",
+   "good_guardian_wizard_4",
+   "good_guardian_wizard_5",
+   "good_guardian_wizard_6"
+  ],
+  "good.mounted_archer": [
+   "good_greenwood_robin_hood",
+   "good_greenwood_robin_in_the_hood",
+   "good_greenwood_the_fox_outlaw",
+   "good_greenwood_the_hooded_man"
+  ],
+  "good.priest": [
+   "custom_dw_granny_weatherwax",
+   "custom_dw_nanny_ogg",
+   "good_greenwood_druid_1",
+   "good_greenwood_druid_2",
+   "good_greenwood_druid_3",
+   "good_greenwood_druid_4",
+   "good_greenwood_druid_5",
+   "good_greenwood_druidess",
+   "good_healer_girl",
+   "good_priestess",
+   "good_questing_priest_1",
+   "good_questing_priest_2"
+  ],
+  "good.siege_engineer": [
+   "good_artificier_1",
+   "good_artificier_2"
+  ],
+  "good.soldier": [
+   "good_greenwood_ranger_1",
+   "good_greenwood_ranger_2",
+   "good_greenwood_ranger_3",
+   "good_greenwood_ranger_4",
+   "good_greenwood_ranger_5",
+   "good_greenwood_ranger_6",
+   "good_greenwood_ranger_7",
+   "good_greenwood_ranger_8",
+   "good_greenwood_ranger_9"
+  ],
+  "good.soldier.elite": [
+   "good_guardian_druidbark",
+   "good_guardian_golem_ancient",
+   "good_guardian_golem_sand",
+   "good_guardian_golem_stone",
+   "good_guardian_golem_wood",
+   "good_guardian_greenwood_green_guard",
+   "good_guardian_puppet"
+  ],
+  "good.spellcaster": [
+   "good_guardian_wizard_1"
+  ],
+  "good.spellcaster.1": [
+   "good_guardian_wizard_2"
+  ],
+  "good.spellcaster.2": [
+   "good_guardian_wizard_3"
+  ],
+  "good.spellcaster.3": [
+   "good_guardian_wizard_4"
+  ],
+  "good.spellcaster.4": [
+   "good_guardian_wizard_5"
+  ],
+  "good.trader": [
+   "good_merchant_1",
+   "good_merchant_2",
+   "good_merchant_3",
+   "good_merchant_4",
+   "good_merchant_5",
+   "good_merchant_6",
+   "good_merchant_7"
+  ],
+  "gremlin.archer": [
+   "gremlin_shooter"
+  ],
+  "gremlin.cavalry": [
+   "gremlin_slicer"
+  ],
+  "gremlin.leader": [
+   "gremlin_boss_stripe"
+  ],
+  "gremlin.leader.elite": [
+   "gremlin_boss_mohawky"
+  ],
+  "gremlin.mounted_archer": [
+   "gremlin_shooter"
+  ],
+  "gremlin.priest": [
+   "gremlin_brains"
+  ],
+  "gremlin.soldier": [
+   "gremlin_slicer"
+  ],
+  "gremlin.spellcaster": [
+   "gremlin_boss_mohawky"
+  ],
+  "guild.archer": [
+   "guild_merchant_archer_3",
+   "guild_merchant_archer_4",
+   "guild_merchant_archer_5"
+  ],
+  "guild.archer.elite": [
+   "guild_merchant_archer",
+   "guild_merchant_archer_2"
+  ],
+  "guild.leader": [
+   "guild_merchant_officer_1",
+   "guild_merchant_officer_2"
+  ],
+  "guild.soldier": [
+   "guild_merchant_spearman_1",
+   "guild_merchant_spearman_2",
+   "guild_merchant_spearman_3"
+  ],
+  "guild.trader": [
+   "guild_merchant_1",
+   "guild_merchant_10",
+   "guild_merchant_11",
+   "guild_merchant_12",
+   "guild_merchant_14",
+   "guild_merchant_2",
+   "guild_merchant_3",
+   "guild_merchant_4",
+   "guild_merchant_5",
+   "guild_merchant_6",
+   "guild_merchant_7",
+   "guild_merchant_8",
+   "guild_merchant_9"
+  ],
+  "hobbit.archer": [
+   "hobbit_1",
+   "hobbit_10",
+   "hobbit_11",
+   "hobbit_12",
+   "hobbit_2",
+   "hobbit_3",
+   "hobbit_4",
+   "hobbit_6",
+   "hobbit_7",
+   "hobbit_8",
+   "hobbit_9"
+  ],
+  "hobbit.archer.elite": [
+   "hobbit_1",
+   "hobbit_10",
+   "hobbit_11",
+   "hobbit_12",
+   "hobbit_2",
+   "hobbit_3",
+   "hobbit_4",
+   "hobbit_6",
+   "hobbit_7",
+   "hobbit_8",
+   "hobbit_9"
+  ],
+  "hobbit.bard": [
+   "hobbit_bard",
+   "hobbit_drunkard",
+   "hobbit_tavern_singer",
+   "hobbit_tavern_singer_2"
+  ],
+  "hobbit.civilian.female": [
+   "hobbit_girl",
+   "hobbit_woman_1",
+   "hobbit_woman_2",
+   "hobbit_woman_pepper_puddifoot"
+  ],
+  "hobbit.civilian.male": [
+   "hobbit_1",
+   "hobbit_10",
+   "hobbit_11",
+   "hobbit_12",
+   "hobbit_2",
+   "hobbit_3",
+   "hobbit_4",
+   "hobbit_6",
+   "hobbit_7",
+   "hobbit_8",
+   "hobbit_9",
+   "hobbit_farmer_2",
+   "hobbit_farmer_3",
+   "hobbit_farmer_4",
+   "hobbit_farmer_5"
+  ],
+  "hobbit.leader": [
+   "hobbit_hero",
+   "hobbit_hero_bilbo",
+   "hobbit_hero_frodo",
+   "hobbit_hero_pippin",
+   "hobbit_hero_sam"
+  ],
+  "hobbit.priest": [
+   "hobbit_councillor",
+   "hobbit_mayor"
+  ],
+  "hobbit.soldier": [
+   "hobbit_1",
+   "hobbit_10",
+   "hobbit_11",
+   "hobbit_12",
+   "hobbit_2",
+   "hobbit_3",
+   "hobbit_4",
+   "hobbit_6",
+   "hobbit_7",
+   "hobbit_8",
+   "hobbit_9"
+  ],
+  "hobbit.soldier.elite": [
+   "hobbit_captain_1",
+   "hobbit_captain_2",
+   "hobbit_captain_3",
+   "hobbit_captain_4",
+   "hobbit_captain_5",
+   "hobbit_captain_6"
+  ],
+  "hobbit.trader": [
+   "hobbit_farmer_2",
+   "hobbit_farmer_3",
+   "hobbit_farmer_4",
+   "hobbit_farmer_6",
+   "hobbit_fisherman",
+   "hobbit_girl_rosie_cotton",
+   "hobbit_woman_barmaid",
+   "hobbit_woman_trader"
+  ],
+  "icelord.archer": [
+   "icelord_zombie_1",
+   "icelord_zombie_2",
+   "icelord_zombie_3"
+  ],
+  "icelord.archer.elite": [
+   "icelord_archer",
+   "icelord_skeleton_archer"
+  ],
+  "icelord.cavalry": [
+   "icelord_leader",
+   "icelord_leader_2",
+   "icelord_leader_3",
+   "icelord_revenant_cavalry"
+  ],
+  "icelord.leader": [
+   "icelord_beast",
+   "icelord_beast_cold_demon",
+   "icelord_beast_cold_walker",
+   "icelord_beast_wendigo",
+   "icelord_beast_yeti_1",
+   "icelord_beast_yeti_2",
+   "icelord_beast_yeti_3",
+   "icelord_frost_demon",
+   "icelord_frost_troll",
+   "icelord_snow_beast"
+  ],
+  "icelord.leader.elite": [
+   "icelord_cold_king_1",
+   "icelord_cold_king_2",
+   "icelord_draugr_winter_king"
+  ],
+  "icelord.mounted_archer": [
+   "icelord_cold_warrior_1",
+   "icelord_cold_warrior_2",
+   "icelord_cold_warrior_3",
+   "icelord_cold_warrior_4",
+   "icelord_cold_warrior_5"
+  ],
+  "icelord.priest": [
+   "icelord_cold_lich_1",
+   "icelord_cold_lich_2",
+   "icelord_cold_lich_3"
+  ],
+  "icelord.soldier": [
+   "icelord_draugr_1",
+   "icelord_draugr_10",
+   "icelord_draugr_2",
+   "icelord_draugr_3",
+   "icelord_draugr_5",
+   "icelord_draugr_7",
+   "icelord_draugr_8",
+   "icelord_draugr_9"
+  ],
+  "icelord.soldier.elite": [
+   "icelord_white_walker_1",
+   "icelord_white_walker_2",
+   "icelord_white_walker_3",
+   "icelord_white_walker_5",
+   "icelord_white_walker_6"
+  ],
+  "icelord.spellcaster": [
+   "icelord_cold_lich_3"
+  ],
+  "icelord.spellcaster.1": [
+   "icelord_mage_1"
+  ],
+  "icelord.spellcaster.2": [
+   "icelord_draugr_priest"
+  ],
+  "icelord.spellcaster.3": [],
+  "icelord.spellcaster.4": [],
+  "ishtari.archer": [
+   "ishtari_high_priest_1",
+   "ishtari_high_priest_2"
+  ],
+  "ishtari.leader": [
+   "ishtari_anubite",
+   "ishtari_anubite_2",
+   "ishtari_anubite_3"
+  ],
+  "ishtari.leader.elite": [
+   "ishtari_anubite_pharoah",
+   "ishtari_pharoah"
+  ],
+  "ishtari.priest": [
+   "ishtari_priest_1",
+   "ishtari_priest_2"
+  ],
+  "ishtari.soldier": [
+   "ishtari_mummy_1",
+   "ishtari_mummy_2",
+   "ishtari_mummy_3"
+  ],
+  "ishtari.soldier.elite": [
+   "ishtari_warrior_1",
+   "ishtari_warrior_2",
+   "ishtari_zombie_1",
+   "ishtari_zombie_2"
+  ],
+  "ishtari.spellcaster": [
+   "ishtari_anubite_pharoah"
+  ],
+  "ishtari.spellcaster.1": [
+   "ishtari_pharoah"
+  ],
+  "ishtari.spellcaster.2": [
+   "ishtari_pharoah"
+  ],
+  "ishtari.spellcaster.3": [
+   "ishtari_pharoah"
+  ],
+  "ishtari.spellcaster.4": [
+   "ishtari_pharoah"
+  ],
+  "klown.cavalry": [
+   "klown_harlequin"
+  ],
+  "klown.leader": [
+   "klown_strongman_1",
+   "klown_strongman_2"
+  ],
+  "klown.leader.elite": [
+   "klown_it",
+   "klown_it_2"
+  ],
+  "klown.mounted_archer": [
+   "klown_monkey"
+  ],
+  "klown.priest": [
+   "klown_ring_master",
+   "klown_ringmaster"
+  ],
+  "klown.soldier": [
+   "klown_rag_doll"
+  ],
+  "klown.soldier.elite": [
+   "klown_killer_klown_1",
+   "klown_killer_klown_10",
+   "klown_killer_klown_2",
+   "klown_killer_klown_3",
+   "klown_killer_klown_4",
+   "klown_killer_klown_5",
+   "klown_killer_klown_6",
+   "klown_killer_klown_7",
+   "klown_killer_klown_9",
+   "klown_killer_klown_krusty"
+  ],
+  "klown.spellcaster": [
+   "klown_it"
+  ],
+  "klown.spellcaster.1": [
+   "klown_it_2"
+  ],
+  "klown.spellcaster.2": [
+   "klown_it_2"
+  ],
+  "klown.spellcaster.3": [
+   "klown_it_2"
+  ],
+  "klown.spellcaster.4": [
+   "klown_it_2"
+  ],
+  "kong.archer": [
+   "kong_1",
+   "kong_2",
+   "kong_3",
+   "kong_4",
+   "kong_5",
+   "kong_6",
+   "kong_7",
+   "kong_8"
+  ],
+  "kong.archer.elite": [
+   "kong_1",
+   "kong_2",
+   "kong_3",
+   "kong_4",
+   "kong_5",
+   "kong_6",
+   "kong_7",
+   "kong_8"
+  ],
+  "kong.civilian.female": [
+   "kong_girl",
+   "kong_woman_1",
+   "kong_woman_2",
+   "kong_woman_3",
+   "kong_woman_4"
+  ],
+  "kong.civilian.male": [
+   "kong_1",
+   "kong_2",
+   "kong_3"
+  ],
+  "kong.leader": [
+   "kong_ape_1",
+   "kong_ape_2",
+   "kong_ape_3"
+  ],
+  "kong.leader.elite": [
+   "kong_chief_1",
+   "kong_chief_2",
+   "kong_chief_3",
+   "kong_chief_4",
+   "kong_chief_5",
+   "kong_chief_6",
+   "kong_high_chief_1",
+   "kong_high_chief_2",
+   "kong_high_chief_3",
+   "kong_high_chief_4"
+  ],
+  "kong.priest": [
+   "kong_shaman_1",
+   "kong_shaman_2",
+   "kong_shaman_3"
+  ],
+  "kong.soldier": [
+   "kong_1",
+   "kong_2",
+   "kong_3",
+   "kong_4",
+   "kong_5",
+   "kong_6",
+   "kong_7",
+   "kong_8",
+   "kong_9"
+  ],
+  "kong.soldier.elite": [
+   "kong_blood_spirit"
+  ],
+  "kong.spellcaster": [],
+  "kong.spellcaster.1": [],
+  "kong.spellcaster.2": [
+   "kong_witchdoctor_2"
+  ],
+  "kong.spellcaster.3": [],
+  "kong.spellcaster.4": [
+   "kong_witchdoctor_2"
+  ],
+  "kong.trader": [
+   "kong_7"
+  ],
+  "lizardman.archer": [
+   "lizardman"
+  ],
+  "lizardman.leader": [
+   "lizardman_chief"
+  ],
+  "lizardman.leader.elite": [
+   "lizardman_brood_mother"
+  ],
+  "lizardman.priest": [
+   "custom_monster_serpentman_priest"
+  ],
+  "lizardman.soldier": [
+   "lizardman"
+  ],
+  "lizardman.soldier.elite": [
+   "lizardman_berserker_1",
+   "lizardman_berserker_2",
+   "lizardman_berserker_3"
+  ],
+  "lizardman.spellcaster": [
+   "custom_monster_serpentman"
+  ],
+  "lizardman.spellcaster.1": [
+   "custom_monster_serpentman"
+  ],
+  "lizardman.spellcaster.2": [
+   "custom_monster_serpentman"
+  ],
+  "lizardman.spellcaster.3": [
+   "custom_monster_serpentman"
+  ],
+  "lizardman.spellcaster.4": [
+   "custom_monster_serpentman"
+  ],
+  "mindflayer.leader": [
+   "custom_monster_cave_growler"
+  ],
+  "mindflayer.leader.elite": [
+   "custom_monster_troll_cavern_troll_1"
+  ],
+  "mindflayer.priest": [],
+  "mindflayer.soldier": [
+   "custom_monster_cave_gremlin"
+  ],
+  "mindflayer.soldier.elite": [
+   "custom_monster_wererat"
+  ],
+  "mindflayer.spellcaster": [
+   "custom_monster_mind_flayer_lord"
+  ],
+  "mindflayer.spellcaster.1": [
+   "custom_monster_mind_flayer_lord"
+  ],
+  "mindflayer.spellcaster.2": [
+   "custom_monster_mind_flayer_lord"
+  ],
+  "mindflayer.spellcaster.3": [
+   "custom_monster_mind_flayer_lord"
+  ],
+  "mindflayer.spellcaster.4": [
+   "custom_monster_mind_flayer_lord"
+  ],
+  "minossian.leader": [
+   "minossian_brazen_bull_golem"
+  ],
+  "minossian.leader.elite": [
+   "minossian_chief",
+   "minossian_chief_2",
+   "minossian_chief_3",
+   "minossian_chief_4",
+   "minossian_minotaur_lord"
+  ],
+  "minossian.priest": [
+   "minossian_bull_priest_1",
+   "minossian_bull_priest_2",
+   "minossian_bull_priest_3"
+  ],
+  "minossian.soldier": [
+   "minossian_giant_talos"
+  ],
+  "minossian.soldier.elite": [
+   "minossian_warrior_1",
+   "minossian_warrior_2",
+   "minossian_warrior_3",
+   "minossian_warrior_4",
+   "minossian_warrior_5",
+   "minossian_warrior_6",
+   "minossian_warrior_7",
+   "minossian_warrior_8"
+  ],
+  "minossian.spellcaster": [
+   "minossian_mage"
+  ],
+  "minossian.spellcaster.1": [
+   "minossian_mage"
+  ],
+  "minossian.spellcaster.2": [
+   "minossian_mage"
+  ],
+  "minossian.spellcaster.3": [
+   "minossian_mage"
+  ],
+  "minossian.spellcaster.4": [
+   "minossian_mage"
+  ],
+  "monster.leader": [
+   "custom_monster_jabberwocky"
+  ],
+  "monster.leader.elite": [
+   "custom_monster_troll"
+  ],
+  "monster.soldier": [
+   "custom_monster_aquatic_cthulhoid_deep_one"
+  ],
+  "monster.soldier.elite": [
+   "custom_monster_lizard_beast"
+  ],
+  "monster.spellcaster": [
+   "custom_monster_mindflayer_priest"
+  ],
+  "nogg.archer": [
+   "nogg_militia_1",
+   "nogg_militia_2",
+   "nogg_militia_3",
+   "nogg_militia_4",
+   "nogg_militia_5",
+   "nogg_militia_6",
+   "nogg_militia_7",
+   "nogg_militia_8"
+  ],
+  "nogg.archer.elite": [
+   "nogg_adventurer_archer_1",
+   "nogg_adventurer_archer_2",
+   "nogg_adventurer_archer_3",
+   "nogg_adventurer_archer_4",
+   "nogg_adventurer_archer_5",
+   "nogg_adventurer_archer_6",
+   "nogg_adventurer_archer_7",
+   "nogg_adventurer_archer_8"
+  ],
+  "nogg.bard": [
+   "nogg_adventurer_bard",
+   "nogg_bard",
+   "nogg_princess"
+  ],
+  "nogg.cavalry": [
+   "nogg_knight_1",
+   "nogg_knight_2",
+   "nogg_knight_3",
+   "nogg_knight_4",
+   "nogg_knight_5"
+  ],
+  "nogg.civilian.female": [
+   "nogg_girl_1",
+   "nogg_girl_2",
+   "nogg_girl_3",
+   "nogg_girl_4",
+   "nogg_girl_5",
+   "nogg_girl_6",
+   "nogg_woman_1",
+   "nogg_woman_2",
+   "nogg_woman_3",
+   "nogg_woman_4",
+   "nogg_woman_5",
+   "nogg_woman_6",
+   "nogg_woman_7",
+   "nogg_woman_8"
+  ],
+  "nogg.civilian.male": [
+   "nogg_villager_1",
+   "nogg_villager_10",
+   "nogg_villager_11",
+   "nogg_villager_12",
+   "nogg_villager_2",
+   "nogg_villager_3",
+   "nogg_villager_4",
+   "nogg_villager_5",
+   "nogg_villager_6",
+   "nogg_villager_7",
+   "nogg_villager_8",
+   "nogg_villager_9"
+  ],
+  "nogg.leader": [
+   "nogg_knight_1",
+   "nogg_knight_2",
+   "nogg_knight_3",
+   "nogg_knight_4",
+   "nogg_knight_5"
+  ],
+  "nogg.leader.elite": [
+   "nogg_lord_1",
+   "nogg_lord_2",
+   "nogg_lord_3"
+  ],
+  "nogg.mounted_archer": [
+   "nogg_militia_1",
+   "nogg_militia_2",
+   "nogg_militia_3",
+   "nogg_militia_4",
+   "nogg_militia_5",
+   "nogg_militia_6",
+   "nogg_militia_7",
+   "nogg_militia_8"
+  ],
+  "nogg.priest": [
+   "nogg_priest_1",
+   "nogg_priest_2",
+   "nogg_priest_3",
+   "nogg_priest_4",
+   "nogg_priest_5",
+   "nogg_priest_6",
+   "nogg_priest_7",
+   "nogg_priest_8"
+  ],
+  "nogg.siege_engineer": [
+   "nogg_adventurer_1",
+   "nogg_adventurer_2",
+   "nogg_adventurer_3",
+   "nogg_adventurer_4"
+  ],
+  "nogg.soldier": [
+   "nogg_church_knight",
+   "nogg_militia_1",
+   "nogg_militia_2",
+   "nogg_militia_3",
+   "nogg_militia_4",
+   "nogg_militia_5",
+   "nogg_militia_6",
+   "nogg_militia_7",
+   "nogg_militia_8",
+   "nogg_militia_9"
+  ],
+  "nogg.soldier.elite": [
+   "nogg_adventurer_1",
+   "nogg_adventurer_10",
+   "nogg_adventurer_2",
+   "nogg_adventurer_3",
+   "nogg_adventurer_4",
+   "nogg_adventurer_5",
+   "nogg_adventurer_6",
+   "nogg_adventurer_7",
+   "nogg_adventurer_8",
+   "nogg_adventurer_9"
+  ],
+  "nogg.spellcaster": [
+   "custom_adventurer_mage"
+  ],
+  "nogg.spellcaster.1": [
+   "custom_mage_2"
+  ],
+  "nogg.spellcaster.2": [
+   "custom_mage_1"
+  ],
+  "nogg.spellcaster.3": [
+   "custom_adventurer_elder_mage"
+  ],
+  "nogg.spellcaster.4": [
+   "custom_nogg_royal_bird_graculus"
+  ],
+  "nogg.trader": [
+   "nogg_blacksmith",
+   "nogg_merchant_1",
+   "nogg_merchant_2",
+   "nogg_merchant_3",
+   "nogg_merchant_4",
+   "nogg_merchant_5",
+   "nogg_trader_6",
+   "nogg_trader_7",
+   "nogg_trader_8",
+   "nogg_trader_9"
+  ],
+  "norska.archer": [
+   "norska_bowman_2",
+   "norska_bowman_3",
+   "norska_bowman_4",
+   "norska_bowman_5",
+   "norska_bowman_6",
+   "norska_bowman_7",
+   "norska_bowman_8"
+  ],
+  "norska.archer.elite": [
+   "norska_bowman_2",
+   "norska_bowman_3",
+   "norska_bowman_4",
+   "norska_bowman_5",
+   "norska_bowman_6",
+   "norska_bowman_7",
+   "norska_bowman_8"
+  ],
+  "norska.bard": [
+   "norska_man_1",
+   "norska_man_2",
+   "norska_man_3",
+   "norska_man_9"
+  ],
+  "norska.cavalry": [
+   "norska_bear_master_1",
+   "norska_bear_master_2",
+   "norska_bear_master_3",
+   "norska_bear_master_4",
+   "norska_bear_master_5",
+   "norska_bear_master_6",
+   "norska_bear_master_7"
+  ],
+  "norska.civilian.female": [
+   "norska_girl",
+   "norska_noblewoman",
+   "norska_princess",
+   "norska_princess_2",
+   "norska_queen",
+   "norska_woman_1",
+   "norska_woman_2",
+   "norska_woman_3",
+   "norska_woman_4",
+   "norska_woman_5",
+   "norska_woman_6",
+   "norska_woman_7",
+   "norska_woman_8",
+   "norska_woman_9"
+  ],
+  "norska.civilian.male": [
+   "norska_man_1",
+   "norska_man_2",
+   "norska_man_3",
+   "norska_man_4",
+   "norska_man_5",
+   "norska_man_6",
+   "norska_man_7",
+   "norska_man_8"
+  ],
+  "norska.leader": [
+   "norska_jarl_1",
+   "norska_jarl_2",
+   "norska_jarl_3",
+   "norska_jarl_4",
+   "norska_jarl_5",
+   "norska_jarl_6"
+  ],
+  "norska.leader.elite": [
+   "norska_blood_jarl_1",
+   "norska_blood_jarl_2",
+   "norska_blood_jarl_3",
+   "norska_blood_jarl_4",
+   "norska_blood_jarl_5",
+   "norska_chief_ragnar",
+   "norska_warrior_1",
+   "norska_warrior_2",
+   "norska_warrior_3"
+  ],
+  "norska.mounted_archer": [
+   "norska_bowman_2",
+   "norska_bowman_3",
+   "norska_bowman_4",
+   "norska_bowman_5",
+   "norska_bowman_6",
+   "norska_bowman_7"
+  ],
+  "norska.priest": [
+   "norska_runecaster_1",
+   "norska_runecaster_2",
+   "norska_runecaster_3",
+   "norska_runecaster_4",
+   "norska_runecaster_5"
+  ],
+  "norska.siege_engineer": [
+   "norska_1",
+   "norska_2",
+   "norska_3",
+   "norska_4",
+   "norska_5"
+  ],
+  "norska.soldier": [
+   "norska_1",
+   "norska_10",
+   "norska_11",
+   "norska_12",
+   "norska_13",
+   "norska_14",
+   "norska_15",
+   "norska_18",
+   "norska_2",
+   "norska_3",
+   "norska_4",
+   "norska_5",
+   "norska_6",
+   "norska_7",
+   "norska_8",
+   "norska_9"
+  ],
+  "norska.soldier.elite": [
+   "norska_berserker_1",
+   "norska_berserker_10",
+   "norska_berserker_11",
+   "norska_berserker_12",
+   "norska_berserker_2",
+   "norska_berserker_3",
+   "norska_berserker_4",
+   "norska_berserker_5",
+   "norska_berserker_6",
+   "norska_berserker_7",
+   "norska_berserker_8",
+   "norska_berserker_9"
+  ],
+  "norska.spellcaster": [
+   "norska_rune_caster"
+  ],
+  "norska.spellcaster.1": [
+   "norska_jarl_3",
+   "norska_rune_caster"
+  ],
+  "norska.spellcaster.2": [
+   "norska_seidhr"
+  ],
+  "norska.spellcaster.3": [],
+  "norska.spellcaster.4": [
+   "norska_varulfur_1",
+   "norska_varulfur_2",
+   "norska_varulfur_3"
+  ],
+  "norska.trader": [
+   "norska_trader_1",
+   "norska_trader_10",
+   "norska_trader_11",
+   "norska_trader_12",
+   "norska_trader_13",
+   "norska_trader_14",
+   "norska_trader_2",
+   "norska_trader_3",
+   "norska_trader_4",
+   "norska_trader_5",
+   "norska_trader_6",
+   "norska_trader_7",
+   "norska_trader_8",
+   "norska_trader_9"
+  ],
+  "orc.archer": [
+   "orc_1",
+   "orc_2",
+   "orc_3",
+   "orc_4",
+   "orc_5",
+   "orc_6",
+   "orc_7",
+   "orc_8",
+   "orc_archer_2",
+   "orc_archer_3"
+  ],
+  "orc.archer.elite": [
+   "orc_1",
+   "orc_2",
+   "orc_3",
+   "orc_4",
+   "orc_5",
+   "orc_6",
+   "orc_7",
+   "orc_8",
+   "orc_archer_2",
+   "orc_archer_3"
+  ],
+  "orc.bard": [
+   "orc_bard_1",
+   "orc_bard_2"
+  ],
+  "orc.cavalry": [
+   "orc_cavalry",
+   "orc_cavalry_2",
+   "orc_cavalry_3",
+   "orc_cavalry_4"
+  ],
+  "orc.civilian.female": [
+   "orc_female_1",
+   "orc_female_10",
+   "orc_female_11",
+   "orc_female_12",
+   "orc_female_2",
+   "orc_female_3",
+   "orc_female_4",
+   "orc_female_5",
+   "orc_female_6",
+   "orc_female_7",
+   "orc_female_8",
+   "orc_female_9"
+  ],
+  "orc.civilian.male": [
+   "orc_1",
+   "orc_2",
+   "orc_3"
+  ],
+  "orc.leader": [
+   "orc_chief_1",
+   "orc_chief_2",
+   "orc_chief_3",
+   "orc_chief_4",
+   "orc_chief_5",
+   "orc_chief_6"
+  ],
+  "orc.leader.elite": [
+   "orc_chieftain",
+   "orc_chieftain_2",
+   "orc_king",
+   "orc_warlord",
+   "orc_warlord_2",
+   "orc_warlord_3",
+   "orc_warlord_4"
+  ],
+  "orc.mounted_archer": [
+   "orc_uruk_1"
+  ],
+  "orc.priest": [
+   "orc_shaman_1",
+   "orc_shaman_2",
+   "orc_shaman_3",
+   "orc_shaman_4",
+   "orc_shaman_5",
+   "orc_shaman_6",
+   "orc_shaman_7",
+   "orc_witch"
+  ],
+  "orc.siege_engineer": [
+   "orc_bugbear_1",
+   "orc_bugbear_2",
+   "orc_bugbear_3",
+   "orc_bugbear_4",
+   "orc_bugbear_5"
+  ],
+  "orc.soldier": [
+   "orc_1",
+   "orc_10",
+   "orc_11",
+   "orc_12",
+   "orc_13",
+   "orc_14",
+   "orc_15",
+   "orc_16",
+   "orc_17",
+   "orc_18",
+   "orc_19",
+   "orc_2",
+   "orc_20",
+   "orc_21",
+   "orc_22",
+   "orc_3",
+   "orc_4",
+   "orc_5",
+   "orc_6",
+   "orc_7",
+   "orc_8",
+   "orc_9"
+  ],
+  "orc.soldier.elite": [
+   "orc_berserker_1",
+   "orc_berserker_2",
+   "orc_berserker_3",
+   "orc_berserker_4",
+   "orc_berserker_5",
+   "orc_berserker_6",
+   "orc_berserker_7",
+   "orc_berserker_8",
+   "orc_cyclops",
+   "orc_uruk_1",
+   "orc_uruk_2",
+   "orc_uruk_3"
+  ],
+  "orc.spellcaster": [
+   "orc_chieftain",
+   "orc_chieftain_2",
+   "orc_king",
+   "orc_warlord",
+   "orc_warlord_2",
+   "orc_warlord_3",
+   "orc_warlord_4"
+  ],
+  "orc.spellcaster.1": [
+   "orc_shaman_1",
+   "orc_shaman_2",
+   "orc_shaman_3",
+   "orc_shaman_4",
+   "orc_shaman_5"
+  ],
+  "orc.spellcaster.2": [
+   "orc_shaman_6",
+   "orc_shaman_7"
+  ],
+  "orc.spellcaster.3": [
+   "orc_shaman_2",
+   "orc_shaman_7"
+  ],
+  "orc.spellcaster.4": [
+   "orc_shaman_2",
+   "orc_shaman_7"
+  ],
+  "orc.trader": [
+   "orc_trader_1",
+   "orc_trader_2",
+   "orc_trader_3",
+   "orc_trader_4",
+   "orc_trader_5",
+   "orc_trader_6",
+   "orc_trader_7",
+   "orc_trader_8",
+   "orc_trader_9"
+  ],
+  "pirate.archer": [
+   "pirate_1",
+   "pirate_10",
+   "pirate_2",
+   "pirate_3",
+   "pirate_4",
+   "pirate_5",
+   "pirate_6",
+   "pirate_7",
+   "pirate_8",
+   "pirate_9"
+  ],
+  "pirate.archer.elite": [
+   "pirate_1",
+   "pirate_10",
+   "pirate_2",
+   "pirate_3",
+   "pirate_4",
+   "pirate_5",
+   "pirate_6",
+   "pirate_7",
+   "pirate_8",
+   "pirate_9"
+  ],
+  "pirate.bard": [],
+  "pirate.cavalry": [
+   "pirate_smuggler_1",
+   "pirate_smuggler_2",
+   "pirate_smuggler_3",
+   "pirate_smuggler_4",
+   "pirate_smuggler_5",
+   "pirate_smuggler_6"
+  ],
+  "pirate.civilian.female": [
+   "pirate_girl_1",
+   "pirate_girl_2",
+   "pirate_girl_3",
+   "pirate_girl_4",
+   "pirate_girl_5",
+   "pirate_woman_1",
+   "pirate_woman_2"
+  ],
+  "pirate.civilian.male": [
+   "pirate_11",
+   "pirate_14",
+   "pirate_15",
+   "pirate_16",
+   "pirate_17",
+   "pirate_7"
+  ],
+  "pirate.leader": [
+   "pirate_captain_1",
+   "pirate_captain_2",
+   "pirate_captain_3",
+   "pirate_captain_4"
+  ],
+  "pirate.leader.elite": [
+   "pirate_boss_barbossa",
+   "pirate_boss_capn_jack_sparrow",
+   "pirate_boss_davy_jones_1",
+   "pirate_boss_davy_jones_2",
+   "pirate_captain_anne_bonney",
+   "pirate_captain_flint",
+   "pirate_captain_jack_rackham",
+   "pirate_captain_vane"
+  ],
+  "pirate.mounted_archer": [
+   "pirate_smuggler_1",
+   "pirate_smuggler_2",
+   "pirate_smuggler_3",
+   "pirate_smuggler_4",
+   "pirate_smuggler_5",
+   "pirate_smuggler_6"
+  ],
+  "pirate.priest": [
+   "pirate_girl_syrena",
+   "pirate_voodoo_priest",
+   "pirate_voodoo_witch"
+  ],
+  "pirate.siege_engineer": [
+   "pirate_1",
+   "pirate_2",
+   "pirate_3",
+   "pirate_4",
+   "pirate_5",
+   "pirate_6"
+  ],
+  "pirate.soldier": [
+   "pirate_1",
+   "pirate_10",
+   "pirate_11",
+   "pirate_12",
+   "pirate_13",
+   "pirate_2",
+   "pirate_3",
+   "pirate_4",
+   "pirate_5",
+   "pirate_6",
+   "pirate_7",
+   "pirate_8",
+   "pirate_9"
+  ],
+  "pirate.soldier.elite": [
+   "pirate_1",
+   "pirate_10",
+   "pirate_11",
+   "pirate_12",
+   "pirate_13",
+   "pirate_2",
+   "pirate_3",
+   "pirate_4",
+   "pirate_5",
+   "pirate_6",
+   "pirate_7",
+   "pirate_8",
+   "pirate_9"
+  ],
+  "pirate.spellcaster": [
+   "pirate_girl_syrena"
+  ],
+  "pirate.spellcaster.1": [
+   "pirate_voodoo_caster"
+  ],
+  "pirate.spellcaster.2": [
+   "pirate_voodoo_sorceror"
+  ],
+  "pirate.spellcaster.3": [
+   "pirate_voodoo_priest"
+  ],
+  "pirate.spellcaster.4": [
+   "pirate_voodoo_witch"
+  ],
+  "pirate.trader": [
+   "pirate_1",
+   "pirate_2",
+   "pirate_3",
+   "pirate_4",
+   "pirate_5",
+   "pirate_6",
+   "pirate_7",
+   "pirate_old"
+  ],
+  "priest": [
+   "po_priest_1",
+   "po_priest_2",
+   "po_priest_3",
+   "po_priest_4"
+  ],
+  "rakshasa.leader.elite": [
+   "rakshasa_lord"
+  ],
+  "rakshasa.soldier.elite": [
+   "rakshasa_tigerman_1",
+   "rakshasa_tigerman_2"
+  ],
+  "rakshasa.spellcaster": [
+   "rakshasa_lord"
+  ],
+  "rakshasa.spellcaster.1": [
+   "rakshasa_lord"
+  ],
+  "rakshasa.spellcaster.2": [
+   "rakshasa_lord"
+  ],
+  "rakshasa.spellcaster.3": [
+   "rakshasa_lord"
+  ],
+  "rakshasa.spellcaster.4": [
+   "rakshasa_lord"
+  ],
+  "reiksgard.archer": [
+   "reiksgard_archer_1",
+   "reiksgard_archer_2",
+   "reiksgard_archer_3"
+  ],
+  "reiksgard.archer.elite": [
+   "reiksgard_sentry_1",
+   "reiksgard_sentry_2",
+   "reiksgard_sentry_3",
+   "reiksgard_sentry_4"
+  ],
+  "reiksgard.bard": [
+   "reiksgard_drummer_1",
+   "reiksgard_drummer_2",
+   "reiksgard_drummer_3"
+  ],
+  "reiksgard.cavalry": [
+   "reiksgard_reiter_1",
+   "reiksgard_reiter_2",
+   "reiksgard_reiter_3",
+   "reiksgard_reiter_4"
+  ],
+  "reiksgard.civilian.female": [
+   "reiksgard_trossfrau_1",
+   "reiksgard_trossfrau_2",
+   "reiksgard_trossfrau_3",
+   "reiksgard_trossfrau_4",
+   "reiksgard_trossfrau_5",
+   "reiksgard_trossfrau_6"
+  ],
+  "reiksgard.civilian.male": [
+   "reiksgard_trossmann_1",
+   "reiksgard_trossmann_2",
+   "reiksgard_trossmann_3",
+   "reiksgard_trossmann_4"
+  ],
+  "reiksgard.leader": [
+   "reiksgard_feldweibel_1",
+   "reiksgard_feldweibel_2",
+   "reiksgard_feldweibel_3",
+   "reiksgard_feldweibel_4"
+  ],
+  "reiksgard.leader.elite": [
+   "reiksgard_hauptmann_1",
+   "reiksgard_hauptmann_2",
+   "reiksgard_hauptmann_3",
+   "reiksgard_hauptmann_4",
+   "reiksgard_hauptmann_5"
+  ],
+  "reiksgard.mounted_archer": [
+   "reiksgard_archer_1",
+   "reiksgard_archer_2",
+   "reiksgard_archer_3"
+  ],
+  "reiksgard.priest": [
+   "reiksgard_friar_1",
+   "reiksgard_friar_2",
+   "reiksgard_friar_3"
+  ],
+  "reiksgard.siege_engineer": [
+   "reiksgard_cannoneer_1",
+   "reiksgard_cannoneer_2",
+   "reiksgard_cannoneer_3"
+  ],
+  "reiksgard.soldier": [
+   "reiksgard_soldner_1",
+   "reiksgard_soldner_2",
+   "reiksgard_soldner_3",
+   "reiksgard_soldner_4",
+   "reiksgard_soldner_5",
+   "reiksgard_soldner_6",
+   "reiksgard_soldner_7"
+  ],
+  "reiksgard.soldier.elite": [
+   "reiksgard_doppelsoldner_1",
+   "reiksgard_doppelsoldner_2",
+   "reiksgard_doppelsoldner_3",
+   "reiksgard_doppelsoldner_4"
+  ],
+  "reiksgard.spellcaster": [
+   "custom_adventurer_blue_wizard"
+  ],
+  "reiksgard.spellcaster.1": [
+   "custom_adventurer_elder_mage"
+  ],
+  "reiksgard.spellcaster.2": [
+   "custom_adventurer_veteran_mage"
+  ],
+  "reiksgard.spellcaster.3": [
+   "custom_adventurer_village_wizard"
+  ],
+  "reiksgard.spellcaster.4": [
+   "custom_adventurer_wizard_green"
+  ],
+  "reiksgard.trader": [
+   "reiksgard_trader_1",
+   "reiksgard_trader_2",
+   "reiksgard_trader_3"
+  ],
+  "sarkonid.archer": [
+   "sarkonid_archer_1",
+   "sarkonid_archer_2",
+   "sarkonid_archer_3",
+   "sarkonid_archer_4",
+   "sarkonid_archer_5",
+   "sarkonid_archer_6",
+   "sarkonid_archer_7"
+  ],
+  "sarkonid.archer.elite": [
+   "sarkonid_horse_archer_1",
+   "sarkonid_horse_archer_2",
+   "sarkonid_horse_archer_3",
+   "sarkonid_horse_archer_4",
+   "sarkonid_horse_archer_5",
+   "sarkonid_horse_archer_6",
+   "sarkonid_horse_archer_7",
+   "sarkonid_horse_archer_8"
+  ],
+  "sarkonid.bard": [
+   "sarkonid_bard"
+  ],
+  "sarkonid.cavalry": [
+   "sarkonid_knight_1",
+   "sarkonid_knight_10",
+   "sarkonid_knight_11",
+   "sarkonid_knight_12",
+   "sarkonid_knight_2",
+   "sarkonid_knight_3",
+   "sarkonid_knight_4",
+   "sarkonid_knight_5",
+   "sarkonid_knight_6",
+   "sarkonid_knight_7",
+   "sarkonid_knight_8",
+   "sarkonid_knight_9"
+  ],
+  "sarkonid.civilian.female": [
+   "sarkonid_princess",
+   "sarkonid_woman_1",
+   "sarkonid_woman_2",
+   "sarkonid_woman_3",
+   "sarkonid_woman_4",
+   "sarkonid_woman_5",
+   "sarkonid_woman_6",
+   "sarkonid_woman_7",
+   "sarkonid_woman_8"
+  ],
+  "sarkonid.civilian.male": [
+   "sarkonid_man_1",
+   "sarkonid_man_10",
+   "sarkonid_man_11",
+   "sarkonid_man_2",
+   "sarkonid_man_3",
+   "sarkonid_man_4",
+   "sarkonid_man_5",
+   "sarkonid_man_6",
+   "sarkonid_man_7",
+   "sarkonid_man_8",
+   "sarkonid_man_9"
+  ],
+  "sarkonid.leader": [
+   "sarkonid_emir_1",
+   "sarkonid_emir_2",
+   "sarkonid_emir_3",
+   "sarkonid_emir_4",
+   "sarkonid_emir_5",
+   "sarkonid_emir_6"
+  ],
+  "sarkonid.leader.elite": [
+   "sarkonid_king",
+   "sarkonid_lord_1",
+   "sarkonid_lord_2",
+   "sarkonid_lord_3",
+   "sarkonid_lord_4",
+   "sarkonid_lord_5"
+  ],
+  "sarkonid.mounted_archer": [
+   "sarkonid_horse_archer_1",
+   "sarkonid_horse_archer_2",
+   "sarkonid_horse_archer_3",
+   "sarkonid_horse_archer_4",
+   "sarkonid_horse_archer_5",
+   "sarkonid_horse_archer_6",
+   "sarkonid_horse_archer_7",
+   "sarkonid_horse_archer_8"
+  ],
+  "sarkonid.priest": [
+   "sarkonid_mage_1",
+   "sarkonid_mage_2",
+   "sarkonid_mage_3",
+   "sarkonid_mage_4",
+   "sarkonid_mage_5",
+   "sarkonid_mage_6"
+  ],
+  "sarkonid.siege_engineer": [
+   "sarkonid_siege_engineer_1",
+   "sarkonid_siege_engineer_2",
+   "sarkonid_siege_engineer_3",
+   "sarkonid_siege_engineer_4",
+   "sarkonid_siege_engineer_5"
+  ],
+  "sarkonid.soldier": [
+   "sarkonid_1",
+   "sarkonid_10",
+   "sarkonid_11",
+   "sarkonid_12",
+   "sarkonid_2",
+   "sarkonid_3",
+   "sarkonid_4",
+   "sarkonid_5",
+   "sarkonid_6",
+   "sarkonid_7",
+   "sarkonid_8",
+   "sarkonid_9"
+  ],
+  "sarkonid.soldier.elite": [
+   "sarkonid_halbardier_1",
+   "sarkonid_halbardier_2",
+   "sarkonid_knight_1",
+   "sarkonid_knight_2",
+   "sarkonid_knight_3",
+   "sarkonid_knight_4",
+   "sarkonid_knight_5",
+   "sarkonid_knight_6",
+   "sarkonid_knight_7",
+   "sarkonid_knight_8",
+   "sarkonid_spearman_1",
+   "sarkonid_spearman_2",
+   "sarkonid_spearman_3",
+   "sarkonid_spearman_4",
+   "sarkonid_warrior_1",
+   "sarkonid_warrior_2"
+  ],
+  "sarkonid.spellcaster": [
+   "sarkonid_mage_7"
+  ],
+  "sarkonid.spellcaster.1": [
+   "sarkonid_mage_8"
+  ],
+  "sarkonid.spellcaster.2": [
+   "sarkonid_mage_9"
+  ],
+  "sarkonid.spellcaster.3": [
+   "sarkonid_mage_10"
+  ],
+  "sarkonid.spellcaster.4": [
+   "sarkonid_mage_11"
+  ],
+  "sarkonid.trader": [
+   "sarkonid_trader_1",
+   "sarkonid_trader_2",
+   "sarkonid_trader_3",
+   "sarkonid_trader_4",
+   "sarkonid_trader_5",
+   "sarkonid_trader_6",
+   "sarkonid_trader_7",
+   "sarkonid_trader_8",
+   "sarkonid_trader_9"
+  ],
+  "sealsker.archer": [
+   "sealsker_hunter"
+  ],
+  "sealsker.archer.elite": [
+   "sealsker_lookout"
+  ],
+  "sealsker.civilian.female": [
+   "sealsker_huntress"
+  ],
+  "sealsker.civilian.male": [
+   "sealsker_fisher"
+  ],
+  "sealsker.leader": [
+   "sealsker_chieftain",
+   "sealsker_wolf_warrior"
+  ],
+  "sealsker.leader.elite": [
+   "sealsker_snow_fox"
+  ],
+  "sealsker.priest": [
+   "sealsker_shaman_1"
+  ],
+  "sealsker.soldier": [
+   "sealsker_walrusser"
+  ],
+  "sealsker.soldier.elite": [
+   "sealsker_harpooner"
+  ],
+  "sealsker.spellcaster": [
+   "sealsker_mage"
+  ],
+  "sealsker.trader": [
+   "sealsker_gatherer"
+  ],
+  "shakayana.archer": [
+   "shakayana_archer"
+  ],
+  "shakayana.archer.elite": [
+   "shakayana_infantry"
+  ],
+  "shakayana.bard": [
+   "shakayana_bard"
+  ],
+  "shakayana.cavalry": [
+   "shakayana_knight"
+  ],
+  "shakayana.civilian.female": [
+   "shakayana_princess",
+   "shakayana_woman_1",
+   "shakayana_woman_2",
+   "shakayana_woman_3"
+  ],
+  "shakayana.civilian.male": [
+   "shakayana_man_1",
+   "shakayana_man_2",
+   "shakayana_man_3"
+  ],
+  "shakayana.leader": [
+   "shakayana_leader",
+   "shakayana_raja"
+  ],
+  "shakayana.leader.elite": [
+   "shakayana_noble_1",
+   "shakayana_noble_2"
+  ],
+  "shakayana.mounted_archer": [
+   "shakayana_cavalry"
+  ],
+  "shakayana.priest": [
+   "shakayana_priest"
+  ],
+  "shakayana.siege_engineer": [
+   "shakayana_soldier"
+  ],
+  "shakayana.soldier": [
+   "shakayana_warrior"
+  ],
+  "shakayana.soldier.elite": [
+   "shakayana_soldier"
+  ],
+  "shakayana.spellcaster": [
+   "shakayana_mage"
+  ],
+  "shakayana.spellcaster.1": [
+   "shakayana_mage"
+  ],
+  "shakayana.spellcaster.2": [
+   "shakayana_mage"
+  ],
+  "shakayana.spellcaster.3": [
+   "shakayana_mage"
+  ],
+  "shakayana.spellcaster.4": [
+   "shakayana_mage"
+  ],
+  "shakayana.trader": [
+   "shakayana_trader"
+  ],
+  "siege_engineer": [
+   "po_siege_engineer"
+  ],
+  "smingol.archer": [
+   "smingol_archer_5",
+   "smingol_archer_6",
+   "smingol_archer_7",
+   "smingol_archer_8"
+  ],
+  "smingol.archer.elite": [
+   "smingol_archer_1",
+   "smingol_archer_2",
+   "smingol_archer_3",
+   "smingol_archer_4"
+  ],
+  "smingol.bard": [
+   "smingol_throatsinger"
+  ],
+  "smingol.cavalry": [
+   "smingol_chief_1",
+   "smingol_chief_2",
+   "smingol_great_chief",
+   "smingol_high_chief",
+   "smingol_warrior_1",
+   "smingol_warrior_2",
+   "smingol_warrior_3",
+   "smingol_warrior_4",
+   "smingol_warrior_5",
+   "smingol_warrior_6"
+  ],
+  "smingol.civilian.female": [
+   "smingol_woman_1",
+   "smingol_woman_2"
+  ],
+  "smingol.civilian.male": [
+   "smingol_man_1",
+   "smingol_man_2",
+   "smingol_man_3",
+   "smingol_man_4"
+  ],
+  "smingol.leader": [
+   "smingol_chief_1",
+   "smingol_chief_2"
+  ],
+  "smingol.leader.elite": [
+   "smingol_great_chief",
+   "smingol_high_chief"
+  ],
+  "smingol.mounted_archer": [
+   "smingol_archer_1",
+   "smingol_archer_2",
+   "smingol_archer_3",
+   "smingol_archer_4",
+   "smingol_archer_5",
+   "smingol_archer_6",
+   "smingol_archer_7",
+   "smingol_archer_8"
+  ],
+  "smingol.priest": [
+   "smingol_priestess"
+  ],
+  "smingol.siege_engineer": [
+   "smingol_cannoneer_2",
+   "smingol_cannoneer_3"
+  ],
+  "smingol.soldier": [
+   "smingol_warrior_1",
+   "smingol_warrior_2",
+   "smingol_warrior_3"
+  ],
+  "smingol.soldier.elite": [
+   "smingol_warrior_4",
+   "smingol_warrior_5",
+   "smingol_warrior_6"
+  ],
+  "smingol.spellcaster": [
+   "smingol_mage_1"
+  ],
+  "smingol.spellcaster.1": [
+   "smingol_mage_1",
+   "smingol_mage_2"
+  ],
+  "smingol.spellcaster.2": [
+   "smingol_mage_3",
+   "smingol_mage_4"
+  ],
+  "smingol.spellcaster.3": [
+   "smingol_spellcaster"
+  ],
+  "smingol.spellcaster.4": [
+   "smingol_great_spellcaster"
+  ],
+  "smingol.trader": [
+   "smingol_trader_1",
+   "smingol_trader_2"
+  ],
+  "trader": [
+   "po_trader_1",
+   "po_trader_2",
+   "po_trader_3"
+  ],
+  "undead.archer": [
+   "undead_skeleton"
+  ],
+  "undead.archer.elite": [
+   "undead_lich_1",
+   "undead_lich_3",
+   "undead_lich_4",
+   "undead_lich_5",
+   "undead_lich_6",
+   "undead_lich_7"
+  ],
+  "undead.bard": [
+   "undead_ghost_lady"
+  ],
+  "undead.cavalry": [
+   "undead_death_knight",
+   "undead_dread_knight",
+   "undead_revenant_knight",
+   "undead_wraith_rider_1",
+   "undead_wraith_rider_2",
+   "undead_wraith_rider_3",
+   "undead_wraith_rider_4"
+  ],
+  "undead.leader": [
+   "undead_death_knight",
+   "undead_death_knight_red",
+   "undead_death_knight_yellow",
+   "undead_dread_knight",
+   "undead_revenant_knight",
+   "undead_warlord"
+  ],
+  "undead.leader.elite": [
+   "undead_lich_lord_1",
+   "undead_lich_lord_2",
+   "undead_lich_lord_4",
+   "undead_lich_lord_7",
+   "undead_lich_lord_8"
+  ],
+  "undead.mounted_archer": [
+   "undead_ghost_1",
+   "undead_ghost_2",
+   "undead_ghost_3",
+   "undead_ghost_6",
+   "undead_ghost_7",
+   "undead_ghost_8"
+  ],
+  "undead.priest": [
+   "undead_lich_priest_1",
+   "undead_lich_priest_2",
+   "undead_lich_priest_3",
+   "undead_lich_priest_4"
+  ],
+  "undead.siege_engineer": [
+   "undead_skeleton"
+  ],
+  "undead.soldier": [
+   "undead_bloated_corpse",
+   "undead_burned_corpse",
+   "undead_decaying_corpse",
+   "undead_drowned_corpse",
+   "undead_grave_zombie",
+   "undead_lynched-corpse",
+   "undead_rotting_corpse",
+   "undead_zombie",
+   "undead_zombie_warrior"
+  ],
+  "undead.soldier.elite": [
+   "undead_spectre_1",
+   "undead_spectre_2",
+   "undead_spectre_3",
+   "undead_wraith_1",
+   "undead_wraith_2",
+   "undead_wraith_3"
+  ],
+  "undead.spellcaster": [
+   "undead_lich_lord_1"
+  ],
+  "undead.spellcaster.1": [
+   "undead_summoner"
+  ],
+  "undead.spellcaster.2": [
+   "undead_necromancer",
+   "undead_necromancer_2"
+  ],
+  "undead.spellcaster.3": [
+   "undead_lich_2",
+   "undead_lich_4"
+  ],
+  "undead.spellcaster.4": [
+   "undead_lich_lord_3",
+   "undead_lich_lord_5",
+   "undead_lich_lord_6"
+  ],
+  "undead.trader": [
+   "undead_death_trader",
+   "undead_wight"
+  ],
+  "vampire.archer": [
+   "szygany_guard_1",
+   "szygany_guard_2"
+  ],
+  "vampire.archer.elite": [
+   "szygany_day_guard_1",
+   "szygany_day_guard_2"
+  ],
+  "vampire.cavalry": [
+   "vampire_death_dealer"
+  ],
+  "vampire.civilian.female": [
+   "blood_slave_girl_1",
+   "blood_slave_girl_2"
+  ],
+  "vampire.civilian.male": [
+   "vampire_thrall_1",
+   "vampire_thrall_2",
+   "vampire_thrall_3",
+   "vampire_thrall_4"
+  ],
+  "vampire.leader": [
+   "nosferatu_1",
+   "nosferatu_2",
+   "nosferatu_count_orlok",
+   "nosferatu_lord"
+  ],
+  "vampire.leader.elite": [
+   "vampire_count_dracula",
+   "vampire_dracula_enraged",
+   "vampire_lord_1",
+   "vampire_lord_2",
+   "vampire_vlad_drakul"
+  ],
+  "vampire.mounted_archer": [
+   "szygany_day_guard_1",
+   "szygany_day_guard_2",
+   "szygany_guard_2"
+  ],
+  "vampire.priest": [
+   "undead_lich_1"
+  ],
+  "vampire.siege_engineer": [
+   "szygany_guard_1",
+   "szygany_guard_2"
+  ],
+  "vampire.soldier": [
+   "frankensteins_monster_1",
+   "frankensteins_monster_2",
+   "frankensteins_monster_3",
+   "frankensteins_monster_4",
+   "frankensteins_monster_5"
+  ],
+  "vampire.soldier.elite": [
+   "vampire_bride_1",
+   "vampire_bride_2",
+   "vampire_bride_3",
+   "vampire_lady",
+   "vampire_queen"
+  ],
+  "vampire.spellcaster": [
+   "custom_monster_vampire_count_alucard",
+   "vampire_count_dracula"
+  ],
+  "vampire.spellcaster.1": [
+   "vampire_count_dracula",
+   "vampire_lord_4"
+  ],
+  "vampire.spellcaster.2": [
+   "vampire_lord_3",
+   "vampire_vlad_drakul"
+  ],
+  "vampire.spellcaster.3": [
+   "vampire_blood_mage"
+  ],
+  "vampire.spellcaster.4": [
+   "vampire_ancient"
+  ],
+  "vampire.trader": [
+   "undead_wight"
+  ],
+  "vyncan.archer": [
+   "vyncan_archer_1",
+   "vyncan_hunter"
+  ],
+  "vyncan.archer.elite": [
+   "vyncan_archer_2"
+  ],
+  "vyncan.civilian.female": [
+   "vyncan_girl",
+   "vyncan_woman"
+  ],
+  "vyncan.civilian.male": [
+   "vyncan_slave"
+  ],
+  "vyncan.leader": [
+   "vyncan_death_spirit",
+   "vyncan_guard_beast",
+   "vyncan_tomb_guardian"
+  ],
+  "vyncan.leader.elite": [
+   "vyncan_chieftain",
+   "vyncan_king"
+  ],
+  "vyncan.priest": [
+   "vyncan_druid",
+   "vyncan_priest_1",
+   "vyncan_priest_2"
+  ],
+  "vyncan.soldier": [
+   "vyncan_warrior_1",
+   "vyncan_warrior_2"
+  ],
+  "vyncan.soldier.elite": [
+   "vyncan_blood_warrior"
+  ],
+  "vyncan.spellcaster": [
+   "vyncan_mage"
+  ],
+  "vyncan.spellcaster.1": [
+   "vyncan_mage_1"
+  ],
+  "vyncan.spellcaster.2": [
+   "vyncan_mage_2"
+  ],
+  "vyncan.spellcaster.3": [
+   "vyncan_mage_3"
+  ],
+  "vyncan.spellcaster.4": [
+   "vyncan_mage_4"
+  ],
+  "vyncan.trader": [
+   "vyncan_maiden"
+  ],
+  "witchbane.archer": [
+   "witchbane_archer_1",
+   "witchbane_archer_2"
+  ],
+  "witchbane.archer.elite": [
+   "witchbane_1",
+   "witchbane_2",
+   "witchbane_3",
+   "witchbane_4",
+   "witchbane_5",
+   "witchbane_6"
+  ],
+  "witchbane.bard": [
+   "witchbane_hymn_singer"
+  ],
+  "witchbane.cavalry": [
+   "witchbane_knight_1",
+   "witchbane_knight_10",
+   "witchbane_knight_2",
+   "witchbane_knight_3",
+   "witchbane_knight_4",
+   "witchbane_knight_5",
+   "witchbane_knight_6",
+   "witchbane_knight_7",
+   "witchbane_knight_8",
+   "witchbane_knight_9"
+  ],
+  "witchbane.civilian.female": [
+   "witchbane_nun_1",
+   "witchbane_nun_2"
+  ],
+  "witchbane.civilian.male": [
+   "witchbane_monk_1",
+   "witchbane_monk_2",
+   "witchbane_monk_3",
+   "witchbane_monk_4"
+  ],
+  "witchbane.leader": [
+   "witchbane_abbot",
+   "witchbane_baron_1",
+   "witchbane_baron_2",
+   "witchbane_baron_3",
+   "witchbane_baron_4"
+  ],
+  "witchbane.leader.elite": [
+   "witchbane_duke_1",
+   "witchbane_duke_2",
+   "witchbane_duke_3",
+   "witchbane_duke_4"
+  ],
+  "witchbane.mounted_archer": [
+   "witchbane_archer_1",
+   "witchbane_archer_2"
+  ],
+  "witchbane.priest": [
+   "witchbane_priest_1",
+   "witchbane_priest_2",
+   "witchbane_priest_3",
+   "witchbane_priest_4",
+   "witchbane_priest_5",
+   "witchbane_priest_6"
+  ],
+  "witchbane.siege_engineer": [
+   "witchbane_1",
+   "witchbane_2",
+   "witchbane_3"
+  ],
+  "witchbane.soldier": [
+   "witchbane_spearman_1",
+   "witchbane_spearman_2",
+   "witchbane_spearman_3",
+   "witchbane_spearman_4",
+   "witchbane_spearman_5",
+   "witchbane_spearman_6"
+  ],
+  "witchbane.soldier.elite": [
+   "witchbane_knight_1",
+   "witchbane_knight_10",
+   "witchbane_knight_2",
+   "witchbane_knight_3",
+   "witchbane_knight_4",
+   "witchbane_knight_5",
+   "witchbane_knight_6",
+   "witchbane_knight_7",
+   "witchbane_knight_8",
+   "witchbane_knight_9"
+  ],
+  "witchbane.spellcaster": [
+   "witchbane_nun_12"
+  ],
+  "witchbane.spellcaster.1": [
+   "custom_inquisitor_1"
+  ],
+  "witchbane.spellcaster.2": [
+   "custom_inquisitor_2"
+  ],
+  "witchbane.spellcaster.3": [
+   "custom_monty_python_spanish_inquisitor"
+  ],
+  "witchbane.spellcaster.4": [
+   "custom_monty_python_cardinal_fang_spanish_inquisition"
+  ],
+  "witchbane.trader": [
+   "witchbane_trader_1",
+   "witchbane_trader_2",
+   "witchbane_trader_3"
+  ],
+  "wizardly.archer": [
+   "wizard_archer_1"
+  ],
+  "wizardly.archer.elite": [
+   "wizard_archer_1"
+  ],
+  "wizardly.bard": [
+   "wizards_doorkeeper",
+   "wizards_retainer"
+  ],
+  "wizardly.civilian.female": [
+   "custom_hp_anne_oliphant",
+   "custom_hp_bellatrix_lestrange",
+   "custom_hp_ginny_weasely",
+   "custom_hp_hermione_granger",
+   "custom_hp_luna_lovegood"
+  ],
+  "wizardly.civilian.male": [
+   "custom_hp_boy_ravenclaw",
+   "custom_hp_boy_slytherin",
+   "custom_hp_cedric_diggery",
+   "custom_hp_draco_malfoy",
+   "custom_hp_harry_potter",
+   "custom_hp_ron_weasley",
+   "custom_hp_scott_ravenclaw"
+  ],
+  "wizardly.leader": [
+   "custom_dw_rincewind",
+   "custom_hp_alastor_moody",
+   "custom_hp_albus_dumbledore",
+   "custom_hp_dolores_umbridge",
+   "custom_hp_madam_hooch",
+   "custom_hp_professor_mcgonagall",
+   "custom_hp_professor_severus_snape",
+   "custom_hp_sirius_black"
+  ],
+  "wizardly.leader.elite": [
+   "custom_hp_rubeus_hagrid"
+  ],
+  "wizardly.priest": [
+   "good_guardian_wizard_1",
+   "good_guardian_wizard_2",
+   "good_guardian_wizard_3",
+   "wizards_potion_mixer"
+  ],
+  "wizardly.siege_engineer": [
+   "custom_villager_town_ballistae_bowman"
+  ],
+  "wizardly.soldier": [
+   "wizard_guard_1"
+  ],
+  "wizardly.soldier.elite": [
+   "guardian_cat_1",
+   "guardian_cat_2",
+   "guardian_cat_3",
+   "guardian_cat_4",
+   "wizards_guardian",
+   "wizards_guardian_monkey",
+   "wizards_guardian_unicornus"
+  ],
+  "wizardly.spellcaster": [
+   "custom_dw_rincewind"
+  ],
+  "wizardly.spellcaster.1": [
+   "custom_hp_alastor_moody"
+  ],
+  "wizardly.spellcaster.2": [
+   "custom_hp_sirius_black"
+  ],
+  "wizardly.spellcaster.3": [
+   "custom_hp_professor_severus_snape"
+  ],
+  "wizardly.spellcaster.4": [
+   "custom_hp_albus_dumbledore"
+  ],
+  "wizardly.trader": [
+   "wizards_apprentice_1",
+   "wizards_apprentice_2",
+   "wizards_apprentice_accident",
+   "wizards_apprentice_alchemist"
+  ],
+  "worker": [
+   "po_worker_1",
+   "po_worker_2",
+   "po_worker_3",
+   "po_worker_4",
+   "po_worker_5"
+  ],
+  "worker.craftsman": [
+   "po_worker_craftsman_1",
+   "po_worker_craftsman_2",
+   "po_worker_craftsman_3",
+   "po_worker_craftsman_4",
+   "po_worker_craftsman_5"
+  ],
+  "worker.farmer": [
+   "po_worker_farmer_1",
+   "po_worker_farmer_2",
+   "po_worker_farmer_3",
+   "po_worker_farmer_4",
+   "po_worker_farmer_5",
+   "po_worker_farmer_6",
+   "po_worker_farmer_7"
+  ],
+  "worker.lumberjack": [
+   "po_worker_lumberjack_1",
+   "po_worker_lumberjack_2"
+  ],
+  "worker.miner": [
+   "po_worker_miner_1",
+   "po_worker_miner_2",
+   "po_worker_miner_3",
+   "po_worker_miner_4",
+   "po_worker_miner_5"
+  ],
+  "worker.researcher": [
+   "po_worker_researcher_1",
+   "po_worker_researcher_2",
+   "po_worker_researcher_3",
+   "po_worker_researcher_4",
+   "po_worker_researcher_5",
+   "po_worker_researcher_6",
+   "po_worker_researcher_7"
+  ],
+  "xoltec.archer": [
+   "xoltec_1",
+   "xoltec_2",
+   "xoltec_3",
+   "xoltec_4",
+   "xoltec_5",
+   "xoltec_6"
+  ],
+  "xoltec.archer.elite": [
+   "xoltec_eagle_knight"
+  ],
+  "xoltec.bard": [
+   "xoltec_dancer"
+  ],
+  "xoltec.cavalry": [
+   "xoltec_temple_guard"
+  ],
+  "xoltec.civilian.female": [
+   "xoltec_girl",
+   "xoltec_woman_1",
+   "xoltec_woman_2",
+   "xoltec_woman_3",
+   "xoltec_woman_4",
+   "xoltec_woman_5"
+  ],
+  "xoltec.civilian.male": [
+   "xoltec_1",
+   "xoltec_2",
+   "xoltec_3",
+   "xoltec_4",
+   "xoltec_5",
+   "xoltec_man"
+  ],
+  "xoltec.leader": [
+   "xoltec_lord_1",
+   "xoltec_lord_2",
+   "xoltec_lord_3",
+   "xoltec_lord_4",
+   "xoltec_lord_5",
+   "xoltec_noble"
+  ],
+  "xoltec.leader.elite": [
+   "xoltec_king_1",
+   "xoltec_king_2",
+   "xoltec_king_3",
+   "xoltec_king_4",
+   "xoltec_king_5"
+  ],
+  "xoltec.mounted_archer": [
+   "xoltec_falcon_knight"
+  ],
+  "xoltec.priest": [
+   "xoltec_priest_1",
+   "xoltec_priest_3",
+   "xoltec_priest_4",
+   "xoltec_priest_5",
+   "xoltec_priest_6"
+  ],
+  "xoltec.siege_engineer": [
+   "xoltec_death_priest"
+  ],
+  "xoltec.soldier": [
+   "xoltec_1",
+   "xoltec_2",
+   "xoltec_3",
+   "xoltec_4",
+   "xoltec_5",
+   "xoltec_6"
+  ],
+  "xoltec.soldier.elite": [
+   "xoltec_jaguar_knight",
+   "xoltec_jaguar_knight_2",
+   "xoltec_jaguar_knight_3",
+   "xoltec_jaguar_knight_4"
+  ],
+  "xoltec.spellcaster": [
+   "xoltec_heart_ripper"
+  ],
+  "xoltec.spellcaster.1": [
+   "xoltec_enchantress"
+  ],
+  "xoltec.spellcaster.2": [
+   "xoltec_mage"
+  ],
+  "xoltec.spellcaster.3": [
+   "xoltec_priest_1"
+  ],
+  "xoltec.spellcaster.4": [
+   "xoltec_king_3"
+  ],
+  "xoltec.trader": [
+   "xoltec_trader",
+   "xoltec_trader_2",
+   "xoltec_trader_3"
+  ],
+  "zamurai.archer": [
+   "zamurai_retainer_1",
+   "zamurai_retainer_2"
+  ],
+  "zamurai.archer.elite": [
+   "zamurai_guard_1",
+   "zamurai_guard_2",
+   "zamurai_guard_3",
+   "zamurai_guard_4"
+  ],
+  "zamurai.bard": [
+   "zamurai_geisha_1",
+   "zamurai_geisha_2",
+   "zamurai_geisha_3"
+  ],
+  "zamurai.cavalry": [
+   "zamurai_panda_monk",
+   "zamurai_ruby_warrior",
+   "zamurai_sapphire_warrior",
+   "zamurai_the_korean",
+   "zamurai_veteran_warrior"
+  ],
+  "zamurai.civilian.female": [
+   "zamurai_geisha_1",
+   "zamurai_geisha_2",
+   "zamurai_geisha_3",
+   "zamurai_princess",
+   "zamurai_woman_1",
+   "zamurai_woman_2"
+  ],
+  "zamurai.civilian.male": [
+   "zamurai_follower",
+   "zamurai_man",
+   "zamurai_peasant",
+   "zamurai_wrestler"
+  ],
+  "zamurai.leader": [
+   "zamurai_lord_1",
+   "zamurai_lord_2",
+   "zamurai_lord_4",
+   "zamurai_lord_5"
+  ],
+  "zamurai.leader.elite": [
+   "zamurai_daimyo",
+   "zamurai_demon_shogun",
+   "zamurai_dread_shogun",
+   "zamurai_general",
+   "zamurai_shogun_1",
+   "zamurai_shogun_2"
+  ],
+  "zamurai.mounted_archer": [
+   "zamurai_retainer_1",
+   "zamurai_retainer_2"
+  ],
+  "zamurai.priest": [
+   "zamurai_priest",
+   "zamurai_warrior_monk"
+  ],
+  "zamurai.siege_engineer": [
+   "zamurai_golden_guard",
+   "zamurai_temple_guard"
+  ],
+  "zamurai.soldier": [
+   "zamurai_warrior_1",
+   "zamurai_warrior_2",
+   "zamurai_warrior_3",
+   "zamurai_warrior_4",
+   "zamurai_warrior_5",
+   "zamurai_warrior_6",
+   "zamurai_warrior_7"
+  ],
+  "zamurai.soldier.elite": [
+   "zamurai_jade_warrior",
+   "zamurai_ruby_warrior",
+   "zamurai_sapphire_warrior",
+   "zamurai_veteran_warrior"
+  ],
+  "zamurai.spellcaster": [
+   "zamurai_wraith"
+  ],
+  "zamurai.spellcaster.1": [
+   "zamurai_spellweaver"
+  ],
+  "zamurai.spellcaster.2": [
+   "zamurai_undead_geisha"
+  ],
+  "zamurai.spellcaster.3": [],
+  "zamurai.spellcaster.4": [
+   "zamurai_oni"
+  ],
+  "zamurai.trader": [
+   "zamurai_girl",
+   "zamurai_merchant",
+   "zamurai_trader"
+  ],
+  "zimba.archer": [
+   "zimba_1",
+   "zimba_10",
+   "zimba_2",
+   "zimba_3",
+   "zimba_4",
+   "zimba_5",
+   "zimba_6",
+   "zimba_7",
+   "zimba_8"
+  ],
+  "zimba.archer.elite": [
+   "zimba_1",
+   "zimba_2",
+   "zimba_3",
+   "zimba_4",
+   "zimba_5",
+   "zimba_6",
+   "zimba_7",
+   "zimba_8"
+  ],
+  "zimba.bard": [
+   "zimba_1",
+   "zimba_2",
+   "zimba_3",
+   "zimba_4",
+   "zimba_5"
+  ],
+  "zimba.cavalry": [
+   "zimba_1",
+   "zimba_2",
+   "zimba_3",
+   "zimba_4",
+   "zimba_5",
+   "zimba_6",
+   "zimba_7",
+   "zimba_8"
+  ],
+  "zimba.civilian.female": [
+   "zimba_woman_1",
+   "zimba_woman_2",
+   "zimba_woman_3",
+   "zimba_woman_4",
+   "zimba_woman_5",
+   "zimba_woman_6",
+   "zimba_woman_7"
+  ],
+  "zimba.civilian.male": [
+   "zimba_1",
+   "zimba_10",
+   "zimba_2",
+   "zimba_3",
+   "zimba_4",
+   "zimba_5"
+  ],
+  "zimba.leader": [
+   "zimba_chief_1",
+   "zimba_chief_2",
+   "zimba_chief_5",
+   "zimba_chief_6",
+   "zimba_skeleton_hunter",
+   "zimba_wolf_hunter"
+  ],
+  "zimba.leader.elite": [
+   "zimba_chief_1",
+   "zimba_chief_2",
+   "zimba_chief_3",
+   "zimba_chief_4",
+   "zimba_chief_7"
+  ],
+  "zimba.mounted_archer": [
+   "zimba_1",
+   "zimba_2",
+   "zimba_3",
+   "zimba_4",
+   "zimba_5",
+   "zimba_6",
+   "zimba_7",
+   "zimba_8"
+  ],
+  "zimba.priest": [
+   "zimba_witchdoctor_1",
+   "zimba_witchdoctor_2",
+   "zimba_witchdoctor_3",
+   "zimba_witchdoctor_4",
+   "zimba_witchdoctor_5",
+   "zimba_witchdoctor_6"
+  ],
+  "zimba.siege_engineer": [
+   "zimba_1",
+   "zimba_2",
+   "zimba_3",
+   "zimba_4",
+   "zimba_5"
+  ],
+  "zimba.soldier": [
+   "zimba_1",
+   "zimba_10",
+   "zimba_2",
+   "zimba_3",
+   "zimba_4",
+   "zimba_5",
+   "zimba_6",
+   "zimba_7",
+   "zimba_8",
+   "zimba_9"
+  ],
+  "zimba.soldier.elite": [
+   "zimba_1",
+   "zimba_2",
+   "zimba_3",
+   "zimba_4",
+   "zimba_5",
+   "zimba_6",
+   "zimba_7",
+   "zimba_8"
+  ],
+  "zimba.spellcaster": [
+   "zimba_witchdoctor_11"
+  ],
+  "zimba.spellcaster.1": [
+   "zimba_witchdoctor_7"
+  ],
+  "zimba.spellcaster.2": [
+   "zimba_witchdoctor_8"
+  ],
+  "zimba.spellcaster.3": [
+   "zimba_witchdoctor_9"
+  ],
+  "zimba.spellcaster.4": [
+   "zimba_witchdoctor_10"
+  ],
+  "zimba.trader": [
+   "zimba_trader_1",
+   "zimba_trader_2",
+   "zimba_trader_3",
+   "zimba_trader_4",
+   "zimba_trader_5",
+   "zimba_trader_6"
+  ]
+ },
+ "custom": [
+  "barbarian_spellcaster",
+  "buffloka_chief",
+  "buffloka_trader_6",
+  "buffloka_trader_7",
+  "buffloka_trader_8",
+  "coven_black_and_white_cat_familiar",
+  "coven_reaper",
+  "coven_satyr",
+  "coven_witch_puppet",
+  "custom-villager_lords_baileff",
+  "custom_adventurer_1",
+  "custom_adventurer_2",
+  "custom_adventurer_3",
+  "custom_adventurer_4",
+  "custom_adventurer_5",
+  "custom_adventurer_archmagus",
+  "custom_adventurer_assasins_creed",
+  "custom_adventurer_axeman",
+  "custom_adventurer_barbarian",
+  "custom_adventurer_barbarian_druid",
+  "custom_adventurer_barbarian_hero",
+  "custom_adventurer_barbarian_lord",
+  "custom_adventurer_barbarian_renegade",
+  "custom_adventurer_barbarian_slayer",
+  "custom_adventurer_barbarian_wanderer",
+  "custom_adventurer_barbarian_woman",
+  "custom_adventurer_bard_1",
+  "custom_adventurer_bard_2",
+  "custom_adventurer_bard_3",
+  "custom_adventurer_battlemage",
+  "custom_adventurer_black_knight",
+  "custom_adventurer_blademaster",
+  "custom_adventurer_bold_rogue",
+  "custom_adventurer_boy_prince",
+  "custom_adventurer_brave_paladin",
+  "custom_adventurer_buffalo_bill",
+  "custom_adventurer_buffloka_dances_with_creepers",
+  "custom_adventurer_buffloka_girl",
+  "custom_adventurer_buffloka_warrior",
+  "custom_adventurer_buffloka_wolf_huntress",
+  "custom_adventurer_castaway",
+  "custom_adventurer_caveman",
+  "custom_adventurer_cheeky_monkey",
+  "custom_adventurer_cleric_1",
+  "custom_adventurer_cleric_2",
+  "custom_adventurer_cleric_3",
+  "custom_adventurer_cold_lands_tracker",
+  "custom_adventurer_cossack_1",
+  "custom_adventurer_dark_priest",
+  "custom_adventurer_dashing_rogue",
+  "custom_adventurer_death_dealer_veteran",
+  "custom_adventurer_druid",
+  "custom_adventurer_dwarf_1",
+  "custom_adventurer_dwarf_2",
+  "custom_adventurer_elf",
+  "custom_adventurer_elf_paladin",
+  "custom_adventurer_elf_priest",
+  "custom_adventurer_elf_ranger",
+  "custom_adventurer_elf_rogue",
+  "custom_adventurer_elf_rogue_fighter",
+  "custom_adventurer_elf_thief",
+  "custom_adventurer_elf_warrior",
+  "custom_adventurer_fighter",
+  "custom_adventurer_fighting_monk",
+  "custom_adventurer_forest_huntress",
+  "custom_adventurer_forest_ranger",
+  "custom_adventurer_fox_the_foxy",
+  "custom_adventurer_foxy",
+  "custom_adventurer_freelance_knight",
+  "custom_adventurer_friendly_scarecrow",
+  "custom_adventurer_girl_paladin",
+  "custom_adventurer_girl_thief",
+  "custom_adventurer_gladiator",
+  "custom_adventurer_golden_paladin",
+  "custom_adventurer_goodly_knight",
+  "custom_adventurer_grey_priest",
+  "custom_adventurer_grumpy_cat",
+  "custom_adventurer_half_orc_veteran",
+  "custom_adventurer_hellboy_abe_sapien",
+  "custom_adventurer_hellboy_evil",
+  "custom_adventurer_hellboy_good",
+  "custom_adventurer_hillman",
+  "custom_adventurer_hobbit_1",
+  "custom_adventurer_hobbit_2",
+  "custom_adventurer_hobbit_girl_thief",
+  "custom_adventurer_holy_cleric",
+  "custom_adventurer_knight-quester",
+  "custom_adventurer_knight_1",
+  "custom_adventurer_knight_2",
+  "custom_adventurer_knight_errent",
+  "custom_adventurer_knight_of_lion",
+  "custom_adventurer_kung_fu_panda",
+  "custom_adventurer_lost_samuarai_boy_prince",
+  "custom_adventurer_lost_samurai",
+  "custom_adventurer_lost_samurai_eastern_emperor",
+  "custom_adventurer_lost_samurai_follower",
+  "custom_adventurer_lost_samurai_geisha_assassin",
+  "custom_adventurer_lost_samurai_panda_monk",
+  "custom_adventurer_lost_samurai_priest",
+  "custom_adventurer_lost_samurai_retainer_1",
+  "custom_adventurer_lost_samurai_retainer_2",
+  "custom_adventurer_lost_samurai_ronin",
+  "custom_adventurer_lost_samurai_sorcerer",
+  "custom_adventurer_lost_samurai_the_korean",
+  "custom_adventurer_lost_samurai_warrior_monk",
+  "custom_adventurer_master_thief",
+  "custom_adventurer_minossian_refugee_hero",
+  "custom_adventurer_monkey_magic",
+  "custom_adventurer_moor",
+  "custom_adventurer_norska_fameseeker",
+  "custom_adventurer_norska_shieldmaiden",
+  "custom_adventurer_norska_varangian",
+  "custom_adventurer_norska_wanderer",
+  "custom_adventurer_norska_warrior_1",
+  "custom_adventurer_norska_warrior_2",
+  "custom_adventurer_norska_warrior_3",
+  "custom_adventurer_old_explorer",
+  "custom_adventurer_orc_warrior",
+  "custom_adventurer_orc_warrioress",
+  "custom_adventurer_paladin",
+  "custom_adventurer_paladin_1",
+  "custom_adventurer_paladin_2",
+  "custom_adventurer_paladin_frog",
+  "custom_adventurer_paladin_old",
+  "custom_adventurer_pirate",
+  "custom_adventurer_pirate_capn_jack_chicken",
+  "custom_adventurer_pirate_captain",
+  "custom_adventurer_pirate_captain_redbeard",
+  "custom_adventurer_pirate_simpleton",
+  "custom_adventurer_poor_knight_1",
+  "custom_adventurer_poor_knight_2",
+  "custom_adventurer_prince_of_rogues",
+  "custom_adventurer_prince_of_thieves",
+  "custom_adventurer_puss_in_boots",
+  "custom_adventurer_puss_no_boots",
+  "custom_adventurer_ranger_1",
+  "custom_adventurer_ranger_2",
+  "custom_adventurer_ranger_3",
+  "custom_adventurer_red_knight",
+  "custom_adventurer_red_paladin",
+  "custom_adventurer_robin_hood",
+  "custom_adventurer_rogue_1",
+  "custom_adventurer_rogue_2",
+  "custom_adventurer_sage",
+  "custom_adventurer_samurai",
+  "custom_adventurer_sarkonid_knight",
+  "custom_adventurer_skyrimmer",
+  "custom_adventurer_spearman",
+  "custom_adventurer_spyro",
+  "custom_adventurer_squire",
+  "custom_adventurer_stealthy_thief",
+  "custom_adventurer_stormwind",
+  "custom_adventurer_tarzan",
+  "custom_adventurer_teddy_bear",
+  "custom_adventurer_the_hound",
+  "custom_adventurer_thief_2",
+  "custom_adventurer_thief_hero",
+  "custom_adventurer_tomb_raider",
+  "custom_adventurer_tomb_raider_2",
+  "custom_adventurer_tomb_robber",
+  "custom_adventurer_tribal_warrior",
+  "custom_adventurer_tribal_woodsman",
+  "custom_adventurer_uhtred_of_babbenburg",
+  "custom_adventurer_veteran_warrior",
+  "custom_adventurer_warlock_doctor_strange",
+  "custom_adventurer_warrior_priest",
+  "custom_adventurer_warrioress",
+  "custom_adventurer_wood__elf_lord",
+  "custom_adventurer_woodland_outlaw",
+  "custom_adventurer_xoltec_girl",
+  "custom_adventurer_xoltec_rebel",
+  "custom_adventurer_xoltec_warrior",
+  "custom_adventurer_zelda_link",
+  "custom_adventurer_zimba_fighter",
+  "custom_adventuress_1",
+  "custom_adventuress_2",
+  "custom_adventuress_3",
+  "custom_adventuress_4",
+  "custom_adventuress_5",
+  "custom_adventuress_6",
+  "custom_adventuress_7",
+  "custom_adventuress_elf_girl_rogue",
+  "custom_adventuress_elf_warrioress",
+  "custom_adventuress_hobbit_girl",
+  "custom_adventuress_rogue_archer",
+  "custom_adventuress_rogue_princess",
+  "custom_adventuress_rogue_thief",
+  "custom_adventuress_tomb_raider",
+  "custom_adventuress_vampire_slayer_willow_witch",
+  "custom_adventuress_woodland_elf_girl",
+  "custom_adventuress_zelda",
+  "custom_ancient_king",
+  "custom_assassin",
+  "custom_assassin_1",
+  "custom_assassin_2",
+  "custom_assassin_3",
+  "custom_assassin_4_",
+  "custom_assassin_5",
+  "custom_barbarian_king_1",
+  "custom_barbarian_king_2",
+  "custom_blackadder_baldrick",
+  "custom_blackadder_lord_blackadder",
+  "custom_blackadder_lord_flash",
+  "custom_blackadder_lord_melchett",
+  "custom_blackadder_noble_1",
+  "custom_blackadder_noble_2",
+  "custom_blackadder_noble_3",
+  "custom_blackadder_queen_elizabeth",
+  "custom_cold_lands_guide",
+  "custom_crabman_1",
+  "custom_crabman_10",
+  "custom_crabman_2",
+  "custom_crabman_3",
+  "custom_crabman_4",
+  "custom_crabman_5",
+  "custom_crabman_6",
+  "custom_crabman_7",
+  "custom_crabman_8",
+  "custom_crabman_9",
+  "custom_crazy_old_man",
+  "custom_damsel_in_distress_1",
+  "custom_damsel_in_distress_2",
+  "custom_desert_guide",
+  "custom_desert_thief_or_guide",
+  "custom_diver",
+  "custom_druid_young_apprentice",
+  "custom_druidic_greenguard_1",
+  "custom_druidic_greenguard_2",
+  "custom_druidic_greenguard_3",
+  "custom_dungeon_raider_anti_paladin_1",
+  "custom_dungeon_raider_anti_paladin_2",
+  "custom_dungeon_raider_assassin",
+  "custom_dungeon_raider_axeman",
+  "custom_dungeon_raider_backstabber",
+  "custom_dungeon_raider_blue_knight",
+  "custom_dungeon_raider_cleric",
+  "custom_dungeon_raider_crusader",
+  "custom_dungeon_raider_dark_mage",
+  "custom_dungeon_raider_evil_anti_paladin",
+  "custom_dungeon_raider_evil_magician",
+  "custom_dungeon_raider_fat_knight",
+  "custom_dungeon_raider_fighter_mage",
+  "custom_dungeon_raider_fighter_thief",
+  "custom_dungeon_raider_girl_rogue",
+  "custom_dungeon_raider_girl_thief",
+  "custom_dungeon_raider_half_orc",
+  "custom_dungeon_raider_half_orc_thief",
+  "custom_dungeon_raider_hellion",
+  "custom_dungeon_raider_highwayman",
+  "custom_dungeon_raider_hunter",
+  "custom_dungeon_raider_hunters_apprentice",
+  "custom_dungeon_raider_jewel_thief",
+  "custom_dungeon_raider_knight",
+  "custom_dungeon_raider_landless_knight",
+  "custom_dungeon_raider_magician",
+  "custom_dungeon_raider_malign_sorcerer",
+  "custom_dungeon_raider_mercenary",
+  "custom_dungeon_raider_orc_renegade",
+  "custom_dungeon_raider_orc_shaman",
+  "custom_dungeon_raider_robber_baron",
+  "custom_dungeon_raider_rogue",
+  "custom_dungeon_raider_scarlet_knight",
+  "custom_dungeon_raider_sorceror",
+  "custom_dungeon_raider_steel_knight",
+  "custom_dungeon_raider_swordsman",
+  "custom_dungeon_raider_the_vagabond_king",
+  "custom_dungeon_raider_thief",
+  "custom_dungeon_raider_tomb_robber",
+  "custom_dungeon_raider_trap_specialist",
+  "custom_dungeon_raider_vampire_hunter",
+  "custom_dungeon_raider_warrior",
+  "custom_dungeon_raider_warrior_woman",
+  "custom_dungeon_raider_wicked_knight",
+  "custom_dw_angua_von_uberwald",
+  "custom_dw_captain_carrot",
+  "custom_dw_cohen_the_barbarian",
+  "custom_dw_cut_me_own_throat_dibbler",
+  "custom_dw_death",
+  "custom_dw_moist_von_lipwig",
+  "custom_dw_patrician_vetinari",
+  "custom_dw_sam_vimes",
+  "custom_dw_susan_sto_helit",
+  "custom_earth_elemental",
+  "custom_eastern_princess",
+  "custom_eastern_trader_1",
+  "custom_eastern_trader_2",
+  "custom_eastern_trader_3",
+  "custom_empire_court_jester",
+  "custom_empire_emperor",
+  "custom_empire_empress",
+  "custom_empire_enchanter_1",
+  "custom_empire_imperial_executioner",
+  "custom_empire_imperial_guard_1",
+  "custom_empire_imperial_guard_2",
+  "custom_empire_imperial_guard_3",
+  "custom_empire_imperial_guard_4",
+  "custom_empire_imperial_guard_archer",
+  "custom_empire_imperial_guard_artificier",
+  "custom_empire_imperial_guard_horse_archer",
+  "custom_empire_imperial_guard_knight",
+  "custom_empire_imperial_guard_medic",
+  "custom_empire_imperial_guard_officer",
+  "custom_empire_imperial_guard_officer_2",
+  "custom_empire_imperial_nobleman",
+  "custom_empire_imperial_princess",
+  "custom_empire_imperial_servant",
+  "custom_empire_nun",
+  "custom_executioner_3",
+  "custom_fairy_tale_alice_in_wonderland",
+  "custom_fairy_tale_alice_king_of_hearts",
+  "custom_fairy_tale_alice_mad_hatter",
+  "custom_fairy_tale_alice_queen_of_hearts",
+  "custom_fairy_tale_alice_white_rabbit",
+  "custom_fairy_tale_big_bad_wolf",
+  "custom_fairy_tale_gretel_witch_hunter",
+  "custom_fairy_tale_hansel_and_gretel_witch",
+  "custom_fairy_tale_hansel_witch_hunter",
+  "custom_fairy_tale_little_pig_brick",
+  "custom_fairy_tale_little_pig_straw",
+  "custom_fairy_tale_little_pig_wood",
+  "custom_fairy_tale_little_red_riding_hood",
+  "custom_fairy_tale_santa",
+  "custom_fairy_tale_santa_elf_1",
+  "custom_fairy_tale_santa_elf_2",
+  "custom_fairy_tale_santa_elf_female",
+  "custom_fairy_tale_santa_elf_girl",
+  "custom_fairy_tale_santa_jack_skellington",
+  "custom_fairy_tale_santa_jack_skellington_santa",
+  "custom_fairy_tale_santa_mrs_claus",
+  "custom_fairy_tale_santa_raindeer",
+  "custom_fairy_tale_santa_rudolph",
+  "custom_fairy_tale_santa_snowman",
+  "custom_fairy_tale_santa_teddy_bear",
+  "custom_fairy_tale_santa_tree",
+  "custom_fairy_tale_sleepy_hollow_headless_horseman",
+  "custom_fairy_tale_sleepy_hollow_ichabod_crane",
+  "custom_forest_druid",
+  "custom_forest_mage",
+  "custom_giant_talos",
+  "custom_god__the_god_of_minecraft",
+  "custom_god_angel_1",
+  "custom_god_angel_2",
+  "custom_god_archangel",
+  "custom_god_archimage",
+  "custom_god_bhaal_rhog_of_orcs",
+  "custom_god_buffloka_all_mother",
+  "custom_god_cthulhu",
+  "custom_god_cthulhu_priest",
+  "custom_god_dragon_worshipper_priest",
+  "custom_god_druid",
+  "custom_god_druid_green_man",
+  "custom_god_druid_pan",
+  "custom_god_eastern_priest",
+  "custom_god_empire_patriarch",
+  "custom_god_evil_priest",
+  "custom_god_forge_lord",
+  "custom_god_high_priest_of_malice",
+  "custom_god_high_priest_of_nyarlothotep",
+  "custom_god_high_priestess",
+  "custom_god_ishtar_anubis",
+  "custom_god_ishtar_bast",
+  "custom_god_ishtar_bastet",
+  "custom_god_ishtar_goddess_taweret",
+  "custom_god_ishtar_high_priest",
+  "custom_god_ishtar_horus",
+  "custom_god_ishtar_isis",
+  "custom_god_ishtar_nyarlathotep",
+  "custom_god_ishtar_osiris",
+  "custom_god_ishtar_priestess",
+  "custom_god_ishtar_ra",
+  "custom_god_ishtar_sobek",
+  "custom_god_ishtar_thoth",
+  "custom_god_jungle_temple_priest_1",
+  "custom_god_jungle_temple_priest_2",
+  "custom_god_kong_high_priest",
+  "custom_god_messenger_of_malice",
+  "custom_god_minossian_high_priest",
+  "custom_god_nether_priest",
+  "custom_god_nogg_patriarch",
+  "custom_god_norska_aegir_of_the_sea",
+  "custom_god_norska_baldur",
+  "custom_god_norska_freya_goddess",
+  "custom_god_norska_hel",
+  "custom_god_norska_loki",
+  "custom_god_norska_loki_of_mischief",
+  "custom_god_norska_mimir",
+  "custom_god_norska_nott_goddess_of_night",
+  "custom_god_norska_odin_allfather",
+  "custom_god_norska_priestess_of_freya",
+  "custom_god_norska_priestess_of_hel",
+  "custom_god_norska_thor-of_thunder",
+  "custom_god_norska_tyr_of_swords",
+  "custom_god_norska_valkyrie_1",
+  "custom_god_norska_valkyrie_2",
+  "custom_god_norska_valkyrie_3",
+  "custom_god_of_chickens",
+  "custom_god_of_creepers",
+  "custom_god_of_creepers_priest",
+  "custom_god_of_empire_witchbane_and_noggs",
+  "custom_god_of_evil_the_malice",
+  "custom_god_of_icelords_winter_cometh",
+  "custom_god_of_kongs_golden_growler",
+  "custom_god_of_oceans",
+  "custom_god_pengu_sealsker_god",
+  "custom_god_priest",
+  "custom_god_priestess_1",
+  "custom_god_priestess_2",
+  "custom_god_priestess_3",
+  "custom_god_priestess_4",
+  "custom_god_priestess_5",
+  "custom_god_prophet",
+  "custom_god_sarkonid_god_of_law",
+  "custom_god_sarkonid_lightbringer",
+  "custom_god_sarkonid_prophet",
+  "custom_god_sarkonid_war_god",
+  "custom_god_seagod",
+  "custom_god_snake_lord",
+  "custom_god_sobek_crocodile",
+  "custom_god_temple_guard",
+  "custom_god_temple_guardian",
+  "custom_god_the_seer",
+  "custom_god_undead_disciple",
+  "custom_god_voodoo_priest",
+  "custom_god_water_priestess",
+  "custom_god_wilderness_priest",
+  "custom_god_xoltec_god",
+  "custom_god_xoltec_mictlanth",
+  "custom_god_zimba_death",
+  "custom_god_zimba_hunting_god",
+  "custom_god_zimba_stompy_lumpy",
+  "custom_goddess_of_elves",
+  "custom_gods_buffloka_buffalo_god",
+  "custom_gypsy_girl_esmerelda",
+  "custom_gypsy_guard",
+  "custom_gypsy_hunchbacked_bell_ringer",
+  "custom_gypsy_king",
+  "custom_gypsy_man_1",
+  "custom_gypsy_man_2",
+  "custom_gypsy_trader",
+  "custom_gypsy_warrior",
+  "custom_gypsy_woman_1",
+  "custom_gypsy_woman_2",
+  "custom_gypsy_woman_3",
+  "custom_gypsy_woman_4",
+  "custom_gypsy_woman_5",
+  "custom_gypsy_woman_6",
+  "custom_half_orc_adventuress",
+  "custom_half_orc_cook",
+  "custom_half_orc_thief",
+  "custom_half_orc_warrior",
+  "custom_hero_1",
+  "custom_hero_10",
+  "custom_hero_11",
+  "custom_hero_12",
+  "custom_hero_13",
+  "custom_hero_14",
+  "custom_hero_15",
+  "custom_hero_16",
+  "custom_hero_17",
+  "custom_hero_18",
+  "custom_hero_2",
+  "custom_hero_3",
+  "custom_hero_4",
+  "custom_hero_5",
+  "custom_hero_6",
+  "custom_hero_7",
+  "custom_hero_8",
+  "custom_hero_9",
+  "custom_hero_archer",
+  "custom_hero_hercules",
+  "custom_hero_the_black_prior",
+  "custom_heroine_1",
+  "custom_heroine_2",
+  "custom_hp_cornelius_fudge",
+  "custom_hp_dementor",
+  "custom_hunter",
+  "custom_hunter_1",
+  "custom_hunter_2",
+  "custom_hunter_3",
+  "custom_hunter_4",
+  "custom_imperialogre_1",
+  "custom_imperialogre_2",
+  "custom_inquisitor",
+  "custom_inquisitor_guard",
+  "custom_inventor",
+  "custom_kidnapped_princess",
+  "custom_king_in_the_mountains",
+  "custom_lord_1",
+  "custom_lord_2",
+  "custom_lord_3",
+  "custom_lost_legion_1",
+  "custom_lost_legion_2",
+  "custom_lost_legion_officer",
+  "custom_lotr_barrowwight",
+  "custom_lotr_barrowwight_king",
+  "custom_lotr_beorning",
+  "custom_lotr_beorning_bear",
+  "custom_lotr_bree_aragorn_ranger",
+  "custom_lotr_bree_barliman_butterbur",
+  "custom_lotr_dunedain_1",
+  "custom_lotr_dunedain_2",
+  "custom_lotr_dunedain_3",
+  "custom_lotr_dunedain_5",
+  "custom_lotr_dunedain__4",
+  "custom_lotr_dunedain_aragorn",
+  "custom_lotr_dwarf",
+  "custom_lotr_dwarf_2",
+  "custom_lotr_dwarf_4",
+  "custom_lotr_dwarf_5",
+  "custom_lotr_dwarf_gimli",
+  "custom_lotr_dwarf_gimli_quest",
+  "custom_lotr_dwarf_ironhills_1",
+  "custom_lotr_dwarf_ironhills_2",
+  "custom_lotr_dwarf_ironhills_guard",
+  "custom_lotr_dwarf_ironhillswarrior",
+  "custom_lotr_dwarf_ironhillswarrior2",
+  "custom_lotr_dwarf_king",
+  "custom_lotr_dwarf_king_dainironfoot",
+  "custom_lotr_dwarf_king_thrain",
+  "custom_lotr_dwarf_miner",
+  "custom_lotr_elf_1",
+  "custom_lotr_elf_1_legolas_2",
+  "custom_lotr_elf_2",
+  "custom_lotr_elf_3",
+  "custom_lotr_elf_4",
+  "custom_lotr_elf_5",
+  "custom_lotr_elf_6",
+  "custom_lotr_elf_arwen_evenstar",
+  "custom_lotr_elf_cirion",
+  "custom_lotr_elf_elrond",
+  "custom_lotr_elf_elrond_2",
+  "custom_lotr_elf_elrond_3",
+  "custom_lotr_elf_galadriel",
+  "custom_lotr_elf_glorfindel",
+  "custom_lotr_elf_haldir",
+  "custom_lotr_elf_king_thranduil_1",
+  "custom_lotr_elf_king_thranduil_2",
+  "custom_lotr_elf_legolas",
+  "custom_lotr_elf_lothlorien_archer",
+  "custom_lotr_elf_mirkwood_1",
+  "custom_lotr_elf_mirkwood_2",
+  "custom_lotr_elf_noldorian",
+  "custom_lotr_elf_prince",
+  "custom_lotr_evil_agandaur",
+  "custom_lotr_evil_barrowwight",
+  "custom_lotr_gollum",
+  "custom_lotr_gondor_aragorn_the_king",
+  "custom_lotr_gondor_archer",
+  "custom_lotr_gondor_beregond",
+  "custom_lotr_gondor_boromir_1",
+  "custom_lotr_gondor_boromir_2",
+  "custom_lotr_gondor_boromir_3",
+  "custom_lotr_gondor_boromir_captain",
+  "custom_lotr_gondor_captain",
+  "custom_lotr_gondor_elendil",
+  "custom_lotr_gondor_faramir",
+  "custom_lotr_gondor_isildur",
+  "custom_lotr_gondor_ithilien_ranger_1",
+  "custom_lotr_gondor_ithilien_ranger_2",
+  "custom_lotr_gondor_ithilien_ranger_damrod",
+  "custom_lotr_gondor_ithilien_ranger_madril",
+  "custom_lotr_gondor_knight",
+  "custom_lotr_gondor_noble",
+  "custom_lotr_gondor_prince_imrahil",
+  "custom_lotr_gondor_talion",
+  "custom_lotr_gondor_tower_guard_1",
+  "custom_lotr_gondor_tower_guard_2",
+  "custom_lotr_gondor_warrior_1",
+  "custom_lotr_gondor_warrior_2",
+  "custom_lotr_gondor_warrior_3",
+  "custom_lotr_gondor_warrior_4",
+  "custom_lotr_gondor_warrior_5",
+  "custom_lotr_good_goldberry",
+  "custom_lotr_good_tom_bombadil_1",
+  "custom_lotr_good_tom_bombadil_2",
+  "custom_lotr_good_wildman_ghan_buri_ghan",
+  "custom_lotr_gundabad_orc_1",
+  "custom_lotr_gundabad_orc_2",
+  "custom_lotr_gundabad_orc_captain",
+  "custom_lotr_hobbit_bilbo_baggins",
+  "custom_lotr_hobbit_farmer_maggot",
+  "custom_lotr_hobbit_frodo_1",
+  "custom_lotr_hobbit_frodo_2",
+  "custom_lotr_hobbit_merry",
+  "custom_lotr_hobbit_merry_of_rohan",
+  "custom_lotr_hobbit_pippin",
+  "custom_lotr_hobbit_pippin_of_gondor",
+  "custom_lotr_hobbit_sam",
+  "custom_lotr_laketown_bard_the_bowman",
+  "custom_lotr_laketown_guard",
+  "custom_lotr_laketown_guard_captain",
+  "custom_lotr_laketown_militia",
+  "custom_lotr_laketown_militia_captain",
+  "custom_lotr_master_of_lake_town",
+  "custom_lotr_mordor_azog",
+  "custom_lotr_mordor_azog_battle_armoured",
+  "custom_lotr_mordor_azog_the_defiler",
+  "custom_lotr_mordor_bolg",
+  "custom_lotr_mordor_corsair_of_umbar",
+  "custom_lotr_mordor_easterling_1",
+  "custom_lotr_mordor_easterling_2",
+  "custom_lotr_mordor_goblin",
+  "custom_lotr_mordor_gorbag",
+  "custom_lotr_mordor_gorbag_2",
+  "custom_lotr_mordor_gothmog",
+  "custom_lotr_mordor_gothmog_2",
+  "custom_lotr_mordor_grishnak",
+  "custom_lotr_mordor_gundabad_orc",
+  "custom_lotr_mordor_guritz",
+  "custom_lotr_mordor_haradrim_1",
+  "custom_lotr_mordor_haradrim_archer",
+  "custom_lotr_mordor_haradrim_mage",
+  "custom_lotr_mordor_haradrim_warlord",
+  "custom_lotr_mordor_haradrim_warrior_1",
+  "custom_lotr_mordor_morgul_guard",
+  "custom_lotr_mordor_mouth_of_sauron",
+  "custom_lotr_mordor_nazgul_1",
+  "custom_lotr_mordor_nazgul_2",
+  "custom_lotr_mordor_orc_1",
+  "custom_lotr_mordor_orc_2",
+  "custom_lotr_mordor_orc_3",
+  "custom_lotr_mordor_orc_4",
+  "custom_lotr_mordor_orc_5",
+  "custom_lotr_mordor_ratbag",
+  "custom_lotr_mordor_sauron",
+  "custom_lotr_mordor_witch_king_1",
+  "custom_lotr_mordor_witch_king_2",
+  "custom_lotr_mordor_witch_king_3",
+  "custom_lotr_mouth_of_sauron_1",
+  "custom_lotr_numenorean",
+  "custom_lotr_numenorean_warrior_1",
+  "custom_lotr_numenorean_warrior_2",
+  "custom_lotr_ranger_1",
+  "custom_lotr_ranger_2",
+  "custom_lotr_ranger_3",
+  "custom_lotr_ranger_4",
+  "custom_lotr_ranger_grey_company",
+  "custom_lotr_ranger_strider",
+  "custom_lotr_rohan_captain_2",
+  "custom_lotr_rohan_elfhelm",
+  "custom_lotr_rohan_eomer_1",
+  "custom_lotr_rohan_eomer_2",
+  "custom_lotr_rohan_eowyn",
+  "custom_lotr_rohan_erkenbrand",
+  "custom_lotr_rohan_grima_wormtongue",
+  "custom_lotr_rohan_grimbold",
+  "custom_lotr_rohan_hama",
+  "custom_lotr_rohan_king_theoden_1",
+  "custom_lotr_rohan_king_theoden_2",
+  "custom_lotr_rohan_king_theoden_3",
+  "custom_lotr_rohan_kings_guards",
+  "custom_lotr_rohan_man",
+  "custom_lotr_rohan_rider_1",
+  "custom_lotr_rohan_rider_2",
+  "custom_lotr_rohan_rider_3",
+  "custom_lotr_rohan_rider_4",
+  "custom_lotr_rohan_rider_5",
+  "custom_lotr_rohan_rider_6",
+  "custom_lotr_rohan_rider_7",
+  "custom_lotr_rohan_rider_8",
+  "custom_lotr_rohan_rider_9",
+  "custom_lotr_rohan_royal_guard_2",
+  "custom_lotr_saruman_dunlander",
+  "custom_lotr_saruman_half_orc_spy",
+  "custom_lotr_saruman_lurtz_1",
+  "custom_lotr_saruman_lurtz_2",
+  "custom_lotr_saruman_ugluk",
+  "custom_lotr_saruman_urukhai_berserker_1",
+  "custom_lotr_saruman_urukhai_berserker_2",
+  "custom_lotr_saruman_urukhai_pikeman",
+  "custom_lotr_saruman_urukhai_warrior_1",
+  "custom_lotr_saruman_urukhai_warrior_2",
+  "custom_lotr_wizard_alatar",
+  "custom_lotr_wizard_gandalf",
+  "custom_lotr_wizard_gandalf_the_grey",
+  "custom_lotr_wizard_gandalf_the_white",
+  "custom_lotr_wizard_pallando",
+  "custom_lotr_wizard_radagast",
+  "custom_lotr_wizard_saruman_1",
+  "custom_lotr_wizard_saruman_2",
+  "custom_mad_monk",
+  "custom_mage_3",
+  "custom_mercenary_1",
+  "custom_mercenary_2",
+  "custom_mercenary_3",
+  "custom_mercenary_4",
+  "custom_mercenary_5",
+  "custom_mercenary__cataphract_2",
+  "custom_mercenary_archer",
+  "custom_mercenary_captain",
+  "custom_mercenary_cataphract_1",
+  "custom_mercenary_chaplain",
+  "custom_merchant",
+  "custom_merchant_1",
+  "custom_merchant_2",
+  "custom_merchant_3",
+  "custom_merchant_4",
+  "custom_merchant_5",
+  "custom_merchant_6",
+  "custom_minecraftia_audairen_archer",
+  "custom_minecraftia_audairen_footman",
+  "custom_minecraftia_audairen_guilded_knight",
+  "custom_minecraftia_audairen_infantry",
+  "custom_minecraftia_audairen_king",
+  "custom_minecraftia_audairenknight",
+  "custom_minecraftia_emerald_order_archer",
+  "custom_minecraftia_emerald_order_grand_master_arthur",
+  "custom_minecraftia_emerald_order_sir_alen",
+  "custom_minecraftia_emerald_order_sir_arick",
+  "custom_minecraftia_emerald_order_sir_josh",
+  "custom_minecraftia_emerald_order_sir_teyvar",
+  "custom_minecraftia_emerald_order_sir_william",
+  "custom_minecraftia_emerald_order_soldier",
+  "custom_minecraftia_veitelian_archer",
+  "custom_minecraftia_veitelian_heavy_infantry",
+  "custom_minecraftia_veitelian_knight",
+  "custom_minecraftia_veitelian_ranger",
+  "custom_minecraftia_veitelian_soldier",
+  "custom_minecraftia_veitelian_veteran",
+  "custom_missionary",
+  "custom_monster-underworld_king",
+  "custom_monster_angry_bird",
+  "custom_monster_animated_daedric_armour",
+  "custom_monster_animated_ice",
+  "custom_monster_animated_stone_golem",
+  "custom_monster_antman_black",
+  "custom_monster_antman_fire",
+  "custom_monster_antman_queen",
+  "custom_monster_antman_soldier",
+  "custom_monster_antman_worker",
+  "custom_monster_anubis_tomb_guardian",
+  "custom_monster_apeman",
+  "custom_monster_aquatic_corpse",
+  "custom_monster_aquatic_fish_thing",
+  "custom_monster_aquatic_fish_turtle",
+  "custom_monster_aquatic_fishman",
+  "custom_monster_aquatic_fishtoid",
+  "custom_monster_aquatic_fishyman",
+  "custom_monster_aquatic_lagoon_creature",
+  "custom_monster_aquatic_lagoon_lecher",
+  "custom_monster_aquatic_lobsterman",
+  "custom_monster_aquatic_merking",
+  "custom_monster_aquatic_mermaid_1",
+  "custom_monster_aquatic_mermaid_2",
+  "custom_monster_aquatic_mermaid_3",
+  "custom_monster_aquatic_merman",
+  "custom_monster_aquatic_octopoid",
+  "custom_monster_aquatic_sargasso_creature",
+  "custom_monster_aquatic_sea_beast",
+  "custom_monster_aquatic_sea_creature",
+  "custom_monster_aquatic_seaweed_beast",
+  "custom_monster_aquatic_shrimpo",
+  "custom_monster_aquatic_siren",
+  "custom_monster_aquatic_snapper_turtle",
+  "custom_monster_aquatic_turtle_guard",
+  "custom_monster_aquatic_vodyanoi",
+  "custom_monster_aquatic_water_spirit",
+  "custom_monster_aquatic_water_sprite",
+  "custom_monster_aquatic_water_sprite_2",
+  "custom_monster_argonian_black",
+  "custom_monster_argonian_blue",
+  "custom_monster_argonian_green",
+  "custom_monster_argonian_red",
+  "custom_monster_argonian_tribal",
+  "custom_monster_argonian_tribal_shaman",
+  "custom_monster_avian",
+  "custom_monster_baboon",
+  "custom_monster_baconhead",
+  "custom_monster_banshee",
+  "custom_monster_banshee_wailer",
+  "custom_monster_barrow_guardian",
+  "custom_monster_bat_creature",
+  "custom_monster_bear",
+  "custom_monster_bearman",
+  "custom_monster_beast_man",
+  "custom_monster_beastly_one",
+  "custom_monster_big_bad_wolf",
+  "custom_monster_big_nose",
+  "custom_monster_blood_mage",
+  "custom_monster_bloodwraith",
+  "custom_monster_budgie",
+  "custom_monster_buffloka_wendigo",
+  "custom_monster_bugbear",
+  "custom_monster_bugbear_witch",
+  "custom_monster_bugeyed_beastie",
+  "custom_monster_bulldog",
+  "custom_monster_cannibal",
+  "custom_monster_cat_tribe",
+  "custom_monster_cave_dweller",
+  "custom_monster_caveman",
+  "custom_monster_cheetah",
+  "custom_monster_cheetrha",
+  "custom_monster_chinese_dragon",
+  "custom_monster_chocobo",
+  "custom_monster_chucky",
+  "custom_monster_clay_golem",
+  "custom_monster_clay_puppet",
+  "custom_monster_cloud_elemental",
+  "custom_monster_cobrakar_priest",
+  "custom_monster_cobraman",
+  "custom_monster_cold_crawler",
+  "custom_monster_cookie_monster",
+  "custom_monster_cuddles",
+  "custom_monster_cursed_dwarf",
+  "custom_monster_cursed_knight",
+  "custom_monster_cursed_miner",
+  "custom_monster_cursed_one",
+  "custom_monster_cyclopean",
+  "custom_monster_cyclops",
+  "custom_monster_cyclops_giant",
+  "custom_monster_cyclops_slave_miner",
+  "custom_monster_dark_assassin",
+  "custom_monster_dark_mage",
+  "custom_monster_dark_sorceress",
+  "custom_monster_davy_jones",
+  "custom_monster_deathknight",
+  "custom_monster_deathwing",
+  "custom_monster_deep_dweller",
+  "custom_monster_deep_one_hybrid",
+  "custom_monster_deer_hunter",
+  "custom_monster_demon_diablo",
+  "custom_monster_demon_librarian",
+  "custom_monster_demon_red_guard_1",
+  "custom_monster_demon_red_guard_2",
+  "custom_monster_demon_red_guard_3",
+  "custom_monster_demon_red_guard_4",
+  "custom_monster_demon_red_lord",
+  "custom_monster_demonic_teddy",
+  "custom_monster_devilkin",
+  "custom_monster_diamovore",
+  "custom_monster_djinn",
+  "custom_monster_doll_girl",
+  "custom_monster_double_bagger",
+  "custom_monster_dragon_guardian",
+  "custom_monster_dragon_kin",
+  "custom_monster_dragon_knight",
+  "custom_monster_dragonkin",
+  "custom_monster_drow_mage",
+  "custom_monster_drow_necromancer",
+  "custom_monster_drowned_undead",
+  "custom_monster_druidic_construct",
+  "custom_monster_duck",
+  "custom_monster_dungeon_mobs_rakshasa",
+  "custom_monster_dungeon_mobs_vampire",
+  "custom_monster_easter_bunny",
+  "custom_monster_eb-golem_sorcery",
+  "custom_monster_elemental_air",
+  "custom_monster_elemental_earth",
+  "custom_monster_elemental_fire",
+  "custom_monster_elemental_water",
+  "custom_monster_elf_ghost",
+  "custom_monster_elf_wicked_mage",
+  "custom_monster_enchanted_orc",
+  "custom_monster_evil_barney",
+  "custom_monster_evil_elf_necromancer",
+  "custom_monster_evil_golem",
+  "custom_monster_evil_monkey",
+  "custom_monster_evil_teddy",
+  "custom_monster_evil_thing",
+  "custom_monster_evil_toy",
+  "custom_monster_eye_beast",
+  "custom_monster_fae_queen",
+  "custom_monster_fairy",
+  "custom_monster_fantorangen",
+  "custom_monster_fire_beast",
+  "custom_monster_fishylippy",
+  "custom_monster_flame_bird",
+  "custom_monster_forest_evil_huorn_tree",
+  "custom_monster_forest_faun",
+  "custom_monster_forest_golem",
+  "custom_monster_forest_groot",
+  "custom_monster_forest_possessed_tree_1",
+  "custom_monster_forest_sasquatch",
+  "custom_monster_forest_treent",
+  "custom_monster_forest_tumnus_fawn",
+  "custom_monster_foureyes",
+  "custom_monster_freddy_ferret",
+  "custom_monster_frightfox",
+  "custom_monster_frog_prince",
+  "custom_monster_frogolog",
+  "custom_monster_frost_beast",
+  "custom_monster_frost_wolf",
+  "custom_monster_frosty_the_snowman",
+  "custom_monster_ghost",
+  "custom_monster_ghost_ghoul",
+  "custom_monster_ghost_lady",
+  "custom_monster_ghost_screamer",
+  "custom_monster_gingerbread_man",
+  "custom_monster_goblin",
+  "custom_monster_godzilla",
+  "custom_monster_grandfather_clock",
+  "custom_monster_gravestones_mummy",
+  "custom_monster_great_ender_beast",
+  "custom_monster_great_ender_golem",
+  "custom_monster_great_ender_lord",
+  "custom_monster_great_ender_mage",
+  "custom_monster_great_ender_sorcerer",
+  "custom_monster_green_goblin",
+  "custom_monster_green_knight",
+  "custom_monster_gremlin_gizmo",
+  "custom_monster_grey",
+  "custom_monster_grey_man",
+  "custom_monster_greybeard",
+  "custom_monster_guard_golem",
+  "custom_monster_harlequin",
+  "custom_monster_ho_ho_ho_green_giant",
+  "custom_monster_hobgoblin_1",
+  "custom_monster_hobgoblin_2",
+  "custom_monster_hobgoblin_lurker",
+  "custom_monster_hungry_hungry_hippo",
+  "custom_monster_ice_fiend",
+  "custom_monster_ice_guardian",
+  "custom_monster_ice_ripper",
+  "custom_monster_illagerbeast",
+  "custom_monster_insane_executioner",
+  "custom_monster_insect_bug_ugly",
+  "custom_monster_insect_cockroach",
+  "custom_monster_insect_fly_man",
+  "custom_monster_insect_locustus",
+  "custom_monster_insect_mothman",
+  "custom_monster_insect_the_fly",
+  "custom_monster_ishtari_tomb_guardian",
+  "custom_monster_island_tikki",
+  "custom_monster_jason",
+  "custom_monster_jeepers_creepers",
+  "custom_monster_jungle_howler",
+  "custom_monster_jungle_ruin_golem",
+  "custom_monster_khajiit",
+  "custom_monster_khajit_2",
+  "custom_monster_killer_ape",
+  "custom_monster_king_midas",
+  "custom_monster_knight_owl",
+  "custom_monster_kobold_2",
+  "custom_monster_lava_beast",
+  "custom_monster_lava_lord",
+  "custom_monster_lava_man",
+  "custom_monster_leprechaun_1",
+  "custom_monster_leprechaun_2",
+  "custom_monster_library_golem_1",
+  "custom_monster_library_golem_2",
+  "custom_monster_lion_1",
+  "custom_monster_lion_2",
+  "custom_monster_little_red_riding_wolf",
+  "custom_monster_lizard_king",
+  "custom_monster_lizardian",
+  "custom_monster_lizardian_1",
+  "custom_monster_lizardian_2",
+  "custom_monster_lizardian_3",
+  "custom_monster_lizardian_4",
+  "custom_monster_lizardian_5",
+  "custom_monster_lizardman",
+  "custom_monster_mad_monk_rasputin",
+  "custom_monster_maleficent",
+  "custom_monster_malice_jester",
+  "custom_monster_man_eating_plant",
+  "custom_monster_manape",
+  "custom_monster_medusan",
+  "custom_monster_mind_flayer",
+  "custom_monster_mine_gnome",
+  "custom_monster_mine_lurker",
+  "custom_monster_minotaur",
+  "custom_monster_minotaur_beast",
+  "custom_monster_monkeyowl",
+  "custom_monster_monstrous_shadow",
+  "custom_monster_morlock",
+  "custom_monster_mothman",
+  "custom_monster_mouldywart",
+  "custom_monster_mouse",
+  "custom_monster_mycilium_man",
+  "custom_monster_myconid_1",
+  "custom_monster_myconid_2",
+  "custom_monster_myconidman",
+  "custom_monster_nazgul",
+  "custom_monster_newt",
+  "custom_monster_night_fang",
+  "custom_monster_nymph",
+  "custom_monster_ogre_1",
+  "custom_monster_ogre_2",
+  "custom_monster_ogre_3",
+  "custom_monster_ogre_fire_ogre",
+  "custom_monster_ogre_gate_guard",
+  "custom_monster_ogre_jungle_ogre_1",
+  "custom_monster_ogre_jungle_ogre_2",
+  "custom_monster_ogre_mine_ogre",
+  "custom_monster_ogre_minossian_ogre",
+  "custom_monster_oni",
+  "custom_monster_oni_blue",
+  "custom_monster_oogie_boogie",
+  "custom_monster_orc",
+  "custom_monster_owl",
+  "custom_monster_owlbear_2",
+  "custom_monster_parrot",
+  "custom_monster_patchwork_ghost",
+  "custom_monster_piggsy",
+  "custom_monster_pinkpanther",
+  "custom_monster_pirate_pussy",
+  "custom_monster_plague_doctor",
+  "custom_monster_plague_knight",
+  "custom_monster_plasma_golem",
+  "custom_monster_pollywog",
+  "custom_monster_possessed_pirate",
+  "custom_monster_primitive",
+  "custom_monster_pumpkin_king",
+  "custom_monster_puppet",
+  "custom_monster_purple_people_eater",
+  "custom_monster_rainbow_leprechaun",
+  "custom_monster_rakshasa_primitive",
+  "custom_monster_ranger_killer",
+  "custom_monster_ratpunzel",
+  "custom_monster_redhood",
+  "custom_monster_redstone_skeleton",
+  "custom_monster_reptilian",
+  "custom_monster_rock_golem",
+  "custom_monster_rooster_terror",
+  "custom_monster_rotted_huorn",
+  "custom_monster_rusty_golem",
+  "custom_monster_sabretoothed_flippetygibbet",
+  "custom_monster_sand_bandit",
+  "custom_monster_sand_burrower",
+  "custom_monster_sand_guardian",
+  "custom_monster_sand_lion",
+  "custom_monster_sand_orc",
+  "custom_monster_sand_spawn",
+  "custom_monster_sandman",
+  "custom_monster_sarcophagus_guardian",
+  "custom_monster_scarecrow",
+  "custom_monster_scream",
+  "custom_monster_sealsker_cursed",
+  "custom_monster_selenite",
+  "custom_monster_selenite_queen",
+  "custom_monster_sewer_carp",
+  "custom_monster_sewer_creep",
+  "custom_monster_sewer_goldfish",
+  "custom_monster_sheeple",
+  "custom_monster_shroom",
+  "custom_monster_sid_the_sloth",
+  "custom_monster_silent_gentleman_1",
+  "custom_monster_silent_gentleman_2",
+  "custom_monster_silurian",
+  "custom_monster_sleestak",
+  "custom_monster_slenderman",
+  "custom_monster_snakeman",
+  "custom_monster_snakey",
+  "custom_monster_snarklepus",
+  "custom_monster_snot_goblin",
+  "custom_monster_snow_lurker",
+  "custom_monster_snowman",
+  "custom_monster_sprout",
+  "custom_monster_sprout_king",
+  "custom_monster_squidward",
+  "custom_monster_stone_giant_1",
+  "custom_monster_stone_giant_2",
+  "custom_monster_stone_giant_3",
+  "custom_monster_stone_giant_4",
+  "custom_monster_stone_giant_chief",
+  "custom_monster_stone_golem",
+  "custom_monster_swamp_creature",
+  "custom_monster_swamp_gobbler",
+  "custom_monster_swamp_terror",
+  "custom_monster_swamp_warlock",
+  "custom_monster_swamp_witch",
+  "custom_monster_taz",
+  "custom_monster_temple_oracle",
+  "custom_monster_the_black_widow",
+  "custom_monster_the_evil_queen",
+  "custom_monster_the_grin",
+  "custom_monster_the_mask",
+  "custom_monster_the_pale_man",
+  "custom_monster_the_phantom_of_the_opera",
+  "custom_monster_the_poisoner",
+  "custom_monster_the_red_death",
+  "custom_monster_the_wonderful_lizard_of_voz",
+  "custom_monster_tiki_spirit",
+  "custom_monster_tikki_beast",
+  "custom_monster_toad_bride",
+  "custom_monster_toad_man",
+  "custom_monster_toad_man_nocturnal",
+  "custom_monster_tomb_guard_1",
+  "custom_monster_tomb_guard_2",
+  "custom_monster_tomb_guard_3",
+  "custom_monster_tomb_guard_4",
+  "custom_monster_troll_arctic_troll",
+  "custom_monster_troll_bog_troll",
+  "custom_monster_troll_bridge_troll",
+  "custom_monster_troll_cave_troll",
+  "custom_monster_troll_cave_troll_2",
+  "custom_monster_troll_forest_troll",
+  "custom_monster_troll_hill_troll",
+  "custom_monster_troll_jungle_troll",
+  "custom_monster_troll_jungle_troll_brood_mother",
+  "custom_monster_troll_river_troll",
+  "custom_monster_troll_snow_troll",
+  "custom_monster_troll_swamp_troll",
+  "custom_monster_troll_woodland_troll",
+  "custom_monster_undead_cursed_king",
+  "custom_monster_undead_ghoul",
+  "custom_monster_undead_gog_summoned_butler",
+  "custom_monster_undead_guardian",
+  "custom_monster_undead_hueacuva",
+  "custom_monster_undead_ice_ghost",
+  "custom_monster_undead_jester",
+  "custom_monster_undead_lichelord",
+  "custom_monster_undead_nun",
+  "custom_monster_undead_voodoo_zombie",
+  "custom_monster_under_the_bed_lurker",
+  "custom_monster_vampire_count_sesame",
+  "custom_monster_volcano_elemental_fire",
+  "custom_monster_volcano_magma_elemental",
+  "custom_monster_werebaboon",
+  "custom_monster_werebear",
+  "custom_monster_werecat",
+  "custom_monster_werecoyote",
+  "custom_monster_werecroc",
+  "custom_monster_weredeer",
+  "custom_monster_weredog",
+  "custom_monster_werefox_girl",
+  "custom_monster_werekoala",
+  "custom_monster_werelion",
+  "custom_monster_werepussy",
+  "custom_monster_wererabbit",
+  "custom_monster_weresheep",
+  "custom_monster_weretiger",
+  "custom_monster_werewolf",
+  "custom_monster_werewolf_2",
+  "custom_monster_werewolf_with_hood",
+  "custom_monster_white_wolfen",
+  "custom_monster_witch_imp",
+  "custom_monster_witch_king",
+  "custom_monster_witch_puppet",
+  "custom_monster_wizards_ape",
+  "custom_monster_wolf_in_sheeps_clothing",
+  "custom_monster_wolfen",
+  "custom_monster_wolfie",
+  "custom_monster_wolfman",
+  "custom_monster_woodland_lurker",
+  "custom_monster_xoltec_guardian_golem",
+  "custom_monster_yeti",
+  "custom_monster_zimba_lion_spirit_beast",
+  "custom_monty_python_black_knight_wounded",
+  "custom_monty_python_camelot_black_knight",
+  "custom_monty_python_camelot_morgana_1",
+  "custom_monty_python_camelot_oracle_wizard",
+  "custom_monty_python_camelot_sir_bedivere_1",
+  "custom_monty_python_camelot_sir_bedivere_2",
+  "custom_monty_python_camelot_sir_bors",
+  "custom_monty_python_camelot_sir_galahad",
+  "custom_monty_python_camelot_sir_hector",
+  "custom_monty_python_camelot_sir_lancelot",
+  "custom_monty_python_camelot_sir_percival",
+  "custom_monty_python_camelot_sir_robin_1",
+  "custom_monty_python_camelot_sir_robin_2",
+  "custom_monty_python_camelot_spank_me_lady",
+  "custom_monty_python_camelot_surly_peasant",
+  "custom_monty_python_eric_the_half_a_bee",
+  "custom_monty_python_grail_knight",
+  "custom_monty_python_killer_rabbit",
+  "custom_monty_python_lady_of_the_lake",
+  "custom_monty_python_lumberjack_1",
+  "custom_monty_python_lumberjack_2",
+  "custom_monty_python_marty_feldman",
+  "custom_monty_python_minister_of_silly_walks",
+  "custom_monty_python_mr_gumby",
+  "custom_monty_python_pet_shop_owner",
+  "custom_monty_python_tim",
+  "custom_monty_python_tim_the_enchanter",
+  "custom_myth_adamsavage",
+  "custom_myth_buster",
+  "custom_myth_busters_tori",
+  "custom_myth_grantimahara",
+  "custom_myth_jamiehyneman",
+  "custom_myth_kari",
+  "custom_myth_scotty",
+  "custom_myth_torybelleci",
+  "custom_night_thief",
+  "custom_nobleman",
+  "custom_nogg_king",
+  "custom_nogg_kings_guard",
+  "custom_only_fools_del_boy",
+  "custom_only_fools_grandad",
+  "custom_only_fools_inventor",
+  "custom_only_fools_rodney",
+  "custom_only_fools_uncle_albert",
+  "custom_outlaw_alan_a_dale",
+  "custom_outlaw_friar_tuck",
+  "custom_outlaw_guy_of_guisbourne",
+  "custom_outlaw_hangman",
+  "custom_outlaw_little_john",
+  "custom_outlaw_merry_man_1",
+  "custom_outlaw_merry_man_2",
+  "custom_outlaw_merry_man_3",
+  "custom_outlaw_monk_1",
+  "custom_outlaw_monk_2",
+  "custom_outlaw_much_the_miller",
+  "custom_outlaw_peasant_1",
+  "custom_outlaw_robin_hood",
+  "custom_outlaw_sherrif_of_nottingham",
+  "custom_outlaw_will_scarlet",
+  "custom_quest_giver_1",
+  "custom_quest_giver_2",
+  "custom_quest_giver_dungeon_master",
+  "custom_quest_giver_dungeon_master_cartoon",
+  "custom_quest_giver_landar_the_architect",
+  "custom_quest_giver_lord_pepperfly_the_castellan",
+  "custom_quest_giver_mohawky_the_monstrous",
+  "custom_quest_giver_old_hero",
+  "custom_quest_giver_silentine_the_monster_lord",
+  "custom_quest_giver_sir_squidly_the_artiste",
+  "custom_quest_giver_that_polish_kid_the_sage",
+  "custom_quest_giver_windanesz_the_journeyman",
+  "custom_quest_giver_yoda",
+  "custom_robes_black",
+  "custom_robes_brown",
+  "custom_robes_white",
+  "custom_rogue_desert",
+  "custom_rogue_winter",
+  "custom_royal_court_armoured_king",
+  "custom_royal_court_beautiful_queen",
+  "custom_royal_court_evil_uncle",
+  "custom_royal_court_fat_princess",
+  "custom_royal_court_jester_2",
+  "custom_royal_court_king_1",
+  "custom_royal_court_king_2",
+  "custom_royal_court_king_3",
+  "custom_royal_court_king_4",
+  "custom_royal_court_king_in_armour",
+  "custom_royal_court_king_old",
+  "custom_royal_court_kings_advisor",
+  "custom_royal_court_kings_baker",
+  "custom_royal_court_kings_chamberlain",
+  "custom_royal_court_kings_champion",
+  "custom_royal_court_kings_chef",
+  "custom_royal_court_kings_executioner2",
+  "custom_royal_court_kings_guard",
+  "custom_royal_court_kings_jester",
+  "custom_royal_court_kings_minstrel",
+  "custom_royal_court_kings_nobleman_5",
+  "custom_royal_court_kings_nobleman_6",
+  "custom_royal_court_kings_seneschal_1",
+  "custom_royal_court_kings_seneschal_2",
+  "custom_royal_court_kings_servant",
+  "custom_royal_court_kings_squire",
+  "custom_royal_court_kings_torturer",
+  "custom_royal_court_ladies_maid",
+  "custom_royal_court_ladies_maid_2",
+  "custom_royal_court_nobleman_1",
+  "custom_royal_court_nobleman_2",
+  "custom_royal_court_nobleman_3",
+  "custom_royal_court_nobleman_4",
+  "custom_royal_court_noblewoman_1",
+  "custom_royal_court_noblewoman_2",
+  "custom_royal_court_noblewoman_3",
+  "custom_royal_court_noblewoman_4",
+  "custom_royal_court_old_monarch",
+  "custom_royal_court_princess_blue",
+  "custom_royal_court_princess_green",
+  "custom_royal_court_princess_grey",
+  "custom_royal_court_princess_purple",
+  "custom_royal_court_princess_red",
+  "custom_royal_court_queen",
+  "custom_royal_court_queens_maid_1",
+  "custom_royal_court_queens_maid_2",
+  "custom_royal_court_queens_maid_3",
+  "custom_royal_court_the_baroness",
+  "custom_royal_court_the_countess",
+  "custom_royal_court_the_courtesan",
+  "custom_royal_court_the_duchess",
+  "custom_royal_court_the_governess",
+  "custom_royal_court_the_widow",
+  "custom_royal_court_warrior_king",
+  "custom_royal_court_wicked_advisor",
+  "custom_royal_court_wicked_princess",
+  "custom_royal_court_young_queen",
+  "custom_sage_1",
+  "custom_sage_2",
+  "custom_sage_3",
+  "custom_shipwreck_survivor_1",
+  "custom_shipwreck_survivor_2",
+  "custom_sorcerer",
+  "custom_sorcerer_2",
+  "custom_sorcerers_apprentice",
+  "custom_sorceress",
+  "custom_sorcery_elemental_golem",
+  "custom_the_oracle",
+  "custom_trader_alchemist",
+  "custom_trader_armourer",
+  "custom_trader_baker",
+  "custom_trader_banker",
+  "custom_trader_brewer",
+  "custom_trader_metalworker",
+  "custom_trader_miller",
+  "custom_trader_nautical",
+  "custom_trader_spice_merchant",
+  "custom_trader_weaponsmith",
+  "custom_trader_wool_merchant",
+  "custom_travelling_knight",
+  "custom_tribal_elder",
+  "custom_tribal_jungle_orc",
+  "custom_tribesman_1",
+  "custom_tribesman_10",
+  "custom_tribesman_11",
+  "custom_tribesman_12",
+  "custom_tribesman_13",
+  "custom_tribesman_15",
+  "custom_tribesman_16",
+  "custom_tribesman_17",
+  "custom_tribesman_19",
+  "custom_tribesman_2",
+  "custom_tribesman_20",
+  "custom_tribesman_21",
+  "custom_tribesman_22",
+  "custom_tribesman_3",
+  "custom_tribesman_4",
+  "custom_tribesman_5",
+  "custom_tribesman_6",
+  "custom_tribesman_7",
+  "custom_tribesman_8",
+  "custom_tribesman_9",
+  "custom_tribesman_99",
+  "custom_tribesman_blue",
+  "custom_tribesman_cat_tribe",
+  "custom_tribesman_huzunga",
+  "custom_tribesman_huzunga_chief",
+  "custom_tribesman_hyena",
+  "custom_tribesman_islander_girl",
+  "custom_tribesman_islander_man",
+  "custom_tribesman_islander_woman",
+  "custom_tribesman_pygmy_chief",
+  "custom_tribesman_pygmy_warrior",
+  "custom_tribesman_skraeling_1",
+  "custom_tribesman_skraeling_2",
+  "custom_tribesman_skraeling_3",
+  "custom_tribesman_skraeling_4",
+  "custom_tribesman_skraeling_female",
+  "custom_tribesman_wendol",
+  "custom_tribesman_zardoz",
+  "custom_undead_barrow_wight",
+  "custom_undead_butler_1",
+  "custom_undead_butler_2",
+  "custom_undead_coffer_corpse",
+  "custom_undead_crusader_1",
+  "custom_undead_crusader_2",
+  "custom_undead_death",
+  "custom_undead_ghoul",
+  "custom_undead_grave_revenent",
+  "custom_undead_hag",
+  "custom_undead_king",
+  "custom_undead_king_of_the_dead",
+  "custom_undead_monster_1",
+  "custom_undead_monster_2",
+  "custom_undead_necromancer",
+  "custom_undead_pirate_skeleton_1",
+  "custom_undead_pirate_skeleton_2",
+  "custom_undead_pirate_skeleton_3",
+  "custom_undead_pirate_skeleton_captain",
+  "custom_undead_revenant",
+  "custom_undead_sage",
+  "custom_undead_skullduggery",
+  "custom_undead_swamp_ghoul",
+  "custom_undead_tomb_guard",
+  "custom_undead_vampire",
+  "custom_undead_vampire_lord",
+  "custom_undead_vengeance_revenant",
+  "custom_valgrun_king",
+  "custom_valgrun_veteran_warrior",
+  "custom_valgrun_warrior_1",
+  "custom_valgrun_warrior_2",
+  "custom_valgrun_warrior_3",
+  "custom_viking_alfred_the_great",
+  "custom_viking_beowulf",
+  "custom_viking_berserk",
+  "custom_viking_berserker",
+  "custom_viking_bjorn",
+  "custom_viking_bjorn_ironside",
+  "custom_viking_floki",
+  "custom_viking_halfdan",
+  "custom_viking_hero",
+  "custom_viking_huscarl",
+  "custom_viking_hvitserk",
+  "custom_viking_ivars_guard",
+  "custom_viking_ivarthe_boneless",
+  "custom_viking_jarl",
+  "custom_viking_lagertha",
+  "custom_viking_prince",
+  "custom_viking_princess",
+  "custom_viking_queen",
+  "custom_viking_ragnar_lothbruck",
+  "custom_viking_rollo",
+  "custom_viking_shieldmaiden",
+  "custom_viking_shieldmaiden_veteran",
+  "custom_viking_thane",
+  "custom_viking_ubbe",
+  "custom_viking_uhtred",
+  "custom_viking_warrior",
+  "custom_viking_witch",
+  "custom_village_criminal_bandit_1",
+  "custom_village_criminal_bandit_2",
+  "custom_village_criminal_bandit_3",
+  "custom_village_criminal_bandit_4",
+  "custom_village_criminal_bandit_5",
+  "custom_village_criminal_bandit_6",
+  "custom_village_criminal_bandit_7",
+  "custom_village_criminal_bandit_8",
+  "custom_villager_alchemist",
+  "custom_villager_alchemists_apprentice",
+  "custom_villager_alchemists_assistant",
+  "custom_villager_baker_1",
+  "custom_villager_baker_2",
+  "custom_villager_banker",
+  "custom_villager_beggar_girl",
+  "custom_villager_begger_1",
+  "custom_villager_begger_2",
+  "custom_villager_begger_3",
+  "custom_villager_beggerboy",
+  "custom_villager_blacksmith_1",
+  "custom_villager_blacksmith_2",
+  "custom_villager_blacksmith_3",
+  "custom_villager_blacksmith_4",
+  "custom_villager_bob_the_bear_baiting_bear",
+  "custom_villager_butcher",
+  "custom_villager_butcher_1",
+  "custom_villager_butcher_2",
+  "custom_villager_butcher_3",
+  "custom_villager_butcher_4",
+  "custom_villager_butler_of_nobility",
+  "custom_villager_carpenter",
+  "custom_villager_cattle_farmer",
+  "custom_villager_chief_librarian",
+  "custom_villager_chimney_sweep",
+  "custom_villager_cook",
+  "custom_villager_criminal_assassin",
+  "custom_villager_criminal_burglar",
+  "custom_villager_criminal_chicken_rustler",
+  "custom_villager_criminal_forest_outlaw",
+  "custom_villager_criminal_harlot_1",
+  "custom_villager_criminal_harlot_2",
+  "custom_villager_criminal_harlot_3",
+  "custom_villager_criminal_harlot_4",
+  "custom_villager_criminal_highwayman",
+  "custom_villager_criminal_horse_thief",
+  "custom_villager_criminal_mugger",
+  "custom_villager_criminal_petty_thief_1",
+  "custom_villager_criminal_petty_thief_2",
+  "custom_villager_criminal_pickpocket",
+  "custom_villager_criminal_ruffian",
+  "custom_villager_criminal_thieves_guild_boss",
+  "custom_villager_criminal_thieves_guild_enforcer",
+  "custom_villager_criminal_thug",
+  "custom_villager_demon_hunter",
+  "custom_villager_elder_1",
+  "custom_villager_elder_2",
+  "custom_villager_elder_3",
+  "custom_villager_enemy_spy",
+  "custom_villager_evil_witch",
+  "custom_villager_farm_girl",
+  "custom_villager_farmer_1",
+  "custom_villager_farmer_2",
+  "custom_villager_farmer_3",
+  "custom_villager_fire_juggler",
+  "custom_villager_fisherman",
+  "custom_villager_fishwife",
+  "custom_villager_forester",
+  "custom_villager_gambler",
+  "custom_villager_girl_1",
+  "custom_villager_girl_2",
+  "custom_villager_girl_3",
+  "custom_villager_girl_4",
+  "custom_villager_girl_5",
+  "custom_villager_girl_6",
+  "custom_villager_girl_next_door",
+  "custom_villager_girl_shy",
+  "custom_villager_good_witch_herbalist",
+  "custom_villager_goodly_priest",
+  "custom_villager_goodwife_1",
+  "custom_villager_goodwife_2",
+  "custom_villager_grandpa_farmer",
+  "custom_villager_guide",
+  "custom_villager_healer_woman",
+  "custom_villager_hero_chickenman",
+  "custom_villager_hunter",
+  "custom_villager_inn_keeper_1",
+  "custom_villager_inn_keeper_2",
+  "custom_villager_inn_keeper_3",
+  "custom_villager_inn_keeper_4",
+  "custom_villager_inn_serving_wench_1",
+  "custom_villager_inn_serving_wench_2",
+  "custom_villager_inventor",
+  "custom_villager_jester",
+  "custom_villager_jester_bard",
+  "custom_villager_judge",
+  "custom_villager_lady_1",
+  "custom_villager_lady_2",
+  "custom_villager_lady_3",
+  "custom_villager_lady_4",
+  "custom_villager_lady_5",
+  "custom_villager_lady_6",
+  "custom_villager_lady_7",
+  "custom_villager_lady_8",
+  "custom_villager_lady_9",
+  "custom_villager_leper_1",
+  "custom_villager_leper_2",
+  "custom_villager_leper_3",
+  "custom_villager_leper_king",
+  "custom_villager_librarian",
+  "custom_villager_little_red_riding_hood",
+  "custom_villager_lords_forester",
+  "custom_villager_lumberman_1",
+  "custom_villager_lumberman_2",
+  "custom_villager_lumberman_3",
+  "custom_villager_lumberman_4",
+  "custom_villager_maid",
+  "custom_villager_maid_2",
+  "custom_villager_meat_butcher",
+  "custom_villager_merchant_prince",
+  "custom_villager_milkmaid",
+  "custom_villager_miner_1",
+  "custom_villager_miner_2",
+  "custom_villager_monster_huntsman",
+  "custom_villager_night_watchman",
+  "custom_villager_noblewoman_1",
+  "custom_villager_noblewoman_2",
+  "custom_villager_noblewoman_3",
+  "custom_villager_noblewoman_4",
+  "custom_villager_noblewoman_5",
+  "custom_villager_noblewoman_6",
+  "custom_villager_old_codger",
+  "custom_villager_old_crone_1",
+  "custom_villager_old_crone_2",
+  "custom_villager_old_grandfather",
+  "custom_villager_old_hermit",
+  "custom_villager_old_man_1",
+  "custom_villager_old_man_2",
+  "custom_villager_old_man_3",
+  "custom_villager_old_peasant",
+  "custom_villager_old_ranger",
+  "custom_villager_old_woman_granny",
+  "custom_villager_peasant",
+  "custom_villager_peasant_1",
+  "custom_villager_peasant_2",
+  "custom_villager_peasant_3",
+  "custom_villager_peasant_girl_1",
+  "custom_villager_peasant_girl_2",
+  "custom_villager_peasant_girl_3",
+  "custom_villager_peasant_girl_4",
+  "custom_villager_peasant_girl_5",
+  "custom_villager_peasant_girl_6",
+  "custom_villager_peasant_girl_7",
+  "custom_villager_peasant_girl_runaway",
+  "custom_villager_pest_controller",
+  "custom_villager_plague_doctor",
+  "custom_villager_poor_knight",
+  "custom_villager_questing_knight",
+  "custom_villager_ranger",
+  "custom_villager_robber_1",
+  "custom_villager_robber_2",
+  "custom_villager_runaway_princess",
+  "custom_villager_seamstress_1",
+  "custom_villager_seamstress_2",
+  "custom_villager_seamstress_3",
+  "custom_villager_serving_girl_1",
+  "custom_villager_serving_girl_2",
+  "custom_villager_shopkeep_alchemist",
+  "custom_villager_shopkeep_apprentice1",
+  "custom_villager_shopkeep_armourer",
+  "custom_villager_shopkeep_artisan",
+  "custom_villager_shopkeep_assistant",
+  "custom_villager_shopkeep_baker",
+  "custom_villager_shopkeep_butcher",
+  "custom_villager_shopkeep_cabinet_maker",
+  "custom_villager_shopkeep_cake_baker",
+  "custom_villager_shopkeep_carpenter",
+  "custom_villager_shopkeep_chef",
+  "custom_villager_shopkeep_curio_shop_owner",
+  "custom_villager_shopkeep_gem_armourer",
+  "custom_villager_shopkeep_gem_swordsmith",
+  "custom_villager_shopkeep_leatherworker",
+  "custom_villager_shopkeep_market_rader",
+  "custom_villager_shopkeep_swordsmith",
+  "custom_villager_shopkeep_tanner",
+  "custom_villager_shopkeeper_1",
+  "custom_villager_shopkeeper_2",
+  "custom_villager_spy_master",
+  "custom_villager_stockman",
+  "custom_villager_strongman",
+  "custom_villager_tavern_keeper_1",
+  "custom_villager_tavern_keeper_2",
+  "custom_villager_tavern_madam",
+  "custom_villager_tavern_wench_1",
+  "custom_villager_tavern_wench_2",
+  "custom_villager_tavern_wench_3",
+  "custom_villager_tavern_wench_4",
+  "custom_villager_tavern_wench_5",
+  "custom_villager_tavern_wench_6",
+  "custom_villager_tax_collector",
+  "custom_villager_tax_collector_1",
+  "custom_villager_tax_collector_2",
+  "custom_villager_tax_collector_3",
+  "custom_villager_tax_guard_1",
+  "custom_villager_tax_guard_2",
+  "custom_villager_tax_guard_3",
+  "custom_villager_the_governor",
+  "custom_villager_town_bowman",
+  "custom_villager_town_councillor",
+  "custom_villager_town_crier",
+  "custom_villager_town_guard",
+  "custom_villager_town_guard_halberdier",
+  "custom_villager_town_hero",
+  "custom_villager_town_hero_sidekick",
+  "custom_villager_town_mayor",
+  "custom_villager_town_watch_1",
+  "custom_villager_town_watch_2",
+  "custom_villager_town_watch_3",
+  "custom_villager_undertaker",
+  "custom_villager_undertaker_2",
+  "custom_villager_usurper_king",
+  "custom_villager_village_idiot",
+  "custom_villager_wagon_master",
+  "custom_villager_witch_hunter",
+  "custom_villager_woman",
+  "custom_villager_woodsman",
+  "custom_villager_worker",
+  "custom_warrior_1",
+  "custom_warrior_2",
+  "custom_wicked_countess",
+  "custom_wildling-cub",
+  "custom_wildling_archer",
+  "custom_wildling_chief",
+  "custom_wildling_girl",
+  "custom_wildling_man",
+  "custom_wildling_mother",
+  "custom_wildling_spearman",
+  "custom_wildling_woman",
+  "custom_winter_mage",
+  "custom_witchbane_inquisitor_lord",
+  "custom_wizard_1",
+  "custom_wizard_2",
+  "custom_wizard_3",
+  "custom_wizard_4",
+  "custom_wizard_5",
+  "custom_wizard_6",
+  "custom_wizard_albus_bumblebore",
+  "custom_wizard_gandalf",
+  "custom_wizard_in_brown_and_bird_poop",
+  "custom_wizard_in_grey",
+  "custom_wizard_in_purple",
+  "custom_wizard_in_white",
+  "custom_wizard_necromancer",
+  "custom_wizard_of_oz_cowardly_lion",
+  "custom_wizard_of_oz_dorothy_1",
+  "custom_wizard_of_oz_dorothy_2",
+  "custom_wizard_of_oz_good_witch_glinda",
+  "custom_wizard_of_oz_munchkin",
+  "custom_wizard_of_oz_scarecrow_1",
+  "custom_wizard_of_oz_scarecrow_2",
+  "custom_wizard_of_oz_the_great_and_powerful",
+  "custom_wizard_of_oz_tin_man",
+  "custom_wizard_of_oz_tin_man_rusted",
+  "custom_wizard_of_oz_wicked_witch",
+  "custom_wizard_of_oz_witches_flying_monkey",
+  "custom_wizard_old_wise",
+  "custom_wizard_purpulus",
+  "custom_wizard_radagast_the_brown",
+  "custom_wizard_sarkonid_summoner",
+  "custom_wizard_senile",
+  "custom_wizard_smelly_brown",
+  "demon_bard",
+  "dwarf_guard_1",
+  "dwarf_kings_champion",
+  "dwarf_noble_1",
+  "dwarf_noble_2",
+  "dwarf_noble_3",
+  "dwarf_noble_4",
+  "dwarf_warrior_9",
+  "elf_mage_4",
+  "empire_princess",
+  "ent_father_2",
+  "evil_cultist_1",
+  "evil_cultist_2",
+  "evil_cultist_3",
+  "evil_trader_1",
+  "fire_giant_3",
+  "frost_giant_7",
+  "gnomepoleon_2",
+  "good_battle_cleric",
+  "guild_mechant_13",
+  "guild_merchant_officer_3",
+  "guild_merchant_officer_4",
+  "hill_giant_10",
+  "hill_giant_9",
+  "hobbit_farmer",
+  "hobbit_hero_merry_",
+  "icelord_cold_wraith",
+  "icelords_white_walker_4",
+  "ishtar_cavalry",
+  "ishtar_horse_archer",
+  "ishtari_mummy_4",
+  "ishtari_refugee_merchant",
+  "killer_klown_8",
+  "klown_killer_klown_99",
+  "kong_witchdoctor",
+  "lizardman_berserker",
+  "lizardman_hatchling_1",
+  "lizardman_hatchling_2",
+  "lizardman_hatchling_3",
+  "lizardman_hatchling_4",
+  "lizardman_priest",
+  "lizardman_scout",
+  "lizardman_skink",
+  "malice_mage_1",
+  "minossian_priest_1",
+  "minossian_priest_2",
+  "minossian_priest_blue",
+  "minossian_priest_red",
+  "norska_bowman_1",
+  "norska_goddi_1",
+  "norska_goddi_2",
+  "norska_goddi_3",
+  "norska_priestess_of_freya_2",
+  "old_minossian_general",
+  "old_minossian_mage",
+  "old_minossian_mage_1",
+  "old_minossian_mage_2",
+  "old_minossian_mage_3",
+  "old_minossian_mage_4",
+  "old_minossian_priest_blue",
+  "old_minossian_priest_red",
+  "old_minossian_princess",
+  "orc_shaman",
+  "ozcowardlylion",
+  "sarkonid_mage_12",
+  "shakayana_priest_1",
+  "shakayana_priest_2",
+  "smingol_cannoneer",
+  "smingol_chief_3",
+  "smingol_hunter",
+  "smingol_king",
+  "smingol_princess",
+  "szygany_vampires_butler",
+  "undead_lich",
+  "undead_mage_1",
+  "undead_mage_2",
+  "undead_wraith_king_1",
+  "undead_wraith_king_2",
+  "undead_wraith_king_3",
+  "vampire_bride_4",
+  "vampire_dracula",
+  "vampire_lord_dracula_2",
+  "vampire_the_count",
+  "vyncan_woman_2",
+  "witchbane_abbess",
+  "witchbane_cardinal_1",
+  "witchbane_fanatic_nun",
+  "witchbane_inquisitor_scribe",
+  "xoltec_7",
+  "xoltec_priest_2",
+  "xoltec_priest_7",
+  "xoltec_priest_8",
+  "xoltec_temple_guard2",
+  "zamurai_emperor",
+  "zamurai_emperor_2",
+  "zamurai_geisha_assassin",
+  "zamurai_oni_goblin",
+  "zamurai_rogue",
+  "zamurai_ronin",
+  "zamurai_sorcerer",
+  "zamurai_spearman",
+  "zamurai_warrior_8",
+  "zamurai_woman_3",
+  "zamurai_woman_4"
+ ]
+}

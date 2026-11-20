@@ -1,0 +1,19 @@
+{
+  "type": "ancientwarfare:research_recipe",
+  "research": "ancientwarfare:leadership",
+  "pattern": [
+    "PLP",
+    " P "
+  ],
+  "key": {
+    "P": {
+      "tag": "minecraft:planks"
+    },
+    "L": {
+      "tag": "c:leathers"
+    }
+  },
+  "result": {
+    "id": "ancientwarfarenpc:bard_instrument_drum"
+  }
+}

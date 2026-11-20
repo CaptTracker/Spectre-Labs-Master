@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "ancientwarfarenpc:block/settlement_marker"
+    },
+    "facing=south": {
+      "model": "ancientwarfarenpc:block/settlement_marker",
+      "y": 90
+    },
+    "facing=west": {
+      "model": "ancientwarfarenpc:block/settlement_marker",
+      "y": 180
+    },
+    "facing=north": {
+      "model": "ancientwarfarenpc:block/settlement_marker",
+      "y": 270
+    }
+  }
+}

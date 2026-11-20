@@ -1,0 +1,32 @@
+{
+  "type": "ancientwarfare:research_recipe",
+  "research": "ancientwarfare:leadership",
+  "pattern": [
+    "GF ",
+    "GTB"
+  ],
+  "key": {
+    "B": {
+      "item": "minecraft:shield"
+    },
+    "T": {
+      "item": "minecraft:red_wool"
+    },
+    "F": {
+      "tag": "ancientwarfarenpc:food_bundles"
+    },
+    "G": {
+      "tag": "c:ingots/iron"
+    }
+  },
+  "result": {
+    "id": "ancientwarfarenpc:npc_spawner",
+    "components": {
+      "ancientwarfarenpc:npc_spawner": {
+        "npcType": "guard_captain",
+        "npcSubtype": ""
+      },
+      "minecraft:custom_model_data": 21
+    }
+  }
+}

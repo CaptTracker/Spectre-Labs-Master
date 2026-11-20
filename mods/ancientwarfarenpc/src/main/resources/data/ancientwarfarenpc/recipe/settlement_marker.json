@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "W",
+    "S",
+    "S"
+  ],
+  "key": {
+    "W": {
+      "tag": "minecraft:wool"
+    },
+    "S": {
+      "tag": "c:rods/wooden"
+    }
+  },
+  "result": {
+    "id": "ancientwarfarenpc:settlement_marker",
+    "count": 2
+  }
+}

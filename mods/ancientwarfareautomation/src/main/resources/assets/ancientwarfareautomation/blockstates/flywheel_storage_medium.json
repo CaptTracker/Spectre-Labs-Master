@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "ancientwarfareautomation:block/automation/flywheel_storage_medium"
+    }
+  }
+}

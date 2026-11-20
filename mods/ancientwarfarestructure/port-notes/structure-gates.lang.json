@@ -1,0 +1,21 @@
+{
+  "item.ancientwarfarestructure.gate_basic_wood": "Wooden Gate (vert. open)",
+  "item.ancientwarfarestructure.gate_basic_iron": "Iron Gate (vert. open)",
+  "item.ancientwarfarestructure.gate_single_wood": "Wooden Gate (slide open)",
+  "item.ancientwarfarestructure.gate_single_iron": "Iron Gate (slide open)",
+  "item.ancientwarfarestructure.gate_double_wood": "Wooden Gate (split open)",
+  "item.ancientwarfarestructure.gate_double_iron": "Iron Gate (split open)",
+  "item.ancientwarfarestructure.gate_drawbridge": "Drawbridge (rotate open)",
+  "entity.ancientwarfarestructure.aw_gate": "Gate",
+  "block.ancientwarfarestructure.gate_proxy": "Gate Proxy Block",
+  "guistrings.gate.use_error": "You Cannot Use Enemy Gates",
+  "guistrings.gate.set_pos_one": "Set first Gate Position",
+  "guistrings.gate.set_pos_two": "Set second Gate Position",
+  "guistrings.gate.invalid_position": "Invalid Second Position, please re-select",
+  "guistrings.gate.need_to_clear": "The chosen area is not clear.  Please remove any blocks and try again.",
+  "guistrings.gate.exists": "Gate already exists in that location!",
+  "guistrings.gate.too_far": "You are too far away from the chosen gate coordinates.  Please move closer!.",
+  "guistrings.gate.use_primary_item_key": "Press '%s' to Set Bounds",
+  "guistrings.gate.construct": "Use Item: Construct Gate",
+  "guistrings.gate.clear_item": "(Sneak)Use: Clear Bounds"
+}

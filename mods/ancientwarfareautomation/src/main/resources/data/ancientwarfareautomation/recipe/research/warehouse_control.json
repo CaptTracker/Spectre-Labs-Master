@@ -1,0 +1,23 @@
+{
+  "type": "ancientwarfare:research_recipe",
+  "research": "ancientwarfare:trade",
+  "pattern": [
+    "_P_",
+    "_C_",
+    "_C_"
+  ],
+  "key": {
+    "P": {
+      "item": "minecraft:paper"
+    },
+    "C": {
+      "tag": "c:chests/wooden"
+    },
+    "_": {
+      "tag": "minecraft:planks"
+    }
+  },
+  "result": {
+    "id": "ancientwarfareautomation:warehouse_control"
+  }
+}

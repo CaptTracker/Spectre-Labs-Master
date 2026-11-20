@@ -1,0 +1,29 @@
+{
+  "type": "ancientwarfare:research_recipe",
+  "research": "ancientwarfare:leadership",
+  "pattern": [
+    "GF",
+    "GB"
+  ],
+  "key": {
+    "B": {
+      "item": "minecraft:book"
+    },
+    "F": {
+      "tag": "ancientwarfarenpc:food_bundles"
+    },
+    "G": {
+      "tag": "c:ingots/gold"
+    }
+  },
+  "result": {
+    "id": "ancientwarfarenpc:npc_spawner",
+    "components": {
+      "ancientwarfarenpc:npc_spawner": {
+        "npcType": "priest",
+        "npcSubtype": ""
+      },
+      "minecraft:custom_model_data": 12
+    }
+  }
+}

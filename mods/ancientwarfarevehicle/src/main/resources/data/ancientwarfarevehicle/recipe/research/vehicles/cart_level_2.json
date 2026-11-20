@@ -1,0 +1,29 @@
+{
+  "type": "ancientwarfare:shapeless_research_recipe",
+  "research": "ancientwarfare:trade",
+  "ingredients": [
+    {
+      "item": "ancientwarfarevehicle:ironshod_wood",
+      "count": 4
+    },
+    {
+      "tag": "c:chests/wooden",
+      "count": 3
+    },
+    {
+      "item": "minecraft:lead",
+      "count": 1
+    },
+    {
+      "item": "ancientwarfarevehicle:equipment_bay"
+    }
+  ],
+  "result": {
+    "id": "ancientwarfarevehicle:cart_spawner",
+    "components": {
+      "ancientwarfarevehicle:vehicle_spawn_data": {
+        "level": 2
+      }
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "type": "ancientwarfare:shapeless_research_recipe",
+  "research": "ancientwarfare:ballistics",
+  "ingredients": [
+    {
+      "item": "minecraft:paper",
+      "count": 3
+    },
+    {
+      "tag": "minecraft:planks"
+    }
+  ],
+  "result": {
+    "id": "ancientwarfarevehicle:vehicle_upgrade_aim"
+  }
+}

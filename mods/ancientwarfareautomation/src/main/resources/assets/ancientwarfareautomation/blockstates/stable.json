@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "active=false,facing=north": {
+      "model": "ancientwarfareautomation:block/stable"
+    },
+    "active=false,facing=east": {
+      "model": "ancientwarfareautomation:block/stable",
+      "y": 90
+    },
+    "active=false,facing=south": {
+      "model": "ancientwarfareautomation:block/stable",
+      "y": 180
+    },
+    "active=false,facing=west": {
+      "model": "ancientwarfareautomation:block/stable",
+      "y": 270
+    },
+    "active=true,facing=north": {
+      "model": "ancientwarfareautomation:block/stable"
+    },
+    "active=true,facing=east": {
+      "model": "ancientwarfareautomation:block/stable",
+      "y": 90
+    },
+    "active=true,facing=south": {
+      "model": "ancientwarfareautomation:block/stable",
+      "y": 180
+    },
+    "active=true,facing=west": {
+      "model": "ancientwarfareautomation:block/stable",
+      "y": 270
+    }
+  }
+}

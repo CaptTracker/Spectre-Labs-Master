@@ -1,0 +1,37 @@
+{
+  "type": "ancientwarfare:shapeless_research_recipe",
+  "research": "ancientwarfare:naval_warfare",
+  "ingredients": [
+    {
+      "item": "ancientwarfarevehicle:iron_core_wood",
+      "count": 5
+    },
+    {
+      "tag": "c:strings",
+      "count": 8
+    },
+    {
+      "item": "ancientwarfarevehicle:torsion_unit",
+      "count": 2
+    },
+    {
+      "item": "ancientwarfarevehicle:equipment_bay",
+      "count": 2
+    },
+    {
+      "item": "ancientwarfarevehicle:mobility_unit"
+    },
+    {
+      "item": "minecraft:cactus",
+      "count": 2
+    }
+  ],
+  "result": {
+    "id": "ancientwarfarevehicle:boat_ballista_spawner",
+    "components": {
+      "ancientwarfarevehicle:vehicle_spawn_data": {
+        "level": 3
+      }
+    }
+  }
+}

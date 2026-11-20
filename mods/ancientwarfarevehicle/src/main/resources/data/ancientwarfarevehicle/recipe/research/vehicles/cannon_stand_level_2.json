@@ -1,0 +1,25 @@
+{
+  "type": "ancientwarfare:shapeless_research_recipe",
+  "research": "ancientwarfare:advanced_siege_warfare",
+  "ingredients": [
+    {
+      "item": "ancientwarfarevehicle:tempered_iron",
+      "count": 5
+    },
+    {
+      "item": "ancientwarfarevehicle:powder_case",
+      "count": 2
+    },
+    {
+      "item": "ancientwarfarevehicle:equipment_bay"
+    }
+  ],
+  "result": {
+    "id": "ancientwarfarevehicle:cannon_stand_spawner",
+    "components": {
+      "ancientwarfarevehicle:vehicle_spawn_data": {
+        "level": 2
+      }
+    }
+  }
+}

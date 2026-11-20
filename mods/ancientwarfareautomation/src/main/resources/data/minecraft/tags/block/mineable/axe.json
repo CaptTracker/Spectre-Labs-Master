@@ -1,0 +1,23 @@
+{
+  "replace": false,
+  "values": [
+    "ancientwarfareautomation:tree_farm",
+    "ancientwarfareautomation:crop_farm",
+    "ancientwarfareautomation:fruit_farm",
+    "ancientwarfareautomation:animal_farm",
+    "ancientwarfareautomation:fish_farm",
+    "ancientwarfareautomation:dock",
+    "ancientwarfareautomation:apiary",
+    "ancientwarfareautomation:smelter",
+    "ancientwarfareautomation:market_stall",
+    "ancientwarfareautomation:stable",
+    "ancientwarfareautomation:inn",
+    "ancientwarfareautomation:quarry",
+    "ancientwarfareautomation:auto_crafting",
+    "ancientwarfareautomation:warehouse_control",
+    "ancientwarfareautomation:warehouse_storage_small",
+    "ancientwarfareautomation:warehouse_storage_medium",
+    "ancientwarfareautomation:warehouse_storage_large",
+    "ancientwarfareautomation:windmill_blade"
+  ]
+}

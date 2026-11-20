@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "active=false,facing=north": {
+      "model": "ancientwarfareautomation:block/smelter_inactive"
+    },
+    "active=false,facing=east": {
+      "model": "ancientwarfareautomation:block/smelter_inactive",
+      "y": 90
+    },
+    "active=false,facing=south": {
+      "model": "ancientwarfareautomation:block/smelter_inactive",
+      "y": 180
+    },
+    "active=false,facing=west": {
+      "model": "ancientwarfareautomation:block/smelter_inactive",
+      "y": 270
+    },
+    "active=true,facing=north": {
+      "model": "ancientwarfareautomation:block/smelter"
+    },
+    "active=true,facing=east": {
+      "model": "ancientwarfareautomation:block/smelter",
+      "y": 90
+    },
+    "active=true,facing=south": {
+      "model": "ancientwarfareautomation:block/smelter",
+      "y": 180
+    },
+    "active=true,facing=west": {
+      "model": "ancientwarfareautomation:block/smelter",
+      "y": 270
+    }
+  }
+}

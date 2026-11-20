@@ -1,0 +1,47 @@
+{
+  "parent": "ancientwarfarestructure:block/decor/coin_stack_copper_1",
+  "overrides": [
+    {
+      "predicate": {
+        "ancientwarfarestructure:size": 2
+      },
+      "model": "ancientwarfarestructure:block/decor/coin_stack_copper_2"
+    },
+    {
+      "predicate": {
+        "ancientwarfarestructure:size": 3
+      },
+      "model": "ancientwarfarestructure:block/decor/coin_stack_copper_3"
+    },
+    {
+      "predicate": {
+        "ancientwarfarestructure:size": 4
+      },
+      "model": "ancientwarfarestructure:block/decor/coin_stack_copper_4"
+    },
+    {
+      "predicate": {
+        "ancientwarfarestructure:size": 5
+      },
+      "model": "ancientwarfarestructure:block/decor/coin_stack_copper_5"
+    },
+    {
+      "predicate": {
+        "ancientwarfarestructure:size": 6
+      },
+      "model": "ancientwarfarestructure:block/decor/coin_stack_copper_6"
+    },
+    {
+      "predicate": {
+        "ancientwarfarestructure:size": 7
+      },
+      "model": "ancientwarfarestructure:block/decor/coin_stack_copper_7"
+    },
+    {
+      "predicate": {
+        "ancientwarfarestructure:size": 8
+      },
+      "model": "ancientwarfarestructure:block/decor/coin_stack_copper_8"
+    }
+  ]
+}

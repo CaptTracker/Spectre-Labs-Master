@@ -1,0 +1,14 @@
+{
+  "type": "ancientwarfare:shapeless_research_recipe",
+  "research": "ancientwarfare:machinery",
+  "ingredients": [
+    {
+      "tag": "c:ingots/iron",
+      "count": 8
+    }
+  ],
+  "result": {
+    "id": "ancientwarfarevehicle:rough_iron",
+    "count": 8
+  }
+}

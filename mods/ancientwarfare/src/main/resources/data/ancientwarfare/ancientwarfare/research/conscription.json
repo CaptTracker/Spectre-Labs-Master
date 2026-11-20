@@ -1,0 +1,24 @@
+{
+  "time": 200,
+  "dependencies": [
+    "ancientwarfare:leadership"
+  ],
+  "resources": [
+    {
+      "item": "minecraft:paper",
+      "count": 12
+    },
+    {
+      "tag": "c:ingots/gold",
+      "count": 4
+    },
+    {
+      "item": "minecraft:iron_sword",
+      "count": 1
+    },
+    {
+      "item": "minecraft:golden_apple",
+      "count": 1
+    }
+  ]
+}

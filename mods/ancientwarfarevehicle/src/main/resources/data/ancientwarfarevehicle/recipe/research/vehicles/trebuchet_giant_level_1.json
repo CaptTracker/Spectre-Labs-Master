@@ -1,0 +1,32 @@
+{
+  "type": "ancientwarfare:shapeless_research_recipe",
+  "research": "ancientwarfare:siege_warfare",
+  "ingredients": [
+    {
+      "item": "ancientwarfarevehicle:treated_wood",
+      "count": 20
+    },
+    {
+      "tag": "c:strings",
+      "count": 24
+    },
+    {
+      "tag": "c:leathers",
+      "count": 12
+    },
+    {
+      "item": "ancientwarfarevehicle:counter_weight_unit"
+    },
+    {
+      "item": "ancientwarfarevehicle:equipment_bay"
+    }
+  ],
+  "result": {
+    "id": "ancientwarfarevehicle:trebuchet_giant_spawner",
+    "components": {
+      "ancientwarfarevehicle:vehicle_spawn_data": {
+        "level": 1
+      }
+    }
+  }
+}

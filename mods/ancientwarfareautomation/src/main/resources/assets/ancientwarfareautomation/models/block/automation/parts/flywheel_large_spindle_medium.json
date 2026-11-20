@@ -1,0 +1,13 @@
+{
+  "loader": "neoforge:obj",
+  "model": "ancientwarfareautomation:models/block/automation/parts/flywheel_large_spindle.obj",
+  "flip_v": true,
+  "automatic_culling": false,
+  "shade_quads": true,
+  "emissive_ambient": false,
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "texture": "ancientwarfareautomation:block/automation/flywheel_large_medium",
+    "particle": "ancientwarfareautomation:block/automation/flywheel_large_medium"
+  }
+}

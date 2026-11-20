@@ -1,0 +1,29 @@
+{
+  "type": "ancientwarfare:research_recipe",
+  "research": "ancientwarfare:conscription",
+  "pattern": [
+    "GF",
+    "GT"
+  ],
+  "key": {
+    "T": {
+      "item": "minecraft:wooden_sword"
+    },
+    "F": {
+      "tag": "ancientwarfarenpc:food_bundles"
+    },
+    "G": {
+      "tag": "c:ingots/gold"
+    }
+  },
+  "result": {
+    "id": "ancientwarfarenpc:npc_spawner",
+    "components": {
+      "ancientwarfarenpc:npc_spawner": {
+        "npcType": "combat",
+        "npcSubtype": ""
+      },
+      "minecraft:custom_model_data": 15
+    }
+  }
+}

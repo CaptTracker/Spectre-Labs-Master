@@ -1,0 +1,29 @@
+{
+  "type": "ancientwarfare:research_recipe",
+  "research": "ancientwarfare:trade",
+  "pattern": [
+    "GF",
+    "GT"
+  ],
+  "key": {
+    "T": {
+      "item": "minecraft:white_wool"
+    },
+    "F": {
+      "tag": "ancientwarfarenpc:food_bundles"
+    },
+    "G": {
+      "tag": "c:ingots/gold"
+    }
+  },
+  "result": {
+    "id": "ancientwarfarenpc:npc_spawner",
+    "components": {
+      "ancientwarfarenpc:npc_spawner": {
+        "npcType": "courier",
+        "npcSubtype": ""
+      },
+      "minecraft:custom_model_data": 5
+    }
+  }
+}

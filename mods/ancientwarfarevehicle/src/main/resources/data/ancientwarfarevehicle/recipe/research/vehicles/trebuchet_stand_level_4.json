@@ -1,0 +1,32 @@
+{
+  "type": "ancientwarfare:shapeless_research_recipe",
+  "research": "ancientwarfare:advanced_siege_warfare",
+  "ingredients": [
+    {
+      "item": "ancientwarfarevehicle:rough_iron",
+      "count": 8
+    },
+    {
+      "tag": "c:strings",
+      "count": 8
+    },
+    {
+      "tag": "c:leathers",
+      "count": 4
+    },
+    {
+      "item": "ancientwarfarevehicle:counter_weight_unit"
+    },
+    {
+      "item": "ancientwarfarevehicle:equipment_bay"
+    }
+  ],
+  "result": {
+    "id": "ancientwarfarevehicle:trebuchet_stand_spawner",
+    "components": {
+      "ancientwarfarevehicle:vehicle_spawn_data": {
+        "level": 4
+      }
+    }
+  }
+}
