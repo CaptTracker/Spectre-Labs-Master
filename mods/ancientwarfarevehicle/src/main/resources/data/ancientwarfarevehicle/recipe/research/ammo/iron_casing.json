@@ -1,0 +1,17 @@
+{
+  "type": "ancientwarfare:shapeless_research_recipe",
+  "research": "ancientwarfare:ballistics",
+  "ingredients": [
+    {
+      "tag": "c:ingots/iron",
+      "count": 4
+    },
+    {
+      "tag": "minecraft:wool"
+    }
+  ],
+  "result": {
+    "id": "ancientwarfarevehicle:iron_casing",
+    "count": 8
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "type": "ancientwarfare:research_recipe",
+  "research": "ancientwarfare:leadership",
+  "pattern": [
+    "D",
+    "P",
+    "W"
+  ],
+  "key": {
+    "P": {
+      "item": "minecraft:paper"
+    },
+    "D": {
+      "tag": "c:dyes/red"
+    },
+    "W": {
+      "tag": "minecraft:planks"
+    }
+  },
+  "result": {
+    "id": "ancientwarfarenpc:combat_order"
+  }
+}

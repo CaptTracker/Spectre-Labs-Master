@@ -1,0 +1,20 @@
+{
+  "type": "ancientwarfare:research_recipe",
+  "research": "ancientwarfare:mathematics",
+  "pattern": [
+    "FFF",
+    "SSS",
+    "FFF"
+  ],
+  "key": {
+    "S": {
+      "tag": "c:strings"
+    },
+    "F": {
+      "tag": "c:fences/wooden"
+    }
+  },
+  "result": {
+    "id": "ancientwarfareautomation:worksite_upgrade_bounds_large"
+  }
+}

@@ -1,0 +1,12 @@
+plugins {
+    id 'mod.conventions'
+}
+
+repositories {
+    maven { url = 'https://maven.blamejared.com/' }
+}
+
+dependencies {
+    // JEI is optional: the API is only needed to compile compat/jei, the classes are never loaded without JEI.
+    compileOnly "mezz.jei:jei-1.21.1-neoforge-api:19.21.0.247"
+}

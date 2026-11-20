@@ -1,0 +1,23 @@
+{
+  "type": "ancientwarfare:research_recipe",
+  "research": "ancientwarfare:construction",
+  "pattern": [
+    "SSS",
+    "PPP",
+    "PRP"
+  ],
+  "key": {
+    "P": {
+      "tag": "c:ingots/iron"
+    },
+    "R": {
+      "tag": "c:dusts/redstone"
+    },
+    "S": {
+      "tag": "c:stones"
+    }
+  },
+  "result": {
+    "id": "ancientwarfarestructure:gate_double_iron"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "ancientwarfareautomation:block/automation/flywheel_controller_heavy"
+    },
+    "facing=south": {
+      "model": "ancientwarfareautomation:block/automation/flywheel_controller_heavy",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "ancientwarfareautomation:block/automation/flywheel_controller_heavy",
+      "y": 270
+    },
+    "facing=east": {
+      "model": "ancientwarfareautomation:block/automation/flywheel_controller_heavy",
+      "y": 90
+    }
+  }
+}

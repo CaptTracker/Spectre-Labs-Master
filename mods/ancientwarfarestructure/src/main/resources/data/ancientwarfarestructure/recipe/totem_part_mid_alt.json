@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "B W",
+    "ELR"
+  ],
+  "key": {
+    "B": {
+      "tag": "c:dyes/black"
+    },
+    "W": {
+      "tag": "c:dyes/white"
+    },
+    "R": {
+      "tag": "c:dyes/red"
+    },
+    "E": {
+      "tag": "c:dyes/blue"
+    },
+    "L": {
+      "tag": "minecraft:logs_that_burn"
+    }
+  },
+  "result": {
+    "id": "ancientwarfarestructure:totem_part_mid_alt",
+    "count": 1
+  }
+}

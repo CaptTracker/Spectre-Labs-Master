@@ -1,0 +1,25 @@
+{
+  "time": 200,
+  "dependencies": [
+    "ancientwarfare:explosives",
+    "ancientwarfare:refining"
+  ],
+  "resources": [
+    {
+      "tag": "c:gunpowders",
+      "count": 16
+    },
+    {
+      "tag": "c:sands",
+      "count": 12
+    },
+    {
+      "item": "minecraft:charcoal",
+      "count": 12
+    },
+    {
+      "item": "minecraft:paper",
+      "count": 8
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "ancientwarfareautomation:block/warehouse_stock_viewer_template",
+  "textures": {
+    "particle": "ancientwarfareautomation:block/warehouse_stock_viewer",
+    "texture": "ancientwarfareautomation:block/warehouse_stock_viewer"
+  }
+}

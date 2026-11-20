@@ -1,0 +1,24 @@
+{
+  "time": 200,
+  "dependencies": [
+    "ancientwarfare:mining"
+  ],
+  "resources": [
+    {
+      "tag": "c:dusts/redstone",
+      "count": 32
+    },
+    {
+      "tag": "c:dyes/blue",
+      "count": 16
+    },
+    {
+      "tag": "c:ingots/gold",
+      "count": 2
+    },
+    {
+      "tag": "c:netherracks",
+      "count": 8
+    }
+  ]
+}

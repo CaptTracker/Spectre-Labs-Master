@@ -1,0 +1,33 @@
+{
+  "type": "ancientwarfare:shapeless_research_recipe",
+  "research": "ancientwarfare:naval_warfare",
+  "ingredients": [
+    {
+      "item": "ancientwarfarevehicle:treated_wood",
+      "count": 5
+    },
+    {
+      "item": "ancientwarfarevehicle:torsion_unit",
+      "count": 3
+    },
+    {
+      "item": "ancientwarfarevehicle:equipment_bay"
+    },
+    {
+      "item": "ancientwarfarevehicle:mobility_unit",
+      "count": 2
+    },
+    {
+      "item": "minecraft:cactus",
+      "count": 2
+    }
+  ],
+  "result": {
+    "id": "ancientwarfarevehicle:boat_catapult_spawner",
+    "components": {
+      "ancientwarfarevehicle:vehicle_spawn_data": {
+        "level": 1
+      }
+    }
+  }
+}

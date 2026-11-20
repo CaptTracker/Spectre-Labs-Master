@@ -1,0 +1,29 @@
+{
+  "type": "ancientwarfare:research_recipe",
+  "research": "ancientwarfare:leadership",
+  "pattern": [
+    "GF",
+    "GB"
+  ],
+  "key": {
+    "B": {
+      "item": "ancientwarfarenpc:bard_instrument_lute"
+    },
+    "F": {
+      "tag": "ancientwarfarenpc:food_bundles"
+    },
+    "G": {
+      "tag": "c:ingots/gold"
+    }
+  },
+  "result": {
+    "id": "ancientwarfarenpc:npc_spawner",
+    "components": {
+      "ancientwarfarenpc:npc_spawner": {
+        "npcType": "bard",
+        "npcSubtype": ""
+      },
+      "minecraft:custom_model_data": 3
+    }
+  }
+}

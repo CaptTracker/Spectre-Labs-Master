@@ -1,0 +1,28 @@
+{
+  "time": 200,
+  "dependencies": [
+    "ancientwarfare:theory_of_gravity"
+  ],
+  "resources": [
+    {
+      "tag": "c:gunpowders",
+      "count": 12
+    },
+    {
+      "tag": "c:ingots/iron",
+      "count": 6
+    },
+    {
+      "tag": "c:rods/wooden",
+      "count": 18
+    },
+    {
+      "item": "minecraft:paper",
+      "count": 12
+    },
+    {
+      "item": "minecraft:torch",
+      "count": 6
+    }
+  ]
+}

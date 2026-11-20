@@ -1,0 +1,14 @@
+{
+  "parent": "ancientwarfarenpc:item/wooden_shield",
+  "textures": {
+    "0": "ancientwarfarenpc:item/shield_witchbane_1"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "blocking": 1.0
+      },
+      "model": "ancientwarfarenpc:item/shield_witchbane_1_blocking"
+    }
+  ]
+}

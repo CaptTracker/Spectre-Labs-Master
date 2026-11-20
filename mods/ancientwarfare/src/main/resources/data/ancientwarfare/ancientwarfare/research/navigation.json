@@ -1,0 +1,25 @@
+{
+  "time": 200,
+  "dependencies": [
+    "ancientwarfare:theory_of_gravity",
+    "ancientwarfare:seafaring"
+  ],
+  "resources": [
+    {
+      "item": "minecraft:compass",
+      "count": 1
+    },
+    {
+      "item": "minecraft:map",
+      "count": 1
+    },
+    {
+      "item": "minecraft:paper",
+      "count": 12
+    },
+    {
+      "item": "minecraft:charcoal",
+      "count": 5
+    }
+  ]
+}

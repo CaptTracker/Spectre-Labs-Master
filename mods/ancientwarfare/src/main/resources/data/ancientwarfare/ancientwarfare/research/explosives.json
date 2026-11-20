@@ -1,0 +1,25 @@
+{
+  "time": 200,
+  "dependencies": [
+    "ancientwarfare:combustion",
+    "ancientwarfare:chemistry"
+  ],
+  "resources": [
+    {
+      "item": "minecraft:coal",
+      "count": 12
+    },
+    {
+      "item": "minecraft:charcoal",
+      "count": 8
+    },
+    {
+      "tag": "c:sands",
+      "count": 10
+    },
+    {
+      "tag": "c:netherracks",
+      "count": 10
+    }
+  ]
+}

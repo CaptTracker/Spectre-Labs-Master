@@ -1,0 +1,20 @@
+{
+  "type": "ancientwarfare:research_recipe",
+  "research": "ancientwarfare:leadership",
+  "pattern": [
+    "TT ",
+    "SST",
+    "TT "
+  ],
+  "key": {
+    "S": {
+      "tag": "c:strings"
+    },
+    "T": {
+      "tag": "c:rods/wooden"
+    }
+  },
+  "result": {
+    "id": "ancientwarfarenpc:bard_instrument_harp"
+  }
+}

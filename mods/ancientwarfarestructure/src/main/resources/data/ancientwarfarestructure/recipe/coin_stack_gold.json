@@ -1,0 +1,29 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "ancientwarfarenpc"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "GGG",
+    "G G",
+    "GGG"
+  ],
+  "key": {
+    "G": {
+      "item": "ancientwarfarenpc:coin_gold"
+    }
+  },
+  "result": {
+    "id": "ancientwarfarestructure:coin_stack_gold",
+    "count": 1,
+    "components": {
+      "minecraft:block_state": {
+        "size": "1"
+      }
+    }
+  }
+}

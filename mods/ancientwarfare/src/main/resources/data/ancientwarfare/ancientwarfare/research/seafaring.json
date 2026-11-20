@@ -1,0 +1,26 @@
+{
+  "time": 200,
+  "dependencies": [
+    "ancientwarfare:the_wheel",
+    "ancientwarfare:mathematics",
+    "ancientwarfare:trade"
+  ],
+  "resources": [
+    {
+      "tag": "minecraft:planks",
+      "count": 12
+    },
+    {
+      "tag": "c:ingots/iron",
+      "count": 8
+    },
+    {
+      "tag": "minecraft:wool",
+      "count": 10
+    },
+    {
+      "tag": "c:strings",
+      "count": 12
+    }
+  ]
+}

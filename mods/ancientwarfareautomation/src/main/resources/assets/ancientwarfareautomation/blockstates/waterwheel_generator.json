@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "facing=north,valid_setup=false": {
+      "model": "ancientwarfareautomation:block/automation/waterwheel_generator"
+    },
+    "facing=north,valid_setup=true": {
+      "model": "ancientwarfareautomation:block/automation/waterwheel_generator"
+    },
+    "facing=south,valid_setup=false": {
+      "model": "ancientwarfareautomation:block/automation/waterwheel_generator",
+      "y": 180
+    },
+    "facing=south,valid_setup=true": {
+      "model": "ancientwarfareautomation:block/automation/waterwheel_generator",
+      "y": 180
+    },
+    "facing=west,valid_setup=false": {
+      "model": "ancientwarfareautomation:block/automation/waterwheel_generator",
+      "y": 270
+    },
+    "facing=west,valid_setup=true": {
+      "model": "ancientwarfareautomation:block/automation/waterwheel_generator",
+      "y": 270
+    },
+    "facing=east,valid_setup=false": {
+      "model": "ancientwarfareautomation:block/automation/waterwheel_generator",
+      "y": 90
+    },
+    "facing=east,valid_setup=true": {
+      "model": "ancientwarfareautomation:block/automation/waterwheel_generator",
+      "y": 90
+    }
+  }
+}

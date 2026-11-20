@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "ancientwarfareautomation:block/apiary_front",
+    "down": "ancientwarfareautomation:block/apiary_bottom",
+    "up": "ancientwarfareautomation:block/apiary_top",
+    "north": "ancientwarfareautomation:block/apiary_front",
+    "east": "ancientwarfareautomation:block/apiary_right",
+    "south": "ancientwarfareautomation:block/apiary_rear",
+    "west": "ancientwarfareautomation:block/apiary_left"
+  }
+}

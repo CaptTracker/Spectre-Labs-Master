@@ -1,0 +1,29 @@
+{
+  "type": "ancientwarfare:research_recipe",
+  "research": "ancientwarfare:siege_warfare",
+  "pattern": [
+    "GF",
+    "GT"
+  ],
+  "key": {
+    "T": {
+      "item": "ancientwarfarevehicle:torsion_unit"
+    },
+    "F": {
+      "tag": "ancientwarfarenpc:food_bundles"
+    },
+    "G": {
+      "tag": "c:ingots/gold"
+    }
+  },
+  "result": {
+    "id": "ancientwarfarenpc:npc_spawner",
+    "components": {
+      "ancientwarfarenpc:npc_spawner": {
+        "npcType": "siege_engineer",
+        "npcSubtype": ""
+      },
+      "minecraft:custom_model_data": 1
+    }
+  }
+}

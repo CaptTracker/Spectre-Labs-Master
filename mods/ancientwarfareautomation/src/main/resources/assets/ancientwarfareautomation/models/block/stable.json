@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "ancientwarfareautomation:block/stable_front",
+    "down": "ancientwarfareautomation:block/stable_bottom",
+    "up": "ancientwarfareautomation:block/stable_top",
+    "north": "ancientwarfareautomation:block/stable_front",
+    "east": "ancientwarfareautomation:block/stable_right",
+    "south": "ancientwarfareautomation:block/stable_rear",
+    "west": "ancientwarfareautomation:block/stable_left"
+  }
+}

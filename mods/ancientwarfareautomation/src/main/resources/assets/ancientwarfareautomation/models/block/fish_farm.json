@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "ancientwarfareautomation:block/fish_farm_front",
+    "down": "ancientwarfareautomation:block/fish_farm_bottom",
+    "up": "ancientwarfareautomation:block/fish_farm_top",
+    "north": "ancientwarfareautomation:block/fish_farm_front",
+    "east": "ancientwarfareautomation:block/fish_farm_right",
+    "south": "ancientwarfareautomation:block/fish_farm_rear",
+    "west": "ancientwarfareautomation:block/fish_farm_left"
+  }
+}

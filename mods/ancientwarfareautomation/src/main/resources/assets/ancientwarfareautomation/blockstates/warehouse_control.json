@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "ancientwarfareautomation:block/warehouse_control"
+    },
+    "facing=east": {
+      "model": "ancientwarfareautomation:block/warehouse_control",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "ancientwarfareautomation:block/warehouse_control",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "ancientwarfareautomation:block/warehouse_control",
+      "y": 270
+    }
+  }
+}

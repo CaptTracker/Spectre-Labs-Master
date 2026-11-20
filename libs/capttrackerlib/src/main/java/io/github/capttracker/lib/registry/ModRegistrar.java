@@ -1,6 +1,10 @@
 package io.github.capttracker.lib.registry;
 
+import com.mojang.serialization.Codec;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.inventory.MenuType;
@@ -50,6 +54,7 @@ public final class ModRegistrar {
     public final DeferredRegister<MenuType<?>> menus;
     public final DeferredRegister<SoundEvent> sounds;
     public final DeferredRegister<CreativeModeTab> creativeTabs;
+    public final DeferredRegister.DataComponents dataComponents;
 
     private final List<Supplier<? extends Item>> tabContents = new ArrayList<>();
 
@@ -61,6 +66,7 @@ public final class ModRegistrar {
         this.menus = DeferredRegister.create(Registries.MENU, modId);
         this.sounds = DeferredRegister.create(Registries.SOUND_EVENT, modId);
         this.creativeTabs = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, modId);
+        this.dataComponents = DeferredRegister.createDataComponents(Registries.DATA_COMPONENT_TYPE, modId);
     }
 
     public static ModRegistrar create(String modId) {
@@ -117,6 +123,14 @@ public final class ModRegistrar {
         });
     }
 
+    // ---- Data components ----
+
+    /** Registers an item data component that is saved with the item and synced to clients. */
+    public <T> DeferredHolder<DataComponentType<?>, DataComponentType<T>> dataComponent(
+            String name, Codec<T> codec, StreamCodec<? super RegistryFriendlyByteBuf, T> streamCodec) {
+        return dataComponents.registerComponentType(name, builder -> builder.persistent(codec).networkSynchronized(streamCodec));
+    }
+
     // ---- Sounds ----
 
     public DeferredHolder<SoundEvent, SoundEvent> sound(String name) {
@@ -150,5 +164,6 @@ public final class ModRegistrar {
         menus.register(modBus);
         sounds.register(modBus);
         creativeTabs.register(modBus);
+        dataComponents.register(modBus);
     }
 }

@@ -1,0 +1,29 @@
+{
+  "type": "ancientwarfare:research_recipe",
+  "research": "ancientwarfare:fishing",
+  "pattern": [
+    "PPP",
+    "GWG",
+    "_C_"
+  ],
+  "key": {
+    "C": {
+      "tag": "c:chests/wooden"
+    },
+    "W": {
+      "item": "minecraft:fishing_rod"
+    },
+    "G": {
+      "tag": "c:gears/wooden"
+    },
+    "P": {
+      "item": "minecraft:oak_boat"
+    },
+    "_": {
+      "tag": "minecraft:planks"
+    }
+  },
+  "result": {
+    "id": "ancientwarfareautomation:dock"
+  }
+}

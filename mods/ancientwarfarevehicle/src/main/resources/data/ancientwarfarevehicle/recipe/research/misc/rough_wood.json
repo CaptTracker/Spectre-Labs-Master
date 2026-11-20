@@ -1,0 +1,17 @@
+{
+  "type": "ancientwarfare:shapeless_research_recipe",
+  "research": "ancientwarfare:engineering",
+  "ingredients": [
+    {
+      "tag": "c:leathers"
+    },
+    {
+      "tag": "minecraft:planks",
+      "count": 7
+    }
+  ],
+  "result": {
+    "id": "ancientwarfarevehicle:rough_wood",
+    "count": 8
+  }
+}

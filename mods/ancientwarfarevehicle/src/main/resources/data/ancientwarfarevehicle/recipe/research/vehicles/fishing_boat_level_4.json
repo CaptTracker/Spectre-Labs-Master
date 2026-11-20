@@ -1,0 +1,29 @@
+{
+  "type": "ancientwarfare:shapeless_research_recipe",
+  "research": "ancientwarfare:seafaring",
+  "ingredients": [
+    {
+      "item": "ancientwarfarevehicle:rough_iron",
+      "count": 4
+    },
+    {
+      "tag": "c:strings",
+      "count": 4
+    },
+    {
+      "tag": "minecraft:wool",
+      "count": 2
+    },
+    {
+      "item": "ancientwarfarevehicle:equipment_bay"
+    }
+  ],
+  "result": {
+    "id": "ancientwarfarevehicle:fishing_boat_spawner",
+    "components": {
+      "ancientwarfarevehicle:vehicle_spawn_data": {
+        "level": 4
+      }
+    }
+  }
+}

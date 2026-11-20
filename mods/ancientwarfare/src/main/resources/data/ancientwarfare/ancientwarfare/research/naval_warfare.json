@@ -1,0 +1,26 @@
+{
+  "time": 200,
+  "dependencies": [
+    "ancientwarfare:machinery",
+    "ancientwarfare:navigation",
+    "ancientwarfare:tactics"
+  ],
+  "resources": [
+    {
+      "tag": "c:gunpowders",
+      "count": 16
+    },
+    {
+      "tag": "minecraft:planks",
+      "count": 12
+    },
+    {
+      "tag": "c:ingots/iron",
+      "count": 16
+    },
+    {
+      "item": "minecraft:paper",
+      "count": 8
+    }
+  ]
+}

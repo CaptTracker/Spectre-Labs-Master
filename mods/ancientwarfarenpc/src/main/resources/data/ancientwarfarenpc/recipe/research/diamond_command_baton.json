@@ -1,0 +1,23 @@
+{
+  "type": "ancientwarfare:research_recipe",
+  "research": "ancientwarfare:command",
+  "pattern": [
+    "  M",
+    " I ",
+    "S  "
+  ],
+  "key": {
+    "S": {
+      "tag": "c:rods/wooden"
+    },
+    "I": {
+      "tag": "c:ingots/iron"
+    },
+    "M": {
+      "tag": "c:gems/diamond"
+    }
+  },
+  "result": {
+    "id": "ancientwarfarenpc:diamond_command_baton"
+  }
+}

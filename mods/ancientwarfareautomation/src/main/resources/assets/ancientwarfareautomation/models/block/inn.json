@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "ancientwarfareautomation:block/inn_front",
+    "down": "ancientwarfareautomation:block/inn_bottom",
+    "up": "ancientwarfareautomation:block/inn_top",
+    "north": "ancientwarfareautomation:block/inn_front",
+    "east": "ancientwarfareautomation:block/inn_right",
+    "south": "ancientwarfareautomation:block/inn_rear",
+    "west": "ancientwarfareautomation:block/inn_left"
+  }
+}

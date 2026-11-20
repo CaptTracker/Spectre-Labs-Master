@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "ancientwarfarenpc:item/spawner_base",
+    "layer1": "ancientwarfarenpc:item/spawner_overlay_bottom",
+    "layer2": "ancientwarfarenpc:item/spawner_overlay_top",
+    "layer3": "ancientwarfarenpc:item/spawner_priest"
+  }
+}

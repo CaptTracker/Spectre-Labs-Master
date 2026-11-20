@@ -1,0 +1,35 @@
+{
+  "type": "ancientwarfare:shapeless_research_recipe",
+  "research": "ancientwarfare:siege_warfare",
+  "ingredients": [
+    {
+      "item": "ancientwarfarevehicle:iron_core_wood",
+      "count": 8
+    },
+    {
+      "tag": "c:strings",
+      "count": 8
+    },
+    {
+      "tag": "c:leathers",
+      "count": 4
+    },
+    {
+      "item": "ancientwarfarevehicle:counter_weight_unit"
+    },
+    {
+      "item": "ancientwarfarevehicle:equipment_bay"
+    },
+    {
+      "item": "ancientwarfarevehicle:mobility_unit"
+    }
+  ],
+  "result": {
+    "id": "ancientwarfarevehicle:trebuchet_mobile_spawner",
+    "components": {
+      "ancientwarfarevehicle:vehicle_spawn_data": {
+        "level": 3
+      }
+    }
+  }
+}

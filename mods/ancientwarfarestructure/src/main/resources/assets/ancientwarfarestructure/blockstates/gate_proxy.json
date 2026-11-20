@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "ancientwarfarestructure:block/gate_proxy"
+      }
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+/*
+ * Ancient Warfare Core - NeoForge 1.21.1 port. GPL-3.0-or-later; see LICENSE.txt in this mod's folder.
+ * Ported from Ancient Warfare 2: core/gui/Listener.
+ */
+package io.github.capttracker.ancientwarfare.client.gui;
+
+import io.github.capttracker.ancientwarfare.client.gui.GuiContainerBase.ActivationEvent;
+import io.github.capttracker.ancientwarfare.client.gui.elements.GuiElement;
+
+/**
+ * Event listener attached to a widget. {@code type} is a bit mask of the event kinds wanted.
+ * Returning false from {@link #onEvent} stops the remaining listeners of that widget for this event.
+ */
+public abstract class Listener {
+    public static final int KEY_UP = 1;
+    public static final int KEY_DOWN = 2;
+    public static final int MOUSE_UP = 4;
+    public static final int MOUSE_DOWN = 8;
+    public static final int MOUSE_WHEEL = 16;
+    public static final int MOUSE_MOVED = 32;
+
+    public static final int KEY_TYPES = KEY_UP + KEY_DOWN;
+    public static final int MOUSE_TYPES = MOUSE_UP + MOUSE_DOWN + MOUSE_WHEEL + MOUSE_MOVED;
+    public static final int ALL_EVENTS = 0xffffffff;
+
+    public final int type;
+
+    public Listener(int type) {
+        this.type = type;
+    }
+
+    public abstract boolean onEvent(GuiElement widget, ActivationEvent evt);
+
+}

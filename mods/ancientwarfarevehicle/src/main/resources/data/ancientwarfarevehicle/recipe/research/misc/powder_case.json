@@ -1,0 +1,17 @@
+{
+  "type": "ancientwarfare:shapeless_research_recipe",
+  "research": "ancientwarfare:explosives",
+  "ingredients": [
+    {
+      "tag": "c:ingots/iron",
+      "count": 4
+    },
+    {
+      "tag": "minecraft:wool",
+      "count": 2
+    }
+  ],
+  "result": {
+    "id": "ancientwarfarevehicle:powder_case"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "coin_stack_break": {
+    "category": "neutral",
+    "sounds": [
+      {
+        "name": "ancientwarfarestructure:coinstack_break",
+        "stream": false
+      }
+    ]
+  },
+  "coin_stack_interact": {
+    "category": "neutral",
+    "sounds": [
+      {
+        "name": "ancientwarfarestructure:coinstack_interact",
+        "stream": false
+      }
+    ]
+  }
+}

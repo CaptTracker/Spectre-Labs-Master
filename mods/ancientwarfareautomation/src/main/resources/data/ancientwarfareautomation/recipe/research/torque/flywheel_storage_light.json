@@ -1,0 +1,20 @@
+{
+  "type": "ancientwarfare:research_recipe",
+  "research": "ancientwarfare:theory_of_gravity",
+  "pattern": [
+    "GPG",
+    "PPP",
+    "GPG"
+  ],
+  "key": {
+    "P": {
+      "tag": "minecraft:planks"
+    },
+    "G": {
+      "tag": "c:glass_panes"
+    }
+  },
+  "result": {
+    "id": "ancientwarfareautomation:flywheel_storage_light"
+  }
+}

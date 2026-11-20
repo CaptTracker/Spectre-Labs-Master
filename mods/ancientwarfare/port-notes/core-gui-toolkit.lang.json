@@ -1,0 +1,11 @@
+{
+  "guistrings.dmg.tooltip": "Item damage is used to determine item durability, e.g. the damage of a sword. Some mods may use it to determine the \"amount\" of an item on a simplified level.",
+  "guistrings.tag.tooltip": "Tag data is the detailed information added to an item. This could be upgrades, enchantments, or the type/amount of fluid in a tank.",
+  "guistrings.inventory.direction.*.tooltip": "Which \"side\" of the inventory to operate on. Some blocks have multiple inventories which are accessed via specific sides.",
+  "guistrings.moveup.tooltip": "Move up",
+  "guistrings.movedown.tooltip": "Move down",
+  "guistrings.npc.remove_point.tooltip": "Remove this point",
+  "guistrings.npc.repack.tooltip": "Put the NPC back into item form.",
+  "guistrings.npc.togglefollow.tooltip": "Sneak + right-click on an NPC for a shortcut to toggle follow",
+  "guistrings.npc.custom_equipment.tooltip": "Make the entity spawn with the custom equipment instead of the defaults (otherwise the defaults override the equipments)."
+}

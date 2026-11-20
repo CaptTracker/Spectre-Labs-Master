@@ -1,0 +1,28 @@
+{
+  "type": "ancientwarfare:shapeless_research_recipe",
+  "research": "ancientwarfare:advanced_siege_warfare",
+  "ingredients": [
+    {
+      "item": "ancientwarfarevehicle:rough_iron",
+      "count": 5
+    },
+    {
+      "item": "ancientwarfarevehicle:torsion_unit",
+      "count": 3
+    },
+    {
+      "item": "ancientwarfarevehicle:equipment_bay"
+    },
+    {
+      "item": "ancientwarfarevehicle:mobility_unit"
+    }
+  ],
+  "result": {
+    "id": "ancientwarfarevehicle:catapult_mobile_spawner",
+    "components": {
+      "ancientwarfarevehicle:vehicle_spawn_data": {
+        "level": 4
+      }
+    }
+  }
+}

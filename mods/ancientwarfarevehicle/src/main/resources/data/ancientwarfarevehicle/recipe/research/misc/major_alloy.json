@@ -1,0 +1,26 @@
+{
+  "type": "ancientwarfare:shapeless_research_recipe",
+  "research": "ancientwarfare:machinery",
+  "ingredients": [
+    {
+      "tag": "c:ingots/iron",
+      "count": 8
+    },
+    {
+      "tag": "c:ingots/gold",
+      "count": 8
+    },
+    {
+      "tag": "c:dusts/redstone",
+      "count": 4
+    },
+    {
+      "item": "minecraft:coal",
+      "count": 8
+    }
+  ],
+  "result": {
+    "id": "ancientwarfarevehicle:major_alloy",
+    "count": 8
+  }
+}

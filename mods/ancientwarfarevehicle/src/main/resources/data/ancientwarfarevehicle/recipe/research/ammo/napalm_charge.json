@@ -1,0 +1,22 @@
+{
+  "type": "ancientwarfare:shapeless_research_recipe",
+  "research": "ancientwarfare:combustion",
+  "ingredients": [
+    {
+      "tag": "c:gunpowders",
+      "count": 4
+    },
+    {
+      "tag": "minecraft:wool",
+      "count": 2
+    },
+    {
+      "item": "minecraft:cactus",
+      "count": 2
+    }
+  ],
+  "result": {
+    "id": "ancientwarfarevehicle:napalm_charge",
+    "count": 8
+  }
+}

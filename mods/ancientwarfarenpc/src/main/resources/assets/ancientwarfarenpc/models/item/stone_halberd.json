@@ -1,0 +1,6 @@
+{
+  "parent": "ancientwarfarenpc:item/wooden_halberd",
+  "textures": {
+    "0": "ancientwarfarenpc:item/stone_halberd"
+  }
+}

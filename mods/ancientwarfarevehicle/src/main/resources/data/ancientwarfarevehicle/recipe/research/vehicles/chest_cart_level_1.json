@@ -1,0 +1,25 @@
+{
+  "type": "ancientwarfare:shapeless_research_recipe",
+  "research": "ancientwarfare:trade",
+  "ingredients": [
+    {
+      "item": "ancientwarfarevehicle:treated_wood",
+      "count": 3
+    },
+    {
+      "tag": "c:chests/wooden",
+      "count": 8
+    },
+    {
+      "item": "ancientwarfarevehicle:equipment_bay"
+    }
+  ],
+  "result": {
+    "id": "ancientwarfarevehicle:chest_cart_spawner",
+    "components": {
+      "ancientwarfarevehicle:vehicle_spawn_data": {
+        "level": 1
+      }
+    }
+  }
+}

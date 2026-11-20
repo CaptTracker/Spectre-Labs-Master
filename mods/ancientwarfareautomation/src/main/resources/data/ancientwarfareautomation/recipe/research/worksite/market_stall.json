@@ -1,0 +1,29 @@
+{
+  "type": "ancientwarfare:research_recipe",
+  "research": "ancientwarfare:trade",
+  "pattern": [
+    "WWW",
+    "GIG",
+    "_C_"
+  ],
+  "key": {
+    "W": {
+      "tag": "minecraft:wool"
+    },
+    "I": {
+      "item": "minecraft:gold_ingot"
+    },
+    "G": {
+      "tag": "c:gears/wooden"
+    },
+    "C": {
+      "tag": "c:chests/wooden"
+    },
+    "_": {
+      "tag": "minecraft:planks"
+    }
+  },
+  "result": {
+    "id": "ancientwarfareautomation:market_stall"
+  }
+}

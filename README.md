@@ -66,7 +66,7 @@ On Windows, use `gradlew.bat` instead of `./gradlew`.
 
 Code goes in the library once **two or more mods** need it. It currently has:
 
-- `ModRegistrar`: one object per mod that holds the block, item, block-entity, menu, sound and creative-tab registries, and fills the creative tab automatically.
+- `ModRegistrar`: one object per mod that holds the block, item, block-entity, menu, sound, data-component and creative-tab registries, and fills the creative tab automatically.
 - `Ids`: short `ResourceLocation` helpers.
 - `ItemStacks`: common item helpers (`giveOrDrop`, component-aware equality).
 

@@ -1,0 +1,6 @@
+{
+  "parent": "ancientwarfarenpc:item/wooden_cleaver",
+  "textures": {
+    "0": "ancientwarfarenpc:item/iron_cleaver"
+  }
+}

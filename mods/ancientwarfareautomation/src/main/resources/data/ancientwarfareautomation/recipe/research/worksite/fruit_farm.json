@@ -1,0 +1,26 @@
+{
+  "type": "ancientwarfare:research_recipe",
+  "research": "ancientwarfare:agriculture",
+  "pattern": [
+    "___",
+    "GAG",
+    "_C_"
+  ],
+  "key": {
+    "C": {
+      "tag": "c:chests/wooden"
+    },
+    "A": {
+      "item": "minecraft:apple"
+    },
+    "G": {
+      "tag": "c:gears/wooden"
+    },
+    "_": {
+      "tag": "minecraft:planks"
+    }
+  },
+  "result": {
+    "id": "ancientwarfareautomation:fruit_farm"
+  }
+}

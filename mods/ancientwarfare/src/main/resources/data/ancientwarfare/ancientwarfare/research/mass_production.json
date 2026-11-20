@@ -1,0 +1,25 @@
+{
+  "time": 200,
+  "dependencies": [
+    "ancientwarfare:refining",
+    "ancientwarfare:machinery"
+  ],
+  "resources": [
+    {
+      "tag": "c:ingots/steel",
+      "count": 12
+    },
+    {
+      "tag": "c:gears/steel",
+      "count": 6
+    },
+    {
+      "tag": "ancientwarfare:bearings/steel",
+      "count": 3
+    },
+    {
+      "tag": "ancientwarfare:torque_shafts/steel",
+      "count": 3
+    }
+  ]
+}

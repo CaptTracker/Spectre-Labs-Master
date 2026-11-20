@@ -1,0 +1,24 @@
+{
+  "time": 200,
+  "dependencies": [
+    "ancientwarfare:agriculture"
+  ],
+  "resources": [
+    {
+      "tag": "c:crops/wheat",
+      "count": 12
+    },
+    {
+      "tag": "c:leathers",
+      "count": 4
+    },
+    {
+      "tag": "c:strings",
+      "count": 12
+    },
+    {
+      "item": "minecraft:torch",
+      "count": 4
+    }
+  ]
+}

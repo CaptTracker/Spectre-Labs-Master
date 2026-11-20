@@ -1,0 +1,23 @@
+{
+  "block.ancientwarfareautomation.torque_shaft_light": "Light Torque Shaft",
+  "block.ancientwarfareautomation.torque_shaft_medium": "Medium Torque Shaft",
+  "block.ancientwarfareautomation.torque_shaft_heavy": "Heavy Torque Shaft",
+  "block.ancientwarfareautomation.torque_junction_light": "Light Torque Junction",
+  "block.ancientwarfareautomation.torque_junction_medium": "Medium Torque Junction",
+  "block.ancientwarfareautomation.torque_junction_heavy": "Heavy Torque Junction",
+  "block.ancientwarfareautomation.torque_distributor_light": "Light Torque Distributor",
+  "block.ancientwarfareautomation.torque_distributor_medium": "Medium Torque Distributor",
+  "block.ancientwarfareautomation.torque_distributor_heavy": "Heavy Torque Distributor",
+  "block.ancientwarfareautomation.flywheel_controller_light": "Light Flywheel Controller",
+  "block.ancientwarfareautomation.flywheel_controller_medium": "Medium Flywheel Controller",
+  "block.ancientwarfareautomation.flywheel_controller_heavy": "Heavy Flywheel Controller",
+  "block.ancientwarfareautomation.flywheel_storage_light": "Light Flywheel Energy Storage",
+  "block.ancientwarfareautomation.flywheel_storage_medium": "Medium Flywheel Energy Storage",
+  "block.ancientwarfareautomation.flywheel_storage_heavy": "Heavy Flywheel Energy Storage",
+  "block.ancientwarfareautomation.stirling_generator": "Stirling Generator",
+  "block.ancientwarfareautomation.waterwheel_generator": "Waterwheel Generator",
+  "block.ancientwarfareautomation.hand_cranked_generator": "Hand Cranked Torque Generator",
+  "block.ancientwarfareautomation.windmill_generator": "Windmill Controller",
+  "block.ancientwarfareautomation.windmill_blade": "Windmill Blade",
+  "guistrings.automation.torque.values": "Stored | In | Out | Loss :: %s | %s | %s | %s"
+}

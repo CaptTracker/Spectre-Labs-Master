@@ -1,0 +1,24 @@
+{
+  "type": "ancientwarfare:shapeless_research_recipe",
+  "research": "ancientwarfare:siege_warfare",
+  "ingredients": [
+    {
+      "item": "ancientwarfarevehicle:rough_wood",
+      "count": 4
+    },
+    {
+      "item": "ancientwarfarevehicle:powder_case"
+    },
+    {
+      "item": "ancientwarfarevehicle:equipment_bay"
+    }
+  ],
+  "result": {
+    "id": "ancientwarfarevehicle:hwacha_spawner",
+    "components": {
+      "ancientwarfarevehicle:vehicle_spawn_data": {
+        "level": 0
+      }
+    }
+  }
+}

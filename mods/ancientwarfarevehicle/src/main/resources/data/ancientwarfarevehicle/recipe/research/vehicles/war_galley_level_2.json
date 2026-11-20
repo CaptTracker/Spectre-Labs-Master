@@ -1,0 +1,42 @@
+{
+  "type": "ancientwarfare:shapeless_research_recipe",
+  "research": "ancientwarfare:naval_warfare",
+  "ingredients": [
+    {
+      "item": "ancientwarfarevehicle:ironshod_wood",
+      "count": 12
+    },
+    {
+      "tag": "c:strings",
+      "count": 12
+    },
+    {
+      "tag": "minecraft:wool",
+      "count": 6
+    },
+    {
+      "tag": "c:ingots/iron",
+      "count": 6
+    },
+    {
+      "item": "ancientwarfarevehicle:turret_components",
+      "count": 2
+    },
+    {
+      "item": "ancientwarfarevehicle:powder_case",
+      "count": 2
+    },
+    {
+      "item": "ancientwarfarevehicle:equipment_bay",
+      "count": 2
+    }
+  ],
+  "result": {
+    "id": "ancientwarfarevehicle:war_galley_spawner",
+    "components": {
+      "ancientwarfarevehicle:vehicle_spawn_data": {
+        "level": 2
+      }
+    }
+  }
+}

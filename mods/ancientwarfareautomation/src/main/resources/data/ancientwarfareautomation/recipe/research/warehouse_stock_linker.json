@@ -1,0 +1,29 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "ancientwarfarenpc"
+    }
+  ],
+  "type": "ancientwarfare:research_recipe",
+  "research": "ancientwarfare:trade",
+  "pattern": [
+    "R",
+    "P",
+    "S"
+  ],
+  "key": {
+    "R": {
+      "item": "ancientwarfarenpc:routing_order"
+    },
+    "P": {
+      "item": "minecraft:paper"
+    },
+    "S": {
+      "tag": "minecraft:signs"
+    }
+  },
+  "result": {
+    "id": "ancientwarfareautomation:warehouse_stock_linker"
+  }
+}

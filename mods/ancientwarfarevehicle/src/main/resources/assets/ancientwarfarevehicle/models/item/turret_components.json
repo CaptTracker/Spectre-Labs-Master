@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "ancientwarfarevehicle:item/vehicle/misc/vehicle_turret_components"
+  }
+}
