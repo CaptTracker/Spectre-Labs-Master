@@ -97,9 +97,7 @@ public class NpcAIPlayerOwnedCourier extends NpcAI<NpcCourier> {
             startWork();
         } else {
             ticksAtSite++;
-            if (npc.tickCount % 10 == 0) {
-                npc.swing(InteractionHand.MAIN_HAND);
-            }
+            npc.workSwing();
             if (ticksAtSite > ticksToWork) {
                 setMoveToNextSite();
             }

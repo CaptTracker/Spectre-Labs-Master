@@ -130,9 +130,7 @@ public class NpcAIPlayerOwnedWork extends NpcAI<NpcBase> {
     }
 
     private void swingArm() {
-        if (npc.tickCount % 10 == 0) {
-            npc.swing(InteractionHand.MAIN_HAND);
-        }
+        npc.workSwing();
     }
 
     private void doWork(WorkEntry entry) {

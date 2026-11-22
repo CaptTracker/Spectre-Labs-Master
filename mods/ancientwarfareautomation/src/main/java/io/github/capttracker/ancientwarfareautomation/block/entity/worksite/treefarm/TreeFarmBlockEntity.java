@@ -20,15 +20,19 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.LongTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ShearsItem;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BonemealableBlock;
@@ -207,9 +211,14 @@ public class TreeFarmBlockEntity extends FarmWorksiteBlockEntity {
         return true;
     }
 
-    /** The staffed chop: breaks the block (a trunk, or a leaf block of the leaf queue) and hands what it drops to {@code drops}; the foot of a trunk is remembered for replanting. */
+    /**
+     * The staffed chop. Chopping the lowest log of the queued tree fells the whole tree ({@link #fellTree}); a block of the leaf queue is broken on its
+     * own. What it drops goes to {@code drops}; the foot of a trunk is remembered for replanting.
+     */
     private boolean chopAt(BlockPos position, IItemHandler drops) {
-        trunkBlocksToChop.remove(position);
+        if (trunkBlocksToChop.contains(position)) {
+            return fellTree(position, drops);
+        }
         leafBlocksToChop.remove(position);
         BlockState state = level.getBlockState(position);
         if (state.isAir() || !(level instanceof ServerLevel serverLevel)) {
@@ -227,6 +236,85 @@ public class TreeFarmBlockEntity extends FarmWorksiteBlockEntity {
         }
         setChanged();
         return true;
+    }
+
+    /**
+     * Fells the tree: every log of the queued tree breaks at once and drops into {@code drops}, one sapling of the tree's kind comes with them (the
+     * leaves are left to decay), and the foot of each trunk is remembered for replanting. Chopping the lowest log is what the worker does; the work time
+     * grows with the number of logs ({@link #fellTicks}).
+     */
+    private boolean fellTree(BlockPos position, IItemHandler drops) {
+        if (!(level instanceof ServerLevel serverLevel) || !level.getBlockState(position).is(BlockTags.LOGS)) {
+            trunkBlocksToChop.remove(position);
+            return false;
+        }
+        List<BlockPos> logs = new ArrayList<>(trunkBlocksToChop);
+        logs.sort(Comparator.comparingInt(BlockPos::getY));
+        trunkBlocksToChop.clear();
+        ItemStack sapling = ItemStack.EMPTY;
+        boolean felled = false;
+        for (BlockPos log : logs) {
+            BlockState state = level.getBlockState(log);
+            if (!state.is(BlockTags.LOGS)) {
+                continue; // changed since the scan (a player built there): only logs of the scanned tree are felled
+            }
+            if (sapling.isEmpty()) {
+                sapling = saplingOf(state);
+            }
+            NonNullList<ItemStack> extraDrops = TreeFarmRegistry.getBlockExtraDrop(state).getDrops(level, log, state, getFortune());
+            List<ItemStack> stacks = WorksiteTools.getDrops(serverLevel, log, state, getFortune());
+            if (!BlockTools.breakBlockNoDrops(level, log, state)) {
+                continue;
+            }
+            felled = true;
+            InventoryTools.insertOrDropItems(drops, stacks, level, log);
+            InventoryTools.insertOrDropItems(drops, extraDrops, level, log);
+            if (TreeFarmRegistry.isSoil(level.getBlockState(log.below()))) {
+                replantSpots.add(log.immutable());
+            }
+        }
+        if (felled && !sapling.isEmpty()) {
+            InventoryTools.insertOrDropItems(drops, List.of(sapling), level, position);
+        }
+        setChanged();
+        return felled;
+    }
+
+    /** The sapling item that belongs to a log block (oak_log, stripped_oak_wood: oak_sapling; crimson_stem: crimson_fungus), if the farm can plant it. */
+    private static ItemStack saplingOf(BlockState log) {
+        String name = BuiltInRegistries.BLOCK.getKey(log.getBlock()).getPath();
+        if (name.startsWith("stripped_")) {
+            name = name.substring("stripped_".length());
+        }
+        String base;
+        if (name.endsWith("_log")) {
+            base = name.substring(0, name.length() - 4);
+        } else if (name.endsWith("_wood")) {
+            base = name.substring(0, name.length() - 5);
+        } else if (name.endsWith("_stem")) {
+            base = name.substring(0, name.length() - 5);
+        } else if (name.endsWith("_hyphae")) {
+            base = name.substring(0, name.length() - 7);
+        } else {
+            return ItemStack.EMPTY;
+        }
+        String namespace = BuiltInRegistries.BLOCK.getKey(log.getBlock()).getNamespace();
+        for (String suffix : new String[]{"_sapling", "_propagule", "_fungus"}) {
+            Optional<Item> item = BuiltInRegistries.ITEM.getOptional(ResourceLocation.fromNamespaceAndPath(namespace, base + suffix));
+            if (item.isPresent() && item.get() != Items.AIR) {
+                ItemStack stack = new ItemStack(item.get());
+                if (TreeFarmRegistry.isPlantable(stack)) {
+                    return stack;
+                }
+            }
+        }
+        return ItemStack.EMPTY;
+    }
+
+    /** The work time of felling the queued tree: the time of one log, plus 60% of it for each further log (at most 40 times one log). */
+    private int fellTicks(BlockPos foot, int logs) {
+        int one = WorkTask.breakTicks(level.getBlockState(foot), level, foot);
+        return (int) Math.min(one * 40L, Math.round(one * (1.0D + 0.6D * Math.max(0, logs - 1))));
     }
 
     private boolean shearAt(BlockPos position, IItemHandler drops) {
@@ -291,12 +379,26 @@ public class TreeFarmBlockEntity extends FarmWorksiteBlockEntity {
             leafBlocksToChop.addAll(leafBlocks); // the workers leave the leaves to decay
         }
         List<BlockPos> trunkBlocks = tree.getTrunkPositions();
+        if (isStaffed() && trunkBlocks.size() > 1 && !hasNaturalLeaf(leafBlocks)) {
+            trunkBlocks = List.of(); // logs without natural leaves are a player's build: workers leave them alone
+        }
         trunkBlocksToChop.addAll(trunkBlocks);
 
         if (!leafBlocks.isEmpty() || !trunkBlocks.isEmpty()) {
             setChanged();
         }
         level.getProfiler().pop();
+    }
+
+    /** A leaf block that grew (not placed by a player: those are {@code persistent}); other leaf kinds (nether wart blocks) count as natural. */
+    private boolean hasNaturalLeaf(List<BlockPos> leaves) {
+        for (BlockPos leaf : leaves) {
+            BlockState state = level.getBlockState(leaf);
+            if (!state.hasProperty(net.minecraft.world.level.block.LeavesBlock.PERSISTENT) || !state.getValue(net.minecraft.world.level.block.LeavesBlock.PERSISTENT)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -419,6 +521,8 @@ public class TreeFarmBlockEntity extends FarmWorksiteBlockEntity {
 
     private static final int MAX_LISTED_PLANT = 16;
     private static final int MAX_LISTED_SHEAR = 24;
+    /** The leaves a worker shears from the ground: no higher than this above the foot of the tree. */
+    private static final int MAX_SHEAR_HEIGHT = 4;
 
     @Override
     protected boolean supportsStaffedWork() {
@@ -426,7 +530,7 @@ public class TreeFarmBlockEntity extends FarmWorksiteBlockEntity {
     }
 
     /**
-     * Chop (the lowest layer of the tree that is queued, so the tree comes down bottom up), then plant (where the trunk stood first), bone meal, and
+     * Chop (the foot of the queued tree: chopping the lowest log fells the whole tree), then plant (where the trunk stood first), bone meal, and
      * shear (only with shears in the misc inventory; the leaves decay by themselves otherwise).
      */
     @Override
@@ -441,9 +545,16 @@ public class TreeFarmBlockEntity extends FarmWorksiteBlockEntity {
                 lowest = Math.min(lowest, pos.getY());
             }
         }
-        for (BlockPos pos : trunkBlocksToChop) {
-            if (pos.getY() == lowest) {
-                tasks.add(WorkTask.of(level, pos, WorkAction.CHOP));
+        if (lowest != Integer.MAX_VALUE) {
+            // one task per tree: chopping its lowest log fells it (a worker only has to reach the foot of the trunk)
+            BlockPos foot = null;
+            for (BlockPos pos : trunkBlocksToChop) {
+                if (pos.getY() == lowest && (foot == null || pos.asLong() < foot.asLong())) {
+                    foot = pos;
+                }
+            }
+            if (foot != null) {
+                tasks.add(new WorkTask(foot, WorkAction.CHOP, fellTicks(foot, trunkBlocksToChop.size())));
             }
         }
         if (plantableCount > 0) {
@@ -457,7 +568,9 @@ public class TreeFarmBlockEntity extends FarmWorksiteBlockEntity {
         }
         blocksToShear.removeIf(pos -> !(level.getBlockState(pos).getBlock() instanceof IShearable)); // decayed leaves
         if (hasShears && !blocksToShear.isEmpty()) {
-            blocksToShear.stream().sorted(Comparator.comparingInt(BlockPos::getY)).limit(MAX_LISTED_SHEAR)
+            // workers do not climb: only the leaves a worker can stand under and reach (about 4 blocks above the foot of the tree)
+            int reachTop = (lowest != Integer.MAX_VALUE ? lowest : worldPosition.getY()) + MAX_SHEAR_HEIGHT;
+            blocksToShear.stream().filter(pos -> pos.getY() <= reachTop).sorted(Comparator.comparingInt(BlockPos::getY)).limit(MAX_LISTED_SHEAR)
                     .forEach(pos -> tasks.add(new WorkTask(pos, WorkAction.SHEAR, WorkTask.MIN_TICKS)));
         }
         return tasks;

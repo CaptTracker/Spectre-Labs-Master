@@ -38,6 +38,10 @@ public final class NpcMenuPayloads {
         INVENTORY,
         /** The alt GUI of the NPC ({@code NpcBase.openAltGui}: the bard's songs, the trader's shop). */
         ALT,
+        /** The talk screen: what the NPC is thinking (anyone who is not an enemy). */
+        TALK,
+        /** The talk screen on the morale tab (the commanders of a player-owned NPC). */
+        MORALE,
         /** The creative controls ({@code GUI_NPC_CREATIVE}). */
         CREATIVE,
         /** The trade setup of a faction trader ({@code GUI_NPC_FACTION_TRADE_SETUP}). */

@@ -62,7 +62,7 @@ public class NpcInventoryMenu extends NpcMenuBase<NpcBase> implements ISkinSetti
             addSlot(new SlotItemHandler(equipment, 6, 8 + 18 * 2, 8 + 18 * 3));//work/combat/route orders slot
             addSlot(new SlotItemHandler(equipment, 7, 8 + 18 * 2, 8 + 18 * 2));//upkeep orders slot
         }
-        guiHeight = addPlayerSlots(inventory, 8, 8 + 5 * 18 + 8 + 18, 4) + 8;
+        guiHeight = addPlayerSlots(inventory, 8, 8 + 5 * 18 + 8 + 18 + 18, 4) + 8;
         if (npc != null) {
             isArcher = npc.getNpcSubType().equals("archer");
             name = npc.hasCustomName() ? npc.getCustomName().getString() : "";

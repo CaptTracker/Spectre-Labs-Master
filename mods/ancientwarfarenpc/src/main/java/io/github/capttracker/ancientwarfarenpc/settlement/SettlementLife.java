@@ -260,8 +260,77 @@ public final class SettlementLife {
         return best != null ? best : settlement.getHallPos().above();
     }
 
+    // ---------------------------------------------------------------- alarm bells (playtest fixes)
+
+    /** The bells found by the last bell scan of a settlement (cached: the scan is repeated every {@link #SCAN_INTERVAL} ticks while the alarm is on). */
+    private static final Map<UUID, Set<BlockPos>> BELLS = new java.util.HashMap<>();
+    private static final Map<UUID, Long> BELL_SCANNED = new java.util.HashMap<>();
+    private static final Map<UUID, Long> BELL_RUNG = new java.util.HashMap<>();
+
+    /**
+     * Called every few ticks: while the alarm of the settlement is on, rings every bell block inside the land in the loaded chunks, at once when the
+     * alarm turns on and then every {@code bell_ring_interval_ticks}. The positions are cached and checked again before each ring.
+     */
+    public static void ringBells(ServerLevel level, Settlement settlement) {
+        UUID id = settlement.getId();
+        if (!settlement.isAlarmActive()) {
+            BELL_RUNG.remove(id);
+            BELLS.remove(id);
+            BELL_SCANNED.remove(id);
+            return;
+        }
+        long now = level.getGameTime();
+        Long last = BELL_RUNG.get(id);
+        if (last != null && now - last < SettlementConfig.bellRingIntervalTicks) {
+            return;
+        }
+        Long scanned = BELL_SCANNED.get(id);
+        if (scanned == null || now - scanned >= SCAN_INTERVAL || now < scanned) {
+            scanBells(level, settlement);
+            BELL_SCANNED.put(id, now);
+        }
+        BELL_RUNG.put(id, now);
+        Set<BlockPos> bells = BELLS.get(id);
+        if (bells == null) {
+            return;
+        }
+        bells.removeIf(pos -> {
+            if (!level.isLoaded(pos)) {
+                return false;
+            }
+            BlockState state = level.getBlockState(pos);
+            if (!(state.getBlock() instanceof net.minecraft.world.level.block.BellBlock bell)) {
+                return true;
+            }
+            bell.attemptToRing(level, pos, state.getValue(net.minecraft.world.level.block.BellBlock.FACING));
+            return false;
+        });
+    }
+
+    private static void scanBells(ServerLevel level, Settlement settlement) {
+        int[] bounds = landBounds(settlement);
+        Set<BlockPos> bells = new HashSet<>();
+        for (int cx = bounds[0] >> 4; cx <= bounds[2] >> 4; cx++) {
+            for (int cz = bounds[1] >> 4; cz <= bounds[3] >> 4; cz++) {
+                LevelChunk chunk = level.getChunkSource().getChunkNow(cx, cz);
+                if (chunk == null) {
+                    continue;
+                }
+                for (BlockEntity be : new ArrayList<>(chunk.getBlockEntities().values())) {
+                    if (be instanceof BellBlockEntity && settlement.contains(be.getBlockPos())) {
+                        bells.add(be.getBlockPos().immutable());
+                    }
+                }
+            }
+        }
+        BELLS.put(settlement.getId(), bells);
+    }
+
     /** Forgets the cached scan results of a settlement that is gone. */
     public static void forget(UUID settlementId) {
         SOCIAL_BLOCKS.remove(settlementId);
+        BELLS.remove(settlementId);
+        BELL_SCANNED.remove(settlementId);
+        BELL_RUNG.remove(settlementId);
     }
 }

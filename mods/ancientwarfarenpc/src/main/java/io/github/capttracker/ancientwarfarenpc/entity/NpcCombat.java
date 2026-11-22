@@ -65,6 +65,11 @@ public class NpcCombat extends NpcPlayerOwned implements RangedAttackMob {
     @Nullable
     private NpcBase distressedTarget;
 
+    @Override
+    public int getToolMorale() {
+        return getMainHandItem().isEmpty() ? -6 : 2;
+    }
+
     public NpcCombat(EntityType<? extends NpcCombat> type, Level level) {
         super(type, level);
         setCanPickUpLoot(true);

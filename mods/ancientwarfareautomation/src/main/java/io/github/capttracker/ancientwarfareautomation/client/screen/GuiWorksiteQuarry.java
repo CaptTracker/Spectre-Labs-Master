@@ -5,10 +5,12 @@
 package io.github.capttracker.ancientwarfareautomation.client.screen;
 
 import io.github.capttracker.ancientwarfare.client.gui.elements.Button;
+import io.github.capttracker.ancientwarfare.client.gui.elements.Label;
 import io.github.capttracker.ancientwarfareautomation.menu.QuarryMenu;
 
-/** Screen of {@link QuarryMenu}: the worksite inventory screen with a third button for the quarry's depth. */
+/** Screen of {@link QuarryMenu}: the worksite inventory screen with the ladder and torch slots, a hint when the mine waits for ladders and a third button for the mine settings. */
 public class GuiWorksiteQuarry extends GuiWorksiteBase<QuarryMenu> {
+    private Label waitingHint;
 
     public GuiWorksiteQuarry(QuarryMenu menu) {
         super(menu);
@@ -26,6 +28,11 @@ public class GuiWorksiteQuarry extends GuiWorksiteBase<QuarryMenu> {
     @Override
     public void initElements() {
         addLabels();
+        addGuiElement(new Label(8, getContainer().ladderLabel, "guistrings.automation.quarry_ladders"));
+        addGuiElement(new Label(98, getContainer().ladderLabel, "guistrings.automation.quarry_torches"));
+        waitingHint = new Label(8, getContainer().hintLabel, "guistrings.automation.quarry_waiting_ladder").setColor(0xFFFF6A5A);
+        waitingHint.setVisible(getContainer().waitingForLadder);
+        addGuiElement(waitingHint);
         addSideSelectButton();
         addBoundsAdjustButton();
         addQuarryHeightButton();
@@ -33,6 +40,8 @@ public class GuiWorksiteQuarry extends GuiWorksiteBase<QuarryMenu> {
 
     @Override
     public void setupElements() {
-        // noop
+        if (waitingHint != null) {
+            waitingHint.setVisible(getContainer().waitingForLadder);
+        }
     }
 }

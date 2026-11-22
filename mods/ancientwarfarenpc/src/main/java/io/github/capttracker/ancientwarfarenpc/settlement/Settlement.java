@@ -113,7 +113,10 @@ public class Settlement {
         public MemberStatus status = MemberStatus.IDLE;
         /** {@code getNpcFullType()}, for example {@code worker.farmer}. */
         public String type = "";
-        public String name = "";
+        public String name = "";        /** The generated first name (shown with the template of the type when there is no custom name). */
+        public String given = "";
+        /** The personal morale at the last update, or -1 if the NPC has not computed one yet. */
+        public int morale = -1;
 
         Member(UUID id, BlockPos pos) {
             this.id = id;
@@ -256,6 +259,8 @@ public class Settlement {
         member.type = npc.getNpcFullType();
         Component custom = npc.getCustomName();
         member.name = custom == null ? "" : custom.getString();
+        member.given = npc.getGivenName();
+        member.morale = npc.getPersonalMorale();
     }
 
     public boolean removeMember(UUID npc) {
@@ -385,11 +390,18 @@ public class Settlement {
     /** A member died: it leaves the member set and its spawner stack goes on the death list. */
     public void handleNpcDeath(NpcPlayerOwned npc, DamageSource source) {
         Component customName = npc.getCustomName();
-        deathList.add(new NpcDeathEntry(NpcBridge.createSpawnerStack(npc), npc.getNpcFullType(), customName == null ? "" : customName.getString(),
+        deathList.add(new NpcDeathEntry(NpcBridge.createSpawnerStack(npc), npc.getNpcFullType(), customName == null ? npc.getGivenName() : customName.getString(),
                 source.type().msgId(), true, npc.blockPosition()));
         members.remove(npc.getUUID());
         freeBedOf(npc.getUUID());
         lastDeathTime = npc.level().getGameTime();
+        if (npc.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+            for (UUID memberId : members.keySet()) {
+                if (serverLevel.getEntity(memberId) instanceof NpcPlayerOwned friend) {
+                    friend.think("friend_died", npc.getName());
+                }
+            }
+        }
         dirty();
         informViewers();
     }
@@ -431,10 +443,7 @@ public class Settlement {
 
     /** The work speed factor the morale gives: from the configured minimum (morale 0) to the maximum (morale 100). */
     public double getMoraleWorkFactor() {
-        if (!SettlementConfig.moraleEnabled) {
-            return 1.0D;
-        }
-        return SettlementConfig.moraleMinFactor + (SettlementConfig.moraleMaxFactor - SettlementConfig.moraleMinFactor) * (morale / 100.0D);
+        return SettlementConfig.moraleWorkFactor(morale);
     }
 
     void setMorale(int morale, List<SettlementMorale.Factor> factors) {
@@ -675,6 +684,8 @@ public class Settlement {
             memberTag.putInt("status", member.status.ordinal());
             memberTag.putString("type", member.type);
             memberTag.putString("name", member.name);
+            memberTag.putString("given", member.given);
+            memberTag.putInt("morale", member.morale);
             memberList.add(memberTag);
         }
         tag.put("members", memberList);
@@ -751,6 +762,8 @@ public class Settlement {
             member.status = MemberStatus.byOrdinal(memberTag.getInt("status"));
             member.type = memberTag.getString("type");
             member.name = memberTag.getString("name");
+            member.given = memberTag.getString("given");
+            member.morale = memberTag.contains("morale") ? memberTag.getInt("morale") : -1;
             settlement.members.put(member.id, member);
         }
         ListTag bedList = tag.getList("beds", Tag.TAG_COMPOUND);

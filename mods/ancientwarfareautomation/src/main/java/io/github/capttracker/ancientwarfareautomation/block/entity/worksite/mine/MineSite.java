@@ -39,8 +39,14 @@ public interface MineSite {
     /** True if the block is an ore (the {@code c:ores} tag) a strip mine follows. */
     boolean isOre(BlockState state);
 
-    /** How many of the item the quarry's inventory holds. */
+    /** How many of the item the quarry holds: ladders and torches are counted in their own slots, everything else in the main inventory. */
     int stock(Item item);
+
+    /**
+     * The pattern cannot go on because it needs a ladder and the quarry's ladder slots are empty: the mine waits and the screen says so. Called while
+     * planning; the quarry forgets it at the start of every plan.
+     */
+    void waitingForLadder();
 
     /** The pattern is working around this position now: the quarry keeps its chunk loaded when it has a chunk loader. */
     void focus(BlockPos pos);

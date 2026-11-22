@@ -64,12 +64,23 @@ public final class NpcMenuOpener {
                     openMenu(player, npc, (id, inventory, p) -> new InnShopMenu(id, inventory, keeper));
                 }
             }
+            case TALK -> openTalk(player, npc, NpcTalkMenu.TAB_TALK);
+            case MORALE -> openTalk(player, npc, NpcTalkMenu.TAB_MORALE);
             case FACTION_TRADE_VIEW -> {
                 if (npc instanceof NpcFactionTrader trader) {
                     openMenu(player, npc, (id, inventory, p) -> new FactionTradeViewMenu(id, inventory, trader));
                 }
             }
         }
+    }
+
+    /** The talk screen on a tab; the morale tab only for the commanders of a player-owned NPC. Anyone who is not an enemy may talk. */
+    public static void openTalk(ServerPlayer player, NpcBase npc, int tab) {
+        if (!npc.isAlive() || !NpcMenuBase.mayEdit(player, npc) && npc.isHostileTowards(player)) {
+            return;
+        }
+        int shown = tab == NpcTalkMenu.TAB_MORALE && NpcTalkMenu.hasMoraleTab(player, npc) ? tab : NpcTalkMenu.TAB_TALK;
+        openMenu(player, npc, (id, inventory, p) -> new NpcTalkMenu(id, inventory, npc, shown));
     }
 
     /** The creative controls (1.12.2: {@code GUI_NPC_CREATIVE}, 44). Creative players only. */
@@ -115,6 +126,8 @@ public final class NpcMenuOpener {
                     player.closeContainer();
                 }
             }
+            case TALK -> openTalk(player, npc, NpcTalkMenu.TAB_TALK);
+            case MORALE -> openTalk(player, npc, NpcTalkMenu.TAB_MORALE);
             case CREATIVE -> openCreative(player, npc);
             case TRADE_SETUP -> openTradeSetup(player, npc);
         }

@@ -33,7 +33,11 @@ public final class NpcBridge {
         /** The shop of a trader that staffs a market stall (rework phase 5). */
         MARKET_SHOP,
         /** The meal shop of an innkeeper at an inn (rework phase 5). */
-        INN_SHOP
+        INN_SHOP,
+        /** The talk screen: what the NPC is thinking (playtest fixes). Anyone who is not an enemy. */
+        TALK,
+        /** The talk screen on the morale tab (the commanders of a player-owned NPC). */
+        MORALE
     }
 
     /** Builds the spawner item of an NPC (1.12.2: {@code ItemNpcSpawner.getSpawnerItemForNpc}, which calls {@code writeAdditionalItemData}). */

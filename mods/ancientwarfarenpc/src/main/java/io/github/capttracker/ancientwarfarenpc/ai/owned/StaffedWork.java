@@ -10,8 +10,10 @@ import io.github.capttracker.ancientwarfare.api.WorkAction;
 import io.github.capttracker.ancientwarfare.api.WorkTask;
 import io.github.capttracker.ancientwarfare.util.WorldTools;
 import io.github.capttracker.ancientwarfarenpc.ai.NpcAI;
+import io.github.capttracker.ancientwarfarenpc.ai.path.NpcRouteAssist;
 import io.github.capttracker.ancientwarfarenpc.config.AWNPCStatics;
 import io.github.capttracker.ancientwarfarenpc.entity.NpcWorker;
+import io.github.capttracker.ancientwarfarenpc.settlement.SettlementConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -19,7 +21,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.items.IItemHandler;
@@ -33,8 +37,10 @@ import java.util.UUID;
  * The work of one worker at a staffed worksite ({@link IWorksiteTasks}), driven tick by tick by a goal. The goal gives it the movement call of
  * {@link NpcAI}, so the worker walks like everywhere else.
  *
- * <p>Per task: claim a task from the site, walk within reach of its target, face it and swing the tool while the progress counter fills, then let the
- * site do the action for that target. Progress per tick is {@code toolSpeed * skill * torqueBoost}, and it only advances on the ticks
+ * <p>Per task: claim a task from the site, walk within reach of its target (4.5 blocks from the eyes, with a line of sight; no flying: the worker walks
+ * on the ground and, where vanilla navigation cannot, follows a route over the ladders of a mine, see {@link NpcRouteAssist}), face it and swing the tool
+ * every {@code swing_interval_ticks} while the progress counter fills, then let the site do the action for that target. A target that cannot be reached
+ * goes on cooldown at the site. Progress per tick is {@code toolSpeed * skill * torqueBoost}, and it only advances on the ticks
  * {@link io.github.capttracker.ancientwarfarenpc.entity.NpcBase#advanceWorkTick()} allows (hunger factor times tool factor); the target is
  * {@link WorkTask#baseTicks()} (from the block's hardness for breaking actions). For breaking actions the block's crack overlay follows the progress
  * ({@code Level.destroyBlockProgress}) and the worker's tool speed on that block counts; particles and the block's hit sound play with the swing.
@@ -60,8 +66,14 @@ public final class StaffedWork {
 
     /** The pouch is emptied when fewer slots than this are free: a harvest can drop several stacks. */
     static final int POUCH_RESERVE = 3;
-    private static final int SWING_INTERVAL = 6;
     private static final int STUCK_TICKS = 100;
+    /** Ticks without a way on foot after which a route over the ladders is asked for. */
+    private static final int NO_PATH_TICKS = 10;
+    /** A worker can work a block within this many blocks of its eyes (fishing: at the water's edge). */
+    private static final double WORK_REACH = NpcRouteAssist.WORK_REACH;
+    private static final double FISH_REACH = 3.0D;
+    /** How close to the site block a worker stands to empty its pouch or wait. */
+    private static final double SITE_REACH = 3.0D;
     private static final int KEEP_INTERVAL = 20;
     private static final int DEPOSIT_RETRY_TICKS = 200;
     private static final double MAX_TOOL_SPEED = 8.0D;
@@ -74,9 +86,11 @@ public final class StaffedWork {
     @Nullable
     private BlockPos taskSite;
     private double progress;
-    private double bestDistance;
-    private int stuck;
     private int crackStage = -1;
+    private int swingTimer;
+    private double holdY = Double.NaN;
+    private final Walk taskWalk = new Walk();
+    private final Walk siteWalk = new Walk();
     private int keepTimer;
     private long depositRetryAt;
     private boolean started;
@@ -135,8 +149,9 @@ public final class StaffedWork {
             taskSite = sitePos;
             started = false;
             progress = 0;
-            stuck = 0;
-            bestDistance = Double.MAX_VALUE;
+            taskWalk.reset();
+            swingTimer = Integer.MAX_VALUE / 2;
+            holdY = Double.NaN;
             keepTimer = 0;
         } else if (++keepTimer >= KEEP_INTERVAL) {
             keepTimer = 0;
@@ -154,14 +169,13 @@ public final class StaffedWork {
             return State.IDLE;
         }
         Vec3 center = Vec3.atCenterOf(current.pos());
-        double distance = npc.distanceToSqr(center);
-        double reach = Math.max(npc.getWorkRangeSq(), 4.0D);
-        if (current.action() == WorkAction.FISH) {
-            reach = Math.min(reach, 9.0D); // fishing: at the water's edge
-        }
+        BlockState atTarget = level.getBlockState(current.pos());
+        npc.setDoing("work." + current.action().name().toLowerCase(java.util.Locale.ROOT), current.pos(),
+                (atTarget.isAir() ? level.getBlockState(sitePos) : atTarget).getBlock().getName());
         if (dock != null) {
+            double distance = npc.distanceToSqr(center);
             BoatTrip boat = trip();
-            reach = 16.0D; // from the boat: 4 blocks
+            double reach = 16.0D; // from the boat: 4 blocks
             if (!aboard) {
                 Boolean boarded = boat.board(dock, mover);
                 if (boarded == null) {
@@ -186,31 +200,23 @@ public final class StaffedWork {
             } else {
                 boat.hold(dock, current.pos());
             }
-        } else if (distance > reach && climb(center, current.action())) {
-            keepTimer = Math.min(keepTimer, KEEP_INTERVAL - 1);
-            return State.WORKING; // going up or down a trunk
-        }
-        if (distance > reach && !aboard) {
-            npc.endWorkClimb();
-            double walkY = Math.min(current.pos().getY(), npc.getY() + 2.0D);
-            npc.addAITask(NpcAI.TASK_MOVE);
-            mover.move(current.pos().getX() + 0.5D, walkY, current.pos().getZ() + 0.5D, distance);
-            if (distance < bestDistance - 0.5D) {
-                bestDistance = distance;
-                stuck = 0;
-            } else if (++stuck > STUCK_TICKS) {
-                site.releaseTask(id, current, true); // cannot get there: the target is left alone for a while
+        } else if (!NpcRouteAssist.inReach(npc, current.pos(), reachOf(current.action()), true)) {
+            if (!approach(current)) {
+                site.releaseTask(id, current, true); // there is no way there: the target is left alone for a while
+                npc.think("no_reach");
                 resetKeepingClaim();
+                return State.WORKING;
             }
+            keepTimer = Math.min(keepTimer, KEEP_INTERVAL - 1);
             return State.WORKING;
+        } else {
+            taskWalk.reset(); // within reach: stand and work
         }
 
         npc.getNavigation().stop();
         npc.removeAITask(NpcAI.TASK_MOVE);
         npc.getLookControl().setLookAt(center.x, center.y, center.z);
-        if (npc.workClimbing) {
-            holdClimb();
-        }
+        holdOnLadder();
         boolean fishing = current.action() == WorkAction.FISH;
         if (!started) {
             started = true;
@@ -228,8 +234,9 @@ public final class StaffedWork {
                 progress += rate(site, state, breaking); // high morale: a bonus tick of work now and then
             }
         }
-        if (!fishing && npc.tickCount % SWING_INTERVAL == 0) {
-            npc.swing(InteractionHand.MAIN_HAND);
+        if (!fishing && swingTimer++ >= SettlementConfig.swingIntervalTicks) {
+            swingTimer = 1;
+            npc.swing(InteractionHand.MAIN_HAND); // one swing every swing_interval_ticks while the action is in progress
             swingEffects(level, current, state);
         }
         if (breaking) {
@@ -249,52 +256,86 @@ public final class StaffedWork {
         return State.WORKING;
     }
 
-    // ---------------------------------------------------------------- climbing
+    // ---------------------------------------------------------------- walking to the target
 
-    private static final double CLIMB_SPEED = 0.25D;
-    private static final double CLIMB_COLUMN_SQ = 16.0D;
-    /** Miners also descend into a pit or shaft from further away (12 blocks). */
-    private static final double MINE_COLUMN_SQ = 144.0D;
-
-    /**
-     * Steers the worker up (or down) beside the target when it is close in the horizontal plane but out of reach in height: a trunk block high in a tree.
-     * The worker rises without gravity and collision to about a block below the target. Returns false when it is not near the column (it walks then).
-     */
-    private boolean climb(Vec3 target, WorkAction action) {
-        double dx = target.x - npc.getX();
-        double dz = target.z - npc.getZ();
-        boolean mining = action == WorkAction.MINE || action == WorkAction.PLACE;
-        if (dx * dx + dz * dz > (mining ? MINE_COLUMN_SQ : CLIMB_COLUMN_SQ)) {
-            return false;
-        }
-        // a miner goes down a shaft or a pit to stand at the level of the target; a trunk is climbed to just below it
-        double wantedY = mining ? target.y - 0.5D : target.y - 1.5D;
-        double error = wantedY - npc.getY();
-        if (error < 0 && !npc.workClimbing && !(mining && error < -2.5D)) {
-            return false; // below the worker: it simply walks or drops down
-        }
-        if (Math.abs(error) < 0.4D && !npc.workClimbing) {
-            return false;
-        }
-        npc.workClimbing = true;
-        npc.noPhysics = true;
-        npc.fallDistance = 0.0F;
-        npc.getNavigation().stop();
-        npc.removeAITask(NpcAI.TASK_MOVE);
-        double step = Math.max(-CLIMB_SPEED, Math.min(CLIMB_SPEED, error));
-        double horizontal = Math.sqrt(dx * dx + dz * dz);
-        double sideX = horizontal > 1.5D ? dx / horizontal * 0.15D : 0.0D;
-        double sideZ = horizontal > 1.5D ? dz / horizontal * 0.15D : 0.0D;
-        npc.setDeltaMovement(sideX, Math.abs(error) < 0.4D ? 0.0D : step, sideZ);
-        npc.getLookControl().setLookAt(target.x, target.y, target.z);
-        return true;
+    private static double reachOf(WorkAction action) {
+        return action == WorkAction.FISH ? FISH_REACH : WORK_REACH;
     }
 
-    /** At the working height: hold still in the air. */
-    private void holdClimb() {
-        npc.noPhysics = true;
-        npc.fallDistance = 0.0F;
-        npc.setDeltaMovement(0.0D, 0.0D, 0.0D);
+    /**
+     * Walks towards the target of the task: the vanilla navigation first; a worker that has no way on foot (down in a mine) or stops getting closer gets
+     * a route over the ladders. Nobody flies. @return false if there is no way
+     */
+    private boolean approach(WorkTask current) {
+        BlockPos pos = current.pos();
+        double distance = npc.distanceToSqr(Vec3.atCenterOf(pos));
+        double walkY = Math.min(pos.getY(), npc.getY() + 2.0D);
+        return taskWalk.step(pos.getX() + 0.5D, walkY, pos.getZ() + 0.5D, pos, reachOf(current.action()), true, true, distance);
+    }
+
+    /** On a ladder while working: hold the height (climb back up when the ladder lets the worker slide down), as a player holds on. */
+    private void holdOnLadder() {
+        if (npc.onClimbable()) {
+            if (Double.isNaN(holdY)) {
+                holdY = npc.getY();
+            }
+            if (npc.getY() < holdY - 0.05D) {
+                npc.getJumpControl().jump();
+            }
+        } else {
+            holdY = Double.NaN;
+        }
+    }
+
+    /** One way of getting somewhere: on foot first, over the ladders when that finds no way. */
+    private final class Walk {
+        private boolean assist;
+        private int noPath;
+        private double best = Double.MAX_VALUE;
+        private int stuck;
+
+        void reset() {
+            if (assist || noPath != 0 || stuck != 0) {
+                if (assist) {
+                    npc.getRouteAssist().cancel();
+                }
+                assist = false;
+                noPath = 0;
+                stuck = 0;
+                best = Double.MAX_VALUE;
+            }
+        }
+
+        /** @return false if there is no way there (the caller gives the target up) */
+        boolean step(double x, double y, double z, BlockPos target, double reach, boolean eyes, boolean los, double distanceSq) {
+            NpcRouteAssist route = npc.getRouteAssist();
+            if (!assist) {
+                npc.addAITask(NpcAI.TASK_MOVE);
+                mover.move(x, y, z, distanceSq);
+                PathNavigation navigation = npc.getNavigation();
+                Path path = navigation.getPath();
+                noPath = path == null || !path.canReach() ? noPath + 1 : 0;
+                if (distanceSq < best - 0.5D) {
+                    best = distanceSq;
+                    stuck = 0;
+                } else {
+                    stuck++;
+                }
+                double dx = x - npc.getX();
+                double dz = z - npc.getZ();
+                boolean near = dx * dx + dz * dz < 48.0D * 48.0D;
+                if (near && (noPath >= NO_PATH_TICKS || stuck > STUCK_TICKS / 2)) {
+                    assist = true;
+                } else {
+                    return stuck <= STUCK_TICKS;
+                }
+            }
+            if (!route.request(target, reach, eyes, los)) {
+                return false;
+            }
+            npc.addAITask(NpcAI.TASK_MOVE);
+            return true;
+        }
     }
 
     /** Progress per working tick: the tool on the block (breaking actions), the worker's skill and the torque boost of the site. */
@@ -346,6 +387,7 @@ public final class StaffedWork {
             site.releaseTask(npc.getUUID(), task, false);
             resetKeepingClaim();
         }
+        npc.setDoing("work.sail", sitePos, npc.level().getBlockState(sitePos).getBlock().getName());
         BoatTrip boat = trip();
         BoatTrip.Sail sail = boat.sail(dock, dock.getBerth(), 2.5D, true);
         if (sail == BoatTrip.Sail.SAILING) {
@@ -371,12 +413,13 @@ public final class StaffedWork {
     // ---------------------------------------------------------------- pouch
 
     private State deposit(BlockPos sitePos, IWorksiteTasks site) {
+        npc.setDoing("work.deposit", sitePos, npc.level().getBlockState(sitePos).getBlock().getName());
         double distance = npc.distanceToSqr(sitePos.getX() + 0.5D, sitePos.getY(), sitePos.getZ() + 0.5D);
         if (distance > Math.max(npc.getWorkRangeSq(), 4.0D)) {
-            npc.addAITask(NpcAI.TASK_MOVE);
-            mover.move(sitePos.getX() + 0.5D, sitePos.getY(), sitePos.getZ() + 0.5D, distance);
+            goToSite(sitePos, distance);
             return State.DEPOSITING;
         }
+        siteWalk.reset();
         npc.getNavigation().stop();
         npc.removeAITask(NpcAI.TASK_MOVE);
         if (!emptyPouchInto(npc, site.getDepositInventory())) {
@@ -413,13 +456,22 @@ public final class StaffedWork {
     }
 
     private void waitAtSite(BlockPos sitePos) {
+        npc.setDoing("work.wait", sitePos, npc.level().getBlockState(sitePos).getBlock().getName());
         double distance = npc.distanceToSqr(sitePos.getX() + 0.5D, sitePos.getY(), sitePos.getZ() + 0.5D);
         if (distance > npc.getWorkRangeSq()) {
-            npc.addAITask(NpcAI.TASK_MOVE);
-            mover.move(sitePos.getX() + 0.5D, sitePos.getY(), sitePos.getZ() + 0.5D, distance);
+            goToSite(sitePos, distance);
         } else {
+            siteWalk.reset();
             npc.getNavigation().stop();
             npc.removeAITask(NpcAI.TASK_MOVE);
+        }
+    }
+
+    /** Back to the site block (to empty the pouch, or to wait): a worker down in a mine climbs out over its ladders. */
+    private void goToSite(BlockPos sitePos, double distance) {
+        if (!siteWalk.step(sitePos.getX() + 0.5D, sitePos.getY(), sitePos.getZ() + 0.5D, sitePos, SITE_REACH, false, false, distance)) {
+            npc.addAITask(NpcAI.TASK_MOVE);
+            mover.move(sitePos.getX() + 0.5D, sitePos.getY(), sitePos.getZ() + 0.5D, distance); // no route: the plain walk, as before
         }
     }
 
@@ -460,7 +512,7 @@ public final class StaffedWork {
         taskSite = null;
         started = false;
         progress = 0;
-        stuck = 0;
-        npc.endWorkClimb();
+        taskWalk.reset();
+        holdY = Double.NaN;
     }
 }

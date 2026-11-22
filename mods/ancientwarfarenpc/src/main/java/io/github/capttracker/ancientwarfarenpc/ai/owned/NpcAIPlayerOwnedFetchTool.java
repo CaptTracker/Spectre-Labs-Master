@@ -62,6 +62,7 @@ public class NpcAIPlayerOwnedFetchTool extends NpcAI<NpcWorker> {
                 .sorted(Comparator.comparingDouble(s -> npc.distanceToSqr(s.pos().getX() + 0.5D, s.pos().getY(), s.pos().getZ() + 0.5D)))
                 .toList();
         if (storages.isEmpty()) {
+            npc.think("no_tool");
             nextCheck = now + RETRY_DELAY;
             return false;
         }
@@ -142,6 +143,7 @@ public class NpcAIPlayerOwnedFetchTool extends NpcAI<NpcWorker> {
             }
         }
         npc.setItemSlot(EquipmentSlot.MAINHAND, tool);
+        npc.think("got_tool", tool.getHoverName());
     }
 
     private void giveUp() {

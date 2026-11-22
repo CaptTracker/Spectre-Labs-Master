@@ -310,8 +310,8 @@ public abstract class NpcFaction extends NpcBase {
     }
 
     @Override
-    protected boolean tryCommand(Player player) {
-        return player.isCreative() && super.tryCommand(player);
+    protected boolean canEditBy(Player player) {
+        return player.isCreative();
     }
 
     @Override
@@ -319,14 +319,15 @@ public abstract class NpcFaction extends NpcBase {
         return false;
     }
 
-    /** The custom name replaces the type name (the player-owned NPCs show both). */
+    /** The name is made by {@link NpcBase#getName()}: the type name of the faction ("Brigand Backshooter") and the generated first name. */
     @Override
-    public Component getName() {
-        Component customName = getCustomName();
-        if (customName != null) {
-            return customName;
-        }
-        return Component.translatable("entity.ancientwarfarenpc." + getNpcFullType() + ".name");
+    protected String getNamePoolFaction() {
+        return factionName == null ? "" : factionName;
+    }
+
+    @Override
+    protected boolean canGenerateName() {
+        return factionName != null && !factionName.isEmpty();
     }
 
     @Override

@@ -12,6 +12,7 @@ import io.github.capttracker.ancientwarfare.client.gui.elements.Text;
 import io.github.capttracker.ancientwarfarenpc.config.AWNPCStatics;
 import io.github.capttracker.ancientwarfarenpc.entity.NpcBase;
 import io.github.capttracker.ancientwarfarenpc.entity.NpcCombat;
+import io.github.capttracker.ancientwarfarenpc.entity.NpcPlayerOwned;
 import io.github.capttracker.ancientwarfarenpc.init.AwNpcs;
 import io.github.capttracker.ancientwarfarenpc.menu.NpcInventoryMenu;
 import io.github.capttracker.ancientwarfarenpc.menu.NpcMenuPayloads;
@@ -57,7 +58,26 @@ public class GuiNpcInventory extends GuiNpcBase<NpcInventoryMenu> {
         };
         addGuiElement(skinButton);
 
-        Button button = new Button(BUTTON_X, 36, 75, 12, "guistrings.npc.togglefollow") {
+        Button button = new Button(BUTTON_X, 36, 37, 12, "guistrings.npc.talk.tab.talk") {
+            @Override
+            protected void onPressed() {
+                sendPendingChanges();
+                requestOpen(NpcMenuPayloads.Request.TALK);
+            }
+        };
+        addGuiElement(button);
+        if (npc instanceof NpcPlayerOwned) {
+            button = new Button(BUTTON_X + 38, 36, 37, 12, "guistrings.npc.talk.tab.morale") {
+                @Override
+                protected void onPressed() {
+                    sendPendingChanges();
+                    requestOpen(NpcMenuPayloads.Request.MORALE);
+                }
+            };
+            addGuiElement(button);
+        }
+
+        button = new Button(BUTTON_X, 48, 75, 12, "guistrings.npc.togglefollow") {
             @Override
             protected void onPressed() {
                 getContainer().togglefollow();
@@ -66,7 +86,7 @@ public class GuiNpcInventory extends GuiNpcBase<NpcInventoryMenu> {
         };
         addGuiElement(button);
 
-        button = new Button(BUTTON_X, 48, 75, 12, "guistrings.npc.set_home") {
+        button = new Button(BUTTON_X, 60, 75, 12, "guistrings.npc.set_home") {
             @Override
             protected void onPressed() {
                 getContainer().setHome();
@@ -74,7 +94,7 @@ public class GuiNpcInventory extends GuiNpcBase<NpcInventoryMenu> {
         };
         addGuiElement(button);
 
-        button = new Button(BUTTON_X, 60, 75, 12, "guistrings.npc.clear_home") {
+        button = new Button(BUTTON_X, 72, 75, 12, "guistrings.npc.clear_home") {
             @Override
             protected void onPressed() {
                 getContainer().clearHome();
@@ -83,7 +103,7 @@ public class GuiNpcInventory extends GuiNpcBase<NpcInventoryMenu> {
         addGuiElement(button);
 
         if (npc.hasAltGui()) {
-            button = new Button(BUTTON_X, 72, 75, 12, "guistrings.npc.alt_gui") {
+            button = new Button(BUTTON_X, 84, 75, 12, "guistrings.npc.alt_gui") {
                 @Override
                 protected void onPressed() {
                     sendPendingChanges();
@@ -94,7 +114,7 @@ public class GuiNpcInventory extends GuiNpcBase<NpcInventoryMenu> {
         }
 
         if (!AWNPCStatics.repackCreativeOnly || player.isCreative()) {
-            button = new Button(BUTTON_X, 84, 75, 12, "guistrings.npc.repack") {
+            button = new Button(BUTTON_X, 96, 75, 12, "guistrings.npc.repack") {
                 @Override
                 protected void onPressed() {
                     getContainer().repack();
@@ -105,7 +125,7 @@ public class GuiNpcInventory extends GuiNpcBase<NpcInventoryMenu> {
         }
 
         if (player.isCreative()) {
-            button = new Button(BUTTON_X, 96, 75, 12, "guistrings.npc.creative_gui") {
+            button = new Button(BUTTON_X, 108, 75, 12, "guistrings.npc.creative_gui") {
                 @Override
                 protected void onPressed() {
                     sendPendingChanges();
@@ -116,7 +136,7 @@ public class GuiNpcInventory extends GuiNpcBase<NpcInventoryMenu> {
         }
 
         if (getContainer().isArcher) {
-            doNotPursueCheckbox = new Checkbox(BUTTON_X, 108, 12, 12, "guistrings.npc.donotpursue") {
+            doNotPursueCheckbox = new Checkbox(BUTTON_X, 120, 12, 12, "guistrings.npc.donotpursue") {
                 @Override
                 public void onToggled() {
                     getContainer().doNotPursue = checked();

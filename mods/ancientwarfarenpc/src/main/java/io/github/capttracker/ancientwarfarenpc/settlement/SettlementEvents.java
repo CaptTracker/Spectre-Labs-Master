@@ -51,6 +51,19 @@ public final class SettlementEvents {
         if (tick % RECORD_INTERVAL == 0) {
             SettlementData.get(server).serverTick(server);
         }
+        if (tick % 5 == 0) {
+            SettlementData data = SettlementData.get(server);
+            for (Settlement settlement : data.all()) {
+                if (settlement.isAlarmActive()) {
+                    net.minecraft.server.level.ServerLevel level = server.getLevel(settlement.getDimension());
+                    if (level != null) {
+                        SettlementLife.ringBells(level, settlement);
+                    }
+                } else {
+                    SettlementLife.ringBells(null, settlement);
+                }
+            }
+        }
         if (tick % GEOMETRY_INTERVAL == 0) {
             sendGeometry(server);
         }

@@ -42,6 +42,8 @@ public final class SettlementConfig {
     // ---- roles and the job board (rework phase 2) ----
     /** Work speed factor of a worker that has no tool matching its role. */
     public static double noToolWorkFactor = 0.5;
+    /** Ticks between two swings of the main hand while an NPC works (playtest fixes: 12 is a normal pace, a player swings about every 4). */
+    public static int swingIntervalTicks = 12;
     /** How many workers may claim one worksite. */
     public static int maxWorkersPerSite = 2;
     /** Ticks a worksite may have no work before its claims are released (60 seconds). */
@@ -80,8 +82,12 @@ public final class SettlementConfig {
     public static boolean autoAlarm = true;
     /** The number of hostile entities inside the land that raises the alarm. */
     public static int autoAlarmThreshold = 1;
+    /** Hostile entities more than this many blocks below the surface of their column (caves) are not threats. */
+    public static int threatMaxDepth = 8;
     /** Ticks without a threat before an automatic alarm ends (30 seconds). */
     public static int alarmClearTicks = 600;
+    /** Ticks between two rings of every bell of the land while the alarm is on (playtest fixes). */
+    public static int bellRingIntervalTicks = 60;
     /** If true, idle combat NPCs (guard mode GUARD or AGGRESSIVE) patrol the border by day. */
     public static boolean borderPatrol = true;
 
@@ -136,6 +142,18 @@ public final class SettlementConfig {
     public static int moraleDeathMemoryTicks = 24000;
     /** A bard counts as performing for this many ticks after it last started a song. */
     public static int moraleBardWindowTicks = 2400;
+    /** Ticks a worker without a job on its work shift must be idle before it gets unhappy about it (playtest fixes: personal morale). */
+    public static int moraleIdleTicks = 1200;
+    /** How long a thought is not noted again when it comes up again (playtest fixes: what the NPC is thinking). */
+    public static int thoughtRepeatTicks = 600;
+
+    /** The work speed factor a morale from 0 to 100 gives: {@code moraleMinFactor} at 0 to {@code moraleMaxFactor} at 100. 1 when the morale is switched off. */
+    public static double moraleWorkFactor(int morale) {
+        if (!moraleEnabled) {
+            return 1.0D;
+        }
+        return moraleMinFactor + (moraleMaxFactor - moraleMinFactor) * (Math.max(0, Math.min(100, morale)) / 100.0D);
+    }
 
     // ---- inn and stable hand (rework phase 5) ----
     /** Blocks around the inn within which the innkeeper serves the members that gather. */
@@ -174,6 +192,8 @@ public final class SettlementConfig {
     private static final ModConfigSpec.IntValue MORALE_VARIETY_GOAL;
     private static final ModConfigSpec.IntValue MORALE_DEATH_MEMORY;
     private static final ModConfigSpec.IntValue MORALE_BARD_WINDOW;
+    private static final ModConfigSpec.IntValue MORALE_IDLE;
+    private static final ModConfigSpec.IntValue THOUGHT_REPEAT;
     private static final ModConfigSpec.IntValue INN_SERVE_RADIUS;
     private static final ModConfigSpec.IntValue INN_SERVE_INTERVAL;
     private static final ModConfigSpec.IntValue INN_DRINK_FOOD;
@@ -205,7 +225,9 @@ public final class SettlementConfig {
     private static final ModConfigSpec.IntValue TRADE_REPUTATION_DAILY_CAP;
     private static final ModConfigSpec.BooleanValue AUTO_ALARM;
     private static final ModConfigSpec.IntValue AUTO_ALARM_THRESHOLD;
+    private static final ModConfigSpec.IntValue THREAT_MAX_DEPTH;
     private static final ModConfigSpec.IntValue ALARM_CLEAR_TICKS;
+    private static final ModConfigSpec.IntValue BELL_RING_INTERVAL;
     private static final ModConfigSpec.BooleanValue BORDER_PATROL;
     private static final ModConfigSpec.BooleanValue AUTO_HAUL;
     private static final ModConfigSpec.IntValue FOOD_LOW_NPC_DAYS;
@@ -222,6 +244,7 @@ public final class SettlementConfig {
     private static final ModConfigSpec.BooleanValue MORNING_MEAL;
     private static final ModConfigSpec.DoubleValue MORNING_MEAL_BELOW;
     private static final ModConfigSpec.DoubleValue NO_TOOL_WORK;
+    private static final ModConfigSpec.IntValue SWING_INTERVAL;
     private static final ModConfigSpec.IntValue MAX_WORKERS_PER_SITE;
     private static final ModConfigSpec.IntValue JOB_RELEASE_TICKS;
     private static final ModConfigSpec.DoubleValue HUNGRY_THRESHOLD;
@@ -274,6 +297,8 @@ public final class SettlementConfig {
         builder.comment("Worker roles and the settlement job board (server side)").push("jobs");
         NO_TOOL_WORK = builder.comment("Default = 0.5", "Work speed factor of a worker that holds no tool matching its role.")
                 .defineInRange("no_tool_work_factor", 0.5, 0.01, 1.0);
+        SWING_INTERVAL = builder.comment("Default = 12", "Ticks between two swings of the main hand while an NPC works (a player swings about every 4 ticks).")
+                .defineInRange("swing_interval_ticks", 12, 2, 200);
         MAX_WORKERS_PER_SITE = builder.comment("Default = 2", "How many workers of a settlement may claim the same worksite.")
                 .defineInRange("max_workers_per_site", 2, 1, 64);
         JOB_RELEASE_TICKS = builder.comment("Default = 1200 (60 seconds)", "Ticks a worksite may have no work before the workers that claimed it are released.")
@@ -306,8 +331,12 @@ public final class SettlementConfig {
                 .define("auto_alarm", true);
         AUTO_ALARM_THRESHOLD = builder.comment("Default = 1", "How many hostile entities inside the land raise the alarm.")
                 .defineInRange("auto_alarm_threshold", 1, 1, 1000);
+        THREAT_MAX_DEPTH = builder.comment("Default = 8", "Hostile entities more than this many blocks below the surface of their column (in caves) are ignored by the threat scan.")
+                .defineInRange("threat_max_depth", 8, 0, 512);
         ALARM_CLEAR_TICKS = builder.comment("Default = 600 (30 seconds)", "Ticks without a hostile entity before an automatic alarm ends. An alarm set by hand never ends by itself.")
                 .defineInRange("alarm_clear_ticks", 600, 20, Integer.MAX_VALUE);
+        BELL_RING_INTERVAL = builder.comment("Default = 60", "Ticks between two rings of every bell block inside the settlement land while the alarm is on.")
+                .defineInRange("bell_ring_interval_ticks", 60, 10, 1200);
         BORDER_PATROL = builder.comment("Default = true", "If true, combat NPCs without orders whose guard mode is GUARD or AGGRESSIVE patrol the border (marker to marker, past the hall) by day.")
                 .define("border_patrol", true);
         builder.pop();
@@ -377,6 +406,10 @@ public final class SettlementConfig {
                 .defineInRange("morale_death_memory_ticks", 24000, 20, 2400000);
         MORALE_BARD_WINDOW = builder.comment("Default = 2400 (2 minutes)", "A bard counts as performing for this many ticks after it last started a song.")
                 .defineInRange("morale_bard_window_ticks", 2400, 20, 72000);
+        MORALE_IDLE = builder.comment("Default = 1200 (1 minute)", "Ticks a worker without a job must stand idle in its work hours before the personal morale drops for it.")
+                .defineInRange("morale_idle_ticks", 1200, 20, 240000);
+        THOUGHT_REPEAT = builder.comment("Default = 600 (30 seconds)", "Ticks before the same event is written to the recent thoughts of an NPC again (the 'talk to NPC' screen).")
+                .defineInRange("thought_repeat_ticks", 600, 0, 240000);
         builder.pop();
         builder.comment("Inn and stable hand (server side)").push("inn_and_stable");
         INN_SERVE_RADIUS = builder.comment("Default = 6", "Blocks around the inn in which the innkeeper serves the members that gather there.")
@@ -439,6 +472,7 @@ public final class SettlementConfig {
             foodSpareNpcDays = FOOD_SPARE_NPC_DAYS.get();
             maxPathRange = MAX_PATH_RANGE.get();
             noToolWorkFactor = NO_TOOL_WORK.get();
+            swingIntervalTicks = SWING_INTERVAL.get();
             maxWorkersPerSite = MAX_WORKERS_PER_SITE.get();
             jobReleaseTicks = JOB_RELEASE_TICKS.get();
             scheduleEnabled = SCHEDULE_ENABLED.get();
@@ -453,7 +487,9 @@ public final class SettlementConfig {
             morningMealBelow = MORNING_MEAL_BELOW.get();
             autoAlarm = AUTO_ALARM.get();
             autoAlarmThreshold = AUTO_ALARM_THRESHOLD.get();
+            threatMaxDepth = THREAT_MAX_DEPTH.get();
             alarmClearTicks = ALARM_CLEAR_TICKS.get();
+            bellRingIntervalTicks = BELL_RING_INTERVAL.get();
             borderPatrol = BORDER_PATROL.get();
             friendlyDiscount = FRIENDLY_DISCOUNT.get();
             alliedDiscount = ALLIED_DISCOUNT.get();
@@ -479,6 +515,8 @@ public final class SettlementConfig {
             moraleVarietyGoal = MORALE_VARIETY_GOAL.get();
             moraleDeathMemoryTicks = MORALE_DEATH_MEMORY.get();
             moraleBardWindowTicks = MORALE_BARD_WINDOW.get();
+            moraleIdleTicks = MORALE_IDLE.get();
+            thoughtRepeatTicks = THOUGHT_REPEAT.get();
             innServeRadius = INN_SERVE_RADIUS.get();
             innServeInterval = INN_SERVE_INTERVAL.get();
             innDrinkFood = INN_DRINK_FOOD.get();
