@@ -6,6 +6,7 @@ package io.github.capttracker.ancientwarfareautomation.block.entity.worksite;
 
 import io.github.capttracker.ancientwarfare.api.WorkAction;
 import io.github.capttracker.ancientwarfare.api.WorkTask;
+import io.github.capttracker.ancientwarfare.block.BlockRotationHandler.RelativeSide;
 import io.github.capttracker.ancientwarfare.upgrade.WorksiteUpgrade;
 import io.github.capttracker.ancientwarfare.util.BlockTools;
 import io.github.capttracker.ancientwarfare.util.InventoryTools;
@@ -37,6 +38,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
+import net.neoforged.neoforge.items.ItemStackHandler;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -55,8 +57,10 @@ import java.util.Set;
  * them into staffed MINE and PLACE tasks (digging; ladders, torches and cobblestone plugs for lava and water). Tunnels stay where they are.
  *
  * <p>Everything that comes out goes into the main inventory, except what the void filter removes (cobblestone, dirt, gravel). Ladders and torches
- * are taken from the main inventory (only offered while it holds some); plugs use cobblestone from it, or are free when it has none. Without staff
- * (config {@code machines_work_alone}) the machine loop does the first listed operation per action, into the inventory, as before.
+ * have their own slots ({@link #ladderInventory}, {@link #torchInventory}, filtered; couriers stock them through the logistics needs); plugs use cobblestone
+ * from the main inventory, or are free when it has none. Workers depend on the ladders to get down, so a mine that needs a ladder and has none waits
+ * ({@link #isWaitingForLadder}, shown on the screen) instead of going on. Without staff (config {@code machines_work_alone}) the machine loop does the
+ * first listed operation per action, into the inventory, as before.
  *
  * <p>The bounds reach from the layer below the machine down to the bottom of the world ({@code height} blocks; used by the open quarry). The cursors are reset
  * whenever an upgrade is added or the area, height or Y changes. Valid upgrades: enchanted tools 1/2, quarry medium/large, tool quality 1-3 and the quarry
@@ -72,6 +76,10 @@ public final class QuarryBlockEntity extends InventoryWorksiteBlockEntity implem
     private static final int UNSET_Y = Integer.MIN_VALUE;
     private static final int MAX_TASKS = 48;
     private static final int PLACE_TICKS = 15;
+    public static final int LADDER_SLOTS = 2;
+    public static final int TORCH_SLOTS = 2;
+    private static final int LOGISTICS_LADDER_TARGET = 32;
+    private static final int LOGISTICS_TORCH_TARGET = 16;
 
     private boolean hasDoneInit = false;
     public int height;
@@ -84,6 +92,34 @@ public final class QuarryBlockEntity extends InventoryWorksiteBlockEntity implem
     private boolean voidGravel;
 
     private final Map<MineMode, MinePattern> patterns = new EnumMap<>(MineMode.class);
+
+    /** The ladders and torches the workers place: they are only taken from these slots (ladders and torches only). */
+    public final ItemStackHandler ladderInventory = new ItemStackHandler(LADDER_SLOTS) {
+        @Override
+        public boolean isItemValid(int slot, ItemStack stack) {
+            return stack.is(Items.LADDER);
+        }
+
+        @Override
+        protected void onContentsChanged(int slot) {
+            invalidatePlan();
+            setChanged();
+        }
+    };
+    public final ItemStackHandler torchInventory = new ItemStackHandler(TORCH_SLOTS) {
+        @Override
+        public boolean isItemValid(int slot, ItemStack stack) {
+            return stack.is(Items.TORCH);
+        }
+
+        @Override
+        protected void onContentsChanged(int slot) {
+            invalidatePlan();
+            setChanged();
+        }
+    };
+    /** True while the pattern waits for a ladder the quarry does not have (set while planning, shown on the screen). */
+    private boolean waitingForLadder;
 
     /** The tasks of the last plan, kept for a few ticks (planning scans the world), and the operation behind each target. */
     private List<WorkTask> cachedTasks = List.of();
@@ -98,6 +134,34 @@ public final class QuarryBlockEntity extends InventoryWorksiteBlockEntity implem
         patterns.put(MineMode.SHAFT, new ShaftPattern());
         patterns.put(MineMode.BRANCH, new TunnelPattern(true));
         patterns.put(MineMode.STRIP, new TunnelPattern(false));
+        setSideInventory(RelativeSide.FRONT, ladderInventory, RelativeSide.FRONT);
+        setSideInventory(RelativeSide.REAR, torchInventory, RelativeSide.REAR);
+    }
+
+    /** The mine needs a ladder and the ladder slots are empty: it waits for a courier or a player to stock them. */
+    public boolean isWaitingForLadder() {
+        return waitingForLadder;
+    }
+
+    @Override
+    public void waitingForLadder() {
+        waitingForLadder = true;
+    }
+
+    @Override
+    public void onBlockBroken(BlockState state) {
+        super.onBlockBroken(state);
+        if (level != null) {
+            InventoryTools.dropItemsInWorld(level, ladderInventory, worldPosition);
+            InventoryTools.dropItemsInWorld(level, torchInventory, worldPosition);
+        }
+    }
+
+    /** Ladders and torches are kept stocked in their slots. */
+    @Override
+    public List<Need> getLogisticsNeeds() {
+        return List.of(new Need(ladderInventory, stack -> stack.is(Items.LADDER), LOGISTICS_LADDER_TARGET),
+                new Need(torchInventory, stack -> stack.is(Items.TORCH), LOGISTICS_TORCH_TARGET));
     }
 
     // ************************************** MINE SETTINGS ***************************************//
@@ -315,9 +379,10 @@ public final class QuarryBlockEntity extends InventoryWorksiteBlockEntity implem
 
     @Override
     public int stock(Item item) {
+        ItemStackHandler inventory = inventoryFor(item);
         int count = 0;
-        for (int slot = 0; slot < mainInventory.getSlots(); slot++) {
-            ItemStack stack = mainInventory.getStackInSlot(slot);
+        for (int slot = 0; slot < inventory.getSlots(); slot++) {
+            ItemStack stack = inventory.getStackInSlot(slot);
             if (stack.is(item)) {
                 count += stack.getCount();
             }
@@ -325,10 +390,19 @@ public final class QuarryBlockEntity extends InventoryWorksiteBlockEntity implem
         return count;
     }
 
-    /** Takes one of the item out of the main inventory. */
+    /** Ladders and torches are only kept in their own slots; everything else (cobblestone for plugs) in the main inventory. */
+    private ItemStackHandler inventoryFor(Item item) {
+        if (item == Items.LADDER) {
+            return ladderInventory;
+        }
+        return item == Items.TORCH ? torchInventory : mainInventory;
+    }
+
+    /** Takes one of the item out of the inventory it is kept in. */
     private boolean takeOne(Item item) {
-        for (int slot = 0; slot < mainInventory.getSlots(); slot++) {
-            if (mainInventory.getStackInSlot(slot).is(item) && !mainInventory.extractItem(slot, 1, false).isEmpty()) {
+        ItemStackHandler inventory = inventoryFor(item);
+        for (int slot = 0; slot < inventory.getSlots(); slot++) {
+            if (inventory.getStackInSlot(slot).is(item) && !inventory.extractItem(slot, 1, false).isEmpty()) {
                 return true;
             }
         }
@@ -383,6 +457,7 @@ public final class QuarryBlockEntity extends InventoryWorksiteBlockEntity implem
             return cachedTasks;
         }
         List<MineOp> ops = new ArrayList<>();
+        waitingForLadder = false;
         pattern().plan(this, ops, MAX_TASKS);
         opsByPos.clear();
         List<WorkTask> tasks = new ArrayList<>(ops.size());
@@ -526,6 +601,8 @@ public final class QuarryBlockEntity extends InventoryWorksiteBlockEntity implem
         voidCobble = tag.getBoolean("voidCobble");
         voidDirt = tag.getBoolean("voidDirt");
         voidGravel = tag.getBoolean("voidGravel");
+        ladderInventory.deserializeNBT(registries, tag.getCompound("ladderInventory"));
+        torchInventory.deserializeNBT(registries, tag.getCompound("torchInventory"));
         if (tag.contains("patterns", 10)) {
             CompoundTag saved = tag.getCompound("patterns");
             for (MinePattern pattern : patterns.values()) {
@@ -553,6 +630,8 @@ public final class QuarryBlockEntity extends InventoryWorksiteBlockEntity implem
         tag.putBoolean("voidCobble", voidCobble);
         tag.putBoolean("voidDirt", voidDirt);
         tag.putBoolean("voidGravel", voidGravel);
+        tag.put("ladderInventory", ladderInventory.serializeNBT(registries));
+        tag.put("torchInventory", torchInventory.serializeNBT(registries));
         CompoundTag saved = new CompoundTag();
         for (MinePattern pattern : patterns.values()) {
             CompoundTag one = new CompoundTag();

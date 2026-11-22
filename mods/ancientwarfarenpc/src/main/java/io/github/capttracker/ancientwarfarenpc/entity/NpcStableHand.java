@@ -85,7 +85,7 @@ public class NpcStableHand extends NpcPlayerOwned {
         if (player.level().isClientSide) {
             return true;
         }
-        return isOwner(player) ? tryCommand(player) : true;
+        return tryCommand(player);
     }
 
     @Nullable

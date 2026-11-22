@@ -77,6 +77,7 @@ public class NpcAIPlayerOwnedGetFood extends NpcAI<NpcPlayerOwned> {
         if (storages.isEmpty()) {
             if (npc.isHungry()) {
                 SettlementApi.addAlert(level, settlement.get(), SettlementApi.ALERT_NO_FOOD);
+                npc.think("no_food");
             }
             return false;
         }
@@ -141,7 +142,11 @@ public class NpcAIPlayerOwnedGetFood extends NpcAI<NpcPlayerOwned> {
                 ? SettlementApi.handlerAt(level, pos)
                 : WorldTools.getItemHandlerFromTile(npc.level(), pos, npc.getUpkeepBlockSide()).orElse(null);
         if (handler != null) {
+            int before = npc.getFoodRemaining();
             npc.withdrawFood(handler, targetFood);
+            if (npc.getFoodRemaining() > before) {
+                npc.think("ate");
+            }
         }
         if (npc.getFoodRemaining() < targetFood) {
             // the storage ran dry: look for another one later

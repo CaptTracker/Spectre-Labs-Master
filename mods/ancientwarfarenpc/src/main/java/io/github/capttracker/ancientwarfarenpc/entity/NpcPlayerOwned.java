@@ -11,6 +11,7 @@ import io.github.capttracker.ancientwarfarenpc.ai.AIHelper;
 import io.github.capttracker.ancientwarfarenpc.ai.NpcAI;
 import io.github.capttracker.ancientwarfarenpc.settlement.Activity;
 import io.github.capttracker.ancientwarfarenpc.settlement.MemberStatus;
+import io.github.capttracker.ancientwarfarenpc.settlement.NpcMorale;
 import io.github.capttracker.ancientwarfarenpc.settlement.Settlement;
 import io.github.capttracker.ancientwarfarenpc.settlement.SettlementApi;
 import io.github.capttracker.ancientwarfarenpc.settlement.SettlementData;
@@ -50,6 +51,7 @@ import net.neoforged.neoforge.items.IItemHandler;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -403,12 +405,148 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
         return hunger * getMoraleFactor();
     }
 
-    /** The work speed factor of the morale of the settlement (rework phase 5): 0.8 to 1.2 by default, 1 without a settlement or on the client. */
+    /**
+     * The work speed factor of the morale of this NPC: 0.8 to 1.2 by default, 1 when the morale is switched off. It is the personal morale, which starts
+     * from the morale of the settlement and adds the personal factors ({@link NpcMorale}).
+     */
     public double getMoraleFactor() {
-        if (!SettlementConfig.moraleEnabled || settlementId == null || !(level() instanceof ServerLevel serverLevel)) {
-            return 1.0D;
+        return SettlementConfig.moraleWorkFactor(personalMorale);
+    }
+
+    // ---- personal morale and what it is made of (playtest fixes)
+
+    /** The morale of this NPC, 0 to 100 (recomputed every 30 seconds on the server, saved). */
+    private int personalMorale = 50;
+    /** The factors of the last computation (not saved; computed again at the first sample after a load). */
+    private List<NpcMorale.Factor> moraleFactors = List.of();
+    private int moraleBase = 50;
+    private boolean moraleHasSettlement = false;
+    private long moraleNext = 0L;
+    /** Game times of the things that count for the morale, -1 if never (saved). */
+    private long lastSleptAt = -1L;
+    private long lastHurtAt = -1L;
+    private long lastNearDeathAt = -1L;
+    private long lastInnMealAt = -1L;
+    private long lastSocialAt = -1L;
+    /** Ticks the NPC has been idle without a job in its work hours (not saved). */
+    private int idleTicks = 0;
+
+    public int getPersonalMorale() {
+        return personalMorale;
+    }
+
+    public List<NpcMorale.Factor> getMoraleFactors() {
+        return moraleFactors;
+    }
+
+    public int getMoraleBase() {
+        return moraleBase;
+    }
+
+    public boolean isMoraleSettlementBased() {
+        return moraleHasSettlement;
+    }
+
+    public long getLastSleptAt() {
+        return lastSleptAt;
+    }
+
+    public long getLastHurtAt() {
+        return lastHurtAt;
+    }
+
+    public long getLastNearDeathAt() {
+        return lastNearDeathAt;
+    }
+
+    public long getLastInnMealAt() {
+        return lastInnMealAt;
+    }
+
+    public long getLastSocialAt() {
+        return lastSocialAt;
+    }
+
+    public int getIdleTicks() {
+        return idleTicks;
+    }
+
+    /** Points for the tool of the job: the right tool +2, none a penalty, 0 for an NPC without a tool job. */
+    public int getToolMorale() {
+        return 0;
+    }
+
+    /** True while this NPC should be working but has no job (a worker with a role, no orders and no claimed site in the work hours). */
+    protected boolean isIdleWithoutJob() {
+        return false;
+    }
+
+    /** Called by the innkeeper when it served this NPC a meal. */
+    public void onInnMeal() {
+        lastInnMealAt = level().getGameTime();
+        think("ate_inn");
+    }
+
+    /** Called by the schedule while the NPC idles at a gathering point. */
+    public void markSocial() {
+        lastSocialAt = level().getGameTime();
+        think("social");
+    }
+
+    @Override
+    protected void onInjured(boolean nearDeath) {
+        long now = level().getGameTime();
+        lastHurtAt = now;
+        if (nearDeath) {
+            lastNearDeathAt = now;
         }
-        return SettlementData.get(serverLevel).byId(settlementId).map(Settlement::getMoraleWorkFactor).orElse(1.0D);
+    }
+
+    @Override
+    protected void onWokeUp() {
+        lastSleptAt = level().getGameTime();
+        think("slept");
+    }
+
+    /** Every second: counts the idle time, and when it is time recomputes the morale. */
+    private void moraleTick() {
+        if (!(level() instanceof ServerLevel serverLevel) || (tickCount + getId()) % 20 != 0) {
+            return;
+        }
+        if (isSleeping()) {
+            lastSleptAt = serverLevel.getGameTime();
+        }
+        if (isIdleWithoutJob()) {
+            idleTicks += 20;
+        } else {
+            idleTicks = Math.max(0, idleTicks - 40);
+        }
+        if (SettlementConfig.moraleEnabled && serverLevel.getGameTime() >= moraleNext) {
+            recomputeMorale(serverLevel);
+        }
+    }
+
+    /** Computes the morale now. */
+    public void recomputeMorale(ServerLevel serverLevel) {
+        moraleNext = serverLevel.getGameTime() + SettlementConfig.moraleIntervalTicks;
+        if (lastSleptAt < 0) {
+            lastSleptAt = serverLevel.getGameTime(); // a new NPC has a day before it counts as sleepless
+        }
+        NpcMorale.Result result = NpcMorale.compute(this, serverLevel);
+        String before = NpcMorale.mood(personalMorale);
+        personalMorale = result.value();
+        moraleFactors = result.factors();
+        moraleBase = result.base();
+        moraleHasSettlement = result.hasSettlement();
+        String after = NpcMorale.mood(personalMorale);
+        if (!before.equals(after)) {
+            if (personalMorale < 40) {
+                think("mood_low");
+            } else if (personalMorale >= 60) {
+                think("mood_high");
+            }
+        }
+        refreshMemberRecord();
     }
 
     /** True when an upkeep order or a baton-set upkeep position decides where this NPC eats instead of the settlement storage. */
@@ -438,6 +576,9 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
             }
         }
         if (isStarving()) {
+            if (starvingTicks == 0) {
+                think("starving");
+            }
             starvingTicks++;
             int past = starvingTicks - SettlementConfig.starvationGraceTicks;
             if (SettlementConfig.starvationEnabled && past > 0 && past % SettlementConfig.starvationDamageInterval == 0 && isAlive()) {
@@ -565,6 +706,7 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
         if (!level().isClientSide) {
             settlementTick();
             hungerTick();
+            moraleTick();
         }
         if (foodValueRemaining > 0 && !isSleeping()) {
             foodValueRemaining--;
@@ -584,6 +726,14 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         foodValueRemaining = tag.getInt("foodValue");
+        if (tag.contains("personalMorale")) {
+            personalMorale = Math.max(0, Math.min(100, tag.getInt("personalMorale")));
+        }
+        lastSleptAt = tag.contains("lastSleptAt") ? tag.getLong("lastSleptAt") : -1L;
+        lastHurtAt = tag.contains("lastHurtAt") ? tag.getLong("lastHurtAt") : -1L;
+        lastNearDeathAt = tag.contains("lastNearDeathAt") ? tag.getLong("lastNearDeathAt") : -1L;
+        lastInnMealAt = tag.contains("lastInnMealAt") ? tag.getLong("lastInnMealAt") : -1L;
+        lastSocialAt = tag.contains("lastSocialAt") ? tag.getLong("lastSocialAt") : -1L;
         starvingTicks = tag.getInt("starvingTicks");
         if (tag.contains(COMMAND_TAG)) {
             playerIssuedCommand = new Command(tag.getCompound(COMMAND_TAG));
@@ -600,6 +750,12 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         tag.putInt("foodValue", foodValueRemaining);
+        tag.putInt("personalMorale", personalMorale);
+        tag.putLong("lastSleptAt", lastSleptAt);
+        tag.putLong("lastHurtAt", lastHurtAt);
+        tag.putLong("lastNearDeathAt", lastNearDeathAt);
+        tag.putLong("lastInnMealAt", lastInnMealAt);
+        tag.putLong("lastSocialAt", lastSocialAt);
         tag.putInt("starvingTicks", starvingTicks);
         if (playerIssuedCommand != Command.NONE) {
             tag.put(COMMAND_TAG, playerIssuedCommand.writeToNBT(new CompoundTag()));

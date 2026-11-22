@@ -69,9 +69,7 @@ public class NpcAIPlayerOwnedWorkRandom extends NpcAI<NpcWorker> {
     }
 
     private void workAtSite(BlockPos target) {
-        if (npc.tickCount % 10 == 0) {
-            npc.swing(InteractionHand.MAIN_HAND);
-        }
+        npc.workSwing();
         if (!npc.advanceWorkTick()) {
             return; // hunger slows the work down
         }

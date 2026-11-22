@@ -135,9 +135,7 @@ public class NpcAIPlayerOwnedLogistics extends NpcAI<NpcCourier> {
         }
         if (waitTicks > 0) {
             waitTicks--;
-            if (npc.tickCount % 10 == 0) {
-                npc.swing(InteractionHand.MAIN_HAND);
-            }
+            npc.workSwing();
             if (waitTicks == 0) {
                 task = null; // next tick plans the next stop
             }

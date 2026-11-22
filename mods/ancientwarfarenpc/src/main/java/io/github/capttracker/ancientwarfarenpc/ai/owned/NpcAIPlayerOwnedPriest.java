@@ -90,7 +90,7 @@ public class NpcAIPlayerOwnedPriest extends NpcAI<NpcPlayerOwned> {
             resurrectionDelay = 0;
         } else {
             resurrectionDelay++;
-            npc.swing(InteractionHand.MAIN_HAND);
+            npc.workSwing();
             if (resurrectionDelay > RESURRECTION_TIME) {
                 resurrectionDelay = 0;
                 resurrectTarget();

@@ -13,6 +13,7 @@ import io.github.capttracker.ancientwarfare.client.gui.elements.Text;
 import io.github.capttracker.ancientwarfarenpc.entity.NpcWorker;
 import io.github.capttracker.ancientwarfarenpc.menu.TownHallMenu;
 import io.github.capttracker.ancientwarfarenpc.settlement.NpcDeathEntry;
+import io.github.capttracker.ancientwarfarenpc.settlement.NpcMorale;
 import io.github.capttracker.ancientwarfarenpc.settlement.SettlementConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -63,7 +64,7 @@ public class GuiTownHallInventory extends GuiContainerBase<TownHallMenu> {
     private List<String> builtAlerts = new ArrayList<>();
 
     public GuiTownHallInventory(TownHallMenu menu) {
-        super(menu, 290, 3 * 18 + 4 * 18 + 8 + 8 + 4 + 8 + 16);
+        super(menu, 350, 3 * 18 + 4 * 18 + 8 + 8 + 4 + 8 + 16);
         menu.setInventoryVisible(false);
     }
 
@@ -264,7 +265,7 @@ public class GuiTownHallInventory extends GuiContainerBase<TownHallMenu> {
         }
         for (TownHallMenu.MemberView member : members) {
             String type = tr("entity.ancientwarfarenpc." + member.type() + ".name");
-            String title = member.name().isEmpty() ? type : member.name() + " (" + type + ")";
+            String title = member.name().isEmpty() ? io.github.capttracker.ancientwarfarenpc.entity.NpcNames.display(member.type(), member.given()).getString() : member.name() + " (" + type + ")";
             area.addGuiElement(new Label(6, y + 2, fit(title, 74)));
             if (member.type().startsWith("worker")) {
                 String role = member.type().length() > 7 ? member.type().substring(7) : "";
@@ -279,7 +280,12 @@ public class GuiTownHallInventory extends GuiContainerBase<TownHallMenu> {
             area.addGuiElement(new Label(136, y + 2, tr("guistrings.settlement.status." + member.status().name().toLowerCase(Locale.ROOT)))
                     .setColor(statusColor(member.status())));
             area.addGuiElement(new Label(176, y + 2, tr("guistrings.settlement.distance", member.distance())));
-            area.addGuiElement(new Button(204, y, 40, 12, "guistrings.settlement.dismiss") {
+            if (member.morale() >= 0) {
+                String mood = NpcMorale.mood(member.morale());
+                area.addGuiElement(new Label(208, y + 2, tr("guistrings.settlement.member_morale", tr("guistrings.npc.mood." + mood), member.morale()))
+                        .setColor(moraleColor(member.morale())));
+            }
+            area.addGuiElement(new Button(302, y, 40, 12, "guistrings.settlement.dismiss") {
                 @Override
                 protected void onPressed() {
                     getContainer().dismiss(member.id());
@@ -292,6 +298,19 @@ public class GuiTownHallInventory extends GuiContainerBase<TownHallMenu> {
             }
         }
         area.setAreaSize(y + 4);
+    }
+
+    private static int moraleColor(int morale) {
+        if (morale < 20) {
+            return 0xFFFF5555;
+        }
+        if (morale < 40) {
+            return 0xFFFFAA55;
+        }
+        if (morale < 60) {
+            return 0xFFCCCCCC;
+        }
+        return 0xFF55FF55;
     }
 
     private static int statusColor(io.github.capttracker.ancientwarfarenpc.settlement.MemberStatus status) {

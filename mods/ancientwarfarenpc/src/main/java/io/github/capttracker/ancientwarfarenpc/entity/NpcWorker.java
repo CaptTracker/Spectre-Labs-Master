@@ -28,6 +28,7 @@ import io.github.capttracker.ancientwarfarenpc.ai.owned.NpcAIStaffedWork;
 import io.github.capttracker.ancientwarfarenpc.ai.owned.NpcAIWorkerDeposit;
 import io.github.capttracker.ancientwarfarenpc.config.AWNPCStatics;
 import io.github.capttracker.ancientwarfarenpc.orders.WorkOrder;
+import io.github.capttracker.ancientwarfarenpc.settlement.Activity;
 import net.minecraft.core.BlockPos;
 import io.github.capttracker.ancientwarfarenpc.settlement.SettlementConfig;
 import net.minecraft.nbt.CompoundTag;
@@ -76,12 +77,6 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
     @Nullable
     public BlockPos pouchSite;
 
-    /**
-     * True while the worker climbs to a task target above its reach (a trunk or leaf block high up in a tree): no gravity and no collision, the work goal
-     * steers it up and down. Not saved. See {@code StaffedWork}.
-     */
-    public boolean workClimbing;
-    private long noFallDamageUntil;
     /** The block this worker shows a crack overlay on (see {@code StaffedWork}); cleared when the worker is removed so nothing stays cracked. Not saved. */
     @Nullable
     public BlockPos crackPos;
@@ -100,27 +95,6 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
         super.remove(reason);
     }
 
-    /** Climbing is over: the worker may fall without damage for a few seconds (it climbed up where nothing holds it). */
-    public void endWorkClimb() {
-        if (workClimbing) {
-            workClimbing = false;
-            noPhysics = false;
-            noFallDamageUntil = tickCount + 200L;
-        }
-    }
-
-    @Override
-    public boolean isNoGravity() {
-        return workClimbing || super.isNoGravity();
-    }
-
-    @Override
-    public boolean causeFallDamage(float fallDistance, float multiplier, net.minecraft.world.damagesource.DamageSource source) {
-        if (workClimbing || tickCount < noFallDamageUntil) {
-            return false;
-        }
-        return super.causeFallDamage(fallDistance, multiplier, source);
-    }
     // Assigned in registerGoals (server only), see NpcBase: no initialisers, and null on the client.
     @Nullable
     private NpcAIPlayerOwnedWork workAI;
@@ -200,6 +174,20 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
     @Override
     public double getToolWorkFactor() {
         return getRoleWorkType() == WorkType.NONE || hasMatchingTool() ? 1.0D : SettlementConfig.noToolWorkFactor;
+    }
+
+    @Override
+    public int getToolMorale() {
+        if (getRoleWorkType() == WorkType.NONE) {
+            return 0;
+        }
+        return hasMatchingTool() ? 2 : -8;
+    }
+
+    @Override
+    protected boolean isIdleWithoutJob() {
+        return getRoleWorkType() != WorkType.NONE && ordersStack.isEmpty() && autoWorkTarget == null && getSettlementId() != null
+                && getActivity() == Activity.WORK && getTarget() == null && !isAlarmed;
     }
 
     // ---- carry pouch (rework phase 3) ----

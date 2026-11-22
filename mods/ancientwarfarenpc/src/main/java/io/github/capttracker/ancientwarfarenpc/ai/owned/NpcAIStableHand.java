@@ -382,8 +382,8 @@ public class NpcAIStableHand extends NpcAI<NpcStableHand> {
             return;
         }
         jobTicks++;
+        npc.workSwing();
         if (jobTicks % 20 == 0) {
-            npc.swing(InteractionHand.MAIN_HAND);
             level.sendParticles(net.minecraft.core.particles.ParticleTypes.SMOKE, horse.getX(), horse.getY() + 1.0D, horse.getZ(), 3, 0.3D, 0.3D, 0.3D, 0.01D);
         }
         if (jobTicks >= SettlementConfig.stableTameTicks) {

@@ -12,6 +12,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.LongArrayTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -30,7 +31,9 @@ import java.util.Set;
  * <li>a cell that is a fluid is plugged with cobblestone and never dug (its position is remembered in {@code sealed}); so is any fluid that touches
  * a cell that is open;</li>
  * <li>a solid cell is dug if the tool can: only if it touches open space, or if it is the first one left (the worker has to start somewhere);</li>
- * <li>ladders and torches are placed where the cell is open, the support is there and the quarry has them in stock;</li>
+ * <li>ladders are placed where the cell is open and the support is there; the workers depend on them to get down, so the slices below are not offered
+ * until the ladder of the slice above stands, and when the quarry has none in its ladder slots the mine waits ({@link MineSite#waitingForLadder});
+ * torches are placed when the quarry has them in stock, they never hold the digging back;</li>
  * <li>{@link #followsVeins() strip mines} also mine the ores that touch an open cell of a slice and, from what they mine, the ores around it.</li>
  * </ul>
  */
@@ -86,6 +89,8 @@ abstract class SlicePattern implements MinePattern {
         final List<MineOp> torches = new ArrayList<>();
         final Set<BlockPos> seen = new HashSet<>();
         int outstanding;
+        /** A ladder of the slice is not there yet (and could be: its support is there). */
+        boolean ladderPending;
     }
 
     @Override
@@ -108,8 +113,13 @@ abstract class SlicePattern implements MinePattern {
             finished = true;
             return;
         }
-        for (int slice = cursor + 1; slice < Math.min(total, cursor + WINDOW); slice++) {
-            examine(site, slice, found);
+        if (!found.ladderPending) {
+            for (int slice = cursor + 1; slice < Math.min(total, cursor + WINDOW); slice++) {
+                examine(site, slice, found);
+                if (found.ladderPending) {
+                    break; // dig no deeper than the next ladder
+                }
+            }
         }
         examineVeinQueue(site, found);
 
@@ -134,6 +144,9 @@ abstract class SlicePattern implements MinePattern {
                 out.add(op);
             }
         }
+        if (found.ladderPending && ladderStock <= 0 && out.isEmpty()) {
+            site.waitingForLadder();
+        }
         if (out.size() > limit) {
             out.subList(limit, out.size()).clear();
         }
@@ -146,6 +159,7 @@ abstract class SlicePattern implements MinePattern {
         Level level = site.level();
         List<MineCell> cells = new ArrayList<>();
         cells(site, slice, cells);
+        boolean torches = site.stock(Items.TORCH) > 0;
         for (MineCell cell : cells) {
             BlockPos pos = cell.pos();
             if (!level.isLoaded(pos)) {
@@ -155,16 +169,23 @@ abstract class SlicePattern implements MinePattern {
             BlockState state = level.getBlockState(pos);
             switch (cell.kind()) {
                 case DIG -> examineDig(site, cell, state, found);
-                case LADDER, TORCH_FLOOR, TORCH_WALL -> {
+                case LADDER -> {
                     MineOp op = new MineOp(pos, cell.kind(), cell.facing());
                     BlockState place = op.placeState();
-                    if (state.isAir() && place != null && place.canSurvive(level, pos)) {
-                        found.outstanding++;
-                        if (cell.kind() == MineOp.Kind.LADDER) {
+                    if (place != null && !state.is(Blocks.LADDER) && place.canSurvive(level, pos) && (state.isAir() || site.canDig(pos, state))) {
+                        found.ladderPending = true; // there is no ladder yet: nothing below it is dug before it stands
+                        if (state.isAir()) {
+                            found.outstanding++;
                             found.ladders.add(op);
-                        } else {
-                            found.torches.add(op);
                         }
+                    }
+                }
+                case TORCH_FLOOR, TORCH_WALL -> {
+                    MineOp op = new MineOp(pos, cell.kind(), cell.facing());
+                    BlockState place = op.placeState();
+                    if (torches && state.isAir() && place != null && place.canSurvive(level, pos)) {
+                        found.outstanding++;
+                        found.torches.add(op);
                     }
                 }
                 default -> {

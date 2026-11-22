@@ -20,6 +20,7 @@ import io.github.capttracker.ancientwarfarenpc.menu.NpcInventoryMenu;
 import io.github.capttracker.ancientwarfarenpc.menu.NpcMenuOpener;
 import io.github.capttracker.ancientwarfarenpc.menu.NpcMenuPayloads;
 import io.github.capttracker.ancientwarfarenpc.menu.NpcSpellcasterMenu;
+import io.github.capttracker.ancientwarfarenpc.menu.NpcTalkMenu;
 import io.github.capttracker.ancientwarfarenpc.menu.PlayerOwnedTradeMenu;
 import io.github.capttracker.ancientwarfarenpc.menu.RoutingOrderMenu;
 import io.github.capttracker.ancientwarfarenpc.menu.TownHallMenu;
@@ -79,6 +80,9 @@ public final class AwNpcMenus {
     // rework phase 5: the meal shop of an innkeeper
     public static final DeferredHolder<MenuType<?>, MenuType<InnShopMenu>> INN_SHOP_MENU =
             AncientWarfareNPC.REG.menus.register("npc_inn_shop", () -> IMenuTypeExtension.create(InnShopMenu::new));
+    // playtest fixes: talking to an NPC, and its morale
+    public static final DeferredHolder<MenuType<?>, MenuType<NpcTalkMenu>> TALK_MENU =
+            AncientWarfareNPC.REG.menus.register("npc_talk", () -> IMenuTypeExtension.create(NpcTalkMenu::new));
     // GUI_NPC_TOWN_HALL (41)
     public static final DeferredHolder<MenuType<?>, MenuType<TownHallMenu>> TOWN_HALL_MENU =
             AncientWarfareNPC.REG.menus.register("town_hall", () -> IMenuTypeExtension.create(TownHallMenu::new));

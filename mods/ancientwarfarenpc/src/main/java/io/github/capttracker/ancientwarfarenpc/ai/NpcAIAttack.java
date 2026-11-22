@@ -57,6 +57,9 @@ public abstract class NpcAIAttack<T extends NpcBase> extends NpcAI<T> {
         target = getAttackTarget();
         moveRetryDelay = 0;
         npc.addAITask(TASK_ATTACK);
+        if (target != null) {
+            npc.think("fight", target.getName());
+        }
         npc.setSwingingArms(true);
         attackDelay = 0;
     }

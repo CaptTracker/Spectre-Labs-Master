@@ -108,9 +108,9 @@ public class NpcAIMedicBase<T extends NpcBase> extends NpcAI<T> {
         } else {
             npc.removeAITask(TASK_MOVE);
             healDelay--;
+            npc.workSwing(); // the medic works on the patient all the while
             if (healDelay < 0) {
                 healDelay = HEAL_DELAY_MAX;
-                npc.swing(InteractionHand.MAIN_HAND);
                 patient.heal(getAmountToHealEachTry());
             }
         }

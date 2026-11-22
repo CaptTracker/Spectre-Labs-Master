@@ -23,6 +23,7 @@ public class GuiNpcFactionTradeView extends GuiNpcBase<FactionTradeViewMenu> {
     private Button inventoryButton;
     private Button setupButton;
     private CompositeScrolled area;
+    private int talkY;
 
     public GuiNpcFactionTradeView(FactionTradeViewMenu menu) {
         super(menu);
@@ -30,8 +31,9 @@ public class GuiNpcFactionTradeView extends GuiNpcBase<FactionTradeViewMenu> {
 
     @Override
     public void initElements() {
-        int areaYSize = player.isCreative() ? ySize - 24 - 16 - 4 - 4 * 18 : ySize - 16 - 4 - 4 * 18;
+        int areaYSize = (player.isCreative() ? ySize - 24 - 16 - 4 - 4 * 18 : ySize - 16 - 4 - 4 * 18) - 14;
         area = new CompositeScrolled(this, 0, player.isCreative() ? 24 : 0, xSize, areaYSize);
+        talkY = (player.isCreative() ? 24 : 0) + areaYSize + 1;
         inventoryButton = new Button(8, 8, (256 - 16) / 2, 12, "guistrings.inventory") {
             @Override
             protected void onPressed() {
@@ -50,6 +52,7 @@ public class GuiNpcFactionTradeView extends GuiNpcBase<FactionTradeViewMenu> {
     public void setupElements() {
         clearElements();
         addGuiElement(area);
+        addGuiElement(talkButton(8, talkY, 60));
         if (player.isCreative()) {
             addGuiElement(inventoryButton);
             addGuiElement(setupButton);

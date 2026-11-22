@@ -21,6 +21,7 @@ import io.github.capttracker.ancientwarfarenpc.trade.POTrade;
 public class GuiNpcPlayerOwnedTrade extends GuiNpcBase<PlayerOwnedTradeMenu> {
     private CompositeScrolled area;
     private boolean owner;
+    private int talkY;
 
     public GuiNpcPlayerOwnedTrade(PlayerOwnedTradeMenu menu) {
         super(menu);
@@ -28,7 +29,7 @@ public class GuiNpcPlayerOwnedTrade extends GuiNpcBase<PlayerOwnedTradeMenu> {
 
     @Override
     public void initElements() {
-        int areaSize = ySize - 8 - 4 - 8 - 4 * 18;
+        int areaSize = ySize - 8 - 4 - 8 - 4 * 18 - 14;
         int areaY = 0;
         if (getContainer().npc.isOwner(player)) {
             areaSize -= 12 + 8 + 4;
@@ -36,6 +37,7 @@ public class GuiNpcPlayerOwnedTrade extends GuiNpcBase<PlayerOwnedTradeMenu> {
             owner = true;
         }
         area = new CompositeScrolled(this, 0, areaY, xSize, areaSize);
+        talkY = areaY + areaSize + 1;
     }
 
     @Override
@@ -52,6 +54,7 @@ public class GuiNpcPlayerOwnedTrade extends GuiNpcBase<PlayerOwnedTradeMenu> {
             addGuiElement(inventory);
         }
         addGuiElement(area);
+        addGuiElement(talkButton(8, talkY, 60));
         if (getContainer().storage != null) {
             addTrades();
         } else {

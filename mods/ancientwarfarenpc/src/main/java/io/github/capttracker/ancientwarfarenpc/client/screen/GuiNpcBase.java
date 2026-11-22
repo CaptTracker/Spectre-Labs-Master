@@ -5,6 +5,7 @@
 package io.github.capttracker.ancientwarfarenpc.client.screen;
 
 import io.github.capttracker.ancientwarfare.client.gui.GuiContainerBase;
+import io.github.capttracker.ancientwarfare.client.gui.elements.Button;
 import io.github.capttracker.ancientwarfarenpc.entity.NpcBase;
 import io.github.capttracker.ancientwarfarenpc.menu.NpcMenuBase;
 import io.github.capttracker.ancientwarfarenpc.menu.NpcMenuPayloads;
@@ -49,6 +50,16 @@ public abstract class GuiNpcBase<T extends NpcMenuBase<?>> extends GuiContainerB
         if (npc != null) {
             PacketDistributor.sendToServer(new NpcMenuPayloads.OpenNpcMenu(npc.getId(), request));
         }
+    }
+
+    /** A Talk button for the screens of a trader or an innkeeper: it opens the talk screen of the NPC (what it is thinking). */
+    protected final Button talkButton(int x, int y, int width) {
+        return new Button(x, y, width, 12, "guistrings.npc.talk.tab.talk") {
+            @Override
+            protected void onPressed() {
+                requestOpen(NpcMenuPayloads.Request.TALK);
+            }
+        };
     }
 
     /** A lang text with arguments (1.12.2: {@code I18n.format(key, args)}). */

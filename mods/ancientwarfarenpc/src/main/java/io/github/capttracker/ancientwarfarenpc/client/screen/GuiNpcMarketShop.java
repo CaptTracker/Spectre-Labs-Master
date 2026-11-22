@@ -25,7 +25,7 @@ public class GuiNpcMarketShop extends GuiNpcBase<MarketShopMenu> {
 
     @Override
     public void initElements() {
-        area = new CompositeScrolled(this, 0, 0, xSize, ySize - 16 - 4 - 4 * 18);
+        area = new CompositeScrolled(this, 0, 0, xSize, ySize - 16 - 4 - 4 * 18 - 14);
     }
 
     @Override
@@ -33,6 +33,7 @@ public class GuiNpcMarketShop extends GuiNpcBase<MarketShopMenu> {
         clearElements();
         area.clearElements();
         addGuiElement(area);
+        addGuiElement(talkButton(8, ySize - 16 - 4 - 4 * 18 - 13, 60));
         MarketShopMenu menu = getContainer();
         int y = 8;
         if (!menu.open) {

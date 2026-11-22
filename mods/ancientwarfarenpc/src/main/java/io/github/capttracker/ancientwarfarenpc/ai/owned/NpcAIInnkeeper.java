@@ -157,7 +157,7 @@ public class NpcAIInnkeeper extends NpcAI<NpcInnkeeper> {
             }
         }
         if (guest != null && InnApi.serveGuest(level, settlement.get(), inn, guest)) {
-            npc.swing(InteractionHand.MAIN_HAND);
+            npc.swing(InteractionHand.MAIN_HAND); // handing over the meal
             npc.getLookControl().setLookAt(guest, 30.0F, 30.0F);
         }
     }

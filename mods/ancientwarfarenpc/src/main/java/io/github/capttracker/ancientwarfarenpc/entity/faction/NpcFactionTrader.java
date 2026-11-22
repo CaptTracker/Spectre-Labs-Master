@@ -104,6 +104,12 @@ public class NpcFactionTrader extends NpcFaction {
         ItemStack held = player.getItemInHand(hand);
         boolean baton = !held.isEmpty() && NpcItemIds.isCommandBaton(held);
         if (!baton && isAlive()) {
+            if (player.isShiftKeyDown() && held.isEmpty()) {
+                if (!player.level().isClientSide) {
+                    openTalk(player); // sneak + empty hand: talk instead of trade
+                }
+                return true;
+            }
             if (!player.level().isClientSide && trader == null && player instanceof ServerPlayer serverPlayer) {
                 startTrade(player);
                 NpcBridge.openGui(serverPlayer, this, NpcBridge.Gui.FACTION_TRADE_VIEW);

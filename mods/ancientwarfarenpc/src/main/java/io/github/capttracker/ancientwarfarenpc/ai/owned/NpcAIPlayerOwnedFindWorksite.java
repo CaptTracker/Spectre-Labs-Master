@@ -48,5 +48,10 @@ public class NpcAIPlayerOwnedFindWorksite extends NpcAI<NpcWorker> {
             return; // keeps the claim (also while it eats or sleeps)
         }
         npc.autoWorkTarget = board.claim(npc, npc.getRoleWorkType()).orElse(null);
+        if (npc.autoWorkTarget != null) {
+            npc.think("got_job", npc.level().getBlockState(npc.autoWorkTarget).getBlock().getName());
+        } else if (npc.getRoleWorkType() != io.github.capttracker.ancientwarfare.api.IWorkSite.WorkType.NONE) {
+            npc.think("no_job");
+        }
     }
 }

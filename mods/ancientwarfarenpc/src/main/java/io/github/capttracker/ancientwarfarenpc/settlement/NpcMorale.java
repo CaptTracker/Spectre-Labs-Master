@@ -1,0 +1,123 @@
+/*
+ * Ancient Warfare NPCs - NeoForge 1.21.1 port. GPL-3.0-or-later; see LICENSE.txt in this mod's folder.
+ * New in the port (playtest fixes): the morale of one NPC.
+ */
+package io.github.capttracker.ancientwarfarenpc.settlement;
+
+import io.github.capttracker.ancientwarfarenpc.entity.NpcPlayerOwned;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.phys.AABB;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * The morale of one player-owned NPC, from 0 to 100, recomputed every {@code morale_interval_ticks} (30 seconds). It starts from the morale of the
+ * settlement (50 for an NPC without one) and adds personal factors, each a number of points that can be negative:
+ * <ul>
+ *   <li>{@code hunger}: starving -15, hungry -8, well fed +3;</li>
+ *   <li>{@code bed}: a bed of its own +5, none -8 (members of a settlement);</li>
+ *   <li>{@code sleep}: slept in the last day +4, not -6;</li>
+ *   <li>{@code injury}: a near death in the last day up to -12, any injury up to -5, fading with the time;</li>
+ *   <li>{@code inn}: a meal at the inn in the last day +6;</li>
+ *   <li>{@code social}: time at a gathering point in the last day +4;</li>
+ *   <li>{@code tool}: the right tool +2, none -8 (workers) or no weapon -6 (soldiers);</li>
+ *   <li>{@code idle}: too long without a job in the work hours, -2 to -8;</li>
+ *   <li>{@code fear}: an alarm on -8, a hostile close by -5;</li>
+ *   <li>{@code friends}: other members within 8 blocks, +1 for each up to +4, alone -2.</li>
+ * </ul>
+ * The work speed of the NPC uses this value ({@link SettlementConfig#moraleWorkFactor}), so it already includes the settlement part.
+ */
+public final class NpcMorale {
+    /** One line of the breakdown: the key of {@code guistrings.npc.morale.<key>} and the points. */
+    public record Factor(String key, int delta) {}
+
+    /** The morale, the settlement part it started from and the factors. */
+    public record Result(int value, int base, boolean hasSettlement, List<Factor> factors) {}
+
+    public static final long DAY = 24000L;
+    public static final int FRIENDS_RADIUS = 8;
+
+    private NpcMorale() {}
+
+    /** The mood word of a morale: miserable, unhappy, content, happy or inspired. */
+    public static String mood(int morale) {
+        if (morale < 20) {
+            return "miserable";
+        }
+        if (morale < 40) {
+            return "unhappy";
+        }
+        if (morale < 60) {
+            return "content";
+        }
+        if (morale < 80) {
+            return "happy";
+        }
+        return "inspired";
+    }
+
+    public static Result compute(NpcPlayerOwned npc, ServerLevel level) {
+        long now = level.getGameTime();
+        Optional<Settlement> settlement = npc.getSettlement();
+        int base = settlement.map(Settlement::getMorale).orElse(50);
+        List<Factor> factors = new ArrayList<>();
+
+        if (npc.requiresUpkeep()) {
+            int hunger = npc.isStarving() ? -15 : npc.isHungry() ? -8 : npc.getFoodFraction() > 0.7D ? 3 : 0;
+            factors.add(new Factor("hunger", hunger));
+        }
+        if (settlement.isPresent()) {
+            factors.add(new Factor("bed", settlement.get().isHomeless(npc.getUUID()) ? -8 : 5));
+        }
+        factors.add(new Factor("sleep", now - npc.getLastSleptAt() <= DAY ? 4 : -6));
+
+        long sinceHurt = now - npc.getLastHurtAt();
+        long sinceNear = now - npc.getLastNearDeathAt();
+        int injury = 0;
+        if (npc.getLastNearDeathAt() >= 0 && sinceNear < DAY) {
+            injury = -(int) Math.ceil(12.0D * (1.0D - (double) sinceNear / DAY));
+        }
+        if (npc.getLastHurtAt() >= 0 && sinceHurt < DAY / 2) {
+            injury = Math.min(injury, -(int) Math.ceil(5.0D * (1.0D - (double) sinceHurt / (DAY / 2))));
+        }
+        factors.add(new Factor("injury", injury));
+
+        if (npc.getLastInnMealAt() >= 0 && now - npc.getLastInnMealAt() <= DAY) {
+            factors.add(new Factor("inn", 6));
+        }
+        factors.add(new Factor("social", npc.getLastSocialAt() >= 0 && now - npc.getLastSocialAt() <= DAY ? 4 : 0));
+
+        int tool = npc.getToolMorale();
+        if (tool != 0) {
+            factors.add(new Factor("tool", tool));
+        }
+
+        int idleLimit = SettlementConfig.moraleIdleTicks;
+        if (npc.getIdleTicks() > idleLimit) {
+            factors.add(new Factor("idle", -(2 + (int) Math.min(6, (npc.getIdleTicks() - idleLimit) / 1200L))));
+        }
+
+        int fear = 0;
+        if (npc.isAlarmed) {
+            fear = -8;
+        } else if (!npc.nearbyHostiles.isEmpty()) {
+            fear = -5;
+        }
+        factors.add(new Factor("fear", fear));
+
+        if (settlement.isPresent()) {
+            AABB box = npc.getBoundingBox().inflate(FRIENDS_RADIUS);
+            int friends = level.getEntitiesOfClass(NpcPlayerOwned.class, box,
+                    other -> other != npc && other.isAlive() && settlement.get().getId().equals(other.getSettlementId())).size();
+            factors.add(new Factor("friends", friends == 0 ? -2 : Math.min(4, friends)));
+        }
+
+        int total = base;
+        for (Factor factor : factors) {
+            total += factor.delta();
+        }
+        return new Result(Math.max(0, Math.min(100, total)), base, settlement.isPresent(), List.copyOf(factors));
+    }
+}

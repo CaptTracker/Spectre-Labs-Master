@@ -231,7 +231,7 @@ public class NpcAIScheduleGoal extends NpcAI<NpcPlayerOwned> {
                 npc.restingAtHall = false;
                 npc.assignBed(bed.get());
                 if (walkTo(bed.get(), AWNPCStatics.npcActionRange)) {
-                    if (npc.lieDown(bed.get())) {
+                    if (npc.lieDown(bed.get())) { // the thought "slept" is written when it gets up
                         npc.setPositionToBed();
                         npc.getNavigation().stop();
                     }
@@ -247,7 +247,9 @@ public class NpcAIScheduleGoal extends NpcAI<NpcPlayerOwned> {
         if (walkTo(spot, 1.5D)) {
             standStill();
             npc.restingAtHall = true;
+            npc.think("rested_hall");
         }
+        npc.think("homeless");
     }
 
     // ------------------------------------------------------------ socialise
@@ -284,6 +286,7 @@ public class NpcAIScheduleGoal extends NpcAI<NpcPlayerOwned> {
         if (there || npc.getNavigation().isDone()) {
             standStill();
             idleTicks++;
+            npc.markSocial();
             lookAtOthers(level);
             if (idleTicks > 100 + npc.getRandom().nextInt(120)) {
                 spot = ringSpot(level, point, 1, radius, true);
@@ -320,6 +323,7 @@ public class NpcAIScheduleGoal extends NpcAI<NpcPlayerOwned> {
 
     private void tickShelter(ServerLevel level, Settlement s) {
         npc.addAITask(TASK_RAIN);
+        npc.think("rain");
         if (spot == null) {
             if (level.getGameTime() < shelterRetry) {
                 return;
@@ -348,6 +352,7 @@ public class NpcAIScheduleGoal extends NpcAI<NpcPlayerOwned> {
 
     private void tickWatch(ServerLevel level, Settlement s) {
         npc.addAITask(TASK_PATROL);
+        npc.think("watch");
         if (pauseTicks > 0) {
             pauseTicks--;
             standStill();

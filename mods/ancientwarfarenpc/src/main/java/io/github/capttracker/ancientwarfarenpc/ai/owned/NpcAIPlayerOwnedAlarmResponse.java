@@ -45,6 +45,7 @@ public class NpcAIPlayerOwnedAlarmResponse extends NpcAI<NpcPlayerOwned> {
     @Override
     public void start() {
         npc.addAITask(TASK_ALARM);
+        npc.think("alarm");
         shelter = null;
         nextRethink = 0;
     }

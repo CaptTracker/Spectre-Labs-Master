@@ -16,6 +16,7 @@ import io.github.capttracker.ancientwarfarenpc.client.screen.GuiNpcFactionTradeS
 import io.github.capttracker.ancientwarfarenpc.client.screen.GuiNpcFactionTradeView;
 import io.github.capttracker.ancientwarfarenpc.client.screen.GuiNpcInventory;
 import io.github.capttracker.ancientwarfarenpc.client.screen.GuiNpcPlayerOwnedTrade;
+import io.github.capttracker.ancientwarfarenpc.client.screen.GuiNpcTalk;
 import io.github.capttracker.ancientwarfarenpc.client.screen.GuiRoutingOrder;
 import io.github.capttracker.ancientwarfarenpc.client.screen.GuiTownHallInventory;
 import io.github.capttracker.ancientwarfarenpc.client.screen.GuiTradeOrder;
@@ -32,6 +33,7 @@ import io.github.capttracker.ancientwarfarenpc.menu.NpcCreativeControlsMenu;
 import io.github.capttracker.ancientwarfarenpc.menu.NpcFactionBardMenu;
 import io.github.capttracker.ancientwarfarenpc.menu.NpcInventoryMenu;
 import io.github.capttracker.ancientwarfarenpc.menu.NpcSpellcasterMenu;
+import io.github.capttracker.ancientwarfarenpc.menu.NpcTalkMenu;
 import io.github.capttracker.ancientwarfarenpc.menu.PlayerOwnedTradeMenu;
 import io.github.capttracker.ancientwarfarenpc.menu.RoutingOrderMenu;
 import io.github.capttracker.ancientwarfarenpc.menu.TownHallMenu;
@@ -55,6 +57,7 @@ public final class NpcScreensClient {
     @SubscribeEvent
     public static void registerScreens(RegisterMenuScreensEvent event) {
         event.<NpcInventoryMenu, GuiNpcInventory>register(AwNpcMenus.INVENTORY_MENU.get(), (menu, inventory, title) -> new GuiNpcInventory(menu));
+        event.<NpcTalkMenu, GuiNpcTalk>register(AwNpcMenus.TALK_MENU.get(), (menu, inventory, title) -> new GuiNpcTalk(menu));
         event.<NpcCreativeControlsMenu, GuiNpcCreativeControls>register(AwNpcMenus.CREATIVE_MENU.get(), (menu, inventory, title) -> new GuiNpcCreativeControls(menu));
         event.<NpcBardMenu, GuiNpcBard>register(AwNpcMenus.BARD_MENU.get(), (menu, inventory, title) -> new GuiNpcBard(menu));
         event.<NpcFactionBardMenu, GuiNpcFactionBard>register(AwNpcMenus.FACTION_BARD_MENU.get(), (menu, inventory, title) -> new GuiNpcFactionBard(menu));

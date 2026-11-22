@@ -146,6 +146,8 @@ public class NpcAIFleeHostiles extends NpcAI<NpcPlayerOwned> {
     public void start() {
         npc.addAITask(TASK_GO_HOME);
         npc.addAITask(TASK_FLEE);
+        LivingEntity scared = npc.getTarget();
+        npc.think("fled", scared == null ? net.minecraft.network.chat.Component.translatable("npc.thought.something") : scared.getName());
         stayOutOfSightTimer = MAX_STAY_AWAY + fearLevel;
         fearLevel += MAX_STAY_AWAY;
     }

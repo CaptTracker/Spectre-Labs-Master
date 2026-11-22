@@ -4,6 +4,7 @@
  */
 package io.github.capttracker.ancientwarfarenpc.ai;
 
+import io.github.capttracker.ancientwarfarenpc.ai.path.NpcRouteAssist;
 import io.github.capttracker.ancientwarfarenpc.entity.NpcBase;
 import io.github.capttracker.ancientwarfarenpc.entity.NpcPlayerOwned;
 import io.github.capttracker.ancientwarfarenpc.settlement.SettlementConfig;
@@ -237,13 +238,26 @@ public abstract class NpcAI<T extends NpcBase> extends Goal {
     protected final void setPath(double x, double y, double z) {
         PathNavigation navigation = npc.getNavigation();
         Path path = trimPath(navigation.createPath(x, y, z, 1));
-        navigation.moveTo(path, moveSpeed);
+        startPath(path, x, y, z);
     }
 
     protected final void setPath(BlockPos pos) {
         PathNavigation navigation = npc.getNavigation();
         Path path = trimPath(navigation.createPath(pos, 1));
-        navigation.moveTo(path, moveSpeed);
+        startPath(path, pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D);
+    }
+
+    /**
+     * Follows the path. An NPC that has no way on foot to a place at another height (down a mine shaft: vanilla navigation does not climb ladders) gets a
+     * route over the ladders instead ({@link NpcRouteAssist}); a way on foot always wins.
+     */
+    private void startPath(@Nullable Path path, double x, double y, double z) {
+        NpcRouteAssist assist = npc.getRouteAssist();
+        if ((path == null || !path.canReach()) && Math.abs(y - npc.getY()) >= 2.0D && assist.requestMove(x, y, z)) {
+            return; // the route moves the NPC
+        }
+        assist.cancel();
+        npc.getNavigation().moveTo(path, moveSpeed);
     }
 
     /**

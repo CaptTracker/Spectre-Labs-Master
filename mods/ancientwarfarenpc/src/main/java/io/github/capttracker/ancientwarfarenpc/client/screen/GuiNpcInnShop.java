@@ -21,7 +21,7 @@ public class GuiNpcInnShop extends GuiNpcBase<InnShopMenu> {
 
     @Override
     public void initElements() {
-        area = new CompositeScrolled(this, 0, 0, xSize, ySize - 16 - 4 - 4 * 18);
+        area = new CompositeScrolled(this, 0, 0, xSize, ySize - 16 - 4 - 4 * 18 - 14);
     }
 
     @Override
@@ -29,6 +29,7 @@ public class GuiNpcInnShop extends GuiNpcBase<InnShopMenu> {
         clearElements();
         area.clearElements();
         addGuiElement(area);
+        addGuiElement(talkButton(8, ySize - 16 - 4 - 4 * 18 - 13, 60));
         InnShopMenu menu = getContainer();
         int y = 8;
         if (!menu.open) {

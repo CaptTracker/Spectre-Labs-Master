@@ -17,6 +17,8 @@ import io.github.capttracker.ancientwarfare.util.InventoryTools;
 import io.github.capttracker.ancientwarfare.util.WorldTools;
 import io.github.capttracker.ancientwarfarenpc.ai.NpcAIBlockWithShield;
 import io.github.capttracker.ancientwarfarenpc.ai.NpcNavigator;
+import io.github.capttracker.ancientwarfarenpc.ai.path.NpcRouteAssist;
+import io.github.capttracker.ancientwarfarenpc.settlement.SettlementConfig;
 import io.github.capttracker.ancientwarfarenpc.config.AWNPCStatics;
 import io.github.capttracker.ancientwarfarenpc.entity.faction.NpcFaction;
 import io.github.capttracker.ancientwarfarenpc.registry.NpcDefault;
@@ -110,6 +112,8 @@ public abstract class NpcBase extends PathfinderMob implements IEntityWithComple
     private static final EntityDataAccessor<Integer> AI_TASKS = SynchedEntityData.defineId(NpcBase.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> SHIELD_DISABLED_TICK = SynchedEntityData.defineId(NpcBase.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> SWINGING_ARMS = SynchedEntityData.defineId(NpcBase.class, EntityDataSerializers.BOOLEAN);
+    /** The generated first name ({@link NpcNames}); empty until the first server tick. */
+    private static final EntityDataAccessor<String> GIVEN_NAME = SynchedEntityData.defineId(NpcBase.class, EntityDataSerializers.STRING);
 
     private static final String SLOT_NUM_TAG = "slotNum";
     private static final String CACHED_BED_POS_TAG = "cachedBedPos";
@@ -190,6 +194,96 @@ public abstract class NpcBase extends PathfinderMob implements IEntityWithComple
         return new NpcNavigator(this, level);
     }
 
+    /** Created on first use: the goals are registered inside the constructor of {@code Mob}, before the initialisers of this class run. */
+    @Nullable
+    private NpcRouteAssist routeAssist;
+
+    /** The routes over ladders for the NPC that cannot get somewhere on foot (down a mine and back up). Server side. */
+    public NpcRouteAssist getRouteAssist() {
+        if (routeAssist == null) {
+            routeAssist = new NpcRouteAssist(this);
+        }
+        return routeAssist;
+    }
+
+    /** Created on first use, like the route assist. */
+    @Nullable
+    private NpcMind mind;
+
+    /** The recent thoughts of this NPC (talk screen). */
+    public NpcMind getMind() {
+        if (mind == null) {
+            mind = new NpcMind();
+        }
+        return mind;
+    }
+
+    /** Server side: writes an event to the recent thoughts ({@code npc.thought.event.<event>.1-3}); see {@link NpcMind#note}. */
+    public void think(String event, Component... args) {
+        if (!level().isClientSide && isAlive()) {
+            getMind().note(this, event, args);
+        }
+    }
+
+    // what the NPC is doing now, as the goals tell (server side, not saved): the key of {@code npc.thought.now.<key>.1-3}, a target position and an argument
+    @Nullable
+    private String doingKey;
+    @Nullable
+    private BlockPos doingPos;
+    @Nullable
+    private Component doingArg;
+    private long doingTime = -1000L;
+
+    /** Called by the goals every tick or so while they act: what the NPC does ({@code key}), where ({@code pos}, may be null) and with what (may be null). */
+    public void setDoing(String key, @Nullable BlockPos pos, @Nullable Component arg) {
+        doingKey = key;
+        doingPos = pos;
+        doingArg = arg;
+        doingTime = level().getGameTime();
+    }
+
+    /** The key of what the goals last said the NPC does, or null if that is more than 5 seconds old. */
+    @Nullable
+    public String getDoingKey() {
+        return doingKey != null && level().getGameTime() - doingTime <= 100L ? doingKey : null;
+    }
+
+    @Nullable
+    public BlockPos getDoingPos() {
+        return doingPos;
+    }
+
+    @Nullable
+    public Component getDoingArg() {
+        return doingArg;
+    }
+
+    private int lastWorkSwing = -1000;
+
+    /**
+     * Swings the main hand at the pace of {@code swing_interval_ticks} (default 12, a normal pace; a player swings about every 4 ticks): call it every tick
+     * of an action in progress, it swings when the interval has passed. The swing is broadcast to the clients by {@code LivingEntity.swing}.
+     *
+     * @return true if it swung on this call
+     */
+    public boolean workSwing() {
+        if (tickCount - lastWorkSwing >= SettlementConfig.swingIntervalTicks) {
+            lastWorkSwing = tickCount;
+            swing(InteractionHand.MAIN_HAND);
+            return true;
+        }
+        return false;
+    }
+
+    /** Runs before the move control of this tick, so the route can steer the NPC. */
+    @Override
+    protected void customServerAiStep() {
+        super.customServerAiStep();
+        if (routeAssist != null) {
+            routeAssist.tick();
+        }
+    }
+
     public void stopAIControlFlag(int flag) {
         stopAIControlFlags |= flag;
     }
@@ -208,6 +302,33 @@ public abstract class NpcBase extends PathfinderMob implements IEntityWithComple
         builder.define(AI_TASKS, 0);
         builder.define(SWINGING_ARMS, false);
         builder.define(SHIELD_DISABLED_TICK, 0);
+        builder.define(GIVEN_NAME, "");
+    }
+
+    /** The generated first name, or empty if there is none yet. */
+    public String getGivenName() {
+        return entityData.get(GIVEN_NAME);
+    }
+
+    public void setGivenName(String name) {
+        entityData.set(GIVEN_NAME, name == null ? "" : name);
+    }
+
+    /** The faction whose name pool the first name comes from; empty for the player-owned NPCs. */
+    protected String getNamePoolFaction() {
+        return "";
+    }
+
+    /** False while the NPC cannot yet tell which name pool it draws from (a faction NPC before its faction is set). */
+    protected boolean canGenerateName() {
+        return true;
+    }
+
+    /** Server side: gives an NPC without a first name one (new NPCs and NPCs saved before names existed). */
+    private void ensureGivenName() {
+        if (getGivenName().isEmpty() && canGenerateName()) {
+            setGivenName(NpcNames.pick(getRandom(), getNamePoolFaction()));
+        }
     }
 
     // ---- attributes and overrides ----
@@ -445,24 +566,54 @@ public abstract class NpcBase extends PathfinderMob implements IEntityWithComple
         return false;
     }
 
+    /** Whether the player may edit this NPC (open its inventory screen): the commanders of a player-owned NPC; a faction NPC overrides it (creative players). */
+    protected boolean canEditBy(Player player) {
+        return hasCommandPermissions(player.getUUID(), player.getGameProfile().getName());
+    }
+
+    /**
+     * Right-click: the editor opens the inventory screen, sneak + right-click with an empty hand opens the talk screen and with an item in hand toggles
+     * follow (as before); anyone else who is not an enemy gets the talk screen.
+     */
     protected boolean tryCommand(Player player) {
         boolean baton = NpcItemIds.isCommandBaton(player.getMainHandItem()) || NpcItemIds.isCommandBaton(player.getOffhandItem());
-        if (!baton) {
-            if (!level().isClientSide) {
-                if (player.isShiftKeyDown()) {
+        if (baton) {
+            return false;
+        }
+        if (!canEditBy(player)) {
+            if (level().isClientSide) {
+                return true; // the server decides (an enemy gets nothing)
+            }
+            if (isHostileTowards(player)) {
+                return false;
+            }
+            openTalk(player);
+            return true;
+        }
+        if (!level().isClientSide) {
+            if (player.isShiftKeyDown()) {
+                if (player.getMainHandItem().isEmpty()) {
+                    openTalk(player);
+                } else {
                     String playerName = player.getGameProfile().getName();
                     if (followingPlayerName != null && followingPlayerName.equals(playerName)) {
                         followingPlayerName = null;
                     } else {
                         followingPlayerName = playerName;
                     }
-                } else {
-                    openGUI(player);
                 }
+            } else {
+                openGUI(player);
             }
-            return true;
         }
-        return false;
+        return true;
+    }
+
+    /** Opens the talk screen (what the NPC is thinking) for the player. Server side. */
+    public void openTalk(Player player) {
+        if (player instanceof ServerPlayer serverPlayer) {
+            NpcBridge.openGui(serverPlayer, this, NpcBridge.Gui.TALK);
+        }
     }
 
     @Override
@@ -476,7 +627,29 @@ public abstract class NpcBase extends PathfinderMob implements IEntityWithComple
         if (!level().isClientSide) {
             processPreDamageLogic(source, damage);
         }
-        return super.hurt(source, damage);
+        boolean hurt = super.hurt(source, damage);
+        if (hurt && !level().isClientSide && isAlive()) {
+            Entity attacker = source.getEntity();
+            think("hurt", attacker == null ? Component.translatable("npc.thought.something") : attacker.getName());
+            boolean nearDeath = getHealth() < getMaxHealth() * 0.3F;
+            if (nearDeath) {
+                think("near_death");
+            }
+            onInjured(nearDeath);
+        }
+        return hurt;
+    }
+
+    /** Server side, after the NPC took damage: lets the player-owned NPCs note it for their morale. */
+    protected void onInjured(boolean nearDeath) {
+    }
+
+    /** The NPC went to bed (server side). */
+    protected void onFellAsleep() {
+    }
+
+    /** The NPC got up from its bed (server side). */
+    protected void onWokeUp() {
     }
 
     private void processPreDamageLogic(DamageSource source, float damage) {
@@ -571,6 +744,7 @@ public abstract class NpcBase extends PathfinderMob implements IEntityWithComple
     public boolean killedEntity(ServerLevel level, LivingEntity entity) {
         boolean result = super.killedEntity(level, entity);
         addExperience(AWNPCStatics.npcXpFromKill);
+        think("won_fight", entity.getName());
         if (entity == getTarget()) {
             setTarget(null);
         }
@@ -791,15 +965,17 @@ public abstract class NpcBase extends PathfinderMob implements IEntityWithComple
         return type;
     }
 
-    /** {@code entity.ancientwarfarenpc.<full type>.name}, plus " : " and the custom name if there is one. */
+    /**
+     * A custom name (name tag or the inventory screen) replaces everything; otherwise the template of the type and role with the generated first
+     * name ("Guard Captain Rory"). The role is read each time, so it follows a role change.
+     */
     @Override
     public Component getName() {
-        MutableComponent name = Component.translatable("entity.ancientwarfarenpc." + getNpcFullType() + ".name");
         Component customName = getCustomName();
         if (customName != null) {
-            name = name.append(" : ").append(customName);
+            return customName;
         }
-        return name;
+        return NpcNames.display(getNpcFullType(), getGivenName());
     }
 
     public final NpcLevelingStats getLevelingStats() {
@@ -837,6 +1013,9 @@ public abstract class NpcBase extends PathfinderMob implements IEntityWithComple
     @Override
     public void tick() {
         if (!level().isClientSide) {
+            if (tickCount % 10 == 1) {
+                ensureGivenName();
+            }
             if (getShieldDisabledTick() > 0) {
                 decrementShieldDisabledTick();
             }
@@ -1159,6 +1338,9 @@ public abstract class NpcBase extends PathfinderMob implements IEntityWithComple
         }
 
         readBaseTags(tag);
+        if (tag.contains("mind", Tag.TAG_LIST)) {
+            getMind().load(tag.getList("mind", Tag.TAG_COMPOUND), registryAccess());
+        }
         onWeaponInventoryChanged();
         onOffhandInventoryChanged();
     }
@@ -1166,6 +1348,9 @@ public abstract class NpcBase extends PathfinderMob implements IEntityWithComple
     @Override
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
+        if (mind != null && !mind.thoughts().isEmpty()) {
+            tag.put("mind", mind.save(registryAccess()));
+        }
         if (!hasHome()) {
             Optional<BlockPos> position = getTownHallPosition();
             if (position.isPresent()) {
@@ -1203,6 +1388,9 @@ public abstract class NpcBase extends PathfinderMob implements IEntityWithComple
         if (tag.contains("name")) {
             setCustomName(Component.literal(tag.getString("name")));
         }
+        if (tag.contains("givenName")) {
+            setGivenName(tag.getString("givenName"));
+        }
         if (tag.contains("food")) {
             setFoodRemaining(tag.getInt("food"));
         }
@@ -1237,6 +1425,9 @@ public abstract class NpcBase extends PathfinderMob implements IEntityWithComple
         tag.putFloat(HEALTH_TAG, getHealth());
         if (hasCustomName()) {
             tag.putString("name", getCustomName().getString());
+        }
+        if (!getGivenName().isEmpty()) {
+            tag.putString("givenName", getGivenName());
         }
         tag.putInt("food", getFoodRemaining());
         tag.putInt(ATTACK_DAMAGE_OVERRIDE_TAG, attackDamage);
@@ -1337,6 +1528,7 @@ public abstract class NpcBase extends PathfinderMob implements IEntityWithComple
             }
             startSleeping(pos);
             setPositionToBed();
+            onFellAsleep();
             return true;
         }
         return false;
@@ -1349,6 +1541,9 @@ public abstract class NpcBase extends PathfinderMob implements IEntityWithComple
     public void wakeUp() {
         if (isSleeping()) {
             stopSleeping();
+            if (!level().isClientSide) {
+                onWokeUp();
+            }
         }
     }
 
