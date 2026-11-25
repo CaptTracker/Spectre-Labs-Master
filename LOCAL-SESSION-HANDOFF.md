@@ -12,7 +12,7 @@ Your job: inventory and decompile the old jars, then start porting them.
 - **Target:** Minecraft **1.21.1**, **NeoForge 21.1.x**, **Java 21**, ModDevGradle.
   Most of the originals are **1.12.2 Forge** mods.
 - **Repo layout:**
-  - `libs/capttrackerlib/`: the shared library mod (`ModRegistrar`, `Ids`, `ItemStacks`). Every mod depends on it.
+  - `libs/spectrelib/`: the shared library mod (`ModRegistrar`, `Ids`, `ItemStacks`). Every mod depends on it.
   - `mods/<modid>/`: one folder per mod. Create new ones with `scripts/new-mod.sh` (on Windows, run it from Git Bash).
   - `legacy/<modid>/`: the original source or jar, for reference only. Jars and `decompiled/` folders are git-ignored.
 - **The legacy jars are in the local `Spectre Labs Master` folder** (this session's working folder).
@@ -43,7 +43,7 @@ Record the results in **`docs/LEGACY-INVENTORY.md`** in the repo: one table row 
 Flag the hard cases:
 - **Coremods** (`IFMLLoadingPlugin`, ASM class transformers). These have to be rewritten as **mixins** or NeoForge events.
 - Mods that depend on **other mods that were never updated** past 1.12.2.
-- **Shared code duplicated across several mods.** These are candidates for `capttrackerlib`.
+- **Shared code duplicated across several mods.** These are candidates for `spectrelib`.
 
 ## Step 2: Decompile
 
@@ -68,7 +68,7 @@ Follow `CLAUDE.md` and `docs/PORTING.md`. For each mod:
 2. Run `scripts/new-mod.sh <modid> "<Mod Name>"` with the **same mod id** as the 1.12.2 original. Add `ported_from=1.12.2` to its `gradle.properties`.
 3. Copy assets first, applying the folder renames in `docs/PORTING.md`
    (`textures/blocks` → `textures/block`, `.lang` → `.json`, and so on).
-4. Register everything through `ModRegistrar`. Move code that two or more mods need into `capttrackerlib`.
+4. Register everything through `ModRegistrar`. Move code that two or more mods need into `spectrelib`.
 5. Clean up while porting, since these mods are old:
    - Replace metadata variants with separate blocks or block states.
    - Use data components instead of item NBT.
