@@ -32,15 +32,12 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
 import org.slf4j.Logger;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * Builds a caravan: a faction trader leading a horse that is hitched to a wagon (the phase 4 hitch API), and the guards. It appears 64 to 96 blocks from the
@@ -126,15 +123,19 @@ public final class CaravanSpawner {
         for (var trade : trades.getTrades()) {
             list.add(trade.copy());
         }
-        CaravanStock.stockCargo(wagon.inventory.storageInventory, trades);
-        if (SettlementConfig.caravanTailorBuyOrders) {
-            tailorCargo(level, settlement, wagon.inventory.storageInventory, CaravanStock.suppliable(candidates, level.registryAccess()));
-        }
 
         long now = level.getGameTime();
         BlockPos target = tradingPlace(level, settlement, place.pos);
         CaravanState state = new CaravanState(settlement.getId(), hall, target, BlockPos.containing(place.pos), biome.unwrapKey().map(k -> k.location().toString()).orElse(""), now);
         state.wagon = wagon.getUUID();
+        // the wagon starts empty: goods for buy orders are made only when a trade is paid (CaravanLogic), so a killed caravan has no free goods to drop
+        state.virtualCargo = true;
+        state.supply.addAll(CaravanStock.supplyOf(trades));
+        if (SettlementConfig.caravanTailorBuyOrders) {
+            for (Item item : CaravanStock.suppliable(candidates, level.registryAccess())) {
+                state.supply.add(net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(item).toString());
+            }
+        }
         state.horses.add(horse.getUUID());
 
         List<NpcFaction> guards = new ArrayList<>();
@@ -169,28 +170,6 @@ public final class CaravanSpawner {
         wagon.hitch.setLeader(trader, 3.0D);
         CaravanData.get(level.getServer()).setActive(settlement.getId(), trader.getUUID(), now);
         return true;
-    }
-
-    // ---------------------------------------------------------------- cargo for buy orders
-
-    /** Adds goods for the buy orders of the settlement's stalls (up to a stack each), for the items that the faction and the land can supply. */
-    private static void tailorCargo(ServerLevel level, Settlement settlement, IItemHandler cargo, Set<Item> suppliable) {
-        for (MarketApi.PostedOrder posted : MarketApi.listBuyOrders(level, settlement)) {
-            var item = posted.order().item();
-            if (item.isEmpty() || !suppliable.contains(item.getItem())) {
-                continue;
-            }
-            int wanted = Math.max(1, posted.order().deals()) * item.getCount();
-            if (posted.order().remaining() >= 0) {
-                wanted = Math.min(wanted, posted.order().remaining());
-            }
-            wanted = Math.min(wanted, item.getMaxStackSize() * 2);
-            while (wanted > 0) {
-                int part = Math.min(wanted, item.getMaxStackSize());
-                ItemHandlerHelper.insertItem(cargo, item.copyWithCount(part), false);
-                wanted -= part;
-            }
-        }
     }
 
     // ---------------------------------------------------------------- places

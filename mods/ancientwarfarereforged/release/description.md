@@ -35,6 +35,7 @@ This one file holds all five Ancient Warfare modules: **Core, Vehicles, Automati
 - Every NPC has a name, like "Guard Captain Rory" or "Bill the Miner".
 - **Talk to them** to see what they're doing and what's on their mind.
 - **Each NPC has its own morale:** food, a bed, sleep, injuries, friends and fear all count.
+- Workers switch to the right tool for each block.
 - **New NPC types:** trader, innkeeper, stable hand and guard captain.
 
 ## Factions and trade
@@ -42,11 +43,14 @@ This one file holds all five Ancient Warfare modules: **Core, Vehicles, Automati
 - Ancient Warfare's NPC factions, like Vikings, desert nomads and Romans, are real factions with reputation.
 - Market stalls have sell offers and buy orders, and prices depend on reputation.
 - Faction caravans travel the land with a trader, a wagon and guards.
+- With JEI, the "+" button fills the crafting grid of the engineering bench, auto crafting block and warehouse crafting station.
 
 ## Vehicles and ships
 - Siege engines with **mouse steering** and a chase camera.
 - Horse-drawn carts and wagons.
 - **Ships with walkable decks:** a fishing boat, a cog and a war galley, driven by wind and rowers and armed with mounted turrets.
+- **NPC ship crews:** send your NPCs aboard with the command baton. They row, ride as passengers, and soldiers fire the turrets at your enemies.
+- Hitched horses are roped to their cart, and riders keep their seats after a reload.
 
 ## Structures
 Only the craftable building pieces are included: 7 gate types, coin stacks, fire pits and totems. The original structure templates, builder and world generation are **not** included.

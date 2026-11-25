@@ -198,10 +198,15 @@ public final class CartHitch {
         }
         for (int i = 0; i < entries.size(); i++) {
             if (entries.get(i).horse == horse) {
-                return i % 2 == 0 ? -PAIR_LATERAL : PAIR_LATERAL;
+                return lateralAt(i, entries.size());
             }
         }
         return 0.0D;
+    }
+
+    /** The sideways offset of the horse at the index in a team of the given size (the client knows only the order of the ids). */
+    public static double lateralAt(int index, int count) {
+        return count < 2 ? 0.0D : (index % 2 == 0 ? -PAIR_LATERAL : PAIR_LATERAL);
     }
 
     // ---- hitching ----

@@ -50,9 +50,9 @@ final class ShipGunnerClient {
             Tuple<Float, Float> angles = Trig.getLaunchAngleToHit(dx, dy, dz, speed);
             if (!angles.getA().isNaN() && !angles.getB().isNaN()) {
                 if (Trig.isAngleBetween(angles.getB(), mount.pitchMin(), mount.pitchMax())) {
-                    pitch = angles.getB();
+                    pitch = Mth.wrapDegrees(angles.getB()); // solver can return 0..360; -5 must not read as 355
                 } else if (Trig.isAngleBetween(angles.getA(), mount.pitchMin(), mount.pitchMax())) {
-                    pitch = angles.getA();
+                    pitch = Mth.wrapDegrees(angles.getA()); // solver can return 0..360; -5 must not read as 355
                 }
             }
         } else {

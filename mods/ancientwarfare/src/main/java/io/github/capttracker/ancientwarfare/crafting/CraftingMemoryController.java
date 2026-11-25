@@ -53,6 +53,8 @@ public class CraftingMemoryController {
     private ItemStack lastBook = ItemStack.EMPTY;
     private RecipeResourceLocation lastRecipe = RecipeResourceLocation.NO_RECIPE_REGISTRY_NAME;
     private boolean everRefreshed = false;
+    /** Set by {@link #setRecipe}: the next {@link #serverRefresh} tells the menu to recompute its result even though the inputs look unchanged. */
+    private boolean resultDirty = false;
     private int ticksSinceRefresh = 0;
 
     // client
@@ -154,10 +156,12 @@ public class CraftingMemoryController {
         if (level.isClientSide) {
             return false;
         }
+        boolean pending = resultDirty;
+        resultDirty = false;
         boolean periodic = ++ticksSinceRefresh >= PERIODIC_REFRESH_TICKS;
         boolean inputsChanged = gridOrBookChanged() || !memory.getRecipeId().equals(lastRecipe);
         if (!(force || periodic || inputsChanged || !everRefreshed)) {
-            return false;
+            return pending;
         }
         ticksSinceRefresh = 0;
 
@@ -180,7 +184,7 @@ public class CraftingMemoryController {
         if (listChanged) {
             sendToClient();
         }
-        return inputsChanged || listChanged || force;
+        return inputsChanged || listChanged || force || pending;
     }
 
     /**
@@ -209,6 +213,7 @@ public class CraftingMemoryController {
         if (forceSet || indexOf(recipes, recipe.getRegistryName()) >= 0) {
             memory.setRecipe(recipe);
             serverRefresh(true);
+            resultDirty = true;
         }
     }
 

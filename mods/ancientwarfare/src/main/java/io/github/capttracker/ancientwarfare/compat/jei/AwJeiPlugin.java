@@ -1,6 +1,6 @@
 /*
  * Ancient Warfare Core - NeoForge 1.21.1 port. GPL-3.0-or-later; see LICENSE.txt in this mod's folder.
- * Ported from Ancient Warfare 2: core/compat/jei/AWJEIPlugin (recipe display only; no bench recipe transfer yet).
+ * Ported from Ancient Warfare 2: core/compat/jei/AWJEIPlugin plus the recipe transfer handlers.
  */
 package io.github.capttracker.ancientwarfare.compat.jei;
 
@@ -10,10 +10,13 @@ import io.github.capttracker.ancientwarfare.crafting.ResearchRecipe;
 import io.github.capttracker.ancientwarfare.init.AwCoreStations;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
+import io.github.capttracker.ancientwarfare.menu.EngineeringStationMenu;
+import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
+import mezz.jei.api.registration.IRecipeTransferRegistration;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.resources.ResourceLocation;
@@ -54,6 +57,12 @@ public class AwJeiPlugin implements IModPlugin {
     @Override
     public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
         registration.addRecipeCatalyst(VanillaTypes.ITEM_STACK, new ItemStack(AncientWarfareCore.ENGINEERING_STATION.get()), ResearchRecipeCategory.TYPE);
+        registration.addRecipeCatalyst(VanillaTypes.ITEM_STACK, new ItemStack(AncientWarfareCore.ENGINEERING_STATION.get()), RecipeTypes.CRAFTING);
         registration.addRecipeCatalyst(VanillaTypes.ITEM_STACK, new ItemStack(AwCoreStations.RESEARCH_STATION.get()), ResearchRecipeCategory.TYPE);
+    }
+
+    @Override
+    public void registerRecipeTransferHandlers(IRecipeTransferRegistration registration) {
+        AwRecipeTransferHandler.register(registration, EngineeringStationMenu.class, AncientWarfareCore.ENGINEERING_STATION_MENU.get());
     }
 }

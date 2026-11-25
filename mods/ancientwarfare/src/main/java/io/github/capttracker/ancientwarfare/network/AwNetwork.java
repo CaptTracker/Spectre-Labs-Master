@@ -17,6 +17,7 @@ public final class AwNetwork {
         PayloadRegistrar registrar = event.registrar(VERSION);
         registrar.playBidirectional(MenuDataPayload.TYPE, MenuDataPayload.CODEC, MenuDataPayload::handle);
         registrar.playToClient(ResearchSyncPayload.TYPE, ResearchSyncPayload.CODEC, ResearchSyncPayload::handle);
+        registrar.playToServer(TransferRecipePayload.TYPE, TransferRecipePayload.CODEC, TransferRecipePayload::handle);
         CoreMiscPayloads.registerPayloads(registrar);
     }
 }

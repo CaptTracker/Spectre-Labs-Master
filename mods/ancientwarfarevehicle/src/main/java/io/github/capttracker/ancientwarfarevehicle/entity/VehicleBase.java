@@ -187,6 +187,11 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
     private boolean packed = false;
     /** The entity id of the rider of each seat of the type, -1 if the seat is free. The server sets it, the client reads it from {@link #SEAT_DATA}. */
     private int[] seatOccupants = new int[0];
+    /** SERVER: seats of riders read from the saved data that have not re-attached yet (rider UUID to seat index); see {@link #restoreSeat}. */
+    private final java.util.Map<java.util.UUID, Integer> pendingSeats = new java.util.HashMap<>();
+    /** SERVER: ticks left in which the seats in {@link #pendingSeats} are kept free for their riders. */
+    private int pendingSeatTicks = 0;
+    private static final int PENDING_SEAT_TICKS = 100;
     /** The horses of a horse-drawn cart (empty for every other type). */
     public final CartHitch hitch = new CartHitch(this);
     /** The ship machinery (hull parts, deck, sails, turrets), non null for an entity of the ship entity type (rework phase 4). */
@@ -199,6 +204,8 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
     /** The role the entity that is boarding right now asked for (see {@link #boardAs}); null for the default order. */
     @Nullable
     private SeatRole boardingRole = null;
+    /** True while {@link #boardStrict} boards: only seats of {@link #boardingRole} are acceptable, with no fall back to another role. */
+    private boolean boardingStrict = false;
 
     public VehicleBase(EntityType<VehicleBase> entityType, Level level) {
         super(entityType, level);
@@ -771,7 +778,10 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
     }
 
     /** The roles an entity takes, in order: the wanted one first. NPC crew only take the seats that work the weapon, anyone else any seat. */
-    private static SeatRole[] roleOrder(Entity entity, @Nullable SeatRole wanted) {
+    private static SeatRole[] roleOrder(Entity entity, @Nullable SeatRole wanted, boolean strict) {
+        if (strict && wanted != null) {
+            return new SeatRole[] {wanted};
+        }
         SeatRole[] order = entity instanceof IVehicleCrew
                 ? new SeatRole[] {SeatRole.DRIVER, SeatRole.GUNNER}
                 : new SeatRole[] {SeatRole.DRIVER, SeatRole.GUNNER, SeatRole.PASSENGER, SeatRole.ROWER};
@@ -786,12 +796,39 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
 
     /** The seat the entity would get now, -1 if there is none. */
     public int findSeatFor(Entity entity, @Nullable SeatRole wanted) {
-        for (SeatRole role : roleOrder(entity, wanted)) {
+        int seat = findSeat(entity, wanted, true);
+        return seat >= 0 ? seat : findSeat(entity, wanted, false);
+    }
+
+    /** @param honourReserved skip the seats kept for riders that are still re-attaching after a load */
+    private int findSeat(Entity entity, @Nullable SeatRole wanted, boolean honourReserved) {
+        for (SeatRole role : roleOrder(entity, wanted, boardingStrict)) {
             for (int i = 0; i < getSeatCount() && i < seatOccupants.length; i++) {
-                if (getSeat(i).role() == role && isSeatFree(i)) {
+                if (getSeat(i).role() == role && isSeatFree(i) && !(honourReserved && isReservedForOther(i, entity))) {
                     return i;
                 }
             }
+        }
+        return -1;
+    }
+
+    private boolean isReservedForOther(int seat, Entity entity) {
+        if (pendingSeats.isEmpty()) {
+            return false;
+        }
+        for (java.util.Map.Entry<java.util.UUID, Integer> e : pendingSeats.entrySet()) {
+            if (e.getValue() == seat && !e.getKey().equals(entity.getUUID())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** SERVER: the seat a rider had when the vehicle was saved, if it is still free and the rider has not been given another one; else -1. */
+    private int restoreSeat(Entity passenger) {
+        Integer saved = pendingSeats.remove(passenger.getUUID());
+        if (saved != null && saved >= 0 && saved < seatOccupants.length && saved < getSeatCount() && isSeatFree(saved)) {
+            return saved;
         }
         return -1;
     }
@@ -808,6 +845,23 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
             return entity.startRiding(this);
         } finally {
             boardingRole = null;
+        }
+    }
+
+    /**
+     * Boards the entity into a free seat of exactly this role, or not at all (no fall back to another role, which {@link #boardAs} has). It is how an NPC is put
+     * on a ship as a rower, gunner or passenger: NPC crew would otherwise only be given the driver and gunner seats. Server side.
+     *
+     * @return false if there was no free seat of the role (or the entity could not ride)
+     */
+    public boolean boardStrict(Entity entity, SeatRole role) {
+        boardingRole = role;
+        boardingStrict = true;
+        try {
+            return entity.startRiding(this);
+        } finally {
+            boardingRole = null;
+            boardingStrict = false;
         }
     }
 
@@ -862,6 +916,9 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
         }
         this.updateTurretPitch();
         this.updateTurretRotation();
+        if (!level().isClientSide && pendingSeatTicks > 0 && --pendingSeatTicks == 0) {
+            pendingSeats.clear();
+        }
         if (!level().isClientSide && vehicleType.isHorseDrawn()) {
             this.hitch.tick();
             if (this.breakDamage > 0.f) {
@@ -965,7 +1022,11 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
     protected void addPassenger(Entity passenger) {
         super.addPassenger(passenger);
         if (!level().isClientSide) {
-            int seat = findSeatFor(passenger, boardingRole);
+            // a rider that comes back after a load gets the seat it had; anyone else the first free seat of the usual order
+            int seat = restoreSeat(passenger);
+            if (seat < 0) {
+                seat = findSeatFor(passenger, boardingRole);
+            }
             if (seat >= 0 && seat < seatOccupants.length) {
                 seatOccupants[seat] = passenger.getId();
                 publishSeats();
@@ -1161,7 +1222,13 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
         double yOffset = passenger instanceof Player ? -0.35D : 0.D;
         callback.accept(passenger, posX, posY + yOffset, posZ);
         if (passenger instanceof IVehicleCrew) {
-            float crewYaw = 180 - localTurretRotation;
+            float crewVehicleYaw = localTurretRotation;
+            int mount = ship != null && ship.hasSpec() ? ship.hardpointOf(passenger) : -1;
+            if (mount >= 0) {
+                // the gunner of a ship faces where his mount points
+                crewVehicleYaw = getYRot() + ship.hardpoint(mount).yaw;
+            }
+            float crewYaw = 180 - crewVehicleYaw;
             passenger.setYRot(crewYaw);
             passenger.setYBodyRot(crewYaw);
         } else if (moveHelper.riderViewFollows) {
@@ -1348,6 +1415,15 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
             this.setupTicks = tag.getInt("sTick");
         }
         this.hitch.load(tag.getList("hitch", Tag.TAG_COMPOUND));
+        // the riders attach after the vehicle has loaded: remember who sat where and give the seats back as they arrive
+        this.pendingSeats.clear();
+        for (Tag entry : tag.getList("seats", Tag.TAG_COMPOUND)) {
+            CompoundTag seatTag = (CompoundTag) entry;
+            if (seatTag.hasUUID("u")) {
+                this.pendingSeats.put(seatTag.getUUID("u"), seatTag.getInt("s"));
+            }
+        }
+        this.pendingSeatTicks = this.pendingSeats.isEmpty() ? 0 : PENDING_SEAT_TICKS;
         if (ship != null) {
             ship.load(tag);
         }
@@ -1374,6 +1450,30 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
         owner.serializeToNBT(tag);
         if (this.hitch.isHitched()) {
             tag.put("hitch", this.hitch.save());
+        }
+        net.minecraft.nbt.ListTag seatList = new net.minecraft.nbt.ListTag();
+        java.util.Set<java.util.UUID> written = new java.util.HashSet<>();
+        for (int i = 0; i < seatOccupants.length; i++) {
+            Entity rider = occupantAt(i);
+            if (rider != null) {
+                CompoundTag seatTag = new CompoundTag();
+                seatTag.putInt("s", i);
+                seatTag.putUUID("u", rider.getUUID());
+                seatList.add(seatTag);
+                written.add(rider.getUUID());
+            }
+        }
+        // riders that have not re-attached yet keep their seat if the vehicle is saved again meanwhile
+        for (java.util.Map.Entry<java.util.UUID, Integer> e : pendingSeats.entrySet()) {
+            if (written.add(e.getKey())) {
+                CompoundTag seatTag = new CompoundTag();
+                seatTag.putInt("s", e.getValue());
+                seatTag.putUUID("u", e.getKey());
+                seatList.add(seatTag);
+            }
+        }
+        if (!seatList.isEmpty()) {
+            tag.put("seats", seatList);
         }
         tag.putBoolean("setup", this.isSettingUp);
         if (this.isSettingUp) {

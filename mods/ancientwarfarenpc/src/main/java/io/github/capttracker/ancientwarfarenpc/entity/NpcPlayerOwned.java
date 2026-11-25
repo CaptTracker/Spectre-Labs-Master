@@ -16,6 +16,11 @@ import io.github.capttracker.ancientwarfarenpc.settlement.Settlement;
 import io.github.capttracker.ancientwarfarenpc.settlement.SettlementApi;
 import io.github.capttracker.ancientwarfarenpc.settlement.SettlementData;
 import io.github.capttracker.ancientwarfarenpc.ai.owned.NpcAIPlayerOwnedRideHorse;
+import io.github.capttracker.ancientwarfarenpc.ai.vehicle.NpcAIShipCrew;
+import io.github.capttracker.ancientwarfarenpc.ai.vehicle.ShipCrew;
+import io.github.capttracker.ancientwarfarevehicle.entity.SeatRole;
+import io.github.capttracker.ancientwarfarevehicle.entity.VehicleBase;
+import net.minecraft.world.phys.Vec3;
 import io.github.capttracker.ancientwarfarenpc.config.AWNPCStatics;
 import io.github.capttracker.ancientwarfarenpc.entity.faction.NpcFaction;
 import io.github.capttracker.ancientwarfarenpc.init.AwNpcSounds;
@@ -93,6 +98,49 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
         }
         Arrays.fill(armorDropChances, 1.f);
         Arrays.fill(handDropChances, 1.f);
+        // every owned NPC can crew a ship: the duty goal runs while it sits in a seat of one (it holds the move flags, so the work goals leave it alone)
+        goalSelector.addGoal(0, new NpcAIShipCrew(this));
+    }
+
+    // ---- ship crew (rowers, gunners, passengers of the Vehicles module's ships) ----
+
+    /** The seat roles this NPC takes on a ship, best first (the helm is never taken). Workers and the like row, soldiers man the guns first. */
+    public List<SeatRole> getShipSeatPreference() {
+        return List.of(SeatRole.ROWER, SeatRole.PASSENGER);
+    }
+
+    /** True if this NPC works a turret when it sits in a gunner seat. */
+    public boolean isShipGunner() {
+        return getShipSeatPreference().contains(SeatRole.GUNNER);
+    }
+
+    /** The ship this NPC crews: it rides it in a seat that is not the helm. Null if it rides nothing, or something else. */
+    @Nullable
+    public VehicleBase getRidingShip() {
+        if (getVehicle() instanceof VehicleBase vehicle && vehicle.isShip()) {
+            int seat = vehicle.seatOf(this);
+            if (seat >= 0 && seat < vehicle.getSeatCount() && vehicle.getSeat(seat).role() != SeatRole.DRIVER) {
+                return vehicle;
+            }
+        }
+        return null;
+    }
+
+    public boolean isShipCrew() {
+        return getRidingShip() != null;
+    }
+
+    /** The ship this NPC was ordered off: idle soldiers do not auto-board it again while the owner stays aboard (not saved; forgotten on a reload). */
+    @Nullable
+    private java.util.UUID refusedShip;
+
+    @Nullable
+    public java.util.UUID getRefusedShip() {
+        return refusedShip;
+    }
+
+    public void setRefusedShip(@Nullable java.util.UUID ship) {
+        refusedShip = ship;
     }
 
     /** The entry of {@code owned_npc_defaults.json} for this NPC type. */
@@ -312,6 +360,18 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
 
     /** input path from command baton - default implementation for player-owned NPC is to set current command==input command and then let AI do the rest */
     public void handlePlayerCommand(Command cmd) {
+        VehicleBase crewShip = getRidingShip();
+        if (crewShip != null && (cmd.type == CommandType.MOVE || cmd.type == CommandType.GUARD || cmd.type == CommandType.ATTACK_AREA)) {
+            // ordered somewhere else, or ordered at its own ship again: it gets off (on dry land close by, if there is some)
+            Entity guarded = cmd.type == CommandType.GUARD ? cmd.getEntityTarget(level()) : null;
+            Vec3 towards = cmd.type == CommandType.GUARD ? (guarded == null ? position() : guarded.position()) : Vec3.atBottomCenterOf(cmd.pos);
+            ShipCrew.disembark(this, crewShip, towards);
+            refusedShip = crewShip.getUUID();
+            if (guarded != null && ShipCrew.shipOf(guarded) == crewShip) {
+                setPlayerCommand(Command.NONE);
+                return;
+            }
+        }
         if (cmd.type == CommandType.MOVE || cmd.type == CommandType.SET_HOME) {
             joinByOrder(cmd.pos);
         }
@@ -401,8 +461,8 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
 
     @Override
     public double getWorkFactor() {
-        double hunger = isStarving() ? SettlementConfig.starvingWorkFactor : isHungry() ? SettlementConfig.hungryWorkFactor : 1.0D;
-        return hunger * getMoraleFactor();
+        // hunger counts once: it is a factor of the personal morale (NpcMorale), not a separate speed factor
+        return getMoraleFactor();
     }
 
     /**

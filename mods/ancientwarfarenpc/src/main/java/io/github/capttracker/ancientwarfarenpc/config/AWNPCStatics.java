@@ -48,6 +48,7 @@ public final class AWNPCStatics {
     private static final String CLIENT_OPTIONS = "03_client_settings";
     private static final String FOOD_SETTINGS = "01_food_settings";
     private static final String FACTION_SETTINGS = "01_faction_settings";
+    private static final String SHIP_CREW_SETTINGS = "01_ship_crew_settings";
 
     // ---- shared settings ----
     public static int npcActionRange = 3;
@@ -74,6 +75,11 @@ public final class AWNPCStatics {
     /** Runtime toggle of {@code /awnpcdebug}, saved in {@code WorldData}; not a config option. */
     public static boolean npcAIDebugMode = false;
     public static double archerRange = 60.0;
+    // ship crew (ports of the vehicle module's ships: owned NPCs as rowers, gunners and passengers)
+    public static boolean shipGunnersFire = true;
+    public static int shipGunnerRange = 60;
+    public static boolean shipAutoCrewSoldiers = true;
+    public static int shipAutoCrewRange = 24;
     public static boolean vanillaEquipmentDropRate = true;
     /** Damage bonus per npc level; at level 10 they do 2x the damage of level 0. */
     public static double npcLevelDamageMultiplier = 0.05;
@@ -108,6 +114,10 @@ public final class AWNPCStatics {
     private static final ModConfigSpec.IntValue TOWN_HALL_MAX_RANGE;
     private static final ModConfigSpec.IntValue TOWN_HALL_TICKS;
     private static final ModConfigSpec.DoubleValue ARCHER_ATTACK_RANGE;
+    private static final ModConfigSpec.BooleanValue SHIP_GUNNERS_FIRE;
+    private static final ModConfigSpec.IntValue SHIP_GUNNER_RANGE;
+    private static final ModConfigSpec.BooleanValue SHIP_AUTO_CREW_SOLDIERS;
+    private static final ModConfigSpec.IntValue SHIP_AUTO_CREW_RANGE;
     private static final ModConfigSpec.IntValue NPC_ACTION_RANGE;
     private static final ModConfigSpec.BooleanValue VANILLA_EQUIPMENT_DROP_RATE;
     private static final ModConfigSpec.BooleanValue REPACK_CREATIVE_ONLY;
@@ -250,6 +260,27 @@ public final class AWNPCStatics {
                 .defineListAllowEmpty("starting_faction_standings", List.of(), () -> "orc=-70", AWNPCStatics::isNameEqualsInt);
         common.pop();
 
+        common.comment("Ship Crew Options",
+                "Owned NPCs can crew the ships of the Vehicles module: ordered aboard with the command baton (Move mode, aimed at the ship), they take a rower,",
+                "gunner or passenger seat; a soldier in a gunner seat aims and fires the ship's turrets at what it is hostile to.",
+                "Affect only server-side operations. Will need to be set for dedicated servers, and single",
+                "player (or LAN worlds). Clients playing on remote servers can ignore these settings.").push(SHIP_CREW_SETTINGS);
+        SHIP_GUNNERS_FIRE = common.comment("NPC gunners fire ship turrets", "Default = true",
+                "If false, NPCs in a gunner seat of a ship keep their seat but never aim or fire (a player in the seat is not affected).")
+                .define("ship_gunners_fire", true);
+        SHIP_GUNNER_RANGE = common.comment("NPC gunner range", "Default = 60",
+                "The farthest distance in blocks at which an NPC gunner picks a target. The turret's own reach (the shot speed of the loaded ammo and the",
+                "elevation limits of the mount) and its arc still apply, so the real range can be shorter.")
+                .defineInRange("ship_gunner_range", 60, 8, 256);
+        SHIP_AUTO_CREW_SOLDIERS = common.comment("Idle soldiers board their owner's ship", "Default = true",
+                "If true, idle player-owned soldiers (no order, no target, no patrol orders) near a ship that their owner is riding walk to it and take a free",
+                "gunner or rower seat. Soldiers aboard stay until they are ordered off with the command baton (Move mode) or the ship sinks.")
+                .define("ship_auto_crew_soldiers", true);
+        SHIP_AUTO_CREW_RANGE = common.comment("Soldiers' boarding range", "Default = 24",
+                "How far from the ship (blocks, measured to its hull) an idle soldier must be to answer the owner's ship. Only used with ship_auto_crew_soldiers.")
+                .defineInRange("ship_auto_crew_range", 24, 4, 128);
+        common.pop();
+
         COMMON_SPEC = common.build();
 
         ModConfigSpec.Builder client = new ModConfigSpec.Builder();
@@ -349,6 +380,10 @@ public final class AWNPCStatics {
         townMaxRange = TOWN_HALL_MAX_RANGE.get();
         townUpdateFreq = TOWN_HALL_TICKS.get();
         archerRange = ARCHER_ATTACK_RANGE.get();
+        shipGunnersFire = SHIP_GUNNERS_FIRE.get();
+        shipGunnerRange = SHIP_GUNNER_RANGE.get();
+        shipAutoCrewSoldiers = SHIP_AUTO_CREW_SOLDIERS.get();
+        shipAutoCrewRange = SHIP_AUTO_CREW_RANGE.get();
 
         foodMultiplier = FOOD_MULTIPLIER.get();
         Map<ResourceLocation, Integer> foods = new HashMap<>();

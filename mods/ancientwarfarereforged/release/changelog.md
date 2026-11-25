@@ -5,7 +5,7 @@ First release of Ancient Warfare 2, rebuilt for Minecraft 1.21.1 on NeoForge. Al
 **Requires:** Spectre Factions 1.0.0+ and Spectre Lib 1.1.0+.
 
 ## Ported from 1.12.2
-- **Core:** research, the engineering bench, tools, the in-game manual and the JEI recipe category.
+- **Core:** research, the engineering bench, tools, the in-game manual and the JEI recipe category. With JEI, the "+" button fills the grid of the engineering bench, the auto crafting block and the warehouse crafting station (shift-"+" fills it with as many sets as you have, up to a stack).
 - **Automation:** worksites, the warehouse and torque power.
 - **Vehicles:** siege engines, boats and ammunition.
 - **NPCs:** workers, soldiers, couriers, traders and faction NPCs.
@@ -42,14 +42,15 @@ First release of Ancient Warfare 2, rebuilt for Minecraft 1.21.1 on NeoForge. Al
 
 ## Vehicles
 - Mouse steering with a chase camera, and smoother controls.
-- Multiple seats with roles; switch seats with the number keys.
-- Horse-drawn carts and wagons you can hitch up.
-- **Ships with walkable decks:** a fishing boat, a cog and a war galley, with world wind, rowers and mounted turrets.
+- Multiple seats with roles; switch seats with the number keys. Riders keep their seats when the world reloads.
+- Horse-drawn carts and wagons you can hitch up. A rope is drawn from the cart to each hitched horse.
+- **Ships with walkable decks:** a fishing boat, a cog and a war galley, with world wind, rowers and mounted turrets. The cog now has four rower seats.
+- **NPC ship crews:** aim the command baton (Move mode) at a ship to send the selected NPCs aboard as rowers, gunners or passengers. Soldiers man the guns first: they aim, lead moving targets and fire at enemies in range (`ship_gunners_fire`, `ship_gunner_range`). Idle soldiers near a ship their owner is riding climb aboard on their own (`ship_auto_crew_soldiers`, `ship_auto_crew_range`). A Move order puts them back on land. You still steer the ship yourself.
 
 ## Traders and new NPCs
 - Market stalls run by your trader, with sell offers and buy orders.
 - Prices depend on reputation: friendly factions get 10% off, allies 20% off, and hostile factions won't trade.
-- Faction caravans travel with a trader, a horse, a wagon and two guards.
+- Faction caravans travel with a trader, a horse, a wagon and two guards. A caravan's wagon starts empty: goods for your buy orders are made only when the stall pays for them, so killing a caravan drops just the coins it earned.
 - **Trader wagon routes** load and unload between your storages.
 - **New NPC types:** innkeeper, stable hand and guard captain.
 
@@ -58,14 +59,13 @@ First release of Ancient Warfare 2, rebuilt for Minecraft 1.21.1 on NeoForge. Al
 - **Talk to NPCs** to see what they're doing and thinking, and what happened to them recently.
 - **Personal morale:** each NPC has its own morale from food, its bed, sleep, injuries, inn meals, friends, tools, idleness and fear. Its morale tab shows why, and morale sets how fast it works.
 - NPCs swing their tools at a natural pace while working.
+- **Workers pick the right tool for each job:** an axe for logs, a pickaxe for stone, a shovel for dirt, a hoe for tilling and shears for leaves and wool. They take it from their hand, a small tool belt or their pouch, or fetch one from your storage. They take their own tool back between jobs (`tool_switching` in the config).
+- Hunger now counts once toward work speed, through the NPC's morale. The config keys `hungry_work_factor` and `starving_work_factor` are gone.
 
 ## Known issues
-- No JEI "move items into the grid" button for the engineering bench yet.
-- NPCs can't crew ships yet.
-- Hitch ropes aren't drawn, and vehicle seat assignments reset when the world reloads.
-- NPCs hold their role's tool and don't switch tools for each task.
-- Hunger counts twice toward a worker's speed.
-- Killing a caravan after placing a buy order with it can give free goods (it costs reputation).
+- NPCs can crew ships, but not steer them. They can't walk or swim out to a ship either, so it has to be moored within 3 blocks of the shore or a dock. NPC rowers only add speed while you set the sail and oars, and faction NPCs don't crew ships.
+- The cog has rower seats, but its model shows no oars.
+- A crew member doesn't leave its seat to eat.
 
 ## Credits
 Original Ancient Warfare 2 by shadowmage45, P3pp3rF1y and contributors. 1.21.1 port and rework by CaptTracker. Licensed GPL-3.0-or-later.

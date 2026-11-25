@@ -76,6 +76,11 @@ public final class ShipHardpoint {
         setDestination(wantedYaw, wantedPitch);
     }
 
+    /** True if the mount can take a new shot: reloaded, and no shot is winding up. */
+    public boolean isReady() {
+        return reload <= 0 && windup <= 0;
+    }
+
     /** True if the weapon points at its destination (within 3 degrees). */
     public boolean onTarget() {
         return Math.abs(Mth.wrapDegrees(destYaw - yaw)) < 3.0F && Math.abs(destPitch - pitch) < 3.0F;

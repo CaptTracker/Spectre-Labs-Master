@@ -91,6 +91,7 @@ public class NpcCombat extends NpcPlayerOwned implements RangedAttackMob {
         goalSelector.addGoal(2, new NpcAIPlayerOwnedGetFood(this));
 
         //3==NpcAIShieldBlock
+        goalSelector.addGoal(3, new io.github.capttracker.ancientwarfarenpc.ai.vehicle.NpcAIShipAutoCrew(this));
         goalSelector.addGoal(5, new NpcAIFollowPlayer(this));
         goalSelector.addGoal(6, new NpcAIPlayerOwnedAlarmResponse(this));
         goalSelector.addGoal(6, new io.github.capttracker.ancientwarfarenpc.ai.owned.NpcAIPlayerOwnedRally(this));
@@ -115,6 +116,13 @@ public class NpcCombat extends NpcPlayerOwned implements RangedAttackMob {
         targetSelector.addGoal(3, new NpcAIHurt(this));
         targetSelector.addGoal(4, new NpcAIAttackNearest(this, selector));
         targetSelector.addGoal(5, new NpcAIDefendFriends(this));
+    }
+
+    /** Soldiers man a ship's guns first, then row. */
+    @Override
+    public java.util.List<io.github.capttracker.ancientwarfarevehicle.entity.SeatRole> getShipSeatPreference() {
+        return java.util.List.of(io.github.capttracker.ancientwarfarevehicle.entity.SeatRole.GUNNER, io.github.capttracker.ancientwarfarevehicle.entity.SeatRole.ROWER,
+                io.github.capttracker.ancientwarfarevehicle.entity.SeatRole.PASSENGER);
     }
 
     @Override

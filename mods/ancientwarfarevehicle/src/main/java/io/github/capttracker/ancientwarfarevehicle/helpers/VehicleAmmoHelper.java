@@ -91,6 +91,28 @@ public class VehicleAmmoHelper implements INBTSerializable<CompoundTag> {
         return 0;
     }
 
+    /**
+     * SERVER: makes sure the selected ammo has stock, switching to another type that has some (what a player does with the ammo keys; an NPC gunner has no keys).
+     * Does not use the client path of {@link #setNextAmmo}, which sends a payload to the server.
+     *
+     * @return true if a round can be fired now
+     */
+    public boolean ensureAmmoAvailable() {
+        if (vehicle.level().isClientSide) {
+            return false;
+        }
+        if (getCurrentAmmoCount() > 0 && getCurrentAmmoType() != null) {
+            return true;
+        }
+        for (Map.Entry<ResourceLocation, VehicleAmmoEntry> entry : ammoEntries.entrySet()) {
+            if (entry.getValue().ammoCount > 0) {
+                updateSelectedAmmo(entry.getKey().toString());
+                return getCurrentAmmoCount() > 0 && getCurrentAmmoType() != null;
+            }
+        }
+        return false;
+    }
+
     boolean doesntUseAmmo() {
         return vehicle.vehicleType.getValidAmmoTypes().isEmpty();
     }

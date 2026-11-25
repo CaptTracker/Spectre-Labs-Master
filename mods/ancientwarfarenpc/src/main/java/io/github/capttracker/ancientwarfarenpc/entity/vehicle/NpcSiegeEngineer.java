@@ -160,6 +160,12 @@ public class NpcSiegeEngineer extends NpcPlayerOwned implements IVehicleUser {
     }
 
     @Override
+    public java.util.List<io.github.capttracker.ancientwarfarevehicle.entity.SeatRole> getShipSeatPreference() {
+        return java.util.List.of(io.github.capttracker.ancientwarfarevehicle.entity.SeatRole.GUNNER, io.github.capttracker.ancientwarfarevehicle.entity.SeatRole.ROWER,
+                io.github.capttracker.ancientwarfarevehicle.entity.SeatRole.PASSENGER);
+    }
+
+    @Override
     public void handlePlayerCommand(NpcCommand.Command cmd) {
         if (cmd.type == NpcCommand.CommandType.ATTACK_AREA) {
             setVehicleTarget(cmd.pos);

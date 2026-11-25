@@ -27,8 +27,6 @@ public final class SettlementConfig {
     public static double hungryThreshold = 0.25;
     /** An NPC that eats keeps eating until it is above this food fraction. */
     public static double eatUntilFraction = 0.90;
-    public static double hungryWorkFactor = 0.6;
-    public static double starvingWorkFactor = 0.3;
     /** Movement speed lost while hungry (0.15 = 15%). */
     public static double hungryMoveSlowdown = 0.15;
     public static boolean starvationEnabled = true;
@@ -44,6 +42,8 @@ public final class SettlementConfig {
     public static double noToolWorkFactor = 0.5;
     /** Ticks between two swings of the main hand while an NPC works (playtest fixes: 12 is a normal pace, a player swings about every 4). */
     public static int swingIntervalTicks = 12;
+    /** If true, a staffed worker swaps to the tool that fits the block it is about to work on (axe, pickaxe, shovel, hoe, shears). */
+    public static boolean workerToolSwitching = true;
     /** How many workers may claim one worksite. */
     public static int maxWorkersPerSite = 2;
     /** Ticks a worksite may have no work before its claims are released (60 seconds). */
@@ -245,12 +245,11 @@ public final class SettlementConfig {
     private static final ModConfigSpec.DoubleValue MORNING_MEAL_BELOW;
     private static final ModConfigSpec.DoubleValue NO_TOOL_WORK;
     private static final ModConfigSpec.IntValue SWING_INTERVAL;
+    private static final ModConfigSpec.BooleanValue TOOL_SWITCHING;
     private static final ModConfigSpec.IntValue MAX_WORKERS_PER_SITE;
     private static final ModConfigSpec.IntValue JOB_RELEASE_TICKS;
     private static final ModConfigSpec.DoubleValue HUNGRY_THRESHOLD;
     private static final ModConfigSpec.DoubleValue EAT_UNTIL;
-    private static final ModConfigSpec.DoubleValue HUNGRY_WORK;
-    private static final ModConfigSpec.DoubleValue STARVING_WORK;
     private static final ModConfigSpec.DoubleValue HUNGRY_SLOWDOWN;
     private static final ModConfigSpec.BooleanValue STARVATION_ENABLED;
     private static final ModConfigSpec.IntValue STARVATION_GRACE;
@@ -273,14 +272,10 @@ public final class SettlementConfig {
         builder.pop();
         builder.comment("Hunger of the player-owned NPCs (server side)").push("hunger");
         HUNGRY_THRESHOLD = builder.comment("Default = 0.25",
-                "Below this fraction of full food an NPC is hungry: it goes to eat, works slower, walks slower and does not heal.")
+                "Below this fraction of full food an NPC is hungry: it goes to eat, walks slower (the work speed follows the morale, which includes hunger) and does not heal.")
                 .defineInRange("hungry_threshold", 0.25, 0.0, 1.0);
         EAT_UNTIL = builder.comment("Default = 0.9", "An NPC that eats at a storage eats until it is above this fraction of full food.")
                 .defineInRange("eat_until_fraction", 0.9, 0.0, 1.0);
-        HUNGRY_WORK = builder.comment("Default = 0.6", "Work speed factor while hungry.")
-                .defineInRange("hungry_work_factor", 0.6, 0.01, 1.0);
-        STARVING_WORK = builder.comment("Default = 0.3", "Work speed factor at 0 food.")
-                .defineInRange("starving_work_factor", 0.3, 0.01, 1.0);
         HUNGRY_SLOWDOWN = builder.comment("Default = 0.15", "Fraction of the movement speed an NPC loses while hungry.")
                 .defineInRange("hungry_move_slowdown", 0.15, 0.0, 0.9);
         STARVATION_ENABLED = builder.comment("Default = true", "If false, hunger only slows NPCs down and they never take starvation damage.")
@@ -299,6 +294,9 @@ public final class SettlementConfig {
                 .defineInRange("no_tool_work_factor", 0.5, 0.01, 1.0);
         SWING_INTERVAL = builder.comment("Default = 12", "Ticks between two swings of the main hand while an NPC works (a player swings about every 4 ticks).")
                 .defineInRange("swing_interval_ticks", 12, 2, 200);
+        TOOL_SWITCHING = builder.comment("Default = true",
+                "If true, a worker at a staffed worksite takes the tool that fits the block it is about to work on (axe, pickaxe, shovel, hoe or shears) from its tool belt or pouch, or fetches one from the storage of its settlement. If false, it works with the one tool it holds.")
+                .define("tool_switching", true);
         MAX_WORKERS_PER_SITE = builder.comment("Default = 2", "How many workers of a settlement may claim the same worksite.")
                 .defineInRange("max_workers_per_site", 2, 1, 64);
         JOB_RELEASE_TICKS = builder.comment("Default = 1200 (60 seconds)", "Ticks a worksite may have no work before the workers that claimed it are released.")
@@ -383,7 +381,7 @@ public final class SettlementConfig {
         CARAVAN_MAX_ACTIVE = builder.comment("Default = 6", "The most caravans on the road at once in a world.")
                 .defineInRange("caravan_max_active", 6, 1, 100);
         CARAVAN_TAILOR = builder.comment("Default = true",
-                "If true, a caravan also carries goods for the buy orders of the market stalls it visits, when the trade lists of its faction and biome offer the item.")
+                "If true, a caravan can supply goods (made at the moment of the trade, never carried) to the buy orders of the market stalls it visits, when the trade lists of its faction and biome offer the item.")
                 .define("caravan_tailor_buy_orders", true);
         TRADE_ROUTE_LOADING = builder.comment("Default = true",
                 "If true, a player-owned trader that follows a trade route with a hitched wagon loads and unloads the wagon at the linked storages of the settlements it stops at (using the deposit and withdraw lists of its trade order).")
@@ -459,8 +457,6 @@ public final class SettlementConfig {
             defaultRadius = DEFAULT_RADIUS.get();
             hungryThreshold = HUNGRY_THRESHOLD.get();
             eatUntilFraction = EAT_UNTIL.get();
-            hungryWorkFactor = HUNGRY_WORK.get();
-            starvingWorkFactor = STARVING_WORK.get();
             hungryMoveSlowdown = HUNGRY_SLOWDOWN.get();
             starvationEnabled = STARVATION_ENABLED.get();
             starvationGraceTicks = STARVATION_GRACE.get();
@@ -473,6 +469,7 @@ public final class SettlementConfig {
             maxPathRange = MAX_PATH_RANGE.get();
             noToolWorkFactor = NO_TOOL_WORK.get();
             swingIntervalTicks = SWING_INTERVAL.get();
+            workerToolSwitching = TOOL_SWITCHING.get();
             maxWorkersPerSite = MAX_WORKERS_PER_SITE.get();
             jobReleaseTicks = JOB_RELEASE_TICKS.get();
             scheduleEnabled = SCHEDULE_ENABLED.get();
