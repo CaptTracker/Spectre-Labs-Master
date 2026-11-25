@@ -1,0 +1,35 @@
+plugins {
+    id 'mod.conventions'
+}
+
+// This mod only bundles the Ancient Warfare modules: its jar holds each module's jar
+// (jar-in-jar), and NeoForge loads them as separate mods. Spectre Factions and
+// capttrackerlib ship as their own uploads and are required dependencies instead.
+def bundled = [
+        'ancientwarfare',
+        'ancientwarfarevehicle',
+        'ancientwarfareautomation',
+        'ancientwarfarenpc',
+        'ancientwarfarestructure',
+]
+
+bundled.each { evaluationDependsOn(":${it}") }
+
+evaluationDependsOn(':spectrefactions')
+
+dependencies {
+    bundled.each { jarJar project(":${it}") }
+    // Not bundled; only so runClient/runServer here have it on the classpath.
+    runtimeOnly project(':spectrefactions')
+}
+
+// runClient/runServer for this project load every bundled mod from source.
+neoForge {
+    mods {
+        (bundled + 'spectrefactions').each { id ->
+            create(id) {
+                sourceSet(project(":${id}").sourceSets.main)
+            }
+        }
+    }
+}

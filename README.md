@@ -12,7 +12,7 @@ All of CaptTracker's Minecraft mods in one repo, including ports of old 1.12.2 m
 ## Layout
 
 ```
-libs/capttrackerlib/   Shared library mod. Every other mod depends on it.
+libs/spectrelib/   Shared library mod. Every other mod depends on it.
 mods/<modid>/          One folder per mod (new mods and ports).
 legacy/<modid>/        Original 1.12.2 source, for reference while porting. Not built.
 templates/mod/         Starting point used by scripts/new-mod.sh.
@@ -62,7 +62,7 @@ On Windows, use `gradlew.bat` instead of `./gradlew`.
 - **`mods/<modid>/gradle.properties`**: that mod's id, name, version and description.
 - **`mods/<modid>/build.gradle`**: extra dependencies for that mod only.
 
-## The shared library (`capttrackerlib`)
+## The shared library (`spectrelib`)
 
 Code goes in the library once **two or more mods** need it. It currently has:
 

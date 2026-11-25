@@ -1,0 +1,40 @@
+<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;background:transparent}svg{display:block}</style></head><body>
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <radialGradient id="bg" cx="50%" cy="38%" r="70%"><stop offset="0" stop-color="#2a1f4a"/><stop offset="1" stop-color="#0d0a1a"/></radialGradient>
+  <linearGradient id="rim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e9d9a6"/><stop offset="1" stop-color="#9c7c3c"/></linearGradient>
+  <radialGradient id="glow" cx="50%" cy="45%" r="50%"><stop offset="0" stop-color="#9ff3ff" stop-opacity=".55"/><stop offset="1" stop-color="#9ff3ff" stop-opacity="0"/></radialGradient>
+  <linearGradient id="ghost" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f2fdff"/><stop offset="1" stop-color="#a8e9f5" stop-opacity=".85"/></linearGradient>
+  <clipPath id="sh"><path d="M256 92 L378 132 L378 250 C378 330 322 382 256 412 C190 382 134 330 134 250 L134 132 Z"/></clipPath>
+</defs>
+<rect x="8" y="8" width="496" height="496" rx="72" fill="url(#bg)"/>
+<rect x="8" y="8" width="496" height="496" rx="72" fill="none" stroke="#5b4a8f" stroke-width="6"/>
+<!-- crossed banners -->
+<g stroke="#5a4630" stroke-width="7" stroke-linecap="round">
+ <line x1="92" y1="414" x2="196" y2="60"/><line x1="420" y1="414" x2="316" y2="60"/>
+</g>
+<circle cx="196" cy="56" r="8" fill="url(#rim)"/><circle cx="316" cy="56" r="8" fill="url(#rim)"/>
+<path d="M190 76 L84 52 L70 132 L96 116 L82 168 L172 140 Z" fill="#b8323a" stroke="#6e1a20" stroke-width="3"/>
+<path d="M322 76 L428 52 L442 132 L416 116 L430 168 L340 140 Z" fill="#2f6fb8" stroke="#173a66" stroke-width="3"/>
+<!-- shield -->
+<g clip-path="url(#sh)">
+ <rect x="120" y="80" width="136" height="170" fill="#b8323a"/>
+ <rect x="256" y="80" width="136" height="170" fill="#2f6fb8"/>
+ <rect x="120" y="250" width="136" height="180" fill="#2f8f5a"/>
+ <rect x="256" y="250" width="136" height="180" fill="#c99a2e"/>
+ <rect x="120" y="80" width="272" height="350" fill="#0d0a1a" opacity=".25"/>
+ <circle cx="256" cy="245" r="150" fill="url(#glow)"/>
+</g>
+<path d="M256 92 L378 132 L378 250 C378 330 322 382 256 412 C190 382 134 330 134 250 L134 132 Z" fill="none" stroke="url(#rim)" stroke-width="12" stroke-linejoin="round"/>
+<line x1="256" y1="100" x2="256" y2="404" stroke="url(#rim)" stroke-width="5" opacity=".7"/>
+<line x1="140" y1="250" x2="372" y2="250" stroke="url(#rim)" stroke-width="5" opacity=".7"/>
+<!-- spectre: hooded wraith -->
+<path d="M256 140 C206 142 186 190 188 236 C190 270 182 300 168 330 L196 318 L210 342 L230 320 L256 348 L282 320 L302 342 L316 318 L344 330 C330 300 322 270 324 236 C326 190 306 142 256 140 Z" fill="url(#ghost)" stroke="#e6fbff" stroke-width="3" stroke-linejoin="round"/>
+<path d="M256 172 C224 174 214 204 216 234 C218 262 236 280 256 282 C276 280 294 262 296 234 C298 204 288 174 256 172 Z" fill="#120e24"/>
+<path d="M256 140 C238 160 236 172 256 172 C276 172 274 160 256 140 Z" fill="#d6f6fc"/>
+<ellipse cx="238" cy="228" rx="9" ry="6" fill="#7ff0ff"/><ellipse cx="274" cy="228" rx="9" ry="6" fill="#7ff0ff"/>
+<ellipse cx="238" cy="228" rx="16" ry="11" fill="#7ff0ff" opacity=".25"/><ellipse cx="274" cy="228" rx="16" ry="11" fill="#7ff0ff" opacity=".25"/>
+<!-- title -->
+<rect x="70" y="424" width="372" height="56" rx="14" fill="#1a1433" stroke="url(#rim)" stroke-width="4"/>
+<text x="256" y="463" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-weight="bold" font-size="30" letter-spacing="3" fill="#f1e3b5">SPECTRE FACTIONS</text>
+</svg></body></html>

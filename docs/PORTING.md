@@ -6,7 +6,7 @@
 2. `scripts/new-mod.sh <modid> "<Mod Name>"`, keeping the **same mod id** so old configs and lang keys still line up. Players' old worlds won't carry over; 1.12.2 → 1.21.1 isn't supported by vanilla upgrading.
 3. Copy textures and sounds across first. They usually need only path renames (see below).
 4. Re-register content through `ModRegistrar`, then port logic one feature at a time, running `runClient` often.
-5. Move anything that two mods share into `capttrackerlib`.
+5. Move anything that two mods share into `spectrelib`.
 6. Add `ported_from=1.12.2` to the mod's `gradle.properties`.
 
 ## Biggest changes
