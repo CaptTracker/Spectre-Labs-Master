@@ -1,0 +1,25 @@
+{
+  "time": 200,
+  "dependencies": [
+    "ancientwarfare:fishing",
+    "ancientwarfare:command"
+  ],
+  "resources": [
+    {
+      "tag": "c:ingots/gold",
+      "count": 8
+    },
+    {
+      "tag": "c:gems/diamond",
+      "count": 3
+    },
+    {
+      "tag": "c:gems/emerald",
+      "count": 1
+    },
+    {
+      "item": "minecraft:book",
+      "count": 4
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "comment": "No static geometry: this block is drawn completely by its block entity renderer. The model only supplies the particle texture.",
+  "textures": {
+    "particle": "ancientwarfareautomation:block/automation/torque_shaft_light"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "time": 200,
+  "dependencies": [
+    "ancientwarfare:the_wheel",
+    "ancientwarfare:construction",
+    "ancientwarfare:mathematics"
+  ],
+  "resources": [
+    {
+      "tag": "c:ingots/iron",
+      "count": 8
+    },
+    {
+      "tag": "c:strings",
+      "count": 8
+    },
+    {
+      "item": "minecraft:book",
+      "count": 1
+    },
+    {
+      "item": "minecraft:apple",
+      "count": 1
+    }
+  ]
+}

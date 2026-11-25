@@ -1,0 +1,6 @@
+{
+  "parent": "item/handheld",
+  "textures": {
+    "layer0": "ancientwarfarenpc:item/diamond_command_baton"
+  }
+}

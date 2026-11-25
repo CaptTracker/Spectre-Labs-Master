@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    " ##",
+    "#S#",
+    " S "
+  ],
+  "key": {
+    "S": {
+      "tag": "c:rods/wooden"
+    },
+    "#": {
+      "tag": "c:gems/diamond"
+    }
+  },
+  "result": {
+    "id": "ancientwarfarenpc:diamond_halberd"
+  }
+}

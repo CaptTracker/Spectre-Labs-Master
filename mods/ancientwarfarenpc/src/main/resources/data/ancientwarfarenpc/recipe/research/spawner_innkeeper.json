@@ -1,0 +1,32 @@
+{
+  "type": "ancientwarfare:research_recipe",
+  "research": "ancientwarfare:trade",
+  "pattern": [
+    "GF ",
+    "GTB"
+  ],
+  "key": {
+    "B": {
+      "item": "minecraft:barrel"
+    },
+    "T": {
+      "item": "minecraft:red_wool"
+    },
+    "F": {
+      "tag": "ancientwarfarenpc:food_bundles"
+    },
+    "G": {
+      "tag": "c:ingots/iron"
+    }
+  },
+  "result": {
+    "id": "ancientwarfarenpc:npc_spawner",
+    "components": {
+      "ancientwarfarenpc:npc_spawner": {
+        "npcType": "innkeeper",
+        "npcSubtype": ""
+      },
+      "minecraft:custom_model_data": 19
+    }
+  }
+}

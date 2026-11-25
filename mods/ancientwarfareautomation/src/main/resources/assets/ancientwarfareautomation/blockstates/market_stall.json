@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "active=false,facing=north": {
+      "model": "ancientwarfareautomation:block/market_stall"
+    },
+    "active=false,facing=east": {
+      "model": "ancientwarfareautomation:block/market_stall",
+      "y": 90
+    },
+    "active=false,facing=south": {
+      "model": "ancientwarfareautomation:block/market_stall",
+      "y": 180
+    },
+    "active=false,facing=west": {
+      "model": "ancientwarfareautomation:block/market_stall",
+      "y": 270
+    },
+    "active=true,facing=north": {
+      "model": "ancientwarfareautomation:block/market_stall"
+    },
+    "active=true,facing=east": {
+      "model": "ancientwarfareautomation:block/market_stall",
+      "y": 90
+    },
+    "active=true,facing=south": {
+      "model": "ancientwarfareautomation:block/market_stall",
+      "y": 180
+    },
+    "active=true,facing=west": {
+      "model": "ancientwarfareautomation:block/market_stall",
+      "y": 270
+    }
+  }
+}

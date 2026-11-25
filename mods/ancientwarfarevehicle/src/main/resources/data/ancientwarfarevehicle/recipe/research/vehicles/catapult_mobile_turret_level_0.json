@@ -1,0 +1,31 @@
+{
+  "type": "ancientwarfare:shapeless_research_recipe",
+  "research": "ancientwarfare:siege_warfare",
+  "ingredients": [
+    {
+      "item": "ancientwarfarevehicle:rough_wood",
+      "count": 5
+    },
+    {
+      "item": "ancientwarfarevehicle:torsion_unit",
+      "count": 3
+    },
+    {
+      "item": "ancientwarfarevehicle:equipment_bay"
+    },
+    {
+      "item": "ancientwarfarevehicle:mobility_unit"
+    },
+    {
+      "item": "ancientwarfarevehicle:turret_components"
+    }
+  ],
+  "result": {
+    "id": "ancientwarfarevehicle:catapult_mobile_turret_spawner",
+    "components": {
+      "ancientwarfarevehicle:vehicle_spawn_data": {
+        "level": 0
+      }
+    }
+  }
+}

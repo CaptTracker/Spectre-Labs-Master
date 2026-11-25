@@ -1,0 +1,1 @@
+Player factions with reputation, diplomacy and guard modes.

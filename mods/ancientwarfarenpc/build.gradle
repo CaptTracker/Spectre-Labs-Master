@@ -1,0 +1,28 @@
+plugins {
+    id 'mod.conventions'
+}
+
+evaluationDependsOn(':ancientwarfare')
+evaluationDependsOn(':ancientwarfarevehicle')
+evaluationDependsOn(':spectrefactions')
+
+dependencies {
+    implementation project(':ancientwarfare')
+    implementation project(':ancientwarfarevehicle')
+    implementation project(':spectrefactions')
+}
+
+// Load the Ancient Warfare modules this one needs in runClient/runServer.
+neoForge {
+    mods {
+        create('ancientwarfare') {
+            sourceSet(project(':ancientwarfare').sourceSets.main)
+        }
+        create('ancientwarfarevehicle') {
+            sourceSet(project(':ancientwarfarevehicle').sourceSets.main)
+        }
+        create('spectrefactions') {
+            sourceSet(project(':spectrefactions').sourceSets.main)
+        }
+    }
+}

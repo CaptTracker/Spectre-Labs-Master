@@ -1,0 +1,16 @@
+{
+  "type": "ancientwarfare:shapeless_research_recipe",
+  "research": "ancientwarfare:ballistics",
+  "ingredients": [
+    {
+      "item": "ancientwarfarevehicle:iron_casing"
+    },
+    {
+      "tag": "c:gunpowders"
+    }
+  ],
+  "result": {
+    "id": "ancientwarfarevehicle:ammo_iron_shot_5",
+    "count": 8
+  }
+}

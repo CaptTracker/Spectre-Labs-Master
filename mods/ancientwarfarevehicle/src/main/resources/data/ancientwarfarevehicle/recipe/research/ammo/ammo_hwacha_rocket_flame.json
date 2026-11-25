@@ -1,0 +1,27 @@
+{
+  "type": "ancientwarfare:shapeless_research_recipe",
+  "research": "ancientwarfare:ballistics",
+  "ingredients": [
+    {
+      "item": "ancientwarfarevehicle:rocket_charge"
+    },
+    {
+      "tag": "c:rods/wooden",
+      "count": 10
+    },
+    {
+      "tag": "c:feathers",
+      "count": 2
+    },
+    {
+      "tag": "c:ingots/iron"
+    },
+    {
+      "item": "ancientwarfarevehicle:flame_charge"
+    }
+  ],
+  "result": {
+    "id": "ancientwarfarevehicle:ammo_hwacha_rocket_flame",
+    "count": 10
+  }
+}

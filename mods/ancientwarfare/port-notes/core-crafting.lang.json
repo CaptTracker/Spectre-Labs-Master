@@ -1,0 +1,6 @@
+{
+  "jei.recipe.research_recipe": "Research Recipe",
+  "jei.recipe.shapeless_research_recipe": "Shapeless Research Recipe",
+  "jei.tooltip.error.recipe.transfer.no.research_book": "No Research Book in slot",
+  "jei.tooltip.error.recipe.transfer.missing.research": "Missing required research"
+}

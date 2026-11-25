@@ -1,0 +1,29 @@
+plugins {
+    id 'mod.conventions'
+}
+
+evaluationDependsOn(':ancientwarfare')
+evaluationDependsOn(':ancientwarfarevehicle')
+
+repositories {
+    maven { url = 'https://maven.blamejared.com/' }
+}
+
+dependencies {
+    implementation project(':ancientwarfare')
+    implementation project(':ancientwarfarevehicle')
+    // JEI is optional: the API is only needed to compile compat/jei, the classes are never loaded without JEI.
+    compileOnly "mezz.jei:jei-1.21.1-neoforge-api:19.21.0.247"
+}
+
+// Load the Ancient Warfare modules this one needs in runClient/runServer.
+neoForge {
+    mods {
+        create('ancientwarfare') {
+            sourceSet(project(':ancientwarfare').sourceSets.main)
+        }
+        create('ancientwarfarevehicle') {
+            sourceSet(project(':ancientwarfarevehicle').sourceSets.main)
+        }
+    }
+}

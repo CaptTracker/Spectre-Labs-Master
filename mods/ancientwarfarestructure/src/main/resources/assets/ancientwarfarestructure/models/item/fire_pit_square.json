@@ -1,0 +1,11 @@
+{
+  "parent": "ancientwarfarestructure:block/decor/fire_pit_square_unlit",
+  "overrides": [
+    {
+      "predicate": {
+        "ancientwarfarestructure:lit": 1
+      },
+      "model": "ancientwarfarestructure:item/fire_pit_square_lit"
+    }
+  ]
+}

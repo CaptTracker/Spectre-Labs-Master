@@ -1,0 +1,22 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "ancientwarfareautomation:block/automation/torque_shaft_medium"
+    },
+    "facing=up": {
+      "model": "ancientwarfareautomation:block/automation/torque_shaft_medium"
+    },
+    "facing=north": {
+      "model": "ancientwarfareautomation:block/automation/torque_shaft_medium"
+    },
+    "facing=south": {
+      "model": "ancientwarfareautomation:block/automation/torque_shaft_medium"
+    },
+    "facing=west": {
+      "model": "ancientwarfareautomation:block/automation/torque_shaft_medium"
+    },
+    "facing=east": {
+      "model": "ancientwarfareautomation:block/automation/torque_shaft_medium"
+    }
+  }
+}

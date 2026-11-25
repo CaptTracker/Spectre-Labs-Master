@@ -1,0 +1,29 @@
+{
+  "type": "ancientwarfare:shapeless_research_recipe",
+  "research": "ancientwarfare:siege_warfare",
+  "ingredients": [
+    {
+      "item": "ancientwarfarevehicle:rough_wood",
+      "count": 5
+    },
+    {
+      "tag": "c:strings",
+      "count": 8
+    },
+    {
+      "item": "ancientwarfarevehicle:torsion_unit",
+      "count": 2
+    },
+    {
+      "item": "ancientwarfarevehicle:equipment_bay"
+    }
+  ],
+  "result": {
+    "id": "ancientwarfarevehicle:ballista_stand_spawner",
+    "components": {
+      "ancientwarfarevehicle:vehicle_spawn_data": {
+        "level": 0
+      }
+    }
+  }
+}

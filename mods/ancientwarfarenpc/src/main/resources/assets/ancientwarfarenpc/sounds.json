@@ -1,0 +1,823 @@
+{
+  "bard.tune1": {
+    "sounds": [
+      "ancientwarfarenpc:npc/bard/drums-103"
+    ]
+  },
+  "bard.tune2": {
+    "sounds": [
+      "ancientwarfarenpc:npc/bard/lord-112"
+    ]
+  },
+  "bard.tune3": {
+    "sounds": [
+      "ancientwarfarenpc:npc/bard/master-122"
+    ]
+  },
+  "bard.tune4": {
+    "sounds": [
+      "ancientwarfarenpc:npc/bard/suonatore_di_liuto"
+    ]
+  },
+  "bard.tune5": {
+    "sounds": [
+      "ancientwarfarenpc:npc/bard/teller-130-1"
+    ]
+  },
+  "bard.tune6": {
+    "sounds": [
+      "ancientwarfarenpc:npc/bard/teller-130-2"
+    ]
+  },
+  "barbarian_attack": {
+    "sounds": [
+      "ancientwarfarenpc:npc/barbarian_attack_1",
+      "ancientwarfarenpc:npc/barbarian_attack_2",
+      "ancientwarfarenpc:npc/barbarian_attack_3",
+      "ancientwarfarenpc:npc/barbarian_attack_4",
+      "ancientwarfarenpc:npc/barbarian_attack_5",
+      "ancientwarfarenpc:npc/barbarian_attack_6"
+    ]
+  },
+  "barbarian_hurt": {
+    "sounds": [
+      "ancientwarfarenpc:npc/barbarian_hurt_1",
+      "ancientwarfarenpc:npc/barbarian_hurt_2",
+      "ancientwarfarenpc:npc/barbarian_hurt_3",
+      "ancientwarfarenpc:npc/barbarian_hurt_4",
+      "ancientwarfarenpc:npc/barbarian_hurt_5"
+    ]
+  },
+  "beast_attack": {
+    "sounds": [
+      "ancientwarfarenpc:npc/beast_attack_1",
+      "ancientwarfarenpc:npc/beast_attack_2",
+      "ancientwarfarenpc:npc/beast_attack_3"
+    ]
+  },
+  "beast_death": {
+    "sounds": [
+      "ancientwarfarenpc:npc/beast_death_1",
+      "ancientwarfarenpc:npc/beast_death_2",
+      "ancientwarfarenpc:npc/beast_death_3"
+    ]
+  },
+  "beast_hurt": {
+    "sounds": [
+      "ancientwarfarenpc:npc/beast_hurt_1",
+      "ancientwarfarenpc:npc/beast_hurt_2"
+    ]
+  },
+  "brigand_attack": {
+    "sounds": [
+      "ancientwarfarenpc:npc/brigand_attack_1",
+      "ancientwarfarenpc:npc/brigand_attack_2",
+      "ancientwarfarenpc:npc/brigand_attack_3",
+      "ancientwarfarenpc:npc/brigand_attack_4",
+      "ancientwarfarenpc:npc/brigand_attack_5",
+      "ancientwarfarenpc:npc/brigand_attack_6"
+    ]
+  },
+  "brigand_death": {
+    "sounds": [
+      "ancientwarfarenpc:npc/brigand_death_1",
+      "ancientwarfarenpc:npc/brigand_death_2",
+      "ancientwarfarenpc:npc/brigand_death_3",
+      "ancientwarfarenpc:npc/brigand_death_4",
+      "ancientwarfarenpc:npc/brigand_death_5"
+    ]
+  },
+  "brigand_hurt": {
+    "sounds": [
+      "ancientwarfarenpc:npc/brigand_hurt_1",
+      "ancientwarfarenpc:npc/brigand_hurt_2",
+      "ancientwarfarenpc:npc/brigand_hurt_3",
+      "ancientwarfarenpc:npc/brigand_hurt_4",
+      "ancientwarfarenpc:npc/brigand_hurt_5"
+    ]
+  },
+  "coven_dryad_death": {
+    "sounds": [
+      "ancientwarfarenpc:npc/coven_dryad_death_1"
+    ]
+  },
+  "coven_dryad_hurt": {
+    "sounds": [
+      "ancientwarfarenpc:npc/coven_dryad_hurt_1"
+    ]
+  },
+  "coven_familiar_attack": {
+    "sounds": [
+      "ancientwarfarenpc:npc/coven_familiar_attack_1"
+    ]
+  },
+  "coven_familiar_death": {
+    "sounds": [
+      "ancientwarfarenpc:npc/coven_familiar_death_1"
+    ]
+  },
+  "coven_familiar_hurt": {
+    "sounds": [
+      "ancientwarfarenpc:npc/coven_familiar_hurt_1"
+    ]
+  },
+  "coven_puppet_attack": {
+    "sounds": [
+      "ancientwarfarenpc:npc/coven_puppet_attack_1"
+    ]
+  },
+  "coven_puppet_death": {
+    "sounds": [
+      "ancientwarfarenpc:npc/coven_puppet_death_1"
+    ]
+  },
+  "coven_puppet_hurt": {
+    "sounds": [
+      "ancientwarfarenpc:npc/coven_puppet_hurt_1"
+    ]
+  },
+  "coven_satyr_death": {
+    "sounds": [
+      "ancientwarfarenpc:npc/coven_satyr_death_1"
+    ]
+  },
+  "coven_satyr_hurt": {
+    "sounds": [
+      "ancientwarfarenpc:npc/coven_satyr_hurt_1"
+    ]
+  },
+  "coven_scarecrow_attack": {
+    "sounds": [
+      "ancientwarfarenpc:npc/coven_scarecrow_attack_1"
+    ]
+  },
+  "coven_scarecrow_death": {
+    "sounds": [
+      "ancientwarfarenpc:npc/coven_scarecrow_death_1"
+    ]
+  },
+  "coven_scarecrow_hurt": {
+    "sounds": [
+      "ancientwarfarenpc:npc/coven_scarecrow_hurt_1"
+    ]
+  },
+  "coven_witch_attack": {
+    "sounds": [
+      "ancientwarfarenpc:npc/coven_witch_attack_1",
+      "ancientwarfarenpc:npc/coven_witch_attack_2"
+    ]
+  },
+  "coven_witch_death": {
+    "sounds": [
+      "ancientwarfarenpc:npc/coven_witch_death_1",
+      "ancientwarfarenpc:npc/coven_witch_death_2"
+    ]
+  },
+  "coven_witch_hurt": {
+    "sounds": [
+      "ancientwarfarenpc:npc/coven_witch_hurt_1"
+    ]
+  },
+  "dwarf_attack": {
+    "sounds": [
+      "ancientwarfarenpc:npc/dwarf_attack_1",
+      "ancientwarfarenpc:npc/dwarf_attack_2",
+      "ancientwarfarenpc:npc/dwarf_attack_3"
+    ]
+  },
+  "dwarf_death": {
+    "sounds": [
+      "ancientwarfarenpc:npc/dwarf_death_1",
+      "ancientwarfarenpc:npc/dwarf_death_2",
+      "ancientwarfarenpc:npc/dwarf_death_3",
+      "ancientwarfarenpc:npc/dwarf_death_4"
+    ]
+  },
+  "dwarf_hurt": {
+    "sounds": [
+      "ancientwarfarenpc:npc/dwarf_hurt_1",
+      "ancientwarfarenpc:npc/dwarf_hurt_2",
+      "ancientwarfarenpc:npc/dwarf_hurt_3",
+      "ancientwarfarenpc:npc/dwarf_hurt_4"
+    ]
+  },
+  "elf_attack": {
+    "sounds": [
+      "ancientwarfarenpc:npc/elf_attack_1"
+    ]
+  },
+  "elf_death": {
+    "sounds": [
+      "ancientwarfarenpc:npc/elf_death_1",
+      "ancientwarfarenpc:npc/elf_death_2"
+    ]
+  },
+  "elf_hurt": {
+    "sounds": [
+      "ancientwarfarenpc:npc/elf_hurt_1",
+      "ancientwarfarenpc:npc/elf_hurt_2",
+      "ancientwarfarenpc:npc/elf_hurt_3"
+    ]
+  },
+  "ent_attack": {
+    "sounds": [
+      "ancientwarfarenpc:npc/ent_attack_1",
+      "ancientwarfarenpc:npc/ent_attack_2"
+    ]
+  },
+  "ent_death": {
+    "sounds": [
+      "ancientwarfarenpc:npc/ent_death_1",
+      "ancientwarfarenpc:npc/ent_death_2",
+      "ancientwarfarenpc:npc/ent_death_3"
+    ]
+  },
+  "ent_hurt": {
+    "sounds": [
+      "ancientwarfarenpc:npc/ent_hurt_1",
+      "ancientwarfarenpc:npc/ent_hurt_2",
+      "ancientwarfarenpc:npc/ent_hurt_3"
+    ]
+  },
+  "gargoyle_attack": {
+    "sounds": [
+      "ancientwarfarenpc:npc/gargoyle_attack_1",
+      "ancientwarfarenpc:npc/gargoyle_attack_2"
+    ]
+  },
+  "gargoyle_death": {
+    "sounds": [
+      "ancientwarfarenpc:npc/gargoyle_death_1"
+    ]
+  },
+  "gargoyle_hurt": {
+    "sounds": [
+      "ancientwarfarenpc:npc/gargoyle_hurt_1"
+    ]
+  },
+  "giant_attack": {
+    "sounds": [
+      "ancientwarfarenpc:npc/giant_attack_1",
+      "ancientwarfarenpc:npc/giant_attack_2",
+      "ancientwarfarenpc:npc/giant_attack_3",
+      "ancientwarfarenpc:npc/giant_attack_4"
+    ]
+  },
+  "giant_death": {
+    "sounds": [
+      "ancientwarfarenpc:npc/giant_death_1",
+      "ancientwarfarenpc:npc/giant_death_2",
+      "ancientwarfarenpc:npc/giant_death_3",
+      "ancientwarfarenpc:npc/giant_death_4"
+    ]
+  },
+  "giant_hurt": {
+    "sounds": [
+      "ancientwarfarenpc:npc/giant_hurt_1",
+      "ancientwarfarenpc:npc/giant_hurt_2",
+      "ancientwarfarenpc:npc/giant_hurt_3",
+      "ancientwarfarenpc:npc/giant_hurt_4",
+      "ancientwarfarenpc:npc/giant_hurt_5"
+    ]
+  },
+  "gnome_attack": {
+    "sounds": [
+      "ancientwarfarenpc:npc/gnome_attack_1",
+      "ancientwarfarenpc:npc/gnome_attack_2",
+      "ancientwarfarenpc:npc/gnome_attack_3"
+    ]
+  },
+  "gnome_death": {
+    "sounds": [
+      "ancientwarfarenpc:npc/gnome_death_1",
+      "ancientwarfarenpc:npc/gnome_death_2"
+    ]
+  },
+  "gnome_hurt": {
+    "sounds": [
+      "ancientwarfarenpc:npc/gnome_hurt_1",
+      "ancientwarfarenpc:npc/gnome_hurt_2"
+    ]
+  },
+  "gremlin_attack": {
+    "sounds": [
+      "ancientwarfarenpc:npc/gremlin_attack_1",
+      "ancientwarfarenpc:npc/gremlin_attack_2"
+    ]
+  },
+  "gremlin_death": {
+    "sounds": [
+      "ancientwarfarenpc:npc/gremlin_death_1",
+      "ancientwarfarenpc:npc/gremlin_death_2"
+    ]
+  },
+  "gremlin_hurt": {
+    "sounds": [
+      "ancientwarfarenpc:npc/gremlin_hurt_1",
+      "ancientwarfarenpc:npc/gremlin_hurt_2"
+    ]
+  },
+  "hobbit_attack": {
+    "sounds": [
+      "ancientwarfarenpc:npc/hobbit_attack_1",
+      "ancientwarfarenpc:npc/hobbit_attack_2"
+    ]
+  },
+  "hobbit_death": {
+    "sounds": [
+      "ancientwarfarenpc:npc/hobbit_death_1",
+      "ancientwarfarenpc:npc/hobbit_death_2",
+      "ancientwarfarenpc:npc/hobbit_death_3"
+    ]
+  },
+  "hobbit_hurt": {
+    "sounds": [
+      "ancientwarfarenpc:npc/hobbit_hurt_1",
+      "ancientwarfarenpc:npc/hobbit_hurt_2",
+      "ancientwarfarenpc:npc/hobbit_hurt_3"
+    ]
+  },
+  "human_attack": {
+    "sounds": [
+      "ancientwarfarenpc:npc/human_attack_1",
+      "ancientwarfarenpc:npc/human_attack_2",
+      "ancientwarfarenpc:npc/human_attack_3",
+      "ancientwarfarenpc:npc/human_attack_4",
+      "ancientwarfarenpc:npc/human_attack_5",
+      "ancientwarfarenpc:npc/human_attack_6",
+      "ancientwarfarenpc:npc/human_attack_7",
+      "ancientwarfarenpc:npc/human_attack_8",
+      "ancientwarfarenpc:npc/human_attack_9",
+      "ancientwarfarenpc:npc/human_attack_10"
+    ]
+  },
+  "human_death": {
+    "sounds": [
+      "ancientwarfarenpc:npc/human_death_1",
+      "ancientwarfarenpc:npc/human_death_2",
+      "ancientwarfarenpc:npc/human_death_3",
+      "ancientwarfarenpc:npc/human_death_4",
+      "ancientwarfarenpc:npc/human_death_5",
+      "ancientwarfarenpc:npc/human_death_6",
+      "ancientwarfarenpc:npc/human_death_7",
+      "ancientwarfarenpc:npc/human_death_8",
+      "ancientwarfarenpc:npc/human_death_9",
+      "ancientwarfarenpc:npc/human_death_10",
+      "ancientwarfarenpc:npc/human_death_11",
+      "ancientwarfarenpc:npc/human_death_12",
+      "ancientwarfarenpc:npc/human_death_13",
+      "ancientwarfarenpc:npc/human_death_14",
+      "ancientwarfarenpc:npc/human_death_15",
+      "ancientwarfarenpc:npc/human_death_16"
+    ]
+  },
+  "human_hurt": {
+    "sounds": [
+      "ancientwarfarenpc:npc/human_hurt_1",
+      "ancientwarfarenpc:npc/human_hurt_2",
+      "ancientwarfarenpc:npc/human_hurt_3",
+      "ancientwarfarenpc:npc/human_hurt_4",
+      "ancientwarfarenpc:npc/human_hurt_5",
+      "ancientwarfarenpc:npc/human_hurt_6",
+      "ancientwarfarenpc:npc/human_hurt_7",
+      "ancientwarfarenpc:npc/human_hurt_8",
+      "ancientwarfarenpc:npc/human_hurt_9",
+      "ancientwarfarenpc:npc/human_hurt_10",
+      "ancientwarfarenpc:npc/human_hurt_11",
+      "ancientwarfarenpc:npc/human_hurt_12",
+      "ancientwarfarenpc:npc/human_hurt_13"
+    ]
+  },
+  "human_female_attack": {
+    "sounds": [
+      "ancientwarfarenpc:npc/human_female_attack_1",
+      "ancientwarfarenpc:npc/human_female_attack_2"
+    ]
+  },
+  "human_female_death": {
+    "sounds": [
+      "ancientwarfarenpc:npc/human_female_death_1",
+      "ancientwarfarenpc:npc/human_female_death_2",
+      "ancientwarfarenpc:npc/human_female_death_3",
+      "ancientwarfarenpc:npc/human_female_death_4",
+      "ancientwarfarenpc:npc/human_female_death_5"
+    ]
+  },
+  "human_female_hurt": {
+    "sounds": [
+      "ancientwarfarenpc:npc/human_female_hurt_1",
+      "ancientwarfarenpc:npc/human_female_hurt_2",
+      "ancientwarfarenpc:npc/human_female_hurt_3",
+      "ancientwarfarenpc:npc/human_female_hurt_4",
+      "ancientwarfarenpc:npc/human_female_hurt_5",
+      "ancientwarfarenpc:npc/human_female_hurt_6"
+    ]
+  },
+  "ishtari_anubite_attack": {
+    "sounds": [
+      "ancientwarfarenpc:npc/ishtari_anubite_attack_1",
+      "ancientwarfarenpc:npc/ishtari_anubite_attack_2"
+    ]
+  },
+  "ishtari_anubite_death": {
+    "sounds": [
+      "ancientwarfarenpc:npc/ishtari_anubite_death_1"
+    ]
+  },
+  "ishtari_anubite_hurt": {
+    "sounds": [
+      "ancientwarfarenpc:npc/ishtari_anubite_hurt_1"
+    ]
+  },
+  "ishtari_mummy_attack": {
+    "sounds": [
+      "ancientwarfarenpc:npc/ishtari_mummy_attack_1",
+      "ancientwarfarenpc:npc/ishtari_mummy_attack_2",
+      "ancientwarfarenpc:npc/ishtari_mummy_attack_3",
+      "ancientwarfarenpc:npc/ishtari_mummy_attack_4"
+    ]
+  },
+  "ishtari_mummy_death": {
+    "sounds": [
+      "ancientwarfarenpc:npc/ishtari_mummy_death_1",
+      "ancientwarfarenpc:npc/ishtari_mummy_death_2",
+      "ancientwarfarenpc:npc/ishtari_mummy_death_3"
+    ]
+  },
+  "ishtari_mummy_hurt": {
+    "sounds": [
+      "ancientwarfarenpc:npc/ishtari_mummy_hurt_1",
+      "ancientwarfarenpc:npc/ishtari_mummy_hurt_2",
+      "ancientwarfarenpc:npc/ishtari_mummy_hurt_3"
+    ]
+  },
+  "ishtari_pharoah_attack": {
+    "sounds": [
+      "ancientwarfarenpc:npc/ishtari_pharoah_attack_1"
+    ]
+  },
+  "ishtari_pharoah_death": {
+    "sounds": [
+      "ancientwarfarenpc:npc/ishtari_pharoah_death_1"
+    ]
+  },
+  "ishtari_pharoah_hurt": {
+    "sounds": [
+      "ancientwarfarenpc:npc/ishtari_pharoah_hurt_1"
+    ]
+  },
+  "klown_attack": {
+    "sounds": [
+      "ancientwarfarenpc:npc/klown_attack_1",
+      "ancientwarfarenpc:npc/klown_attack_2"
+    ]
+  },
+  "klown_death": {
+    "sounds": [
+      "ancientwarfarenpc:npc/klown_death_1",
+      "ancientwarfarenpc:npc/klown_death_2"
+    ]
+  },
+  "klown_hurt": {
+    "sounds": [
+      "ancientwarfarenpc:npc/klown_hurt_1"
+    ]
+  },
+  "kobold_attack": {
+    "sounds": [
+      "ancientwarfarenpc:npc/kobold_attack_1"
+    ]
+  },
+  "kobold_death": {
+    "sounds": [
+      "ancientwarfarenpc:npc/kobold_death_1",
+      "ancientwarfarenpc:npc/kobold_death_2"
+    ]
+  },
+  "kobold_hurt": {
+    "sounds": [
+      "ancientwarfarenpc:npc/kobold_hurt_1",
+      "ancientwarfarenpc:npc/kobold_hurt_2"
+    ]
+  },
+  "kong_ape_attack": {
+    "sounds": [
+      "ancientwarfarenpc:npc/kong_ape_attack_1"
+    ]
+  },
+  "kong_ape_death": {
+    "sounds": [
+      "ancientwarfarenpc:npc/kong_ape_death_1"
+    ]
+  },
+  "kong_ape_hurt": {
+    "sounds": [
+      "ancientwarfarenpc:npc/kong_ape_hurt_1"
+    ]
+  },
+  "lizardman_ambient": {
+    "sounds": [
+      "ancientwarfarenpc:npc/lizardman_ambient_1"
+    ]
+  },
+  "lizardman_attack": {
+    "sounds": [
+      "ancientwarfarenpc:npc/lizardman_attack_1",
+      "ancientwarfarenpc:npc/lizardman_attack_2",
+      "ancientwarfarenpc:npc/lizardman_attack_3",
+      "ancientwarfarenpc:npc/lizardman_attack_4",
+      "ancientwarfarenpc:npc/lizardman_attack_5"
+    ]
+  },
+  "lizardman_death": {
+    "sounds": [
+      "ancientwarfarenpc:npc/lizardman_death_1",
+      "ancientwarfarenpc:npc/lizardman_death_2"
+    ]
+  },
+  "lizardman_hurt": {
+    "sounds": [
+      "ancientwarfarenpc:npc/lizardman_hurt_1",
+      "ancientwarfarenpc:npc/lizardman_hurt_2",
+      "ancientwarfarenpc:npc/lizardman_hurt_3",
+      "ancientwarfarenpc:npc/lizardman_hurt_4"
+    ]
+  },
+  "malice_attack": {
+    "sounds": [
+      "ancientwarfarenpc:npc/malice_attack_1",
+      "ancientwarfarenpc:npc/malice_attack_2",
+      "ancientwarfarenpc:npc/malice_attack_3"
+    ]
+  },
+  "malice_death": {
+    "sounds": [
+      "ancientwarfarenpc:npc/malice_death_1",
+      "ancientwarfarenpc:npc/malice_death_2",
+      "ancientwarfarenpc:npc/malice_death_3",
+      "ancientwarfarenpc:npc/malice_death_4"
+    ]
+  },
+  "malice_hurt": {
+    "sounds": [
+      "ancientwarfarenpc:npc/malice_hurt_1",
+      "ancientwarfarenpc:npc/malice_hurt_2",
+      "ancientwarfarenpc:npc/malice_hurt_3",
+      "ancientwarfarenpc:npc/malice_hurt_4",
+      "ancientwarfarenpc:npc/malice_hurt_5"
+    ]
+  },
+  "monster_attack": {
+    "sounds": [
+      "ancientwarfarenpc:npc/monster_attack_1",
+      "ancientwarfarenpc:npc/monster_attack_2",
+      "ancientwarfarenpc:npc/monster_attack_3"
+    ]
+  },
+  "monster_death": {
+    "sounds": [
+      "ancientwarfarenpc:npc/monster_death_1",
+      "ancientwarfarenpc:npc/monster_death_2"
+    ]
+  },
+  "monster_hurt": {
+    "sounds": [
+      "ancientwarfarenpc:npc/monster_hurt_1",
+      "ancientwarfarenpc:npc/monster_hurt_2",
+      "ancientwarfarenpc:npc/monster_hurt_3"
+    ]
+  },
+  "norska_attack": {
+    "sounds": [
+      "ancientwarfarenpc:npc/norska_attack_1",
+      "ancientwarfarenpc:npc/norska_attack_2",
+      "ancientwarfarenpc:npc/norska_attack_3",
+      "ancientwarfarenpc:npc/norska_attack_4"
+    ]
+  },
+  "norska_death": {
+    "sounds": [
+      "ancientwarfarenpc:npc/norska_death_1",
+      "ancientwarfarenpc:npc/norska_death_2",
+      "ancientwarfarenpc:npc/norska_death_3"
+    ]
+  },
+  "norska_hurt": {
+    "sounds": [
+      "ancientwarfarenpc:npc/norska_hurt_1",
+      "ancientwarfarenpc:npc/norska_hurt_2",
+      "ancientwarfarenpc:npc/norska_hurt_3",
+      "ancientwarfarenpc:npc/norska_hurt_4"
+    ]
+  },
+  "orc_ambient": {
+    "sounds": [
+      "ancientwarfarenpc:npc/orc_ambient_1",
+      "ancientwarfarenpc:npc/orc_ambient_2",
+      "ancientwarfarenpc:npc/orc_ambient_3",
+      "ancientwarfarenpc:npc/orc_ambient_4"
+    ]
+  },
+  "orc_attack": {
+    "sounds": [
+      "ancientwarfarenpc:npc/orc_attack_1",
+      "ancientwarfarenpc:npc/orc_attack_2",
+      "ancientwarfarenpc:npc/orc_attack_3",
+      "ancientwarfarenpc:npc/orc_attack_4"
+    ]
+  },
+  "orc_death": {
+    "sounds": [
+      "ancientwarfarenpc:npc/orc_death_1",
+      "ancientwarfarenpc:npc/orc_death_2",
+      "ancientwarfarenpc:npc/orc_death_3",
+      "ancientwarfarenpc:npc/orc_death_4",
+      "ancientwarfarenpc:npc/orc_death_5",
+      "ancientwarfarenpc:npc/orc_death_6",
+      "ancientwarfarenpc:npc/orc_death_7"
+    ]
+  },
+  "orc_hurt": {
+    "sounds": [
+      "ancientwarfarenpc:npc/orc_hurt_1",
+      "ancientwarfarenpc:npc/orc_hurt_2",
+      "ancientwarfarenpc:npc/orc_hurt_3",
+      "ancientwarfarenpc:npc/orc_hurt_4",
+      "ancientwarfarenpc:npc/orc_hurt_5",
+      "ancientwarfarenpc:npc/orc_hurt_6"
+    ]
+  },
+  "orc_uruk_attack": {
+    "sounds": [
+      "ancientwarfarenpc:npc/orc_uruk_attack_1",
+      "ancientwarfarenpc:npc/orc_uruk_attack_2",
+      "ancientwarfarenpc:npc/orc_uruk_attack_3",
+      "ancientwarfarenpc:npc/orc_uruk_attack_4",
+      "ancientwarfarenpc:npc/orc_uruk_attack_5"
+    ]
+  },
+  "orc_uruk_death": {
+    "sounds": [
+      "ancientwarfarenpc:npc/orc_uruk_death_1",
+      "ancientwarfarenpc:npc/orc_uruk_death_2",
+      "ancientwarfarenpc:npc/orc_uruk_death_3",
+      "ancientwarfarenpc:npc/orc_uruk_death_4"
+    ]
+  },
+  "orc_uruk_hurt": {
+    "sounds": [
+      "ancientwarfarenpc:npc/orc_uruk_hurt_1",
+      "ancientwarfarenpc:npc/orc_uruk_hurt_2",
+      "ancientwarfarenpc:npc/orc_uruk_hurt_3",
+      "ancientwarfarenpc:npc/orc_uruk_hurt_4",
+      "ancientwarfarenpc:npc/orc_uruk_hurt_5",
+      "ancientwarfarenpc:npc/orc_uruk_hurt_6",
+      "ancientwarfarenpc:npc/orc_uruk_hurt_7"
+    ]
+  },
+  "pirate_ambient": {
+    "sounds": [
+      "ancientwarfarenpc:npc/pirate_ambient_1",
+      "ancientwarfarenpc:npc/pirate_ambient_2"
+    ]
+  },
+  "pirate_attack": {
+    "sounds": [
+      "ancientwarfarenpc:npc/pirate_attack_1",
+      "ancientwarfarenpc:npc/pirate_attack_2",
+      "ancientwarfarenpc:npc/pirate_attack_3",
+      "ancientwarfarenpc:npc/pirate_attack_4",
+      "ancientwarfarenpc:npc/pirate_attack_5",
+      "ancientwarfarenpc:npc/pirate_attack_6",
+      "ancientwarfarenpc:npc/pirate_attack_7"
+    ]
+  },
+  "pirate_death": {
+    "sounds": [
+      "ancientwarfarenpc:npc/pirate_death_1",
+      "ancientwarfarenpc:npc/pirate_death_2",
+      "ancientwarfarenpc:npc/pirate_death_3",
+      "ancientwarfarenpc:npc/pirate_death_4",
+      "ancientwarfarenpc:npc/pirate_death_5"
+    ]
+  },
+  "pirate_hurt": {
+    "sounds": [
+      "ancientwarfarenpc:npc/pirate_hurt_1",
+      "ancientwarfarenpc:npc/pirate_hurt_2"
+    ]
+  },
+  "skeleton_death": {
+    "sounds": [
+      "ancientwarfarenpc:npc/skeleton_death_1",
+      "ancientwarfarenpc:npc/skeleton_death_2"
+    ]
+  },
+  "skeleton_hurt": {
+    "sounds": [
+      "ancientwarfarenpc:npc/skeleton_hurt_1",
+      "ancientwarfarenpc:npc/skeleton_hurt_2",
+      "ancientwarfarenpc:npc/skeleton_hurt_3"
+    ]
+  },
+  "vampire_attack": {
+    "sounds": [
+      "ancientwarfarenpc:npc/vampire_attack_1",
+      "ancientwarfarenpc:npc/vampire_attack_2",
+      "ancientwarfarenpc:npc/vampire_attack_3",
+      "ancientwarfarenpc:npc/vampire_attack_4"
+    ]
+  },
+  "vampire_boss_attack": {
+    "sounds": [
+      "ancientwarfarenpc:npc/vampire_boss_attack_1"
+    ]
+  },
+  "vampire_boss_death": {
+    "sounds": [
+      "ancientwarfarenpc:npc/vampire_boss_death_1"
+    ]
+  },
+  "vampire_boss_hurt": {
+    "sounds": [
+      "ancientwarfarenpc:npc/vampire_boss_hurt_1"
+    ]
+  },
+  "vampire_bride_attack": {
+    "sounds": [
+      "ancientwarfarenpc:npc/vampire_bride_attack_1",
+      "ancientwarfarenpc:npc/vampire_bride_attack_2"
+    ]
+  },
+  "vampire_bride_death": {
+    "sounds": [
+      "ancientwarfarenpc:npc/vampire_bride_death_1"
+    ]
+  },
+  "vampire_bride_hurt": {
+    "sounds": [
+      "ancientwarfarenpc:npc/vampire_bride_hurt_1"
+    ]
+  },
+  "vampire_death": {
+    "sounds": [
+      "ancientwarfarenpc:npc/vampire_death_1",
+      "ancientwarfarenpc:npc/vampire_death_2"
+    ]
+  },
+  "vampire_hurt": {
+    "sounds": [
+      "ancientwarfarenpc:npc/vampire_hurt_1",
+      "ancientwarfarenpc:npc/vampire_hurt_2"
+    ]
+  },
+  "zombie_ambient": {
+    "sounds": [
+      "ancientwarfarenpc:npc/zombie_ambient_1",
+      "ancientwarfarenpc:npc/zombie_ambient_2",
+      "ancientwarfarenpc:npc/zombie_ambient_3",
+      "ancientwarfarenpc:npc/zombie_ambient_4",
+      "ancientwarfarenpc:npc/zombie_ambient_5"
+    ]
+  },
+  "zombie_attack": {
+    "sounds": [
+      "ancientwarfarenpc:npc/zombie_attack_1",
+      "ancientwarfarenpc:npc/zombie_attack_2",
+      "ancientwarfarenpc:npc/zombie_attack_3",
+      "ancientwarfarenpc:npc/zombie_attack_4",
+      "ancientwarfarenpc:npc/zombie_attack_5",
+      "ancientwarfarenpc:npc/zombie_attack_6",
+      "ancientwarfarenpc:npc/zombie_attack_7"
+    ]
+  },
+  "zombie_death": {
+    "sounds": [
+      "ancientwarfarenpc:npc/zombie_death_1",
+      "ancientwarfarenpc:npc/zombie_death_2",
+      "ancientwarfarenpc:npc/zombie_death_3",
+      "ancientwarfarenpc:npc/zombie_death_4",
+      "ancientwarfarenpc:npc/zombie_death_5"
+    ]
+  },
+  "zombie_hurt": {
+    "sounds": [
+      "ancientwarfarenpc:npc/zombie_hurt_1",
+      "ancientwarfarenpc:npc/zombie_hurt_2",
+      "ancientwarfarenpc:npc/zombie_hurt_3",
+      "ancientwarfarenpc:npc/zombie_hurt_4",
+      "ancientwarfarenpc:npc/zombie_hurt_5",
+      "ancientwarfarenpc:npc/zombie_hurt_6"
+    ]
+  },
+  "teleport_in": {
+    "sounds": [
+      "ancientwarfarenpc:events/teleport_in"
+    ]
+  },
+  "teleport_out": {
+    "sounds": [
+      "ancientwarfarenpc:events/teleport_out"
+    ]
+  }
+}

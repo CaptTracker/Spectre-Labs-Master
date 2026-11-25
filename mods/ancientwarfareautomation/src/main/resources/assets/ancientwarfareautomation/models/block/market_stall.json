@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "ancientwarfareautomation:block/market_stall_front",
+    "down": "ancientwarfareautomation:block/market_stall_bottom",
+    "up": "ancientwarfareautomation:block/market_stall_top",
+    "north": "ancientwarfareautomation:block/market_stall_front",
+    "east": "ancientwarfareautomation:block/market_stall_right",
+    "south": "ancientwarfareautomation:block/market_stall_rear",
+    "west": "ancientwarfareautomation:block/market_stall_left"
+  }
+}

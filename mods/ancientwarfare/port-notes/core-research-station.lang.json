@@ -1,0 +1,22 @@
+{
+  "guistrings.core.hammer.use_primary_item_key": "Press '%s' to toggle Work/Rotate Mode",
+  "guistrings.core.hammer.work_mode": "Use Item to Work at Worksite",
+  "guistrings.core.hammer.rotate_mode": "Use Item to Rotate blocks",
+  "guistrings.core.quill.work_mode": "Use Item to Research at Research Bench",
+  "guistrings.inventory.side.top": "Top",
+  "guistrings.inventory.side.bottom": "Bottom",
+  "guistrings.inventory.side.front": "Front",
+  "guistrings.inventory.side.rear": "Rear",
+  "guistrings.inventory.side.left": "Left",
+  "guistrings.inventory.side.right": "Right",
+  "guistrings.inventory.side.none": "None",
+  "guistrings.inventory.direction.down": "Down",
+  "guistrings.inventory.direction.up": "Up",
+  "guistrings.inventory.direction.north": "North",
+  "guistrings.inventory.direction.south": "South",
+  "guistrings.inventory.direction.west": "West",
+  "guistrings.inventory.direction.east": "East",
+  "guistrings.inventory.direction.unknown": "Unknown",
+  "guistrings.inventory.side.all_sides": "All Sides",
+  "block.ancientwarfare.research_station": "Research Bench"
+}

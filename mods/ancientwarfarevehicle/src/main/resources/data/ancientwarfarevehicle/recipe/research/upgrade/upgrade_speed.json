@@ -1,0 +1,17 @@
+{
+  "type": "ancientwarfare:shapeless_research_recipe",
+  "research": "ancientwarfare:the_wheel",
+  "ingredients": [
+    {
+      "tag": "minecraft:planks",
+      "count": 3
+    },
+    {
+      "tag": "c:ingots/iron",
+      "count": 3
+    }
+  ],
+  "result": {
+    "id": "ancientwarfarevehicle:vehicle_upgrade_speed"
+  }
+}

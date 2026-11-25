@@ -1,0 +1,20 @@
+{
+  "type": "ancientwarfare:research_recipe",
+  "research": "ancientwarfare:the_wheel",
+  "pattern": [
+    "PPP",
+    "GPG",
+    "PPP"
+  ],
+  "key": {
+    "P": {
+      "tag": "minecraft:planks"
+    },
+    "G": {
+      "tag": "c:gears/wooden"
+    }
+  },
+  "result": {
+    "id": "ancientwarfareautomation:windmill_generator"
+  }
+}

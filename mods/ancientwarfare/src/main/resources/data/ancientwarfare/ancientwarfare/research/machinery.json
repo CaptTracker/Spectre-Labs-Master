@@ -1,0 +1,24 @@
+{
+  "time": 200,
+  "dependencies": [
+    "ancientwarfare:theory_of_gravity"
+  ],
+  "resources": [
+    {
+      "tag": "c:ingots/steel",
+      "count": 10
+    },
+    {
+      "tag": "c:ingots/iron",
+      "count": 8
+    },
+    {
+      "tag": "c:gears/iron",
+      "count": 3
+    },
+    {
+      "tag": "ancientwarfare:bearings/iron",
+      "count": 2
+    }
+  ]
+}

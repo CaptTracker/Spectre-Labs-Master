@@ -1,0 +1,40 @@
+plugins {
+    id 'mod.conventions'
+}
+
+evaluationDependsOn(':ancientwarfare')
+evaluationDependsOn(':ancientwarfarevehicle')
+// Dev runs only: Structures is the last Ancient Warfare module, so its runClient/runServer load
+// all five. Automation and NPCs are runtime-only here; this module does not compile against them.
+evaluationDependsOn(':ancientwarfareautomation')
+evaluationDependsOn(':ancientwarfarenpc')
+evaluationDependsOn(':spectrefactions')
+
+dependencies {
+    implementation project(':ancientwarfare')
+    implementation project(':ancientwarfarevehicle')
+    runtimeOnly project(':ancientwarfareautomation')
+    runtimeOnly project(':ancientwarfarenpc')
+    runtimeOnly project(':spectrefactions')
+}
+
+// Load every Ancient Warfare module in runClient/runServer.
+neoForge {
+    mods {
+        create('ancientwarfare') {
+            sourceSet(project(':ancientwarfare').sourceSets.main)
+        }
+        create('ancientwarfarevehicle') {
+            sourceSet(project(':ancientwarfarevehicle').sourceSets.main)
+        }
+        create('ancientwarfareautomation') {
+            sourceSet(project(':ancientwarfareautomation').sourceSets.main)
+        }
+        create('ancientwarfarenpc') {
+            sourceSet(project(':ancientwarfarenpc').sourceSets.main)
+        }
+        create('spectrefactions') {
+            sourceSet(project(':spectrefactions').sourceSets.main)
+        }
+    }
+}

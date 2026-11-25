@@ -1,0 +1,5 @@
+{
+  "death.attack.AWMissile": "%1$s was killed by missile damage",
+  "death.attack.AWMissile.player": "%1$s was killed by missile damage by %2$s",
+  "entity.ancientwarfarevehicle.missile": "Missile"
+}

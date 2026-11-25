@@ -1,0 +1,15 @@
+{
+  "ancientwarfarevehicle.overlay.throttle": "Throttle: %s",
+  "ancientwarfarevehicle.overlay.pitch": "Pitch: %s",
+  "ancientwarfarevehicle.overlay.climb_rate": "Climb Rate: %s",
+  "ancientwarfarevehicle.overlay.elevation": "Elevation: %s",
+  "ancientwarfarevehicle.overlay.range": "Range: %s",
+  "ancientwarfarevehicle.overlay.turret_pitch": "Pitch: %s",
+  "ancientwarfarevehicle.overlay.turret_yaw": "Yaw: %s",
+  "ancientwarfarevehicle.overlay.launch_velocity": "Velocity: %s",
+  "ancientwarfarevehicle.overlay.ammo": "Ammo: %s",
+  "ancientwarfarevehicle.overlay.ammo_count": "Count: %s",
+  "ancientwarfarevehicle.overlay.no_ammo": "No Ammo Selected",
+  "ancientwarfarevehicle.overlay.speed": "Velocity: %s m/s  max: %s",
+  "ancientwarfarevehicle.overlay.yaw_rate": "Yaw Rate: %s"
+}

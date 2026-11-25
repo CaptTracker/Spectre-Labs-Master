@@ -1,0 +1,20 @@
+{
+  "type": "ancientwarfare:shapeless_research_recipe",
+  "research": "ancientwarfare:rocketry",
+  "ingredients": [
+    {
+      "tag": "c:gunpowders",
+      "count": 2
+    },
+    {
+      "item": "minecraft:paper"
+    },
+    {
+      "tag": "c:strings"
+    }
+  ],
+  "result": {
+    "id": "ancientwarfarevehicle:rocket_charge",
+    "count": 8
+  }
+}

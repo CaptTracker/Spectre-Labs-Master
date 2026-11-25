@@ -1,0 +1,24 @@
+{
+  "time": 200,
+  "dependencies": [
+    "ancientwarfare:invention"
+  ],
+  "resources": [
+    {
+      "item": "minecraft:paper",
+      "count": 20
+    },
+    {
+      "tag": "c:rods/wooden",
+      "count": 12
+    },
+    {
+      "item": "minecraft:charcoal",
+      "count": 4
+    },
+    {
+      "item": "minecraft:torch",
+      "count": 4
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "ancientwarfareautomation:block/smelter_front",
+    "down": "ancientwarfareautomation:block/smelter_bottom",
+    "up": "ancientwarfareautomation:block/smelter_top",
+    "north": "ancientwarfareautomation:block/smelter_front",
+    "east": "ancientwarfareautomation:block/smelter_right",
+    "south": "ancientwarfareautomation:block/smelter_rear",
+    "west": "ancientwarfareautomation:block/smelter_left"
+  }
+}

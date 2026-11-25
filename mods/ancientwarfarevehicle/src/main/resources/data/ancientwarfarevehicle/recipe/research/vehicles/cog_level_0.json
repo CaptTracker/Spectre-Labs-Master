@@ -1,0 +1,37 @@
+{
+  "type": "ancientwarfare:shapeless_research_recipe",
+  "research": "ancientwarfare:seafaring",
+  "ingredients": [
+    {
+      "item": "ancientwarfarevehicle:rough_wood",
+      "count": 10
+    },
+    {
+      "tag": "c:strings",
+      "count": 12
+    },
+    {
+      "tag": "minecraft:wool",
+      "count": 6
+    },
+    {
+      "tag": "c:chests/wooden",
+      "count": 4
+    },
+    {
+      "item": "ancientwarfarevehicle:turret_components"
+    },
+    {
+      "item": "ancientwarfarevehicle:equipment_bay",
+      "count": 2
+    }
+  ],
+  "result": {
+    "id": "ancientwarfarevehicle:cog_spawner",
+    "components": {
+      "ancientwarfarevehicle:vehicle_spawn_data": {
+        "level": 0
+      }
+    }
+  }
+}

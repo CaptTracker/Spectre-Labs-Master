@@ -1,0 +1,136 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "ancientwarfarenpc:item/spawner_base",
+    "layer1": "ancientwarfarenpc:item/spawner_overlay_bottom",
+    "layer2": "ancientwarfarenpc:item/spawner_overlay_top"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "custom_model_data": 1
+      },
+      "model": "ancientwarfarenpc:item/npc_spawner_siege_engineer"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 2
+      },
+      "model": "ancientwarfarenpc:item/npc_spawner_archer"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 3
+      },
+      "model": "ancientwarfarenpc:item/npc_spawner_bard"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 4
+      },
+      "model": "ancientwarfarenpc:item/npc_spawner_commander"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 5
+      },
+      "model": "ancientwarfarenpc:item/npc_spawner_courier"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 6
+      },
+      "model": "ancientwarfarenpc:item/npc_spawner_craftsman"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 7
+      },
+      "model": "ancientwarfarenpc:item/npc_spawner_engineer"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 8
+      },
+      "model": "ancientwarfarenpc:item/npc_spawner_farmer"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 9
+      },
+      "model": "ancientwarfarenpc:item/npc_spawner_lumberjack"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 10
+      },
+      "model": "ancientwarfarenpc:item/npc_spawner_medic"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 11
+      },
+      "model": "ancientwarfarenpc:item/npc_spawner_miner"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 12
+      },
+      "model": "ancientwarfarenpc:item/npc_spawner_priest"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 13
+      },
+      "model": "ancientwarfarenpc:item/npc_spawner_researcher"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 14
+      },
+      "model": "ancientwarfarenpc:item/npc_spawner_trader"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 15
+      },
+      "model": "ancientwarfarenpc:item/npc_spawner_soldier"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 16
+      },
+      "model": "ancientwarfarenpc:item/npc_spawner_civilian_female"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 17
+      },
+      "model": "ancientwarfarenpc:item/npc_spawner_civilian_male"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 18
+      },
+      "model": "ancientwarfarenpc:item/npc_spawner_spellcaster"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 19
+      },
+      "model": "ancientwarfarenpc:item/npc_spawner_innkeeper"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 20
+      },
+      "model": "ancientwarfarenpc:item/npc_spawner_stable_hand"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 21
+      },
+      "model": "ancientwarfarenpc:item/npc_spawner_guard_captain"
+    }
+  ]
+}

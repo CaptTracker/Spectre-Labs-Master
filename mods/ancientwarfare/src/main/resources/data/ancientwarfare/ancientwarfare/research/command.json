@@ -1,0 +1,24 @@
+{
+  "time": 200,
+  "dependencies": [
+    "ancientwarfare:leadership"
+  ],
+  "resources": [
+    {
+      "item": "minecraft:iron_helmet",
+      "count": 1
+    },
+    {
+      "item": "minecraft:iron_chestplate",
+      "count": 1
+    },
+    {
+      "item": "minecraft:iron_leggings",
+      "count": 1
+    },
+    {
+      "item": "minecraft:iron_boots",
+      "count": 1
+    }
+  ]
+}

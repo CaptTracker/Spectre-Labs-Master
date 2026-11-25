@@ -1,0 +1,20 @@
+{
+  "type": "ancientwarfare:research_recipe",
+  "research": "ancientwarfare:the_wheel",
+  "pattern": [
+    "S",
+    "S",
+    "G"
+  ],
+  "key": {
+    "S": {
+      "tag": "ancientwarfare:torque_shafts/iron"
+    },
+    "G": {
+      "tag": "c:gears/iron"
+    }
+  },
+  "result": {
+    "id": "ancientwarfareautomation:torque_shaft_medium"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "time": 200,
+  "dependencies": [
+    "ancientwarfare:engineering"
+  ],
+  "resources": [
+    {
+      "item": "minecraft:book",
+      "count": 3
+    },
+    {
+      "tag": "c:dusts/redstone",
+      "count": 5
+    },
+    {
+      "item": "minecraft:note_block",
+      "count": 1
+    },
+    {
+      "item": "minecraft:charcoal",
+      "count": 4
+    }
+  ]
+}

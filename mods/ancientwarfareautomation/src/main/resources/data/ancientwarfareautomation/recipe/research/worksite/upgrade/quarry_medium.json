@@ -1,0 +1,20 @@
+{
+  "type": "ancientwarfare:research_recipe",
+  "research": "ancientwarfare:mining",
+  "pattern": [
+    "PPP",
+    "F F",
+    "F F"
+  ],
+  "key": {
+    "P": {
+      "tag": "minecraft:planks"
+    },
+    "F": {
+      "tag": "c:fences/wooden"
+    }
+  },
+  "result": {
+    "id": "ancientwarfareautomation:worksite_upgrade_quarry_medium"
+  }
+}

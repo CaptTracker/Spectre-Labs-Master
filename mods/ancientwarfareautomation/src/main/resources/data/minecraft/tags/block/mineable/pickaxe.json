@@ -1,0 +1,31 @@
+{
+  "replace": false,
+  "values": [
+    "ancientwarfareautomation:warehouse_interface",
+    "ancientwarfareautomation:warehouse_crafting",
+    "ancientwarfareautomation:warehouse_stock_viewer",
+    "ancientwarfareautomation:warehouse_stock_linker",
+    "ancientwarfareautomation:mailbox",
+    "ancientwarfareautomation:flywheel_controller_light",
+    "ancientwarfareautomation:flywheel_controller_medium",
+    "ancientwarfareautomation:flywheel_controller_heavy",
+    "ancientwarfareautomation:torque_junction_light",
+    "ancientwarfareautomation:torque_junction_medium",
+    "ancientwarfareautomation:torque_junction_heavy",
+    "ancientwarfareautomation:torque_shaft_light",
+    "ancientwarfareautomation:torque_shaft_medium",
+    "ancientwarfareautomation:torque_shaft_heavy",
+    "ancientwarfareautomation:torque_distributor_light",
+    "ancientwarfareautomation:torque_distributor_medium",
+    "ancientwarfareautomation:torque_distributor_heavy",
+    "ancientwarfareautomation:stirling_generator",
+    "ancientwarfareautomation:waterwheel_generator",
+    "ancientwarfareautomation:hand_cranked_generator",
+    "ancientwarfareautomation:windmill_generator",
+    "ancientwarfareautomation:flywheel_storage_light",
+    "ancientwarfareautomation:flywheel_storage_medium",
+    "ancientwarfareautomation:flywheel_storage_heavy",
+    "ancientwarfareautomation:chunk_loader_simple",
+    "ancientwarfareautomation:chunk_loader_deluxe"
+  ]
+}

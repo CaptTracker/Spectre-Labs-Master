@@ -1,0 +1,6 @@
+{
+  "parent": "ancientwarfarenpc:item/shield_round_blocking",
+  "textures": {
+    "0": "ancientwarfarenpc:item/shield_round_2"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "parent": "ancientwarfarenpc:item/wooden_spear",
+  "textures": {
+    "0": "ancientwarfarenpc:item/diamond_spear"
+  }
+}

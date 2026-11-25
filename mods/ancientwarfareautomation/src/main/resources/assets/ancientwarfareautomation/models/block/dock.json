@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "particle": "ancientwarfareautomation:block/dock_front",
+    "down": "ancientwarfareautomation:block/dock_bottom",
+    "up": "ancientwarfareautomation:block/dock_top",
+    "north": "ancientwarfareautomation:block/dock_front",
+    "east": "ancientwarfareautomation:block/dock_right",
+    "south": "ancientwarfareautomation:block/dock_rear",
+    "west": "ancientwarfareautomation:block/dock_left"
+  }
+}

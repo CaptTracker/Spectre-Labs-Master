@@ -1,0 +1,17 @@
+{
+  "type": "ancientwarfare:shapeless_research_recipe",
+  "research": "ancientwarfare:combustion",
+  "ingredients": [
+    {
+      "item": "minecraft:coal",
+      "count": 2
+    },
+    {
+      "tag": "minecraft:wool"
+    }
+  ],
+  "result": {
+    "id": "ancientwarfarevehicle:flame_charge",
+    "count": 8
+  }
+}

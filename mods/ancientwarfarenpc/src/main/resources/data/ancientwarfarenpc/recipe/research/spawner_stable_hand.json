@@ -1,0 +1,32 @@
+{
+  "type": "ancientwarfare:research_recipe",
+  "research": "ancientwarfare:animal_husbandry",
+  "pattern": [
+    "GF ",
+    "GTB"
+  ],
+  "key": {
+    "B": {
+      "item": "minecraft:hay_block"
+    },
+    "T": {
+      "item": "minecraft:leather"
+    },
+    "F": {
+      "tag": "ancientwarfarenpc:food_bundles"
+    },
+    "G": {
+      "tag": "c:ingots/iron"
+    }
+  },
+  "result": {
+    "id": "ancientwarfarenpc:npc_spawner",
+    "components": {
+      "ancientwarfarenpc:npc_spawner": {
+        "npcType": "stable_hand",
+        "npcSubtype": ""
+      },
+      "minecraft:custom_model_data": 20
+    }
+  }
+}

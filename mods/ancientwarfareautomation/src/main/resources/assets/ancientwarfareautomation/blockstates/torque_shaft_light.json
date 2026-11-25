@@ -1,0 +1,22 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "ancientwarfareautomation:block/automation/torque_shaft_light"
+    },
+    "facing=up": {
+      "model": "ancientwarfareautomation:block/automation/torque_shaft_light"
+    },
+    "facing=north": {
+      "model": "ancientwarfareautomation:block/automation/torque_shaft_light"
+    },
+    "facing=south": {
+      "model": "ancientwarfareautomation:block/automation/torque_shaft_light"
+    },
+    "facing=west": {
+      "model": "ancientwarfareautomation:block/automation/torque_shaft_light"
+    },
+    "facing=east": {
+      "model": "ancientwarfareautomation:block/automation/torque_shaft_light"
+    }
+  }
+}

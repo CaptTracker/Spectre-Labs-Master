@@ -1,0 +1,62 @@
+<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;background:transparent}svg{display:block}</style></head><body>
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <radialGradient id="bg" cx="50%" cy="38%" r="70%"><stop offset="0" stop-color="#2a1f4a"/><stop offset="1" stop-color="#0d0a1a"/></radialGradient>
+  <radialGradient id="sky" cx="50%" cy="60%" r="60%"><stop offset="0" stop-color="#e0703a" stop-opacity=".55"/><stop offset="1" stop-color="#e0703a" stop-opacity="0"/></radialGradient>
+  <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e9d9a6"/><stop offset="1" stop-color="#9c7c3c"/></linearGradient>
+  <linearGradient id="stone" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b9b3a6"/><stop offset="1" stop-color="#6f695e"/></linearGradient>
+  <linearGradient id="blade" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f1f4f8"/><stop offset="1" stop-color="#8a96a6"/></linearGradient>
+</defs>
+<rect x="8" y="8" width="496" height="496" rx="72" fill="url(#bg)"/>
+<rect x="8" y="8" width="496" height="496" rx="72" fill="none" stroke="#5b4a8f" stroke-width="6"/>
+<circle cx="256" cy="250" r="190" fill="url(#sky)"/>
+
+<!-- crossed swords behind the gatehouse -->
+<g transform="translate(256 236) rotate(-38)">
+  <path d="M-9 -190 L0 -212 L9 -190 L9 60 L-9 60 Z" fill="url(#blade)" stroke="#4a5563" stroke-width="3"/>
+  <rect x="-40" y="60" width="80" height="14" rx="5" fill="url(#gold)" stroke="#6b5226" stroke-width="2"/>
+  <rect x="-7" y="74" width="14" height="46" fill="#5a3a22"/>
+  <circle cx="0" cy="126" r="11" fill="url(#gold)"/>
+</g>
+<g transform="translate(256 236) rotate(38)">
+  <path d="M-9 -190 L0 -212 L9 -190 L9 60 L-9 60 Z" fill="url(#blade)" stroke="#4a5563" stroke-width="3"/>
+  <rect x="-40" y="60" width="80" height="14" rx="5" fill="url(#gold)" stroke="#6b5226" stroke-width="2"/>
+  <rect x="-7" y="74" width="14" height="46" fill="#5a3a22"/>
+  <circle cx="0" cy="126" r="11" fill="url(#gold)"/>
+</g>
+
+<!-- gatehouse -->
+<g stroke="#3d3830" stroke-width="4" stroke-linejoin="round">
+  <!-- side towers -->
+  <path d="M136 400 L136 196 L132 196 L132 168 L150 168 L150 182 L164 182 L164 168 L182 168 L182 182 L196 182 L196 168 L214 168 L214 196 L210 196 L210 400 Z" fill="url(#stone)"/>
+  <path d="M302 400 L302 196 L298 196 L298 168 L316 168 L316 182 L330 182 L330 168 L348 168 L348 182 L362 182 L362 168 L380 168 L380 196 L376 196 L376 400 Z" fill="url(#stone)"/>
+  <!-- centre wall -->
+  <path d="M206 400 L206 236 L222 236 L222 222 L240 222 L240 236 L272 236 L272 222 L290 222 L290 236 L306 236 L306 400 Z" fill="url(#stone)"/>
+</g>
+<!-- stone courses -->
+<g stroke="#5e584d" stroke-width="2" opacity=".7">
+  <line x1="138" y1="240" x2="208" y2="240"/><line x1="138" y1="290" x2="208" y2="290"/><line x1="138" y1="340" x2="208" y2="340"/>
+  <line x1="304" y1="240" x2="374" y2="240"/><line x1="304" y1="290" x2="374" y2="290"/><line x1="304" y1="340" x2="374" y2="340"/>
+</g>
+<!-- tower windows -->
+<rect x="165" y="214" width="16" height="30" rx="8" fill="#1a1433"/>
+<rect x="331" y="214" width="16" height="30" rx="8" fill="#1a1433"/>
+<!-- arch with portcullis -->
+<path d="M222 400 L222 304 C222 276 238 262 256 262 C274 262 290 276 290 304 L290 400 Z" fill="#1a1433" stroke="#3d3830" stroke-width="4"/>
+<g stroke="#b8954a" stroke-width="5">
+  <line x1="234" y1="272" x2="234" y2="372"/><line x1="256" y1="264" x2="256" y2="372"/><line x1="278" y1="272" x2="278" y2="372"/>
+  <line x1="224" y1="300" x2="288" y2="300"/><line x1="223" y1="334" x2="289" y2="334"/>
+</g>
+<g fill="url(#gold)">
+  <path d="M229 372 L234 386 L239 372 Z"/><path d="M251 372 L256 386 L261 372 Z"/><path d="M273 372 L278 386 L283 372 Z"/>
+</g>
+<!-- banner on the centre wall -->
+<line x1="256" y1="140" x2="256" y2="236" stroke="#5a4630" stroke-width="5"/>
+<circle cx="256" cy="138" r="6" fill="url(#gold)"/>
+<path d="M259 146 L312 156 L296 172 L312 188 L259 182 Z" fill="#b8323a" stroke="#6e1a20" stroke-width="2"/>
+
+<!-- title -->
+<rect x="44" y="410" width="424" height="76" rx="14" fill="#1a1433" stroke="url(#gold)" stroke-width="4"/>
+<text x="256" y="446" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-weight="bold" font-size="32" letter-spacing="3" fill="#f1e3b5">ANCIENT WARFARE</text>
+<text x="256" y="474" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-weight="bold" font-size="18" letter-spacing="8" fill="#c9a85c">REFORGED</text>
+</svg></body></html>

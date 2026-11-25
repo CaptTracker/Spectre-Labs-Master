@@ -1,0 +1,22 @@
+{
+  "type": "ancientwarfare:shapeless_research_recipe",
+  "research": "ancientwarfare:machinery",
+  "ingredients": [
+    {
+      "tag": "c:ingots/iron"
+    },
+    {
+      "item": "minecraft:piston"
+    },
+    {
+      "tag": "c:strings"
+    },
+    {
+      "tag": "c:dusts/redstone",
+      "count": 2
+    }
+  ],
+  "result": {
+    "id": "ancientwarfarevehicle:turret_components"
+  }
+}

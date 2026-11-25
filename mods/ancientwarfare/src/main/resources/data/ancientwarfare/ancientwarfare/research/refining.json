@@ -1,0 +1,24 @@
+{
+  "time": 200,
+  "dependencies": [
+    "ancientwarfare:chemistry"
+  ],
+  "resources": [
+    {
+      "tag": "c:ingots/iron",
+      "count": 12
+    },
+    {
+      "item": "minecraft:paper",
+      "count": 10
+    },
+    {
+      "tag": "c:ingots/gold",
+      "count": 2
+    },
+    {
+      "item": "minecraft:coal",
+      "count": 12
+    }
+  ]
+}

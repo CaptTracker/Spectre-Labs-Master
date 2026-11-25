@@ -1,0 +1,18 @@
+{
+  "type": "ancientwarfare:shapeless_research_recipe",
+  "research": "ancientwarfare:machinery",
+  "ingredients": [
+    {
+      "tag": "c:ingots/iron",
+      "count": 12
+    },
+    {
+      "item": "minecraft:coal",
+      "count": 4
+    }
+  ],
+  "result": {
+    "id": "ancientwarfarevehicle:tempered_iron",
+    "count": 8
+  }
+}

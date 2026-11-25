@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "ancientwarfareautomation:block/automation/hand_cranked_generator"
+    },
+    "facing=south": {
+      "model": "ancientwarfareautomation:block/automation/hand_cranked_generator",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "ancientwarfareautomation:block/automation/hand_cranked_generator",
+      "y": 270
+    },
+    "facing=east": {
+      "model": "ancientwarfareautomation:block/automation/hand_cranked_generator",
+      "y": 90
+    }
+  }
+}

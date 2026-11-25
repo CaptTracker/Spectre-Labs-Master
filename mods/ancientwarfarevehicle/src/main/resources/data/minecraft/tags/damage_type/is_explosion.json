@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    "ancientwarfarevehicle:missile_explosion",
+    "ancientwarfarevehicle:missile_fire_explosion"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "block.ancientwarfareautomation.warehouse_control": "Warehouse Control Block",
+  "block.ancientwarfareautomation.warehouse_storage_small": "Small Warehouse Storage",
+  "block.ancientwarfareautomation.warehouse_storage_medium": "Medium Warehouse Storage",
+  "block.ancientwarfareautomation.warehouse_storage_large": "Large Warehouse Storage",
+  "block.ancientwarfareautomation.warehouse_interface": "Warehouse Interface",
+  "block.ancientwarfareautomation.warehouse_crafting": "Warehouse Crafting Table",
+  "block.ancientwarfareautomation.warehouse_stock_viewer": "Warehouse Stock Viewer",
+  "block.ancientwarfareautomation.warehouse_stock_linker": "Warehouse Stock Linker",
+  "block.ancientwarfareautomation.warehouse_stock_linker.tooltip": "Linked to warehouse at %s",
+  "block.ancientwarfareautomation.mailbox": "Mailbox",
+  "guistrings.automation.warehouse_set": "Warehouse Set to %s",
+  "equality.equal": "=",
+  "equality.greaterthan": ">",
+  "equality.lessthan": "<",
+  "equality.greaterthanorequalto": "≥",
+  "equality.lessthanorequalto": "≤"
+}

@@ -1,0 +1,18 @@
+plugins {
+    id 'mod.conventions'
+}
+
+evaluationDependsOn(':ancientwarfare')
+
+dependencies {
+    implementation project(':ancientwarfare')
+}
+
+// Load the Ancient Warfare modules this one needs in runClient/runServer.
+neoForge {
+    mods {
+        create('ancientwarfare') {
+            sourceSet(project(':ancientwarfare').sourceSets.main)
+        }
+    }
+}

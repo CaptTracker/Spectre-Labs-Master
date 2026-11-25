@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    " S ",
+    "SSS",
+    "CCC"
+  ],
+  "key": {
+    "S": {
+      "tag": "c:rods/wooden"
+    },
+    "C": {
+      "tag": "c:cobblestones/normal"
+    }
+  },
+  "result": {
+    "id": "ancientwarfarestructure:fire_pit",
+    "count": 1
+  }
+}
