@@ -5,6 +5,9 @@
 package io.github.capttracker.ancientwarfarenpc.ai.owned;
 
 import io.github.capttracker.ancientwarfarenpc.ai.NpcAI;
+import io.github.capttracker.ancientwarfarenpc.ai.vehicle.ShipCrew;
+import io.github.capttracker.ancientwarfarevehicle.entity.VehicleBase;
+import net.minecraft.world.phys.Vec3;
 import io.github.capttracker.ancientwarfarenpc.entity.NpcPlayerOwned;
 import io.github.capttracker.ancientwarfarenpc.npccommand.NpcCommand.Command;
 import io.github.capttracker.ancientwarfarenpc.npccommand.NpcCommand.CommandType;
@@ -21,6 +24,8 @@ import javax.annotation.Nullable;
 public class NpcAIPlayerOwnedFollowCommand extends NpcAI<NpcPlayerOwned> {
     @Nullable
     private BlockPos moveTargetPos = null;
+    /** Ticks spent on the way to a ship the NPC was ordered aboard. */
+    private int boardWalking = 0;
 
     public NpcAIPlayerOwnedFollowCommand(NpcPlayerOwned npc) {
         super(npc);
@@ -105,6 +110,11 @@ public class NpcAIPlayerOwnedFollowCommand extends NpcAI<NpcPlayerOwned> {
             npc.setPlayerCommand(Command.NONE);//clear the command if the target entity cannot be found
             return;
         }
+        VehicleBase ship = ShipCrew.shipOf(e);
+        if (ship != null) {
+            handleBoardShip(ship);
+            return;
+        }
         double sqDist = npc.distanceToSqr(e);
         if (sqDist > MIN_RANGE) {
             moveToEntity(e, sqDist);//move to entity...
@@ -123,6 +133,23 @@ public class NpcAIPlayerOwnedFollowCommand extends NpcAI<NpcPlayerOwned> {
             }
             //do not clear command, guard command is persistent
         }
+    }
+
+    /**
+     * Ordered at a ship (the baton's move mode aimed at it): walk to the nearest point of its hull and take the best free seat of the NPC's roles
+     * ({@code getShipSeatPreference}). The order ends once aboard, when the ship has no seat for the NPC, or after 30 seconds without getting there.
+     */
+    private void handleBoardShip(VehicleBase ship) {
+        ShipCrew.Result result = ShipCrew.tryBoard(npc, ship, npc.getShipSeatPreference());
+        if (result == ShipCrew.Result.TOO_FAR && ++boardWalking < 600) {
+            Vec3 at = ShipCrew.nearestHullPoint(ship, npc.getX(), npc.getZ());
+            moveToPosition(at.x, at.y, at.z, npc.distanceToSqr(at));
+            npc.addAITask(TASK_MOVE);
+            return;
+        }
+        boardWalking = 0;
+        npc.removeAITask(TASK_MOVE);
+        npc.setPlayerCommand(Command.NONE);
     }
 
     private void handleMoveCommand(Command cmd) {

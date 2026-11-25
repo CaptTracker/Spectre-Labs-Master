@@ -41,7 +41,7 @@ import java.util.UUID;
  * on the ground and, where vanilla navigation cannot, follows a route over the ladders of a mine, see {@link NpcRouteAssist}), face it and swing the tool
  * every {@code swing_interval_ticks} while the progress counter fills, then let the site do the action for that target. A target that cannot be reached
  * goes on cooldown at the site. Progress per tick is {@code toolSpeed * skill * torqueBoost}, and it only advances on the ticks
- * {@link io.github.capttracker.ancientwarfarenpc.entity.NpcBase#advanceWorkTick()} allows (hunger factor times tool factor); the target is
+ * {@link io.github.capttracker.ancientwarfarenpc.entity.NpcBase#advanceWorkTick()} allows (morale factor times tool factor; hunger is part of the morale); the target is
  * {@link WorkTask#baseTicks()} (from the block's hardness for breaking actions). For breaking actions the block's crack overlay follows the progress
  * ({@code Level.destroyBlockProgress}) and the worker's tool speed on that block counts; particles and the block's hit sound play with the swing.
  *
@@ -135,6 +135,9 @@ public final class StaffedWork {
             return deposit(sitePos, site);
         }
 
+        if (task == null && npc.tickCount % 10 == 0) {
+            npc.equipRoleTool(); // between tasks the worker holds the tool of its role again
+        }
         if (task == null) {
             Optional<WorkTask> claimed = site.claimTask(id, npc.blockPosition());
             if (claimed.isEmpty()) {
@@ -227,6 +230,7 @@ public final class StaffedWork {
         }
 
         BlockState state = level.getBlockState(current.pos());
+        chooseTool(current, state);
         boolean breaking = current.action().isBreaking() && !state.isAir();
         if (npc.advanceWorkTick()) {
             progress += rate(site, state, breaking);
@@ -254,6 +258,41 @@ public final class StaffedWork {
             finish(site, sitePos, current, level);
         }
         return State.WORKING;
+    }
+
+    // ---------------------------------------------------------------- tool
+
+    /**
+     * Takes the tool that fits the block into the main hand before the swing: the kinds come from the block tags ({@link WorkTool#forTask}), the tool from the
+     * hand, the tool belt, then the pouch. If there is none it asks the fetch-tool goal to get one from the storage of the settlement and goes on with what it
+     * holds (slower, as vanilla breaks a block with the wrong tool). Without a particular kind the worker holds the tool of its role.
+     */
+    private void chooseTool(WorkTask current, BlockState state) {
+        if (!SettlementConfig.workerToolSwitching) {
+            return;
+        }
+        java.util.List<WorkTool> kinds = WorkTool.forTask(current.action(), state);
+        if (kinds.isEmpty()) {
+            npc.equipRoleTool();
+            return;
+        }
+        ItemStack held = npc.getMainHandItem();
+        for (WorkTool kind : kinds) {
+            if (kind.matches(held)) {
+                return;
+            }
+        }
+        for (WorkTool kind : kinds) {
+            for (net.neoforged.neoforge.items.IItemHandlerModifiable handler : new net.neoforged.neoforge.items.IItemHandlerModifiable[]{npc.getToolBelt(), npc.getPouch()}) {
+                int slot = npc.findToolSlot(handler, kind, state);
+                if (slot >= 0) {
+                    npc.equipFrom(handler, slot);
+                    npc.setWantedTool(null);
+                    return;
+                }
+            }
+        }
+        npc.setWantedTool(kinds.get(0));
     }
 
     // ---------------------------------------------------------------- walking to the target

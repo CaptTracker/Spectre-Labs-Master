@@ -29,7 +29,7 @@ public class NpcAIFindVehicle<T extends NpcBase & IVehicleUser> extends NpcAI<T>
 
     @Override
     public boolean canUse() {
-        return super.canUse() && npc.getAssignedVehicle().isEmpty() && npc.canContinueRidingVehicle()
+        return super.canUse() && npc.getAssignedVehicle().isEmpty() && npc.canContinueRidingVehicle() && !(npc.getVehicle() instanceof VehicleBase ship && ship.isShip())
                 && (!npc.isPassenger() || npc.getVehicle() instanceof VehicleBase);
     }
 

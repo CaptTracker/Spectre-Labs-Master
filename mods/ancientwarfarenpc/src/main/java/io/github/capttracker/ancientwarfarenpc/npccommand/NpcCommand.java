@@ -4,7 +4,11 @@
  */
 package io.github.capttracker.ancientwarfarenpc.npccommand;
 
+import io.github.capttracker.ancientwarfarenpc.ai.vehicle.ShipCrew;
 import io.github.capttracker.ancientwarfarenpc.entity.NpcPlayerOwned;
+import io.github.capttracker.ancientwarfarevehicle.entity.SeatRole;
+import io.github.capttracker.ancientwarfarevehicle.entity.VehicleBase;
+import net.minecraft.network.chat.Component;
 import io.github.capttracker.ancientwarfarenpc.network.NpcNetwork;
 import io.github.capttracker.ancientwarfarenpc.network.NpcNetwork.NpcCommandPayload;
 import net.minecraft.core.BlockPos;
@@ -82,11 +86,28 @@ public final class NpcCommand {
         if (provider == null) {
             return;
         }
+        VehicleBase ship = null;
+        if (!block && type == CommandType.GUARD) {
+            // a click on a ship usually lands on one of its hull parts: the order is for the ship (the part is not saved with the command)
+            ship = ShipCrew.shipOf(player.level().getEntity(entityId));
+            if (ship != null) {
+                entityId = ship.getId();
+            }
+        }
         Command cmd = block ? new Command(type, pos) : new Command(type, entityId);
+        int ordered = 0;
         for (Entity entity : provider.getCommandedEntities(player)) {
             if (entity instanceof NpcPlayerOwned npc) {
+                if (ship != null && npc.getVehicle() != ship) {
+                    ordered++;
+                }
                 npc.handlePlayerCommand(cmd.copy());
             }
+        }
+        if (ship != null && ordered > 0) {
+            int free = ShipCrew.freeSeats(ship, List.of(SeatRole.GUNNER, SeatRole.ROWER, SeatRole.PASSENGER));
+            player.displayClientMessage(Component.translatable(ordered > free ? "message.ancientwarfarenpc.ship.not_enough_seats" : "message.ancientwarfarenpc.ship.boarding",
+                    ordered, free), true);
         }
     }
 

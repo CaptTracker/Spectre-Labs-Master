@@ -15,6 +15,7 @@ import io.github.capttracker.ancientwarfarenpc.settlement.SettlementConfig;
 import io.github.capttracker.ancientwarfarenpc.settlement.SettlementData;
 import io.github.capttracker.ancientwarfarenpc.trade.MarketApi;
 import io.github.capttracker.ancientwarfarevehicle.entity.VehicleBase;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -23,6 +24,8 @@ import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.IItemHandlerModifiable;
+import net.neoforged.neoforge.items.ItemHandlerHelper;
+import net.neoforged.neoforge.items.ItemStackHandler;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -32,7 +35,7 @@ import java.util.UUID;
 
 /**
  * The caravan's behaviour, run by its leader ({@link NpcFactionTrader#tick}) on the server: the wagon follows the leader, the phases change
- * (approach, trading, leaving), the stall buy orders are filled from the wagon, and the caravan vanishes when it has left. Killing the leader drops the cargo.
+ * (approach, trading, leaving), the stall buy orders are filled from the wagon, and the caravan vanishes when it has left. Killing the leader drops the coins the caravan earned (goods for buy orders are made only at the trade).
  */
 public final class CaravanLogic {
     /** Ticks a caravan may take to reach the settlement before it gives up. */
@@ -92,7 +95,7 @@ public final class CaravanLogic {
             }
             case TRADING -> {
                 if (leader.tickCount % 60 == 0 && wagon != null && settlement.isPresent()) {
-                    fillBuyOrders(leader, level, settlement.get(), wagon);
+                    fillBuyOrders(leader, level, settlement.get(), wagon, state);
                 }
                 if (leader.tickCount % 100 == 0 && settlement.isPresent()) {
                     CaravanGuests.rentBeds(level, settlement.get(), leader, state);
@@ -122,22 +125,83 @@ public final class CaravanLogic {
         }
     }
 
-    /** Sells goods from the wagon to the buy orders of the settlement's stalls, for coins that go into the wagon. */
-    private static void fillBuyOrders(NpcFactionTrader leader, ServerLevel level, Settlement settlement, VehicleBase wagon) {
+    /** Most items of one kind a caravan supplies to buy orders on one visit (two stacks). */
+    private static final int SUPPLY_STACKS = 2;
+
+    /**
+     * Sells goods to the buy orders of the settlement's stalls, for coins that go into the wagon. The goods are made only now, for the one deal: they are put
+     * into a scratch inventory next to room for the coins, the stall does its all-or-nothing trade with that inventory, and then the coins move into the wagon
+     * and what is left of the goods is thrown away. Goods that were never paid for never exist as items in the wagon, so a killed caravan cannot drop them.
+     */
+    private static void fillBuyOrders(NpcFactionTrader leader, ServerLevel level, Settlement settlement, VehicleBase wagon, CaravanState state) {
         if (leader.distanceToSqr(wagon) > CARGO_RANGE_SQ) {
             return;
         }
-        IItemHandler cargo = wagon.inventory.storageInventory;
+        IItemHandlerModifiable cargo = wagon.inventory.storageInventory;
+        if (!state.virtualCargo) {
+            // a caravan from before the change: its wagon may hold goods, sell those as before
+            for (MarketApi.PostedOrder posted : MarketApi.listBuyOrders(level, settlement)) {
+                if (inRange(leader, posted.stall())
+                        && MarketApi.fillBuyOrder(posted.stall(), posted.order().index(), Math.max(1, posted.order().deals()), cargo).deals() > 0) {
+                    leader.playSound(net.minecraft.sounds.SoundEvents.VILLAGER_TRADE, 1.0F, 1.0F);
+                }
+            }
+            return;
+        }
         for (MarketApi.PostedOrder posted : MarketApi.listBuyOrders(level, settlement)) {
             IMarketStall stall = posted.stall();
-            if (leader.distanceToSqr(stall.getStallPos().getX() + 0.5D, stall.getStallPos().getY(), stall.getStallPos().getZ() + 0.5D) > ORDER_RANGE_SQ) {
+            ItemStack item = posted.order().item();
+            ItemStack price = posted.order().price();
+            if (!inRange(leader, stall) || item.isEmpty() || price.isEmpty() || item.getCount() < 1) {
                 continue;
             }
-            Fill fill = MarketApi.fillBuyOrder(stall, posted.order().index(), Math.max(1, posted.order().deals()), cargo);
+            String id = BuiltInRegistries.ITEM.getKey(item.getItem()).toString();
+            if (!state.supply.contains(id) || CaravanStock.isCoin(item)) {
+                continue;
+            }
+            int perDeal = item.getCount();
+            int budget = item.getMaxStackSize() * SUPPLY_STACKS - state.supplied.getOrDefault(id, 0);
+            int deals = Math.min(Math.max(1, posted.order().deals()), budget / perDeal);
+            if (posted.order().remaining() >= 0) {
+                deals = Math.min(deals, posted.order().remaining() / perDeal);
+            }
+            // the wagon must be able to take the whole payment, or nothing is made
+            while (deals > 0 && !fits(cargo, price.copyWithCount(price.getCount() * deals))) {
+                deals--;
+            }
+            if (deals < 1) {
+                continue;
+            }
+            // scratch inventory: the goods for the deals, and room for the coins (the stall puts them back into the seller's inventory)
+            int goodsSlots = (perDeal * deals + item.getMaxStackSize() - 1) / item.getMaxStackSize();
+            int coinSlots = (price.getCount() * deals + Math.max(1, price.getMaxStackSize()) - 1) / Math.max(1, price.getMaxStackSize());
+            ItemStackHandler scratch = new ItemStackHandler(goodsSlots + coinSlots + 1);
+            ItemStack goods = item.copyWithCount(perDeal * deals);
+            ItemStack leftover = ItemHandlerHelper.insertItem(scratch, goods, false);
+            if (!leftover.isEmpty()) {
+                continue;
+            }
+            Fill fill = MarketApi.fillBuyOrder(stall, posted.order().index(), deals, scratch);
             if (fill.deals() > 0) {
+                state.supplied.merge(id, perDeal * fill.deals(), Integer::sum);
+                // the coins (and nothing else) go into the wagon; the unsold goods are dropped from existence
+                int total = price.getCount() * fill.deals();
+                ItemStack earned = ItemHandlerHelper.insertItem(cargo, price.copyWithCount(total), false);
+                if (!earned.isEmpty()) {
+                    net.minecraft.world.Containers.dropItemStack(level, wagon.getX(), wagon.getY() + 0.5D, wagon.getZ(), earned);
+                }
                 leader.playSound(net.minecraft.sounds.SoundEvents.VILLAGER_TRADE, 1.0F, 1.0F);
             }
         }
+    }
+
+    private static boolean inRange(NpcFactionTrader leader, IMarketStall stall) {
+        return leader.distanceToSqr(stall.getStallPos().getX() + 0.5D, stall.getStallPos().getY(), stall.getStallPos().getZ() + 0.5D) <= ORDER_RANGE_SQ;
+    }
+
+    /** True when the whole stack can be put into the handler. */
+    private static boolean fits(IItemHandler handler, ItemStack stack) {
+        return ItemHandlerHelper.insertItem(handler, stack, true).isEmpty();
     }
 
     // ---------------------------------------------------------------- ending
@@ -179,7 +243,7 @@ public final class CaravanLogic {
         if (wagon != null) {
             wagon.hitch.setLeader(null, 3.0D);
             wagon.hitch.unhitchAll(false);
-            dropCargo(level, wagon);
+            dropCargo(level, wagon, state.virtualCargo);
         }
         for (UUID id : state.guards) {
             if (level.getEntity(id) instanceof NpcFaction guard) {
@@ -190,15 +254,20 @@ public final class CaravanLogic {
         finish(level, state, leader);
     }
 
-    /** Drops everything in the wagon's storage at the wagon. */
-    public static void dropCargo(ServerLevel level, VehicleBase wagon) {
+    /**
+     * Drops the cargo of the wagon at the wagon: the coins the caravan earned. A caravan of the new kind has nothing else in the wagon. A caravan saved before
+     * the change ({@code allItems} false) may hold goods that were made for free, so only its coins are dropped and the rest is removed.
+     */
+    public static void dropCargo(ServerLevel level, VehicleBase wagon, boolean allItems) {
         IItemHandlerModifiable cargo = wagon.inventory.storageInventory;
         for (int slot = 0; slot < cargo.getSlots(); slot++) {
             ItemStack stack = cargo.getStackInSlot(slot);
             if (!stack.isEmpty()) {
                 ItemStack copy = stack.copy();
                 cargo.setStackInSlot(slot, ItemStack.EMPTY);
-                net.minecraft.world.Containers.dropItemStack(level, wagon.getX(), wagon.getY() + 0.5D, wagon.getZ(), copy);
+                if (allItems || CaravanStock.isCoin(copy)) {
+                    net.minecraft.world.Containers.dropItemStack(level, wagon.getX(), wagon.getY() + 0.5D, wagon.getZ(), copy);
+                }
             }
         }
     }

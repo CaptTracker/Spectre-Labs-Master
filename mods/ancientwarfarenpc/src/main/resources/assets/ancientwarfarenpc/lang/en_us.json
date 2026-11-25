@@ -897,7 +897,7 @@
   "guistrings.npc.baton.add_remove": "Add or Remove target NPC",
   "guistrings.npc.baton.clear": "Clear Command",
   "guistrings.npc.baton.attack": "Attack/Move-Attack",
-  "guistrings.npc.baton.move": "Move/Guard/Mount",
+  "guistrings.npc.baton.move": "Move/Guard/Mount/Board ship",
   "guistrings.npc.baton.set_home": "Set Home",
   "guistrings.npc.baton.clear_home": "Clear Home",
   "guistrings.npc.baton.set_upkeep": "Set Upkeep",
@@ -1409,5 +1409,7 @@
   "guistrings.npc.mood.content": "Content",
   "guistrings.npc.mood.happy": "Happy",
   "guistrings.npc.mood.inspired": "Inspired",
-  "guistrings.settlement.member_morale": "%1$s %2$s"
+  "guistrings.settlement.member_morale": "%1$s %2$s",
+  "message.ancientwarfarenpc.ship.boarding": "%1$s NPC(s) ordered aboard (%2$s free seats)",
+  "message.ancientwarfarenpc.ship.not_enough_seats": "%1$s NPC(s) ordered aboard, but the ship has only %2$s free seats"
 }

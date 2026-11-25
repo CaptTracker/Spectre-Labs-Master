@@ -1,6 +1,6 @@
 /*
  * Ancient Warfare NPCs - NeoForge 1.21.1 port. GPL-3.0-or-later; see LICENSE.txt in this mod's folder.
- * New in the port (rework phase 5): what a caravan sells and carries.
+ * New in the port (rework phase 5): what a caravan sells and can supply.
  */
 package io.github.capttracker.ancientwarfarenpc.caravan;
 
@@ -17,8 +17,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.biome.Biome;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -29,7 +27,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Picks the trade lists of a caravan and fills its wagon. The lists are the ones of {@code faction_trade_lists.json} (the {@link FactionTradeListRegistry}).
+ * Picks the trade lists of a caravan and what it can supply. The lists are the ones of {@code faction_trade_lists.json} (the {@link FactionTradeListRegistry}).
  * The data has no explicit faction or biome tags, only names, so the choice goes by name:
  * <ul>
  *   <li>the lists a faction has of its own ({@code faction_defaults}) weigh 6;</li>
@@ -166,29 +164,17 @@ public final class CaravanStock {
         return BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().startsWith("coin_");
     }
 
-    /**
-     * Fills the cargo: the goods of every trade (its output, as many deals as the trade sells, at most a stack each) and half a batch of the goods it takes
-     * in exchange. Stops adding when the wagon is full.
-     */
-    public static void stockCargo(IItemHandler cargo, FactionTradeList trades) {
+    /** The goods the trades of a caravan give (their outputs, no coins): what the caravan can supply to a buy order, made at the moment of the trade. */
+    public static Set<String> supplyOf(FactionTradeList trades) {
+        Set<String> ids = new HashSet<>();
         for (FactionTrade trade : trades.getTrades()) {
-            int deals = Math.max(1, Math.min(trade.getMaxAvailable(), 8));
             for (ItemStack output : trade.getOutput()) {
                 if (!output.isEmpty() && !isCoin(output)) {
-                    insert(cargo, output, deals);
-                }
-            }
-            for (ItemStack input : trade.getInput()) {
-                if (!input.isEmpty() && !isCoin(input)) {
-                    insert(cargo, input, Math.max(1, deals / 2));
+                    ids.add(BuiltInRegistries.ITEM.getKey(output.getItem()).toString());
                 }
             }
         }
-    }
-
-    private static void insert(IItemHandler cargo, ItemStack unit, int deals) {
-        int count = Math.min(unit.getMaxStackSize(), unit.getCount() * deals);
-        ItemHandlerHelper.insertItem(cargo, unit.copyWithCount(count), false);
+        return ids;
     }
 
     /** Every item that any trade of the candidate lists gives: the goods that the faction and the land can supply. */

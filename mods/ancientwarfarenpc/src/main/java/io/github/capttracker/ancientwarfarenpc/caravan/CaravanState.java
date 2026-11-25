@@ -12,8 +12,12 @@ import net.minecraft.nbt.Tag;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -44,6 +48,15 @@ public final class CaravanState {
     public UUID wagon;
     public final List<UUID> horses = new ArrayList<>();
     public final List<UUID> guards = new ArrayList<>();
+    /**
+     * True for a caravan whose wagon is not stocked with goods: goods for buy orders are made only at the moment of the trade (see
+     * {@link CaravanLogic}), so the cargo holds only what the caravan earned. False for a caravan saved before that change (its wagon may hold unpaid goods).
+     */
+    public boolean virtualCargo = true;
+    /** Registry ids of the items this caravan can supply to a buy order (outputs of its trades, and of its faction and land lists if tailoring is on). */
+    public final Set<String> supply = new HashSet<>();
+    /** Registry id to the number of items already supplied to buy orders on this visit (capped per item). */
+    public final Map<String, Integer> supplied = new HashMap<>();
 
     public CaravanState(UUID settlement, BlockPos hall, BlockPos target, BlockPos exit, String biomeKey, long startTick) {
         this.settlement = settlement;
@@ -74,6 +87,15 @@ public final class CaravanState {
         if (wagon != null) {
             tag.putUUID("wagon", wagon);
         }
+        tag.putBoolean("virtualCargo", virtualCargo);
+        ListTag supplyTag = new ListTag();
+        for (String id : supply) {
+            supplyTag.add(net.minecraft.nbt.StringTag.valueOf(id));
+        }
+        tag.put("supply", supplyTag);
+        CompoundTag suppliedTag = new CompoundTag();
+        supplied.forEach(suppliedTag::putInt);
+        tag.put("supplied", suppliedTag);
         tag.put("horses", uuids(horses));
         tag.put("guards", uuids(guards));
         return tag;
@@ -100,6 +122,15 @@ public final class CaravanState {
         state.stayUntil = tag.getLong("stayUntil");
         if (tag.hasUUID("wagon")) {
             state.wagon = tag.getUUID("wagon");
+        }
+        state.virtualCargo = tag.getBoolean("virtualCargo"); // absent in a caravan from before the change: false
+        ListTag supplyTag = tag.getList("supply", Tag.TAG_STRING);
+        for (int i = 0; i < supplyTag.size(); i++) {
+            state.supply.add(supplyTag.getString(i));
+        }
+        CompoundTag suppliedTag = tag.getCompound("supplied");
+        for (String key : suppliedTag.getAllKeys()) {
+            state.supplied.put(key, suppliedTag.getInt(key));
         }
         read(tag.getList("horses", Tag.TAG_INT_ARRAY), state.horses);
         read(tag.getList("guards", Tag.TAG_INT_ARRAY), state.guards);

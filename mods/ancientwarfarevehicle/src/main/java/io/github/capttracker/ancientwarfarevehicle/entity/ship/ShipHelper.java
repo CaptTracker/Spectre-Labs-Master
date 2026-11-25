@@ -5,6 +5,7 @@
 package io.github.capttracker.ancientwarfarevehicle.entity.ship;
 
 import com.mojang.logging.LogUtils;
+import io.github.capttracker.ancientwarfare.util.Trig;
 import io.github.capttracker.ancientwarfarevehicle.entity.SeatRole;
 import io.github.capttracker.ancientwarfarevehicle.entity.VehicleBase;
 import io.github.capttracker.ancientwarfarevehicle.entity.VehicleSeat;
@@ -21,6 +22,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -771,6 +773,76 @@ public final class ShipHelper {
         if (broadcast && !ship.level().isClientSide) {
             PacketDistributor.sendToPlayersTrackingEntity(ship, new VehicleEntityPayloads.HardpointAim(ship.getId(), index, hardpoints[index].destYaw, hardpoints[index].destPitch));
         }
+    }
+
+    /** Where a turret mount must point to hit a point: degrees from the bow, the elevation, and the distance from the mount. */
+    public record AimSolution(float yaw, float pitch, double distance) {}
+
+    /** The stretch of the shot's path over the hull (blocks) beyond which an NPC gunner holds fire: the crew and the passengers are on the deck. */
+    private static final double MAX_FIRE_OVER_HULL = 3.0D;
+
+    /**
+     * SERVER (used by NPC gunners; a player aims by hand): the aim of a mount that hits a point, by the same launch maths the player's client uses
+     * ({@code ShipGunnerClient}: the flat arc, with the shot speed of the ship's ammo), or null when the point cannot be hit: further than {@code maxRange}, closer than
+     * 3 blocks, outside the arc of the mount, out of reach of the shot at the mount's elevation limits, or when the shot would fly over the deck of the ship itself.
+     */
+    @Nullable
+    public AimSolution solveHardpoint(int index, Vec3 target, double maxRange) {
+        if (spec == null || index < 0 || index >= hardpoints.length) {
+            return null;
+        }
+        ShipSpec.Hardpoint mount = hardpoints[index].spec;
+        Vec3 origin = toWorld(mount.forward(), mount.horizontal(), mount.vertical());
+        float dx = (float) (target.x - origin.x);
+        float dy = (float) (target.y - origin.y);
+        float dz = (float) (target.z - origin.z);
+        double distance = Math.sqrt((double) dx * dx + (double) dy * dy + (double) dz * dz);
+        double flat = Math.sqrt((double) dx * dx + (double) dz * dz);
+        if (distance > maxRange || distance < 3.0D || flat < 1.0D) {
+            return null;
+        }
+        float worldYaw = Trig.toDegrees((float) Math.atan2(-dx, -dz));
+        float yaw = Mth.wrapDegrees(worldYaw - ship.getYRot());
+        if (mount.arc() < 180.0F && Math.abs(Mth.wrapDegrees(yaw - mount.centerYaw())) > mount.arc()) {
+            return null;
+        }
+        Tuple<Float, Float> angles = Trig.getLaunchAngleToHit(dx, dy, dz, ship.firingHelper.getAdjustedMaxMissileVelocity());
+        // the angles come wrapped to 0..360: a flat shot downwards is 357, not -3
+        float flatArc = angles.getB().isNaN() ? Float.NaN : Mth.wrapDegrees(angles.getB());
+        float highArc = angles.getA().isNaN() ? Float.NaN : Mth.wrapDegrees(angles.getA());
+        float pitch;
+        if (!Float.isNaN(flatArc) && flatArc >= mount.pitchMin() && flatArc <= mount.pitchMax()) {
+            pitch = flatArc;
+        } else if (!Float.isNaN(highArc) && highArc >= mount.pitchMin() && highArc <= mount.pitchMax()) {
+            pitch = highArc;
+        } else {
+            return null;
+        }
+        if (firesOverOwnDeck(mount, worldYaw, pitch)) {
+            return null;
+        }
+        return new AimSolution(yaw, pitch, distance);
+    }
+
+    /** True if the straight path of a shot from the mount (a rough test: the elevation is the shot's start angle) runs along the hull for more than {@link #MAX_FIRE_OVER_HULL} blocks, low over the deck. */
+    private boolean firesOverOwnDeck(ShipSpec.Hardpoint mount, float worldYaw, float pitch) {
+        double yaw = Math.toRadians(worldYaw);
+        double dirX = -Math.sin(yaw);
+        double dirZ = -Math.cos(yaw);
+        double shipYaw = Math.toRadians(ship.getYRot());
+        double s = Math.sin(shipYaw);
+        double c = Math.cos(shipYaw);
+        double rise = Math.tan(Math.toRadians(pitch));
+        double over = 0.0D;
+        for (double t = 0.5D; t <= spec.length() + 3.0D; t += 0.5D) {
+            double forward = mount.forward() - (dirX * t * s + dirZ * t * c);
+            double horizontal = mount.horizontal() + (dirX * t * c - dirZ * t * s);
+            double height = mount.vertical() + rise * t;
+            if (height < spec.deckTop() + 2.3D && spec.covers((float) forward, (float) horizontal, 0.2F)) {
+                over += 0.5D;
+            }
+        }
+        return over > MAX_FIRE_OVER_HULL;
     }
 
     /** SERVER: a gunner fired a mount. The shot leaves the barrel after the wind-up of the weapon. */

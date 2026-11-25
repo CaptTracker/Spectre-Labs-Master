@@ -26,6 +26,7 @@ import io.github.capttracker.ancientwarfarenpc.ai.owned.NpcAIPlayerOwnedWork;
 import io.github.capttracker.ancientwarfarenpc.ai.owned.NpcAIPlayerOwnedWorkRandom;
 import io.github.capttracker.ancientwarfarenpc.ai.owned.NpcAIStaffedWork;
 import io.github.capttracker.ancientwarfarenpc.ai.owned.NpcAIWorkerDeposit;
+import io.github.capttracker.ancientwarfarenpc.ai.owned.WorkTool;
 import io.github.capttracker.ancientwarfarenpc.config.AWNPCStatics;
 import io.github.capttracker.ancientwarfarenpc.orders.WorkOrder;
 import io.github.capttracker.ancientwarfarenpc.settlement.Activity;
@@ -49,6 +50,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TieredItem;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.ItemAbilities;
+import net.neoforged.neoforge.items.IItemHandlerModifiable;
+import net.neoforged.neoforge.items.ItemHandlerHelper;
 import net.neoforged.neoforge.items.ItemStackHandler;
 
 import javax.annotation.Nullable;
@@ -160,9 +163,94 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
         }
     }
 
-    /** True if the item in the main hand is a tool of the work type of the role. */
+    /** The slots of the tool belt: spare tools for other blocks, and the role tool while another one is in the hand. */
+    public static final int BELT_SIZE = 4;
+    /** Tools the worker carries besides the one in its hand (per-task tool switching). Saved as {@code toolBelt}; there is no screen for it. */
+    private final ItemStackHandler toolBelt = new ItemStackHandler(BELT_SIZE);
+    @Nullable
+    private WorkTool wantedTool;
+    private long wantedToolAt;
+
+    public ItemStackHandler getToolBelt() {
+        return toolBelt;
+    }
+
+    /** The kind of tool the work asked for and nobody has given it (set by the staffed work every tick it is missing, forgotten after 5 seconds). */
+    @Nullable
+    public WorkTool getWantedTool() {
+        return wantedTool != null && level().getGameTime() - wantedToolAt <= 100L ? wantedTool : null;
+    }
+
+    public void setWantedTool(@Nullable WorkTool tool) {
+        wantedTool = tool;
+        wantedToolAt = level().getGameTime();
+    }
+
+    /** True if the worker has a tool of its role in the hand or in the belt (the belt holds it while another tool is in the hand). */
     public boolean hasMatchingTool() {
-        return isToolForRole(getMainHandItem());
+        if (isToolForRole(getMainHandItem())) {
+            return true;
+        }
+        for (int slot = 0; slot < toolBelt.getSlots(); slot++) {
+            if (isToolForRole(toolBelt.getStackInSlot(slot))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** The slot of the best tool of the kind in the handler (the highest speed on the block), or -1. */
+    public int findToolSlot(IItemHandlerModifiable handler, WorkTool kind, @Nullable net.minecraft.world.level.block.state.BlockState block) {
+        int best = -1;
+        float bestSpeed = -1.0F;
+        for (int slot = 0; slot < handler.getSlots(); slot++) {
+            ItemStack stack = handler.getStackInSlot(slot);
+            if (kind.matches(stack)) {
+                float speed = block == null || block.isAir() ? 1.0F : stack.getDestroySpeed(block);
+                if (speed > bestSpeed) {
+                    bestSpeed = speed;
+                    best = slot;
+                }
+            }
+        }
+        return best;
+    }
+
+    /**
+     * Puts the tool of a slot of the belt or the pouch into the main hand. What was in the hand goes into the same slot, or from the pouch into a free slot
+     * of the belt first (the pouch is emptied into the site now and then, the belt is not).
+     */
+    public void equipFrom(IItemHandlerModifiable handler, int slot) {
+        ItemStack tool = handler.getStackInSlot(slot);
+        if (tool.isEmpty()) {
+            return;
+        }
+        ItemStack old = getMainHandItem().copy();
+        handler.setStackInSlot(slot, ItemStack.EMPTY);
+        if (!old.isEmpty()) {
+            if (handler != toolBelt) {
+                old = ItemHandlerHelper.insertItem(toolBelt, old, false);
+            }
+            if (!old.isEmpty()) {
+                handler.setStackInSlot(slot, old);
+            }
+        }
+        setItemSlot(net.minecraft.world.entity.EquipmentSlot.MAINHAND, tool);
+    }
+
+    /** Holds the tool of the role again if another tool is in the hand and the role tool is in the belt or the pouch. */
+    public void equipRoleTool() {
+        if (getRoleWorkType() == WorkType.NONE || isToolForRole(getMainHandItem())) {
+            return;
+        }
+        for (IItemHandlerModifiable handler : new IItemHandlerModifiable[]{toolBelt, pouch}) {
+            for (int slot = 0; slot < handler.getSlots(); slot++) {
+                if (isToolForRole(handler.getStackInSlot(slot))) {
+                    equipFrom(handler, slot);
+                    return;
+                }
+            }
+        }
     }
 
     /** Whether a stack is a tool for the role (work type) of this worker. */
@@ -232,6 +320,13 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
             if (!stack.isEmpty()) {
                 spawnAtLocation(stack, 0.0F);
                 pouch.setStackInSlot(slot, ItemStack.EMPTY);
+            }
+        }
+        for (int slot = 0; slot < toolBelt.getSlots(); slot++) {
+            ItemStack stack = toolBelt.getStackInSlot(slot);
+            if (!stack.isEmpty()) {
+                spawnAtLocation(stack, 0.0F);
+                toolBelt.setStackInSlot(slot, ItemStack.EMPTY);
             }
         }
         pouchSite = null;
@@ -409,6 +504,7 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
             entityData.set(ROLE, ROLES.contains(tag.getString("role")) ? tag.getString("role") : "");
         }
         pouch.deserializeNBT(registryAccess(), tag.getCompound("pouch"));
+        toolBelt.deserializeNBT(registryAccess(), tag.getCompound("toolBelt"));
         pouchSite = tag.contains("pouchSite") ? NbtUtils.readBlockPos(tag, "pouchSite").orElse(null) : null;
         if (tag.contains("workAI") && workAI != null) {
             workAI.readFromNBT(tag.getCompound("workAI"));
@@ -423,6 +519,7 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
         super.addAdditionalSaveData(tag);
         tag.putString("role", getRole());
         tag.put("pouch", pouch.serializeNBT(registryAccess()));
+        tag.put("toolBelt", toolBelt.serializeNBT(registryAccess()));
         if (pouchSite != null) {
             tag.put("pouchSite", NbtUtils.writeBlockPos(pouchSite));
         }

@@ -73,6 +73,10 @@ public class VehicleRenderer extends EntityRenderer<VehicleBase> {
             poseStack.popPose();
         }
 
+        if (vehicle.isHitched()) {
+            HitchRopeRenderer.render(vehicle, partialTick, poseStack, bufferSource);
+        }
+
         if (shouldShowPlate(vehicle)) {
             renderPlate(vehicle, partialTick, poseStack, bufferSource, packedLight);
         }

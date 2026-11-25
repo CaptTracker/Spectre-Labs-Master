@@ -37,6 +37,9 @@ public class NpcAIPlayerOwnedFetchTool extends NpcAI<NpcWorker> {
     private BlockPos target;
     private boolean done;
     private long visitStart;
+    /** The kind of tool for the block at hand when the worker has its role tool already (it goes into the tool belt), null when the role tool is fetched. */
+    @Nullable
+    private WorkTool wanted;
 
     public NpcAIPlayerOwnedFetchTool(NpcWorker npc) {
         super(npc);
@@ -45,7 +48,7 @@ public class NpcAIPlayerOwnedFetchTool extends NpcAI<NpcWorker> {
 
     @Override
     public boolean canUse() {
-        if (!super.canUse() || !(npc.level() instanceof ServerLevel level) || npc.getRoleWorkType() == WorkType.NONE || npc.hasMatchingTool()) {
+        if (!super.canUse() || !(npc.level() instanceof ServerLevel level) || npc.getRoleWorkType() == WorkType.NONE || (npc.hasMatchingTool() && npc.getWantedTool() == null)) {
             return false;
         }
         long now = level.getGameTime();
@@ -53,6 +56,7 @@ public class NpcAIPlayerOwnedFetchTool extends NpcAI<NpcWorker> {
             return false;
         }
         nextCheck = now + CHECK_INTERVAL;
+        wanted = npc.hasMatchingTool() ? npc.getWantedTool() : null; // null: the tool of the role is missing
         Optional<Settlement> settlement = npc.getSettlement();
         if (settlement.isEmpty()) {
             return false;
@@ -62,7 +66,9 @@ public class NpcAIPlayerOwnedFetchTool extends NpcAI<NpcWorker> {
                 .sorted(Comparator.comparingDouble(s -> npc.distanceToSqr(s.pos().getX() + 0.5D, s.pos().getY(), s.pos().getZ() + 0.5D)))
                 .toList();
         if (storages.isEmpty()) {
-            npc.think("no_tool");
+            if (wanted == null) {
+                npc.think("no_tool");
+            }
             nextCheck = now + RETRY_DELAY;
             return false;
         }
@@ -74,7 +80,7 @@ public class NpcAIPlayerOwnedFetchTool extends NpcAI<NpcWorker> {
     private int findToolSlot(IItemHandler handler) {
         for (int slot = 0; slot < handler.getSlots(); slot++) {
             ItemStack stack = handler.getStackInSlot(slot);
-            if (!stack.isEmpty() && npc.isToolForRole(stack) && !handler.extractItem(slot, 1, true).isEmpty()) {
+            if (!stack.isEmpty() && (wanted != null ? wanted.matches(stack) : npc.isToolForRole(stack)) && !handler.extractItem(slot, 1, true).isEmpty()) {
                 return slot;
             }
         }
@@ -83,7 +89,7 @@ public class NpcAIPlayerOwnedFetchTool extends NpcAI<NpcWorker> {
 
     @Override
     public boolean canContinueToUse() {
-        return !done && target != null && npc.isAlive() && !npc.hasMatchingTool() && super.canUse();
+        return !done && target != null && npc.isAlive() && (wanted != null ? npc.getWantedTool() != null : !npc.hasMatchingTool()) && super.canUse();
     }
 
     @Override
@@ -130,6 +136,18 @@ public class NpcAIPlayerOwnedFetchTool extends NpcAI<NpcWorker> {
         ItemStack tool = handler.extractItem(slot, 1, false);
         if (tool.isEmpty()) {
             giveUp();
+            return;
+        }
+        if (wanted != null) {
+            // a tool for the block at hand: into the belt, the hand keeps its tool until the work swaps
+            ItemStack rest = ItemHandlerHelper.insertItem(npc.getToolBelt(), tool, false);
+            if (!rest.isEmpty()) {
+                ItemHandlerHelper.insertItem(handler, rest, false);
+                giveUp();
+                return;
+            }
+            npc.setWantedTool(null);
+            npc.think("got_tool", tool.getHoverName());
             return;
         }
         ItemStack old = npc.getMainHandItem();
