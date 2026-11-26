@@ -4,9 +4,8 @@
  */
 package io.github.capttracker.ancientwarfarestructure;
 
-import io.github.capttracker.ancientwarfarestructure.decor.FirePitVariant;
-import io.github.capttracker.ancientwarfarestructure.init.AwDecor;
 import io.github.capttracker.ancientwarfarestructure.init.AwGateMenus;
+import io.github.capttracker.ancientwarfarestructure.gate.types.Gate;
 import io.github.capttracker.ancientwarfarestructure.init.AwGates;
 import io.github.capttracker.lib.registry.ModRegistrar;
 import net.minecraft.world.item.ItemStack;
@@ -27,10 +26,8 @@ public final class AncientWarfareStructure {
         AwGates.load();
         AwGates.registerEvents(modBus, container);   // entity type, common setup (vehicle link), gate config
         AwGateMenus.load();                          // gate control menu type and its opener
-        AwDecor.load();
-        AwDecor.registerEvents(modBus);              // creative tab contents of the decor items
-        // The one creative tab (id ancientwarfarestructure:main); AwDecor fills it through BuildCreativeModeTabContentsEvent.
-        REG.creativeTab(() -> new ItemStack(AwDecor.firePitItem(FirePitVariant.DEFAULT).get()));
+        // The one creative tab (id ancientwarfarestructure:main); the registrar fills it with the gate items.
+        REG.creativeTab(() -> new ItemStack(AwGates.gateItem(Gate.BASIC_WOOD)));
         REG.register(modBus);
     }
 }

@@ -9,6 +9,8 @@ import com.mojang.blaze3d.platform.InputConstants;
 import io.github.capttracker.ancientwarfare.client.input.InputHandler;
 import io.github.capttracker.ancientwarfarevehicle.AncientWarfareVehicles;
 import io.github.capttracker.ancientwarfarevehicle.config.AWVehicleStatics;
+import io.github.capttracker.ancientwarfarevehicle.entity.IVehicleCrew;
+import io.github.capttracker.ancientwarfarevehicle.entity.SeatRole;
 import io.github.capttracker.ancientwarfarevehicle.entity.VehicleBase;
 import io.github.capttracker.ancientwarfarevehicle.input.VehicleInputData;
 import io.github.capttracker.ancientwarfarevehicle.network.VehicleEntityPayloads;
@@ -290,7 +292,8 @@ public final class VehicleInputClient {
                 if (occupant == player) {
                     continue;
                 }
-                if (occupant != null) {
+                boolean npcHelm = occupant instanceof IVehicleCrew && vehicle.isShip() && vehicle.getSeat(i).role() == SeatRole.DRIVER;
+                if (occupant != null && !npcHelm) {
                     player.displayClientMessage(Component.translatable("message.ancientwarfarevehicle.seat_taken", i + 1), true);
                     continue;
                 }

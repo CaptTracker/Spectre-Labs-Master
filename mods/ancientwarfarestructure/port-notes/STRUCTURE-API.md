@@ -1,30 +1,6 @@
-# Ancient Warfare Structures (gates and decor): ported API
+# Ancient Warfare Structures (gates): ported API
 
 Written by the port workflow. What each finished slice offers to code that builds on it.
-
-## structure-decor
-
-Coin stacks, fire pits and totem parts are ported. The coin stack, totem and asset work from an earlier run was reviewed and kept. This run added the fire pit block, variant enum and item, AwDecor (registrations, coin sound type, creative tab contents) and the client item predicates (coin size, fire pit lit). It also updated the fire pit item models and the asset script. The 11 recipes are converted. Nothing was compiled. Gates are NOT in this slice: 7 gate types plus `gate_spawner` are research-recipe crafted and need the gates slice, or they will be missing from the game.
-
-**API**
-
-- io.github.capttracker.ancientwarfarestructure.init.AwDecor.coinStack(CoinMetal) / coinStackItem(CoinMetal)
-- io.github.capttracker.ancientwarfarestructure.init.AwDecor.firePit(FirePitVariant) / firePitItem(FirePitVariant)
-- io.github.capttracker.ancientwarfarestructure.init.AwDecor.totemItem(TotemVariant), TOTEM_PART, TOTEM_PART_BE
-- io.github.capttracker.ancientwarfarestructure.init.AwDecor.COIN_STACK_INTERACT / COIN_STACK_BREAK
-- io.github.capttracker.ancientwarfarestructure.decor.CoinStackBlock.placeFromCoins(UseOnContext, CoinMetal)
-- io.github.capttracker.ancientwarfarestructure.decor.CoinStackBlock.stackItem(int)
-- io.github.capttracker.ancientwarfarestructure.decor.CoinMetal.coinItemId()
-- io.github.capttracker.ancientwarfarestructure.decor.FirePitBlock.stack(boolean)
-- io.github.capttracker.ancientwarfarestructure.decor.TotemVariant.additionalParts(BlockPos, Direction)
-
-**Not ported**
-
-- Gates (7 types, gate_spawner item, research recipes) are in the gates slice, not here, and so are not in the game yet
-- Drafting station (template only, left out by owner decision)
-- Fire pit random tick and tick rate 30 (did nothing in the original)
-- BlockTotemCube totem cubes and all other Structures blocks (no recipes)
-- Creative tab ordering is per block instead of the 1.12.2 getSubBlocks order
 
 ## structure-gates
 

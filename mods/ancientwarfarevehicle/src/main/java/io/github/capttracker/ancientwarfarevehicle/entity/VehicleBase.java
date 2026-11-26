@@ -868,8 +868,19 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
     /** Moves a rider to another free seat (the number keys). Server side. @return false if the seat does not exist, is taken, or the rider does not ride here */
     public boolean switchSeat(Entity rider, int seat) {
         int current = seatOf(rider);
-        if (level().isClientSide || current < 0 || seat < 0 || seat >= seatOccupants.length || seat == current || !isSeatFree(seat)) {
+        if (level().isClientSide || current < 0 || seat < 0 || seat >= seatOccupants.length || seat == current) {
             return false;
+        }
+        if (!isSeatFree(seat)) {
+            // a player may take the helm of a ship from an NPC helmsman: the NPC steps out onto the deck beside the seat
+            Entity held = occupantAt(seat);
+            if (!(isShip() && rider instanceof Player && held instanceof IVehicleCrew && getSeat(seat).role() == SeatRole.DRIVER)) {
+                return false;
+            }
+            held.stopRiding();
+            if (!isSeatFree(seat)) {
+                return false;
+            }
         }
         if (rider instanceof IVehicleCrew && !getSeat(seat).role().operatesWeapon()) {
             return false;

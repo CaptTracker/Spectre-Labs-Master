@@ -80,6 +80,11 @@ public final class AWNPCStatics {
     public static int shipGunnerRange = 60;
     public static boolean shipAutoCrewSoldiers = true;
     public static int shipAutoCrewRange = 24;
+    public static boolean shipHelmsmen = true;
+    public static int shipHelmStuckSeconds = 10;
+    public static int shipBoardRange = 48;
+    public static boolean shipCrewEat = true;
+    public static boolean shipFactionCrew = true;
     public static boolean vanillaEquipmentDropRate = true;
     /** Damage bonus per npc level; at level 10 they do 2x the damage of level 0. */
     public static double npcLevelDamageMultiplier = 0.05;
@@ -118,6 +123,11 @@ public final class AWNPCStatics {
     private static final ModConfigSpec.IntValue SHIP_GUNNER_RANGE;
     private static final ModConfigSpec.BooleanValue SHIP_AUTO_CREW_SOLDIERS;
     private static final ModConfigSpec.IntValue SHIP_AUTO_CREW_RANGE;
+    private static final ModConfigSpec.BooleanValue SHIP_HELMSMEN;
+    private static final ModConfigSpec.IntValue SHIP_HELM_STUCK_SECONDS;
+    private static final ModConfigSpec.IntValue SHIP_BOARD_RANGE;
+    private static final ModConfigSpec.BooleanValue SHIP_CREW_EAT;
+    private static final ModConfigSpec.BooleanValue SHIP_FACTION_CREW;
     private static final ModConfigSpec.IntValue NPC_ACTION_RANGE;
     private static final ModConfigSpec.BooleanValue VANILLA_EQUIPMENT_DROP_RATE;
     private static final ModConfigSpec.BooleanValue REPACK_CREATIVE_ONLY;
@@ -262,7 +272,7 @@ public final class AWNPCStatics {
 
         common.comment("Ship Crew Options",
                 "Owned NPCs can crew the ships of the Vehicles module: ordered aboard with the command baton (Move mode, aimed at the ship), they take a rower,",
-                "gunner or passenger seat; a soldier in a gunner seat aims and fires the ship's turrets at what it is hostile to.",
+                "gunner or passenger seat (or the helm, which they sail by orders); a soldier in a gunner seat aims and fires the ship's turrets at what it is hostile to.",
                 "Affect only server-side operations. Will need to be set for dedicated servers, and single",
                 "player (or LAN worlds). Clients playing on remote servers can ignore these settings.").push(SHIP_CREW_SETTINGS);
         SHIP_GUNNERS_FIRE = common.comment("NPC gunners fire ship turrets", "Default = true",
@@ -279,6 +289,28 @@ public final class AWNPCStatics {
         SHIP_AUTO_CREW_RANGE = common.comment("Soldiers' boarding range", "Default = 24",
                 "How far from the ship (blocks, measured to its hull) an idle soldier must be to answer the owner's ship. Only used with ship_auto_crew_soldiers.")
                 .defineInRange("ship_auto_crew_range", 24, 4, 128);
+        SHIP_HELMSMEN = common.comment("NPC helmsmen", "Default = true",
+                "If true, an owned NPC ordered aboard a ship whose helm is free takes the helm and sails it: give it a Move order (command baton) at a water",
+                "position and it steers there, slows down and stops near it; a Move order at another vessel (or the follow order, with the owner in another",
+                "vessel) makes it follow. A player can take the helm back with the seat number key (1) or by using the ship when no other seat is free.",
+                "If false, NPCs never take the helm (they row, man the guns or sit).")
+                .define("ship_helmsmen", true);
+        SHIP_HELM_STUCK_SECONDS = common.comment("Helmsman gives up after", "Default = 10",
+                "Seconds a helmsman may make no headway towards its destination (aground, boxed in, nowhere clear to steer) before it gives up and stops the ship.")
+                .defineInRange("ship_helm_stuck_seconds", 10, 3, 120);
+        SHIP_BOARD_RANGE = common.comment("Boarding range of ordered NPCs", "Default = 48",
+                "How far (blocks, measured to the hull) an NPC ordered aboard a ship with the command baton walks and swims out to it. A ship farther away is not",
+                "tried. The time allowed grows with the distance (30 seconds plus 1.5 seconds per block, at most 3 minutes); an NPC that cannot get there gives up.")
+                .defineInRange("ship_board_range", 48, 4, 160);
+        SHIP_CREW_EAT = common.comment("Crew eat aboard", "Default = true",
+                "If true, a hungry owned NPC that sits in a seat of a ship eats food from the ship's storage (or what it carries) without leaving its seat. With no",
+                "food aboard it stays hungry and says so (the hunger line of its thoughts).")
+                .define("ship_crew_eat", true);
+        SHIP_FACTION_CREW = common.comment("Allied faction soldiers crew ships", "Default = true",
+                "Ships cannot be owned by an NPC faction, so this is about ships of players: if true, idle soldiers and archers of an NPC faction that is ALLIED to the",
+                "player at the helm walk (or swim) to the ship when it is within ship_auto_crew_range, man a free gun or oar and fire at what their faction is hostile",
+                "to. They leave the ship when no allied player is at the helm any more. Needs no order: the command baton only commands NPCs of its owner.")
+                .define("ship_faction_crew", true);
         common.pop();
 
         COMMON_SPEC = common.build();
@@ -384,6 +416,11 @@ public final class AWNPCStatics {
         shipGunnerRange = SHIP_GUNNER_RANGE.get();
         shipAutoCrewSoldiers = SHIP_AUTO_CREW_SOLDIERS.get();
         shipAutoCrewRange = SHIP_AUTO_CREW_RANGE.get();
+        shipHelmsmen = SHIP_HELMSMEN.get();
+        shipHelmStuckSeconds = SHIP_HELM_STUCK_SECONDS.get();
+        shipBoardRange = SHIP_BOARD_RANGE.get();
+        shipCrewEat = SHIP_CREW_EAT.get();
+        shipFactionCrew = SHIP_FACTION_CREW.get();
 
         foodMultiplier = FOOD_MULTIPLIER.get();
         Map<ResourceLocation, Integer> foods = new HashMap<>();

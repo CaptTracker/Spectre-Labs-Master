@@ -49,11 +49,12 @@ This one file holds all five Ancient Warfare modules: **Core, Vehicles, Automati
 - Siege engines with **mouse steering** and a chase camera.
 - Horse-drawn carts and wagons.
 - **Ships with walkable decks:** a fishing boat, a cog and a war galley, driven by wind and rowers and armed with mounted turrets.
-- **NPC ship crews:** send your NPCs aboard with the command baton. They row, ride as passengers, and soldiers fire the turrets at your enemies.
+- **NPC ship crews:** send your NPCs aboard with the command baton, even out in open water: they swim out to the ship. They row, ride as passengers, eat from the ship's stores, and soldiers fire the turrets at your enemies. Allied faction soldiers join a friend's ship too.
+- **NPC helmsmen:** an NPC can take the helm and sail to a spot you point at over the water, or follow another vessel. You can take the helm back at any time.
 - Hitched horses are roped to their cart, and riders keep their seats after a reload.
 
 ## Structures
-Only the craftable building pieces are included: 7 gate types, coin stacks, fire pits and totems. The original structure templates, builder and world generation are **not** included.
+Only the craftable gates are included: 7 gate types. There are no coin stacks, fire pits or totems, and the original structure templates, builder and world generation are **not** included.
 
 ## Good to know
 - Back up your worlds. This is a first release.

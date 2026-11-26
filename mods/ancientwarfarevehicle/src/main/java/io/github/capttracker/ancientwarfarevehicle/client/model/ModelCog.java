@@ -15,7 +15,7 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 
 /**
- * Box model of the {@code cog} vehicle: a broad cargo hull with rails, a mast with a square sail and a topsail, barrels, a hatch and a ballista on a swivel at the bow. Texture 256x256. Pixels, y down, the front of the ship is -z; the model is drawn after {@code scale(-1, -1, 1)}. The sails turn about their
+ * Box model of the {@code cog} vehicle: a broad cargo hull with rails, a mast with a square sail and a topsail, two oars a side for the rowers, barrels, a hatch and a ballista on a swivel at the bow. Texture 256x256. Pixels, y down, the front of the ship is -z; the model is drawn after {@code scale(-1, -1, 1)}. The sails turn about their
  * mast ({@link #setSailAngle}), the oars swing ({@link #setOarPhase}) and the turret mounts take a yaw from the bow, an elevation and a recoil ({@link #setHardpoint}).
  */
 public final class ModelCog extends AwPartModel {
@@ -30,8 +30,8 @@ public final class ModelCog extends AwPartModel {
     public ModelCog(ModelPart root) {
         super(root);
         this.sails = new ModelPart[] {root.getChild("sail0"), root.getChild("sail1")};
-        this.oarsStarboard = new ModelPart[0];
-        this.oarsPort = new ModelPart[0];
+        this.oarsStarboard = new ModelPart[] {root.getChild("oarS0"), root.getChild("oarS1")};
+        this.oarsPort = new ModelPart[] {root.getChild("oarP0"), root.getChild("oarP1")};
         this.hardpointYaw = new ModelPart[] {root.getChild("hp0Yaw")};
         this.hardpointPitch = new ModelPart[] {root.getChild("hp0Yaw").getChild("hp0Pitch")};
     }
@@ -51,8 +51,12 @@ public final class ModelCog extends AwPartModel {
         PartDefinition p_mast_10 = root.addOrReplaceChild("mast", CubeListBuilder.create().texOffs(0, 0).addBox(-3.0f, -120.8f, -11.0f, 6.0f, 96.0f, 6.0f), PartPose.offsetAndRotation(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
         PartDefinition p_sail0_11 = root.addOrReplaceChild("sail0", CubeListBuilder.create().texOffs(0, 0).addBox(-37.0f, -1.5f, -1.5f, 74.0f, 3.0f, 3.0f).texOffs(0, 103).addBox(-32.0f, 1.5f, -4.5f, 64.0f, 54.0f, 1.0f), PartPose.offsetAndRotation(-0.0f, -108.8f, -8.0f, 0.0f, 0.0f, 0.0f));
         PartDefinition p_sail1_12 = root.addOrReplaceChild("sail1", CubeListBuilder.create().texOffs(0, 0).addBox(-25.0f, -1.5f, -1.5f, 50.0f, 3.0f, 3.0f).texOffs(0, 103).addBox(-20.0f, 1.5f, -4.5f, 40.0f, 18.0f, 1.0f), PartPose.offsetAndRotation(-0.0f, -121.8f, -8.0f, 0.0f, 0.0f, 0.0f));
-        PartDefinition p_hp0Yaw_13 = root.addOrReplaceChild("hp0Yaw", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0f, -7.0f, -4.0f, 8.0f, 7.0f, 8.0f), PartPose.offsetAndRotation(-0.0f, -24.8f, -54.4f, 0.0f, 0.0f, 0.0f));
-        PartDefinition p_hp0Pitch_14 = p_hp0Yaw_13.addOrReplaceChild("hp0Pitch", CubeListBuilder.create().texOffs(0, 159).addBox(-2.0f, -2.0f, -20.0f, 4.0f, 4.0f, 28.0f).texOffs(0, 0).addBox(-16.0f, -3.0f, -16.0f, 32.0f, 2.0f, 2.0f).texOffs(0, 0).addBox(-16.0f, -3.0f, -16.0f, 2.0f, 2.0f, 12.0f).texOffs(0, 0).addBox(14.0f, -3.0f, -16.0f, 2.0f, 2.0f, 12.0f).texOffs(0, 192).addBox(-1.0f, -4.0f, -22.0f, 2.0f, 2.0f, 16.0f).texOffs(0, 0).addBox(-6.0f, -6.0f, 4.0f, 12.0f, 4.0f, 4.0f), PartPose.offsetAndRotation(0.0f, -9.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+        PartDefinition p_oarS0_13 = root.addOrReplaceChild("oarS0", CubeListBuilder.create().texOffs(0, 159).addBox(-54.0f, -1.0f, -1.0f, 72.0f, 2.0f, 2.0f).texOffs(0, 0).addBox(-54.0f, -0.5f, -3.5f, 12.0f, 1.0f, 7.0f), PartPose.offsetAndRotation(-39.0f, -36.8f, -19.2f, 0.0f, 0.0f, -0.35f));
+        PartDefinition p_oarP0_14 = root.addOrReplaceChild("oarP0", CubeListBuilder.create().texOffs(0, 159).addBox(-18.0f, -1.0f, -1.0f, 72.0f, 2.0f, 2.0f).texOffs(0, 0).addBox(42.0f, -0.5f, -3.5f, 12.0f, 1.0f, 7.0f), PartPose.offsetAndRotation(39.0f, -36.8f, -19.2f, 0.0f, 0.0f, 0.35f));
+        PartDefinition p_oarS1_15 = root.addOrReplaceChild("oarS1", CubeListBuilder.create().texOffs(0, 159).addBox(-54.0f, -1.0f, -1.0f, 72.0f, 2.0f, 2.0f).texOffs(0, 0).addBox(-54.0f, -0.5f, -3.5f, 12.0f, 1.0f, 7.0f), PartPose.offsetAndRotation(-39.0f, -36.8f, 1.6f, 0.0f, 0.0f, -0.35f));
+        PartDefinition p_oarP1_16 = root.addOrReplaceChild("oarP1", CubeListBuilder.create().texOffs(0, 159).addBox(-18.0f, -1.0f, -1.0f, 72.0f, 2.0f, 2.0f).texOffs(0, 0).addBox(42.0f, -0.5f, -3.5f, 12.0f, 1.0f, 7.0f), PartPose.offsetAndRotation(39.0f, -36.8f, 1.6f, 0.0f, 0.0f, 0.35f));
+        PartDefinition p_hp0Yaw_17 = root.addOrReplaceChild("hp0Yaw", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0f, -7.0f, -4.0f, 8.0f, 7.0f, 8.0f), PartPose.offsetAndRotation(-0.0f, -24.8f, -54.4f, 0.0f, 0.0f, 0.0f));
+        PartDefinition p_hp0Pitch_18 = p_hp0Yaw_17.addOrReplaceChild("hp0Pitch", CubeListBuilder.create().texOffs(0, 159).addBox(-2.0f, -2.0f, -20.0f, 4.0f, 4.0f, 28.0f).texOffs(0, 0).addBox(-16.0f, -3.0f, -16.0f, 32.0f, 2.0f, 2.0f).texOffs(0, 0).addBox(-16.0f, -3.0f, -16.0f, 2.0f, 2.0f, 12.0f).texOffs(0, 0).addBox(14.0f, -3.0f, -16.0f, 2.0f, 2.0f, 12.0f).texOffs(0, 192).addBox(-1.0f, -4.0f, -22.0f, 2.0f, 2.0f, 16.0f).texOffs(0, 0).addBox(-6.0f, -6.0f, 4.0f, 12.0f, 4.0f, 4.0f), PartPose.offsetAndRotation(0.0f, -9.0f, 0.0f, 0.0f, 0.0f, 0.0f));
         return LayerDefinition.create(mesh, 256, 256);
     }
 

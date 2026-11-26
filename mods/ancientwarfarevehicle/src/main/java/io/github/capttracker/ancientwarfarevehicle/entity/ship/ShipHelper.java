@@ -389,6 +389,37 @@ public final class ShipHelper {
         return new float[] {throttle, steer};
     }
 
+    /**
+     * Look-ahead for a helmsman (server): true if the hull, turned to {@code heading} (a vehicle yaw in degrees) and with its middle {@code distance} blocks ahead of
+     * where it is now, would float, and would also half way there: every cell over water at least {@link #MIN_DEPTH} blocks deep and no block in the hull's body.
+     * Ground that is not loaded is not looked at (no chunk is loaded for the sake of a guess) and counts as clear.
+     */
+    public boolean isWaterClear(float heading, double distance) {
+        if (spec == null) {
+            return true;
+        }
+        double rad = Math.toRadians(heading);
+        double s = Math.sin(rad);
+        double c = Math.cos(rad);
+        double halfLength = spec.length() / 2.0D + 1.0D;
+        double halfWidth = spec.width() / 2.0D + 1.0D;
+        Level level = ship.level();
+        for (double step : new double[] {distance * 0.5D, distance}) {
+            double x = ship.getX() - s * step;
+            double z = ship.getZ() - c * step;
+            double[][] corners = {{0, 0}, {halfLength, halfWidth}, {halfLength, -halfWidth}, {-halfLength, halfWidth}, {-halfLength, -halfWidth}};
+            for (double[] corner : corners) {
+                if (!level.hasChunkAt(BlockPos.containing(x - corner[0] * s + corner[1] * c, ship.getY(), z - corner[0] * c - corner[1] * s))) {
+                    return true;
+                }
+            }
+            if (violationsAt(x, z, heading, ship.getY()) > 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     // ---- movement (server) ----
 
     /**

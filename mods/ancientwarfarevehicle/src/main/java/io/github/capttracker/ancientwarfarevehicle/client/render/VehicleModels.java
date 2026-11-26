@@ -257,6 +257,8 @@ public final class VehicleModels {
         };
         delegates[VehicleTypeIds.COG] = (veh, yaw, tick, ps, vc, light, overlay, color) -> {
             cog.setSailAngle(sailAngle(veh));
+            // the oars row (like the galley's, with the speed) while somebody sits on a rower's bench; with no rower they hang at rest
+            cog.setOarPhase(veh.getRowerCount() > 0 ? wheelAngle(veh, tick) * 0.8f : 0.f);
             for (int i = 0; i < 1; i++) {
                 poseHardpoint(veh, i, tick, cog::setHardpoint);
             }

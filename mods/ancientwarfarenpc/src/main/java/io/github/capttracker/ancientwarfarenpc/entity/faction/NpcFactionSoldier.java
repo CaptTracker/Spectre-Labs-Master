@@ -51,6 +51,12 @@ public class NpcFactionSoldier extends NpcFaction {
         targetSelector.addGoal(3, new NpcAIDefendFriends(this));
     }
 
+    /** Soldiers of a faction crew the ships of allied players (see NpcAIShipFactionCrew). */
+    @Override
+    protected boolean canCrewShips() {
+        return true;
+    }
+
     @Override
     public boolean worksInRain() {
         return true;
