@@ -4,6 +4,7 @@
  */
 package io.github.capttracker.ancientwarfareautomation.block.entity.worksite;
 
+import io.github.capttracker.ancientwarfare.api.IWorksiteProduction;
 import io.github.capttracker.ancientwarfare.api.WorkAction;
 import io.github.capttracker.ancientwarfare.api.WorkTask;
 import io.github.capttracker.ancientwarfare.block.BlockRotationHandler.RelativeSide;
@@ -51,7 +52,7 @@ import java.util.Optional;
  * <p>Inventories: main (output), input ({@code inputInventory}) and fuel ({@code fuelInventory}). The site is an {@link io.github.capttracker.ancientwarfare.api.IWorksiteLogistics}
  * through its base: couriers take the main inventory and keep input and fuel stocked.
  */
-public class SmelterBlockEntity extends InventoryWorksiteBlockEntity {
+public class SmelterBlockEntity extends InventoryWorksiteBlockEntity implements IWorksiteProduction {
     private static final int INPUT_SIZE = 9;
     private static final int FUEL_SIZE = 3;
     private static final int FIRE_LOAD = 16;
@@ -149,6 +150,24 @@ public class SmelterBlockEntity extends InventoryWorksiteBlockEntity {
         needs.add(new Need(fuelInventory, stack -> stack.is(net.minecraft.world.item.Items.COAL) || stack.is(net.minecraft.world.item.Items.CHARCOAL), 16));
         needs.add(new Need(inputInventory, stack -> stack.is(Tags.Items.RAW_MATERIALS) || stack.is(Tags.Items.ORES), 64));
         return needs;
+    }
+
+    /** Rework phase 8: the settlement hears when the smelter has ore to smelt and no fuel. */
+    @Override
+    public List<StarvedInput> getStarvedInputs() {
+        boolean hasFuel = false;
+        for (int slot = 0; slot < fuelInventory.getSlots() && !hasFuel; slot++) {
+            hasFuel = !fuelInventory.getStackInSlot(slot).isEmpty();
+        }
+        boolean hasInput = false;
+        for (int slot = 0; slot < inputInventory.getSlots() && !hasInput; slot++) {
+            hasInput = !inputInventory.getStackInSlot(slot).isEmpty();
+        }
+        if (hasFuel || !hasInput) {
+            return List.of();
+        }
+        return List.of(new StarvedInput(new ItemStack(net.minecraft.world.item.Items.COAL),
+                stack -> stack.is(net.minecraft.world.item.Items.COAL) || stack.is(net.minecraft.world.item.Items.CHARCOAL), 16));
     }
 
     @Override

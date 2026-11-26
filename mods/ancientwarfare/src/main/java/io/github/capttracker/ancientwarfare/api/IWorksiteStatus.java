@@ -12,6 +12,14 @@ import javax.annotation.Nullable;
 public interface IWorksiteStatus {
     /** The site waits for a courier or a player to stock ladders. */
     String LADDERS = "ladders";
+    /** A production site (sawmill, bakery) waits for a courier to bring raw input. */
+    String INPUT = "needs_input";
+    /** A production site waits for fuel. */
+    String FUEL = "needs_fuel";
+    /** A production site has no recipe switched on. */
+    String NO_RECIPE = "no_recipe";
+    /** A tannery waits for water (a water source next to it, or a water cauldron). */
+    String WATER = "needs_water";
 
     /** @return a short key for the missing thing (for example {@link #LADDERS}), or null if the site waits for nothing */
     @Nullable

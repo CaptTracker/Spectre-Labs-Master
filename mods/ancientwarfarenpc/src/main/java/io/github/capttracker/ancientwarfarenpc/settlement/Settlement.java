@@ -93,6 +93,10 @@ public class Settlement {
     private int alarmClearOverride = 0;
     /** The patrol route set with the command baton through the guard captain: used instead of the border markers when it has at least two points (saved). */
     private final List<BlockPos> patrolWaypoints = new ArrayList<>();
+    // ---- settlement demand (rework phase 8; not saved, recounted every few seconds)
+    private List<SettlementNeed> needs = new ArrayList<>();
+    private long needsNext = 0L;
+    private final Map<String, SettlementNeeds.Posted> postedNeeds = new LinkedHashMap<>();
     @Nullable
     private SettlementData data;
 
@@ -465,6 +469,29 @@ public class Settlement {
             dirty();
         }
         this.moraleFactors = List.copyOf(factors);
+    }
+
+    // ---------------------------------------------------------------- needs (rework phase 8)
+
+    /** The needs of the last count, most urgent first (the list is live; read it on the server thread). */
+    List<SettlementNeed> getNeeds() {
+        return needs;
+    }
+
+    void setNeeds(List<SettlementNeed> list) {
+        needs = list;
+    }
+
+    long getNeedsNext() {
+        return needsNext;
+    }
+
+    void setNeedsNext(long time) {
+        needsNext = time;
+    }
+
+    Map<String, SettlementNeeds.Posted> getPostedNeeds() {
+        return postedNeeds;
     }
 
     long getMoraleNext() {

@@ -12,6 +12,8 @@ import io.github.capttracker.ancientwarfarenpc.settlement.Census;
 import io.github.capttracker.ancientwarfarenpc.settlement.JobBoard;
 import io.github.capttracker.ancientwarfarenpc.settlement.NpcMorale;
 import io.github.capttracker.ancientwarfarenpc.settlement.Settlement;
+import io.github.capttracker.ancientwarfarenpc.settlement.SettlementNeed;
+import io.github.capttracker.ancientwarfarenpc.settlement.SettlementNeeds;
 import io.github.capttracker.ancientwarfarenpc.settlement.SettlementConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -161,8 +163,11 @@ public final class NpcThinking {
         Line job = job(npc, npc, settlement, time, task.startsWith("work."));
         if (job != null) {
             String key = shortKey(job.key());
-            if (key.equals("job.no_tool") || key.equals("job.no_weapon")) {
+            if (key.equals("job.no_tool") || key.equals("job.no_weapon") || key.equals("job.tool_making")) {
                 flags |= Census.FLAG_NO_TOOL;
+                if (key.equals("job.tool_making") && (task.equals("idle") || task.equals("wander") || task.equals("work.generic"))) {
+                    task = "waiting.tool_making";
+                }
             } else if (key.equals("job.no_role") || key.startsWith("nojob.")) {
                 flags |= Census.FLAG_NO_JOB;
             }
@@ -291,6 +296,12 @@ public final class NpcThinking {
             }
             WorkType type = worker.getRoleWorkType();
             if (!worker.hasMatchingTool()) {
+                SettlementNeed made = settlement == null ? null : SettlementNeeds.toolNeed(settlement, worker.getRole());
+                if (made != null && made.status == SettlementNeed.Status.MAKING && !made.producerBlock.isEmpty()) {
+                    String maker = made.producerBlock.substring(made.producerBlock.lastIndexOf('.') + 1);
+                    return now(npc, time, "job.tool_making", Component.translatable("npc.thought.tool." + type.name().toLowerCase(Locale.ROOT)),
+                            Component.translatableWithFallback("npc.thought.maker." + maker, "workshop"));
+                }
                 return now(npc, time, "job.no_tool", Component.translatable("npc.thought.tool." + type.name().toLowerCase(Locale.ROOT)));
             }
             if (!worker.ordersStack.isEmpty()) {

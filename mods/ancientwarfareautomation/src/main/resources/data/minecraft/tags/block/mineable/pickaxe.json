@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
+    "ancientwarfareautomation:smithy",
     "ancientwarfareautomation:warehouse_interface",
     "ancientwarfareautomation:warehouse_crafting",
     "ancientwarfareautomation:warehouse_stock_viewer",

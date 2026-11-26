@@ -15,8 +15,18 @@ import io.github.capttracker.ancientwarfareautomation.block.entity.worksite.Apia
 import io.github.capttracker.ancientwarfareautomation.block.entity.worksite.DockBlockEntity;
 import io.github.capttracker.ancientwarfareautomation.block.entity.worksite.FishFarmBlockEntity;
 import io.github.capttracker.ancientwarfareautomation.block.entity.worksite.MarketStallBlockEntity;
+import io.github.capttracker.ancientwarfareautomation.block.entity.worksite.BakeryBlockEntity;
+import io.github.capttracker.ancientwarfareautomation.block.entity.worksite.ProcessingWorksiteBlockEntity;
+import io.github.capttracker.ancientwarfareautomation.block.entity.worksite.SawmillBlockEntity;
+import io.github.capttracker.ancientwarfareautomation.block.entity.worksite.SmithyBlockEntity;
+import io.github.capttracker.ancientwarfareautomation.block.entity.worksite.TanneryBlockEntity;
 import io.github.capttracker.ancientwarfareautomation.block.entity.worksite.SmelterBlockEntity;
 import io.github.capttracker.ancientwarfareautomation.menu.ApiaryMenu;
+import io.github.capttracker.ancientwarfareautomation.menu.BakeryMenu;
+import io.github.capttracker.ancientwarfareautomation.menu.ProcessingRecipeMenu;
+import io.github.capttracker.ancientwarfareautomation.menu.SawmillMenu;
+import io.github.capttracker.ancientwarfareautomation.menu.SmithyMenu;
+import io.github.capttracker.ancientwarfareautomation.menu.TanneryMenu;
 import io.github.capttracker.ancientwarfareautomation.menu.SmelterMenu;
 import io.github.capttracker.ancientwarfareautomation.block.entity.worksite.InventoryWorksiteBlockEntity;
 import io.github.capttracker.ancientwarfareautomation.block.entity.worksite.QuarryBlockEntity;
@@ -101,6 +111,17 @@ public final class AwAutomationMenus {
     public static final DeferredHolder<MenuType<?>, MenuType<SmelterMenu>> SMELTER =
             AncientWarfareAutomation.REG.menus.register("worksite_smelter", () -> IMenuTypeExtension.create(SmelterMenu::new));
 
+    public static final DeferredHolder<MenuType<?>, MenuType<SawmillMenu>> SAWMILL =
+            AncientWarfareAutomation.REG.menus.register("worksite_sawmill", () -> IMenuTypeExtension.create(SawmillMenu::new));
+    public static final DeferredHolder<MenuType<?>, MenuType<BakeryMenu>> BAKERY =
+            AncientWarfareAutomation.REG.menus.register("worksite_bakery", () -> IMenuTypeExtension.create(BakeryMenu::new));
+    public static final DeferredHolder<MenuType<?>, MenuType<SmithyMenu>> SMITHY =
+            AncientWarfareAutomation.REG.menus.register("worksite_smithy", () -> IMenuTypeExtension.create(SmithyMenu::new));
+    public static final DeferredHolder<MenuType<?>, MenuType<TanneryMenu>> TANNERY =
+            AncientWarfareAutomation.REG.menus.register("worksite_tannery", () -> IMenuTypeExtension.create(TanneryMenu::new));
+    public static final DeferredHolder<MenuType<?>, MenuType<ProcessingRecipeMenu>> PROCESSING_RECIPES =
+            AncientWarfareAutomation.REG.menus.register("worksite_processing_recipes", () -> IMenuTypeExtension.create(ProcessingRecipeMenu::new));
+
     public static final DeferredHolder<MenuType<?>, MenuType<MarketStallMenu>> MARKET_STALL =
             AncientWarfareAutomation.REG.menus.register("worksite_market_stall", () -> IMenuTypeExtension.create(MarketStallMenu::new));
 
@@ -166,6 +187,11 @@ public final class AwAutomationMenus {
         WorksiteMenus.setFactory(WorksiteMenus.Kind.DOCK, (id, inventory, be) -> new DockMenu(id, inventory, (DockBlockEntity) be));
         WorksiteMenus.setFactory(WorksiteMenus.Kind.APIARY, (id, inventory, be) -> new ApiaryMenu(id, inventory, (ApiaryBlockEntity) be));
         WorksiteMenus.setFactory(WorksiteMenus.Kind.SMELTER, (id, inventory, be) -> new SmelterMenu(id, inventory, (SmelterBlockEntity) be));
+        WorksiteMenus.setFactory(WorksiteMenus.Kind.SAWMILL, (id, inventory, be) -> new SawmillMenu(id, inventory, (SawmillBlockEntity) be));
+        WorksiteMenus.setFactory(WorksiteMenus.Kind.BAKERY, (id, inventory, be) -> new BakeryMenu(id, inventory, (BakeryBlockEntity) be));
+        WorksiteMenus.setFactory(WorksiteMenus.Kind.SMITHY, (id, inventory, be) -> new SmithyMenu(id, inventory, (SmithyBlockEntity) be));
+        WorksiteMenus.setFactory(WorksiteMenus.Kind.TANNERY, (id, inventory, be) -> new TanneryMenu(id, inventory, (TanneryBlockEntity) be));
+        WorksiteMenus.setFactory(WorksiteMenus.Kind.PROCESSING_RECIPES, (id, inventory, be) -> new ProcessingRecipeMenu(id, inventory, (ProcessingWorksiteBlockEntity) be));
         WorksiteMenus.setFactory(WorksiteMenus.Kind.MARKET_STALL, (id, inventory, be) -> new MarketStallMenu(id, inventory, (MarketStallBlockEntity) be));
         WorksiteMenus.setFactory(WorksiteMenus.Kind.MARKET_OFFERS, (id, inventory, be) -> new MarketOffersMenu(id, inventory, (MarketStallBlockEntity) be));
         WorksiteMenus.setFactory(WorksiteMenus.Kind.INN, (id, inventory, be) -> new InnMenu(id, inventory, (InnBlockEntity) be));

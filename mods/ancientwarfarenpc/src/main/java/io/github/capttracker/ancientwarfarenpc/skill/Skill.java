@@ -61,7 +61,7 @@ public enum Skill {
             case TILL, PLANT, HARVEST, FERTILIZE -> FARMING;
             case FISH -> FISHING;
             case SHEAR, MILK, BREED, CULL -> HUSBANDRY;
-            case SMELT -> CRAFTING;
+            case SMELT, SAW, BAKE, SMITH, TAN -> CRAFTING;
             case PLACE, COLLECT -> ofWorkType(siteType);
         };
     }
@@ -73,7 +73,7 @@ public enum Skill {
             case MINING -> MINING;
             case FORESTRY -> WOODCUTTING;
             case FARMING -> FARMING;
-            case CRAFTING, RESEARCH -> CRAFTING;
+            case CRAFTING, RESEARCH, SMITHING, TANNING -> CRAFTING;
             case NONE -> null;
         };
     }
@@ -92,7 +92,7 @@ public enum Skill {
                 case "farmer" -> FARMING;
                 case "lumberjack" -> WOODCUTTING;
                 case "miner" -> MINING;
-                case "researcher", "craftsman" -> CRAFTING;
+                case "researcher", "craftsman", "smith", "tanner" -> CRAFTING;
                 default -> null;
             };
             case "combat" -> switch (sub) {

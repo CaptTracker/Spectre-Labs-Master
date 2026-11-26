@@ -77,6 +77,20 @@ public final class SettlementConfig {
     /** The path range (blocks) of the NPCs of a settlement; longer trips go in hops. */
     public static int maxPathRange = 64;
 
+    // ---- settlement demand (rework phase 8) ----
+    /** If true, the settlement counts what it is short of and the production sites work toward it. */
+    public static boolean demandEnabled = true;
+    /** Ticks between two counts of the needs. */
+    public static int demandIntervalTicks = 200;
+    /** The settlement is short of food below this many NPC-days of food for each member. */
+    public static int demandFoodDays = 3;
+    /** The stock of planks, stone and glass the settlement keeps for the builders (0 = no need). */
+    public static int demandReservePlanks = 64;
+    public static int demandReserveStone = 64;
+    public static int demandReserveGlass = 16;
+    /** If true, loaded soldiers with an empty armour slot are a need for armour. */
+    public static boolean demandArmour = true;
+
     // ---- threat response (rework phase 2) ----
     /** If true, the settlement raises the alarm by itself when hostile entities are inside its land. */
     public static boolean autoAlarm = true;
@@ -294,6 +308,13 @@ public final class SettlementConfig {
     private static final ModConfigSpec.IntValue FOOD_LOW_NPC_DAYS;
     private static final ModConfigSpec.IntValue FOOD_SPARE_NPC_DAYS;
     private static final ModConfigSpec.IntValue MAX_PATH_RANGE;
+    private static final ModConfigSpec.BooleanValue DEMAND_ENABLED;
+    private static final ModConfigSpec.IntValue DEMAND_INTERVAL;
+    private static final ModConfigSpec.IntValue DEMAND_FOOD_DAYS;
+    private static final ModConfigSpec.IntValue DEMAND_RESERVE_PLANKS;
+    private static final ModConfigSpec.IntValue DEMAND_RESERVE_STONE;
+    private static final ModConfigSpec.IntValue DEMAND_RESERVE_GLASS;
+    private static final ModConfigSpec.BooleanValue DEMAND_ARMOUR;
     private static final ModConfigSpec.BooleanValue SCHEDULE_ENABLED;
     private static final ModConfigSpec.IntValue WAKE_END;
     private static final ModConfigSpec.IntValue WORK_END;
@@ -457,6 +478,22 @@ public final class SettlementConfig {
                 .defineInRange("food_spare_npc_days", 4, 1, 1000);
         MAX_PATH_RANGE = builder.comment("Default = 64", "Path range (blocks) of settlement NPCs. Trips further than this go in hops through intermediate waypoints.")
                 .defineInRange("max_path_range", 64, 16, 256);
+        builder.pop();
+        builder.comment("Settlement demand: what the settlement is short of, and the production that works toward it (server side)").push("demand");
+        DEMAND_ENABLED = builder.comment("Default = true", "If false, the settlement keeps no needs list: production sites do not react to it and the hall shows no needs.")
+                .define("demand_enabled", true);
+        DEMAND_INTERVAL = builder.comment("Default = 200 (10 seconds)", "Ticks between two counts of the needs of a settlement.")
+                .defineInRange("demand_interval_ticks", 200, 20, 24000);
+        DEMAND_FOOD_DAYS = builder.comment("Default = 3", "The settlement is short of food when its storages hold less than this many NPC-days of food for each member (0 = never).")
+                .defineInRange("demand_food_days", 3, 0, 100);
+        DEMAND_RESERVE_PLANKS = builder.comment("Default = 64", "Planks the settlement keeps in stock for the builders of the settlement expansion; fewer is a need (0 = none kept).")
+                .defineInRange("demand_reserve_planks", 64, 0, 4096);
+        DEMAND_RESERVE_STONE = builder.comment("Default = 64", "Cobblestone or stone kept in stock for the builders; fewer is a need (0 = none kept).")
+                .defineInRange("demand_reserve_stone", 64, 0, 4096);
+        DEMAND_RESERVE_GLASS = builder.comment("Default = 16", "Glass kept in stock for the builders; fewer is a need (0 = none kept).")
+                .defineInRange("demand_reserve_glass", 16, 0, 4096);
+        DEMAND_ARMOUR = builder.comment("Default = true", "If true, an empty armour slot of a loaded soldier counts as a need for that armour piece (soldiers do not fetch it themselves).")
+                .define("demand_armour", true);
         builder.pop();
         builder.comment("Trade prices and reputation (market stalls and faction traders, server side)").push("trade");
         FRIENDLY_DISCOUNT = builder.comment("Default = 0.9", "Price factor for a FRIENDLY buyer. A NEUTRAL buyer pays the full price and a HOSTILE one is refused.")
@@ -681,6 +718,13 @@ public final class SettlementConfig {
             foodLowNpcDays = FOOD_LOW_NPC_DAYS.get();
             foodSpareNpcDays = FOOD_SPARE_NPC_DAYS.get();
             maxPathRange = MAX_PATH_RANGE.get();
+            demandEnabled = DEMAND_ENABLED.get();
+            demandIntervalTicks = DEMAND_INTERVAL.get();
+            demandFoodDays = DEMAND_FOOD_DAYS.get();
+            demandReservePlanks = DEMAND_RESERVE_PLANKS.get();
+            demandReserveStone = DEMAND_RESERVE_STONE.get();
+            demandReserveGlass = DEMAND_RESERVE_GLASS.get();
+            demandArmour = DEMAND_ARMOUR.get();
             noToolWorkFactor = NO_TOOL_WORK.get();
             swingIntervalTicks = SWING_INTERVAL.get();
             workerToolSwitching = TOOL_SWITCHING.get();

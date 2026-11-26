@@ -61,6 +61,7 @@ public class GuiTownHallInventory extends GuiContainerBase<TownHallMenu> {
     private Label membersLabel;
     private Label foodLabel;
     private final List<Label> jobLabels = new ArrayList<>();
+    private final List<Label> needLabels = new ArrayList<>();
     private Button alarmButton;
     private Label moraleLabel;
     private final List<Label> moraleLines = new ArrayList<>();
@@ -198,6 +199,16 @@ public class GuiTownHallInventory extends GuiContainerBase<TownHallMenu> {
             y += 12;
         }
         y += 4;
+        area.addGuiElement(new Label(6, y, tr("guistrings.settlement.needs")));
+        y += 12;
+        needLabels.clear();
+        for (int i = 0; i < TownHallMenu.MAX_NEED_LINES; i++) {
+            Label label = new Label(12, y, "");
+            needLabels.add(label);
+            area.addGuiElement(label);
+            y += 10;
+        }
+        y += 6;
         area.addGuiElement(new Label(6, y, tr("guistrings.settlement.alerts")));
         y += 12;
         builtAlerts = new ArrayList<>(menu.getAlerts());
@@ -238,7 +249,31 @@ public class GuiTownHallInventory extends GuiContainerBase<TownHallMenu> {
             }
         }
         alarmButton.setText(menu.isAlarm() ? "guistrings.settlement.alarm_on" : "guistrings.settlement.alarm_off");
+        updateNeeds();
         updateMorale();
+    }
+
+    /** The Needs section: each line says what is short, how many, and which site makes it or what to build. */
+    private void updateNeeds() {
+        List<TownHallMenu.NeedView> needs = getContainer().getNeeds();
+        for (int i = 0; i < needLabels.size(); i++) {
+            Label label = needLabels.get(i);
+            if (i >= needs.size()) {
+                label.setText(i == 0 ? tr("guistrings.settlement.needs.none") : "");
+                label.setColor(0xFFAAAAAA);
+                continue;
+            }
+            TownHallMenu.NeedView need = needs.get(i);
+            String site = need.siteBlock().isEmpty() ? "" : tr(need.siteBlock());
+            String state = switch (need.status()) {
+                case 0 -> tr("guistrings.settlement.need.making", site);
+                case 1 -> tr("guistrings.settlement.need.queued", site);
+                case 2 -> tr("guistrings.settlement.need.off", site);
+                default -> tr("guistrings.settlement.need.none", need.hint().isEmpty() ? "" : tr(need.hint()));
+            };
+            label.setText(fit(tr("guistrings.settlement.need.line", tr(need.label()), need.count(), state), 330));
+            label.setColor(need.status() == 0 ? 0xFF55FF55 : need.status() == 3 ? 0xFFFF8855 : 0xFFFFFF55);
+        }
     }
 
     /** How many lines the morale breakdown has: one for each factor of {@code SettlementMorale}. */

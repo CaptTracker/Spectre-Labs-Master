@@ -56,7 +56,11 @@ public interface IWorkSite extends ITorque.ITorqueTile, IBlockBreakHandler, IOwn
         /*
          * any change to reg. names will fubar npc-leveling system, as they use these names to store accumulated xp
          */
-        MINING("work_type.mining"), FARMING("work_type.farming"), FORESTRY("work_type.forestry"), CRAFTING("work_type.crafting"), RESEARCH("work_type.research"), NONE("work_type.none");
+        MINING("work_type.mining"), FARMING("work_type.farming"), FORESTRY("work_type.forestry"), CRAFTING("work_type.crafting"), RESEARCH("work_type.research"),
+        /** Rework phase 8: the smithy (worked by the smith role). */
+        SMITHING("work_type.smithing"),
+        /** Rework phase 8: the tannery (worked by the tanner role). */
+        TANNING("work_type.tanning"), NONE("work_type.none");
         public final String regName;
 
         WorkType(String regName) {

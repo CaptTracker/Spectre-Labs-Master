@@ -58,14 +58,14 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 /**
- * Player-owned farmer, lumberjack, miner, researcher and craftsman. The subtype is the stored {@code role} (rework phase 2), synced to the clients;
+ * Player-owned farmer, lumberjack, miner, researcher, craftsman, smith and tanner. The subtype is the stored {@code role} (rework phase 2), synced to the clients;
  * it starts from the spawner subtype, or from the tool the worker holds the first time it has none. A tool that matches the role gives full work
  * speed, no matching tool {@code noToolWorkFactor}; a worker without a matching tool fetches one from the storage of its settlement.
  */
 public class NpcWorker extends NpcPlayerOwned implements IWorker {
 
     /** The roles in the order of the Role button of the hall screen. */
-    public static final List<String> ROLES = List.of("farmer", "lumberjack", "miner", "researcher", "craftsman");
+    public static final List<String> ROLES = List.of("farmer", "lumberjack", "miner", "researcher", "craftsman", "smith", "tanner");
     private static final EntityDataAccessor<String> ROLE = SynchedEntityData.defineId(NpcWorker.class, EntityDataSerializers.STRING);
 
     /** The job the worker has claimed on the board of its settlement (see {@code JobBoard}); {@code null} without one. */
@@ -168,6 +168,8 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
             case "miner" -> WorkType.MINING;
             case "researcher" -> WorkType.RESEARCH;
             case "craftsman" -> WorkType.CRAFTING;
+            case "smith" -> WorkType.SMITHING; // rework phase 8: works the smithy
+            case "tanner" -> WorkType.TANNING; // rework phase 8: works the tannery
             default -> WorkType.NONE;
         };
     }
@@ -277,7 +279,14 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
     /** Whether a stack is a tool for the role (work type) of this worker. */
     public boolean isToolForRole(ItemStack stack) {
         WorkType type = getRoleWorkType();
-        return type != WorkType.NONE && workTypeOfTool(stack) == type;
+        if (type == WorkType.NONE || stack.isEmpty()) {
+            return false;
+        }
+        return switch (type) {
+            case SMITHING -> stack.getItem() instanceof HammerItem; // the smith holds a hammer
+            case TANNING -> io.github.capttracker.ancientwarfarenpc.ai.owned.WorkTool.SHEARS.matches(stack); // the tanner cuts hides with shears
+            default -> workTypeOfTool(stack) == type;
+        };
     }
 
     @Override
@@ -460,6 +469,12 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
                     rankFactor * io.github.capttracker.ancientwarfarenpc.trait.TraitEffects.workSpeed(this, skill)); // with lazy, hardworking, night owl, keen eye
         }
         return effectiveness;
+    }
+
+    /** The rank of the crafting skill, for the bonus of a master smith at the smithy. */
+    @Override
+    public int getCraftingRank() {
+        return getSkillRank(io.github.capttracker.ancientwarfarenpc.skill.Skill.CRAFTING);
     }
 
     /** The effectiveness without the skill rank (the staffed work applies the rank of the skill of each task itself). */

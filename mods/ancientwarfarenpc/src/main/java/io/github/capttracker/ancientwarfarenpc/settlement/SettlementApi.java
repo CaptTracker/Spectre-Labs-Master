@@ -146,6 +146,25 @@ public final class SettlementApi {
         return result;
     }
 
+    /** Rework phase 8: the matching items in the loaded storages of the settlement around the position (0 if there is none). For production sites. */
+    public static int countItems(ServerLevel level, BlockPos pos, java.util.function.Predicate<ItemStack> matcher) {
+        Settlement settlement = findByPosition(level, pos).orElse(null);
+        if (settlement == null) {
+            return 0;
+        }
+        int total = 0;
+        for (StorageHandle storage : allStorages(level, settlement)) {
+            IItemHandler handler = storage.handler();
+            for (int slot = 0; slot < handler.getSlots(); slot++) {
+                ItemStack stack = handler.getStackInSlot(slot);
+                if (!stack.isEmpty() && matcher.test(stack)) {
+                    total += stack.getCount();
+                }
+            }
+        }
+        return total;
+    }
+
     /** A linked storage (or the hall inventory) and its item handler. */
     public record StorageHandle(BlockPos pos, IItemHandler handler) {}
 
@@ -175,6 +194,28 @@ public final class SettlementApi {
             return level.isLoaded(pos) && level.getBlockEntity(pos) instanceof TownHallBlockEntity townHall ? townHall.inventory : null;
         }
         return handlerAt(level, pos);
+    }
+
+    // ---------------------------------------------------------------- needs (rework phase 8)
+
+    /** The needs of the settlement, most urgent first: tools, weapons, food, building stock, starved inputs and posted needs. A copy; may be empty. */
+    public static List<SettlementNeed> getNeeds(Settlement settlement) {
+        return SettlementNeeds.get(settlement);
+    }
+
+    /**
+     * Posts or renews an extra need, for the builders of phase 9: the settlement should hold at least {@code wanted} items that match in its storages
+     * ("64 planks"). Production sites make it, couriers haul it, the hall lists it. It lapses {@code ttlTicks} after the last post (0 or less: until
+     * {@link #clearNeed}); post it again while it lasts. {@code wanted} 0 clears it. {@code labelKey} is the translation key of its name; {@code priority}
+     * compares with {@link SettlementNeeds#PRIORITY_TOOL} and the others.
+     */
+    public static void postNeed(ServerLevel level, Settlement settlement, String id, String labelKey, java.util.function.Predicate<ItemStack> matcher,
+                                int wanted, int priority, long ttlTicks) {
+        SettlementNeeds.post(level, settlement, id, labelKey, matcher, wanted, priority, ttlTicks);
+    }
+
+    public static void clearNeed(Settlement settlement, String id) {
+        SettlementNeeds.clear(settlement, id);
     }
 
     // ---------------------------------------------------------------- alerts and members

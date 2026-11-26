@@ -32,6 +32,7 @@ This one file holds all five Ancient Warfare modules: **Core, Vehicles, Automati
 - **Mining:** quarries in four styles (open pit, shaft, branch and strip), with miners who climb ladders down and back out.
 - **Fishing:** shore fishers, and boat fishers who sail out from a fishing dock.
 - **Worksites:** Apiary, Smelter, Market Stall, Inn, Stable and a staffed animal farm.
+- **Production chains:** Sawmill, Bakery, Smithy and Tannery, with a recipe screen ("keep N in storage"), smith and tanner workers, and a settlement needs list that tells them what to make.
 
 ## NPCs with personality
 - Every NPC has a name, like "Guard Captain Rory" or "Bill the Miner".
