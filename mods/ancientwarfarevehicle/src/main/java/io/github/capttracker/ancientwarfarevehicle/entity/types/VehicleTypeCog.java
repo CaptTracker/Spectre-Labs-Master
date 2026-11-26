@@ -13,7 +13,7 @@ import io.github.capttracker.ancientwarfarevehicle.registry.UpgradeRegistry;
 
 /**
  * Type 24: the cog, a cargo ship 5 blocks wide and 10 long with one square sail, a helm, four passenger seats, four sweep benches for rowers (each rower
- * adds a tenth of the top speed with no wind; the model has no oars drawn for them), 54 slots of cargo and a ballista on a swivel at the bow that a gunner
+ * adds a tenth of the top speed with no wind; the model draws two oars a side that row while the benches are manned), 54 slots of cargo and a ballista on a swivel at the bow that a gunner
  * works. The seat and turret positions are estimates from the model.
  */
 public class VehicleTypeCog extends VehicleTypeShip {

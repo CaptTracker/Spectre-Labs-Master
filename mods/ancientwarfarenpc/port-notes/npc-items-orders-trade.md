@@ -56,8 +56,7 @@ reading, as 1.12.2 dropped unknown items; the whole list is not lost). Routing f
   Knockback is no longer an enchantment of the club (`supportsEnchantment`, `isBookEnchantable`); it disables shields (`canDisableShield`).
 - **Scythe**: NeoForge has no `onBlockStartBreak` on items and no `IPlantable`. The 5x5x5 harvest is `ItemScythe.onBlockBreak` on `BlockEvent.BreakEvent` (game bus, registered by
   `AwNpcItemComponents.registerEvents`), which cancels the break when something was harvested, as the original did. "Plant" is `BushBlock`, `SugarCaneBlock` or `CactusBlock`.
-- **Coin**: four items `coin_<metal>`. 8 coins place `ancientwarfarestructure:coin_stack_<metal>` (looked up by registry id; this module does not depend on Structures), shrink by 8 also
-  in creative, play `ancientwarfarestructure:coin_stack_interact`. Without the Structures module the item just does nothing (FAIL). The ancient coin tooltip is the lang text with
+- **Coin**: four items `coin_<metal>`, plain currency (no block placing). The ancient coin tooltip is the lang text with
   the style dark aqua italic instead of the `%1$s` formatting codes argument.
 - **Bard instruments**: four items; lute = bass, flute, harp, drum = base drum (the default of 1.12.2), `onEntitySwing` cancels the swing.
 - **Spawner**: the creative tab stacks come from `ItemNpcSpawner.getSpawnerSubItems()` (a `BuildCreativeModeTabContentsEvent` listener on `AwNpcs.TAB`); every stack gets

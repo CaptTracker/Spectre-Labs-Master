@@ -25,6 +25,7 @@ import io.github.capttracker.ancientwarfarenpc.registry.NpcDefault;
 import io.github.capttracker.ancientwarfarenpc.skin.NpcSkinSettings;
 import io.github.capttracker.ancientwarfarevehicle.entity.IPathableEntity;
 import io.github.capttracker.ancientwarfarevehicle.entity.IVehicleCrew;
+import io.github.capttracker.ancientwarfarevehicle.entity.SeatRole;
 import io.github.capttracker.ancientwarfarevehicle.entity.VehicleBase;
 import io.github.capttracker.ancientwarfarevehicle.pathing.Node;
 import net.minecraft.core.BlockPos;
@@ -1319,6 +1320,59 @@ public abstract class NpcBase extends PathfinderMob implements IEntityWithComple
 
     }
 
+    // ---- ship crew (rowers, gunners, passengers and helmsmen of the Vehicles module's ships) ----
+
+    /** The seat roles this NPC takes on a ship, best first. Owned workers and the like row or sit, soldiers man the guns first; NPCs that do not crew return none. */
+    public List<SeatRole> getShipSeatPreference() {
+        return List.of(SeatRole.ROWER, SeatRole.PASSENGER);
+    }
+
+    /** True if this NPC works a turret when it sits in a gunner seat. */
+    public boolean isShipGunner() {
+        return getShipSeatPreference().contains(SeatRole.GUNNER);
+    }
+
+    /** The ship this NPC crews: it rides it in a seat that is not the helm. Null if it rides nothing, or something else. */
+    @Nullable
+    public VehicleBase getRidingShip() {
+        if (getVehicle() instanceof VehicleBase vehicle && vehicle.isShip()) {
+            int seat = vehicle.seatOf(this);
+            if (seat >= 0 && seat < vehicle.getSeatCount() && vehicle.getSeat(seat).role() != SeatRole.DRIVER) {
+                return vehicle;
+            }
+        }
+        return null;
+    }
+
+    /** The ship this NPC steers: it sits in its helm (DRIVER seat). Null otherwise. */
+    @Nullable
+    public VehicleBase getHelmShip() {
+        if (getVehicle() instanceof VehicleBase vehicle && vehicle.isShip()) {
+            int seat = vehicle.seatOf(this);
+            if (seat >= 0 && seat < vehicle.getSeatCount() && vehicle.getSeat(seat).role() == SeatRole.DRIVER) {
+                return vehicle;
+            }
+        }
+        return null;
+    }
+
+    public boolean isShipCrew() {
+        return getRidingShip() != null;
+    }
+
+    /** The ship this NPC was ordered off (or left because its allied helm went): it does not board it again by itself while the owner or ally stays aboard. Saved. */
+    @Nullable
+    private UUID refusedShip;
+
+    @Nullable
+    public UUID getRefusedShip() {
+        return refusedShip;
+    }
+
+    public void setRefusedShip(@Nullable UUID ship) {
+        refusedShip = ship;
+    }
+
     // ---- save data ----
 
     @Override
@@ -1369,6 +1423,8 @@ public abstract class NpcBase extends PathfinderMob implements IEntityWithComple
         writeBaseTags(tag);
     }
 
+    private static final String REFUSED_SHIP_TAG = "refusedShip";
+
     private void readBaseTags(CompoundTag tag) {
         if (tag.contains(ORDERS_STACK_TAG)) {
             setItemSlot(ORDER_SLOT, ItemStack.parseOptional(registryAccess(), tag.getCompound(ORDERS_STACK_TAG)));
@@ -1411,6 +1467,7 @@ public abstract class NpcBase extends PathfinderMob implements IEntityWithComple
         }
         setSkinSettings(NpcSkinSettings.deserializeNBT(tag.getCompound("skinSettings")).minimizeData());
         owner = Owner.deserializeFromNBT(tag);
+        refusedShip = tag.hasUUID(REFUSED_SHIP_TAG) ? tag.getUUID(REFUSED_SHIP_TAG) : null;
     }
 
     private void writeBaseTags(CompoundTag tag) {
@@ -1437,6 +1494,9 @@ public abstract class NpcBase extends PathfinderMob implements IEntityWithComple
         tag.putBoolean(HAS_CUSTOM_EQUIPMENT_TAG, hasCustomEquipment);
         tag.put("skinSettings", skinSettings.serializeNBT());
         owner.serializeToNBT(tag);
+        if (refusedShip != null) {
+            tag.putUUID(REFUSED_SHIP_TAG, refusedShip);
+        }
     }
 
     public final ResourceLocation getTexture() {

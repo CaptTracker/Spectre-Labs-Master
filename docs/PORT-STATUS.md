@@ -11,7 +11,7 @@ Working notes for the 1.12.2 to 1.21.1 port on branch `port/ancientwarfare`. Rea
 
 The port is meant to be faithful. Ideas for step 4 go under "Rework candidates" below, not into the port.
 
-**Structures is mostly out of scope (owner decision, 2026-11-18).** The template, scanner, builder and world-generation systems are not being ported. Only the player-craftable building pieces are: the 7 gate types, coin stacks, fire pits and totem parts, in a slimmed-down `ancientwarfarestructure` mod. The drafting station is left out because it only builds from templates. Other Structures links in the other modules sit behind interfaces with no implementation, so they do nothing.
+**Structures is mostly out of scope (owner decision, 2026-11-18).** The template, scanner, builder and world-generation systems are not being ported. Only the player-craftable gates are kept (the 7 gate types), in a slimmed-down `ancientwarfarestructure` mod. The decoration blocks (coin stacks, fire pits and totem parts) were removed on 2026-11-25. The drafting station is left out because it only builds from templates. Other Structures links in the other modules sit behind interfaces with no implementation, so they do nothing.
 
 ## How the port is organised
 
@@ -30,7 +30,7 @@ Stages 1 and 2 are done. Stage 3, the owner's client test, is next.
 | Automation (`ancientwarfareautomation`) | 194 | about 23,100 | Builds |
 | Vehicles (`ancientwarfarevehicle`) | 168 | about 16,600 | Builds |
 | NPCs (`ancientwarfarenpc`) | 229 | about 26,000 | Builds |
-| Structures, gates and decor only (`ancientwarfarestructure`) | 39 | about 4,250 | Builds |
+| Structures, gates only (`ancientwarfarestructure`) | 39 | about 4,250 | Builds |
 
 Checked so far:
 - `gradlew build` passes for every module.
@@ -89,3 +89,11 @@ The playtest fixes (no flying workers, work swings at `swing_interval_ticks`, qu
 ## Known gaps fixed
 
 Six known gaps are fixed across `ancientwarfare`, `ancientwarfareautomation`, `ancientwarfarevehicle` and `ancientwarfarenpc` (notes in `mods/ancientwarfarenpc/port-notes/KNOWN-GAPS.md`): hunger counts once in a worker's speed (through its morale; the `hungry_work_factor` and `starving_work_factor` keys are gone), a caravan's wagon starts empty and makes goods for buy orders only when the stall pays, so killing it drops only the coins it earned, workers switch tools per task (`tool_switching`, a 4-slot saved tool belt), vehicle seats are saved and restored and hitched horses get a drawn rope, owned NPCs can crew ships as rowers, gunners and passengers (config section `01_ship_crew_settings`; the cog got four rower seats), and the JEI "+" button fills the grids of the engineering bench, auto crafting block and warehouse crafting station. `./gradlew build` passes and the all-modules dedicated server (`:ancientwarfarereforged:runServer`) reaches `Done (` with no mod errors. Not play-tested in a client or a world: verify the tool swaps, the caravan trade and kill drop, seat restore after a reload, the rope, boarding and gunnery on a real ship, and the JEI button with JEI installed (including the shift-click multiples and an absent JEI). Verify pass fixed: a soldier ordered off a ship no longer re-boards it by itself while its owner stays aboard, and `CartHitch.java` had mixed line endings. Deviations: NPCs do not steer ships and cannot reach a ship farther than 3 blocks from shore or a dock, the cog model draws no oars, a caravan supplies at most two stacks per item per visit and no longer sells the goods it takes in trade, saved seat reservations expire 5 s after a load, and JEI transfer picks any accepted item per grid cell (not the one JEI showed).
+
+## Decor removed and ship crew fixes
+
+Decor removed: the coin stacks, fire pits and totem parts (blocks, items, models, textures, sounds, recipes, loot tables, tags and the manual's Decoration Blocks page) are gone from `ancientwarfarestructure`, which now holds only the 7 gates. Coins are plain currency items (using 8 on a block no longer places a stack). The creative tab icon is now the wooden gate. Old saves lose any placed decor blocks, with no migration (agreed).
+
+Ship crew fixes (`ancientwarfarenpc`, `ancientwarfarevehicle`): owned NPCs take the helm of a ship (`ship_helmsmen`), sail to a Move order at water or follow another vessel, with a look-ahead over the water and a give-up timer (`ship_helm_stuck_seconds`). Ordered NPCs and soldiers swim out to a ship and walk the deck to their seat (`ship_board_range`), crew eat aboard (`ship_crew_eat`), the cog has oars, allied faction soldiers crew a ship whose helm is an ally (`ship_faction_crew`), and `refusedShip` is saved. A player takes the helm back with seat key 1. Details: `mods/ancientwarfarenpc/port-notes/KNOWN-GAPS.md`.
+
+Status: `./gradlew build` passes and `:ancientwarfarereforged:runServer` reached `Done (` with no errors from the mods (only the expected offline-mode warnings, and the NPC config file was corrected for the new keys). Not play-tested: helm steering, swimming out, the seat swap, the cog oars and the faction crews were compiled and the server started only. Deviations: faction crews board by themselves for an allied player's ship (ships cannot be owned by a faction); the helmsman's look-ahead is not a route planner; only workers carry food to eat aboard (their pouch); the manual's Structures page and the Structures description now cover gates only (the scanner, builder and spawner sections were dropped from the English page because the port has none of them).

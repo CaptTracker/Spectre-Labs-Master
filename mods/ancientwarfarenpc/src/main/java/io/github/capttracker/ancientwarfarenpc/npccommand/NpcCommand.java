@@ -5,6 +5,7 @@
 package io.github.capttracker.ancientwarfarenpc.npccommand;
 
 import io.github.capttracker.ancientwarfarenpc.ai.vehicle.ShipCrew;
+import io.github.capttracker.ancientwarfarenpc.config.AWNPCStatics;
 import io.github.capttracker.ancientwarfarenpc.entity.NpcPlayerOwned;
 import io.github.capttracker.ancientwarfarevehicle.entity.SeatRole;
 import io.github.capttracker.ancientwarfarevehicle.entity.VehicleBase;
@@ -105,7 +106,8 @@ public final class NpcCommand {
             }
         }
         if (ship != null && ordered > 0) {
-            int free = ShipCrew.freeSeats(ship, List.of(SeatRole.GUNNER, SeatRole.ROWER, SeatRole.PASSENGER));
+            int free = ShipCrew.freeSeats(ship, AWNPCStatics.shipHelmsmen ? List.of(SeatRole.DRIVER, SeatRole.GUNNER, SeatRole.ROWER, SeatRole.PASSENGER)
+                    : List.of(SeatRole.GUNNER, SeatRole.ROWER, SeatRole.PASSENGER));
             player.displayClientMessage(Component.translatable(ordered > free ? "message.ancientwarfarenpc.ship.not_enough_seats" : "message.ancientwarfarenpc.ship.boarding",
                     ordered, free), true);
         }

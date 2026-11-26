@@ -152,3 +152,8 @@ Deviations / not verified:
 - Corners of the route use a 3x3 clearance, a 4 block hull turning near shore can still run aground (the spot then goes on cooldown).
 - Only one worker per dock; the passenger seat is unused. No fishing rod durability or xp (as the shore fisher).
 - The dock has no bounds screen, only the side screen.
+
+## Update: NPC helm, cog oars
+
+- `ShipHelper.isWaterClear(heading, distance)`: look-ahead for helmsmen (see the NPC port notes). `VehicleBase.switchSeat` lets a player take the helm of a ship from an NPC helmsman (the number key, client `VehicleInputClient`).
+- `ModelCog` draws 4 oars (2 a side at the rower seats) from `vehicle_ship_models.py`; `VehicleModels` swings them while a rower seat is occupied. The cog texture is unchanged.

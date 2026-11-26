@@ -285,6 +285,13 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
         return pouch;
     }
 
+    /** A worker eats from its pouch aboard a ship when the ship has no food (what it carries is its own inventory). */
+    @Override
+    @javax.annotation.Nullable
+    public net.neoforged.neoforge.items.IItemHandler getCarriedFood() {
+        return pouch;
+    }
+
     public boolean isPouchEmpty() {
         for (int slot = 0; slot < pouch.getSlots(); slot++) {
             if (!pouch.getStackInSlot(slot).isEmpty()) {

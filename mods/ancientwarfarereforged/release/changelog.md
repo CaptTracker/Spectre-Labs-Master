@@ -9,7 +9,7 @@ First release of Ancient Warfare 2, rebuilt for Minecraft 1.21.1 on NeoForge. Al
 - **Automation:** worksites, the warehouse and torque power.
 - **Vehicles:** siege engines, boats and ammunition.
 - **NPCs:** workers, soldiers, couriers, traders and faction NPCs.
-- **Structures:** only the craftable building pieces (7 gate types, coin stacks, fire pits and totems). The structure templates, scanner, builder and world generation aren't included.
+- **Structures:** only the craftable gates (7 gate types). Coin stacks, fire pits and totems are not included, and neither are the structure templates, scanner, builder and world generation. Coins are plain currency items.
 
 ## Factions
 - NPC teams now run on the Spectre Factions mod instead of Ancient Warfare's old team system.
@@ -45,7 +45,12 @@ First release of Ancient Warfare 2, rebuilt for Minecraft 1.21.1 on NeoForge. Al
 - Multiple seats with roles; switch seats with the number keys. Riders keep their seats when the world reloads.
 - Horse-drawn carts and wagons you can hitch up. A rope is drawn from the cart to each hitched horse.
 - **Ships with walkable decks:** a fishing boat, a cog and a war galley, with world wind, rowers and mounted turrets. The cog now has four rower seats.
-- **NPC ship crews:** aim the command baton (Move mode) at a ship to send the selected NPCs aboard as rowers, gunners or passengers. Soldiers man the guns first: they aim, lead moving targets and fire at enemies in range (`ship_gunners_fire`, `ship_gunner_range`). Idle soldiers near a ship their owner is riding climb aboard on their own (`ship_auto_crew_soldiers`, `ship_auto_crew_range`). A Move order puts them back on land. You still steer the ship yourself.
+- **NPC ship crews:** aim the command baton (Move mode) at a ship to send the selected NPCs aboard as rowers, gunners or passengers. Soldiers man the guns first: they aim, lead moving targets and fire at enemies in range (`ship_gunners_fire`, `ship_gunner_range`). Idle soldiers near a ship their owner is riding climb aboard on their own (`ship_auto_crew_soldiers`, `ship_auto_crew_range`). A Move order on land puts them back ashore.
+- **NPC helmsmen:** an NPC ordered aboard a ship with a free helm takes the helm (`ship_helmsmen`). Give it a Move order at water and it sails there, slows down and stops near the spot, looking ahead to keep out of shallows and the shore, and it gives up and stops the ship if it can't get on (`ship_helm_stuck_seconds`). A Move order at another ship or boat makes it follow that vessel. Rowers add speed as they do with you at the helm. Take the helm back with seat key 1.
+- **Boarding from the water:** ordered NPCs, and soldiers that answer their owner's ship, now swim out to a ship in open water and walk across the deck to their seat (`ship_board_range`).
+- **Eating aboard:** a hungry crew member eats from the ship's storage, then from what it carries, without leaving its seat (`ship_crew_eat`).
+- **Faction crews:** idle faction soldiers and archers climb aboard a ship whose helm is a player allied to their faction, man a gun or oar and fire at the faction's enemies. They leave when no allied helm is left (`ship_faction_crew`).
+- **Cog oars:** the cog now has two oars a side that row while its rower seats are manned.
 
 ## Traders and new NPCs
 - Market stalls run by your trader, with sell offers and buy orders.
@@ -63,9 +68,9 @@ First release of Ancient Warfare 2, rebuilt for Minecraft 1.21.1 on NeoForge. Al
 - Hunger now counts once toward work speed, through the NPC's morale. The config keys `hungry_work_factor` and `starving_work_factor` are gone.
 
 ## Known issues
-- NPCs can crew ships, but not steer them. They can't walk or swim out to a ship either, so it has to be moored within 3 blocks of the shore or a dock. NPC rowers only add speed while you set the sail and oars, and faction NPCs don't crew ships.
-- The cog has rower seats, but its model shows no oars.
-- A crew member doesn't leave its seat to eat.
+- Not yet play-tested in a running game: NPC helmsmen, swimming out to a ship, and the cog's oars.
+- A helmsman only looks ahead over the water. A bay or an island between the ship and the destination is steered round as far as it can see, and it gives up if it makes no headway.
+- A helmsman needs water at least 2 blocks deep at the spot you click. Faction NPCs can't take the helm, and they only crew a ship whose helm is held by an ally.
 
 ## Credits
 Original Ancient Warfare 2 by shadowmage45, P3pp3rF1y and contributors. 1.21.1 port and rework by CaptTracker. Licensed GPL-3.0-or-later.

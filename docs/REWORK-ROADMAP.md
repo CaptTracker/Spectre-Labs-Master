@@ -411,3 +411,77 @@ Each is an owned NPC type, made with a spawner recipe and research in the existi
 - **Q3.** Should worksites stay machines with an optional worker, or be staffed by NPCs who visibly do the work?
 - **Q4.** Should big ships be large entities with a walkable deck and seats (feasible, L), or true block contraptions you build (Create-style, XL and fragile)?
 - Later questions: should mines leave tunnels behind or tidy up; should torque survive the rework; should worksites keep chunk loading or run only near players.
+
+## Second round: phases 6 to 12 (owner picks, 2026-11-25)
+
+The owner picked these from `docs/IDEAS.md`. Build order: phase 6 first, then in number order unless the owner says otherwise. Each phase builds and can be played on its own.
+
+### Owner decisions (2026-11-25)
+- **Order:** the overview screen and Jade tooltips come first.
+- **Building designs:** **both** built-in designs (tents, houses and shops shipped with the mod) and player blueprints made by scanning a build.
+- **Building materials:** builders take blocks **from settlement storage**.
+- **Children:** grow into working adults in **2 in-game years**. Minecraft has no calendar, so the length of a year is a config value. Default: 96 days, Serene Seasons' default year. With that default, 2 years is 192 days, about 64 hours of real play. **Q5** confirms this.
+- **Decorations:** coin stacks, fire pits and totems are removed; only the craftable gates stay.
+
+### Phase 6: Settlement overview and tooltips (S)
+- **Overview tab at the hall.**
+  - Lists every member: name, role, mood, location, and current task.
+  - Shows a problem flag for hungry, no bed, no tool, no job, hurt, or no path.
+  - Sort and filter by role and problem; click a row to see where the NPC is.
+- **Jade and WTHIT tooltips (optional dependencies).**
+  - Looking at an NPC shows its name, role, mood and current task.
+  - Looking at a worksite shows its staff, its status and what it's waiting for.
+
+### Phase 7: Worker skills and traits (M)
+- **Skills.**
+  - Each NPC has an experience level per job (mining, farming, woodcutting, fishing, building, combat and so on), gained by doing the work.
+  - **Ranks:** Novice, Apprentice, Journeyman, Expert, Master, shown in the name ("Apprentice Miner Bill") and on the talk screen.
+  - **Effects:** work speed, extra yield chances (ore and crops), and for soldiers more damage and less damage taken.
+- **Traits.**
+  - One or two per NPC, given at spawn or birth: lazy, hardworking, brave, cowardly, glutton, frugal, devout, night owl, sociable, loner, and a few more.
+  - Traits bend morale factors, work speed, fear and the schedule.
+  - Shown on the talk and morale screens.
+
+### Phase 8: Production chains (M to L)
+New staffed worksites. Each one turns inputs from storage into outputs, with couriers hauling both ways:
+- **Sawmill:** logs into planks, slabs and stairs.
+- **Smithy:** an NPC smith makes tools, weapons and armour from ingots, and repairs worn tools for the settlement.
+- **Tannery:** hides and leather.
+- **Bakery:** bread and food from wheat and other crops.
+- **Settlement demand:** the hall tracks what is short (tools for workers, food, building blocks), and production sites work toward it first.
+
+### Phase 9: Settlement expansion and builders (L to XL)
+- **Building zones.** A zone tool marks buildable plots inside the boundary. NPCs only build there.
+- **Planner.** The settlement decides what it needs:
+  - Housing when NPCs are homeless.
+  - A business when a production chain or job is missing (a smithy if tools run short).
+  - A storehouse when storage is full.
+  - It upgrades tents to houses as the settlement grows.
+- **Designs.**
+  - Built-in tents, houses and shops in several styles (timber, stone, desert, Norse).
+  - Player blueprints: a scanner tool saves a build as a design the planner can use.
+- **Builders.** Builder NPCs place the design block by block. Materials come from settlement storage, and couriers fetch what is missing. A building waits, with a clear message, when materials run out.
+- **New buildings** count as beds, worksites and storage straight away.
+
+### Phase 10: Families and children (L)
+- **Couples.** Two adult NPCs with a free house, high morale and spare food may become a couple.
+- **Children.**
+  - Couples have children who get the family surname.
+  - They play around the settlement and go to school if there is one.
+  - They grow up in 2 in-game years (config).
+  - As adults they inherit parts of their parents' traits, and become workers who join the job board.
+- **Population.** Children count toward population and need food and beds. Losing a family member hurts morale.
+
+### Phase 11: Sea trade and naval combat (M to L)
+- **Sea trade routes.** Trader ships run routes between your docks, like wagon routes. Faction trade ships visit your docks the way caravans visit by land.
+- **Boarding.** Grappling hooks pull two ships side by side, and crews fight across the decks.
+- **Ramming.** The war galley does ram damage.
+- **Sinking.** Sinking ships drop part of their cargo as floating crates.
+
+### Phase 12: Siege towers (M)
+- **Siege tower.** A wheeled vehicle that NPCs or horses push to a wall. Troops climb inside and step onto the wall top over a drop bridge.
+- **Mantlet.** Mobile cover for archers.
+- **NPC siege AI.** Soldiers ordered to attack a walled target use towers.
+
+## Open questions for the owner (second round)
+- **Q5.** How long is an in-game year for children growing up? Default proposal: 96 days, so adulthood takes 192 days, about 64 hours of real play. Shorter alternatives: 1 year = 30 days (60 days in total) or 1 year = 8 days (16 days in total).

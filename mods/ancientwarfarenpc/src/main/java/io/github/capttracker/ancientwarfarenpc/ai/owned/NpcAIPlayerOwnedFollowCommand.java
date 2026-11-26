@@ -5,9 +5,10 @@
 package io.github.capttracker.ancientwarfarenpc.ai.owned;
 
 import io.github.capttracker.ancientwarfarenpc.ai.NpcAI;
+import io.github.capttracker.ancientwarfarenpc.ai.vehicle.ShipApproach;
 import io.github.capttracker.ancientwarfarenpc.ai.vehicle.ShipCrew;
+import io.github.capttracker.ancientwarfarenpc.config.AWNPCStatics;
 import io.github.capttracker.ancientwarfarevehicle.entity.VehicleBase;
-import net.minecraft.world.phys.Vec3;
 import io.github.capttracker.ancientwarfarenpc.entity.NpcPlayerOwned;
 import io.github.capttracker.ancientwarfarenpc.npccommand.NpcCommand.Command;
 import io.github.capttracker.ancientwarfarenpc.npccommand.NpcCommand.CommandType;
@@ -24,8 +25,8 @@ import javax.annotation.Nullable;
 public class NpcAIPlayerOwnedFollowCommand extends NpcAI<NpcPlayerOwned> {
     @Nullable
     private BlockPos moveTargetPos = null;
-    /** Ticks spent on the way to a ship the NPC was ordered aboard. */
-    private int boardWalking = 0;
+    /** The way to a ship the NPC was ordered aboard (walking, swimming out, walking the deck). */
+    private final ShipApproach boarding = new ShipApproach();
 
     public NpcAIPlayerOwnedFollowCommand(NpcPlayerOwned npc) {
         super(npc);
@@ -39,6 +40,11 @@ public class NpcAIPlayerOwnedFollowCommand extends NpcAI<NpcPlayerOwned> {
         }
         Command cmd = npc.getCurrentCommand();
         return cmd != Command.NONE && (!(cmd.type == CommandType.GUARD || cmd.type == CommandType.ATTACK_AREA) || npc.getTarget() == null);
+    }
+
+    @Override
+    public void start() {
+        boarding.reset();
     }
 
     @Override
@@ -136,19 +142,22 @@ public class NpcAIPlayerOwnedFollowCommand extends NpcAI<NpcPlayerOwned> {
     }
 
     /**
-     * Ordered at a ship (the baton's move mode aimed at it): walk to the nearest point of its hull and take the best free seat of the NPC's roles
-     * ({@code getShipSeatPreference}). The order ends once aboard, when the ship has no seat for the NPC, or after 30 seconds without getting there.
+     * Ordered at a ship (the baton's move mode aimed at it): get to it (walk, or swim out to a ship that lies in the water; {@link ShipApproach}) and take the
+     * best free seat of the NPC's roles ({@code ShipCrew.boardRoles}: its preference, and the helm if it is free). The order ends once aboard, when the ship has
+     * no seat for the NPC, or when the NPC cannot get there (farther than {@code ship_board_range}, no way, no headway, out of time).
      */
     private void handleBoardShip(VehicleBase ship) {
-        ShipCrew.Result result = ShipCrew.tryBoard(npc, ship, npc.getShipSeatPreference());
-        if (result == ShipCrew.Result.TOO_FAR && ++boardWalking < 600) {
-            Vec3 at = ShipCrew.nearestHullPoint(ship, npc.getX(), npc.getZ());
-            moveToPosition(at.x, at.y, at.z, npc.distanceToSqr(at));
+        ShipApproach.Status status = boarding.tick(npc, ship, ShipCrew.boardRoles(npc, ship), AWNPCStatics.shipBoardRange);
+        if (status == ShipApproach.Status.MOVING) {
             npc.addAITask(TASK_MOVE);
+            npc.setDoing("ship.board", ship.blockPosition(), net.minecraft.network.chat.Component.empty());
             return;
         }
-        boardWalking = 0;
+        boarding.reset();
         npc.removeAITask(TASK_MOVE);
+        if (status == ShipApproach.Status.FAILED) {
+            npc.think("ship_unreachable");
+        }
         npc.setPlayerCommand(Command.NONE);
     }
 

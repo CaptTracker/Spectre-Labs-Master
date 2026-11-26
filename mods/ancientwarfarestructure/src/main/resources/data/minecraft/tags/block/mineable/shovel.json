@@ -1,9 +1,0 @@
-{
-  "replace": false,
-  "values": [
-    "ancientwarfarestructure:coin_stack_copper",
-    "ancientwarfarestructure:coin_stack_silver",
-    "ancientwarfarestructure:coin_stack_gold",
-    "ancientwarfarestructure:coin_stack_ancient"
-  ]
-}
