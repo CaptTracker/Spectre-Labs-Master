@@ -21,8 +21,15 @@ import io.github.capttracker.ancientwarfareautomation.client.screen.GuiWorksiteA
 import io.github.capttracker.ancientwarfareautomation.client.screen.GuiWorksiteBoundsAdjust;
 import io.github.capttracker.ancientwarfareautomation.client.screen.GuiWorksiteCropFarm;
 import io.github.capttracker.ancientwarfareautomation.client.screen.GuiWorksiteApiary;
+import io.github.capttracker.ancientwarfareautomation.client.screen.GuiWorksiteProcessing;
+import io.github.capttracker.ancientwarfareautomation.client.screen.GuiWorksiteProcessingRecipes;
 import io.github.capttracker.ancientwarfareautomation.client.screen.GuiWorksiteSmelter;
 import io.github.capttracker.ancientwarfareautomation.menu.ApiaryMenu;
+import io.github.capttracker.ancientwarfareautomation.menu.BakeryMenu;
+import io.github.capttracker.ancientwarfareautomation.menu.ProcessingRecipeMenu;
+import io.github.capttracker.ancientwarfareautomation.menu.SawmillMenu;
+import io.github.capttracker.ancientwarfareautomation.menu.SmithyMenu;
+import io.github.capttracker.ancientwarfareautomation.menu.TanneryMenu;
 import io.github.capttracker.ancientwarfareautomation.menu.SmelterMenu;
 import io.github.capttracker.ancientwarfareautomation.client.screen.GuiWorksiteDock;
 import io.github.capttracker.ancientwarfareautomation.client.screen.GuiWorksiteInn;
@@ -86,6 +93,11 @@ public final class AutomationScreensClient {
         event.<CropFarmMenu, GuiWorksiteCropFarm>register(AwAutomationMenus.CROP_FARM.get(), (menu, inventory, title) -> new GuiWorksiteCropFarm(menu));
         event.<ApiaryMenu, GuiWorksiteApiary>register(AwAutomationMenus.APIARY.get(), (menu, inventory, title) -> new GuiWorksiteApiary(menu));
         event.<SmelterMenu, GuiWorksiteSmelter>register(AwAutomationMenus.SMELTER.get(), (menu, inventory, title) -> new GuiWorksiteSmelter(menu));
+        event.<SawmillMenu, GuiWorksiteProcessing<SawmillMenu>>register(AwAutomationMenus.SAWMILL.get(), (menu, inventory, title) -> new GuiWorksiteProcessing<>(menu));
+        event.<BakeryMenu, GuiWorksiteProcessing<BakeryMenu>>register(AwAutomationMenus.BAKERY.get(), (menu, inventory, title) -> new GuiWorksiteProcessing<>(menu));
+        event.<SmithyMenu, GuiWorksiteProcessing<SmithyMenu>>register(AwAutomationMenus.SMITHY.get(), (menu, inventory, title) -> new GuiWorksiteProcessing<>(menu));
+        event.<TanneryMenu, GuiWorksiteProcessing<TanneryMenu>>register(AwAutomationMenus.TANNERY.get(), (menu, inventory, title) -> new GuiWorksiteProcessing<>(menu));
+        event.<ProcessingRecipeMenu, GuiWorksiteProcessingRecipes>register(AwAutomationMenus.PROCESSING_RECIPES.get(), (menu, inventory, title) -> new GuiWorksiteProcessingRecipes(menu));
         event.<MarketStallMenu, GuiWorksiteMarketStall>register(AwAutomationMenus.MARKET_STALL.get(), (menu, inventory, title) -> new GuiWorksiteMarketStall(menu));
         event.<InnMenu, GuiWorksiteInn>register(AwAutomationMenus.INN.get(), (menu, inventory, title) -> new GuiWorksiteInn(menu));
         event.<StableMenu, GuiWorksiteStable>register(AwAutomationMenus.STABLE.get(), (menu, inventory, title) -> new GuiWorksiteStable(menu));

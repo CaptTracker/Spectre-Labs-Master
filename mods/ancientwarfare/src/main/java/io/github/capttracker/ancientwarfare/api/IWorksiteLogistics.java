@@ -26,9 +26,14 @@ public interface IWorksiteLogistics {
     record Output(IItemHandler inventory, Predicate<ItemStack> takes) {}
 
     /**
-     * An inventory that should hold at least {@code target} items that match {@code accepts}.
+     * An inventory that should hold at least {@code target} items that match {@code accepts}. {@code priority} (rework phase 8) tells the couriers which
+     * needs to serve first: 0 for a normal one, higher for an input of something the settlement is short of.
      */
-    record Need(IItemHandler inventory, Predicate<ItemStack> accepts, int target) {
+    record Need(IItemHandler inventory, Predicate<ItemStack> accepts, int target, int priority) {
+        public Need(IItemHandler inventory, Predicate<ItemStack> accepts, int target) {
+            this(inventory, accepts, target, 0);
+        }
+
         /** How many more matching items the inventory should get, 0 if it is stocked. */
         public int deficit() {
             int have = 0;

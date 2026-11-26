@@ -380,7 +380,7 @@ public final class AwNpcs {
         NpcDeclaration combat = declare("combat", "aw_npc_combat", NPC_COMBAT, "soldier");
         combat.addSubTypes("commander", "soldier", "archer", "medic", "engineer");
         NpcDeclaration worker = declare("worker", "aw_npc_worker", NPC_WORKER, "miner");
-        worker.addSubTypes("miner", "farmer", "lumberjack", "researcher", "craftsman");
+        worker.addSubTypes("miner", "farmer", "lumberjack", "researcher", "craftsman", "smith", "tanner");
         declare("courier", "aw_npc_courier", NPC_COURIER, "courier");
         declare("trader", "aw_npc_trader", NPC_TRADER, "trader");
         declare("priest", "aw_npc_priest", NPC_PRIEST, "priest");
@@ -428,6 +428,8 @@ public final class AwNpcs {
         addNpcSubtypeEquipment("worker", "lumberjack", new ItemStack(Items.IRON_AXE));
         addNpcSubtypeEquipment("worker", "researcher", new ItemStack(AncientWarfareCore.QUILLS.get("iron_quill").get()));
         addNpcSubtypeEquipment("worker", "craftsman", new ItemStack(AncientWarfareCore.HAMMERS.get("iron_hammer").get()));
+        addNpcSubtypeEquipment("worker", "smith", new ItemStack(AncientWarfareCore.HAMMERS.get("iron_hammer").get()));
+        addNpcSubtypeEquipment("worker", "tanner", new ItemStack(Items.SHEARS));
 
         addNpcSubtypeEquipment("combat", "commander", new ItemStack(IRON_COMMAND_BATON.get()));
         addNpcSubtypeEquipment("combat", "soldier", new ItemStack(Items.IRON_SWORD));
@@ -668,6 +670,10 @@ public final class AwNpcs {
     private static void onCommonSetup(FMLCommonSetupEvent event) {
         // the items exist now (1.12.2: post-init)
         event.enqueueWork(AwNpcs::loadNpcSubtypeEquipment);
+        // rework phase 8: the production sites of the automation module count their product in the storages of the settlement
+        io.github.capttracker.ancientwarfare.api.WorksiteStock.setCounter(io.github.capttracker.ancientwarfarenpc.settlement.SettlementApi::countItems);
+        // ... and make what the settlement is short of first
+        io.github.capttracker.ancientwarfare.api.SettlementDemand.setProvider(new io.github.capttracker.ancientwarfarenpc.settlement.SettlementNeeds.Provider());
     }
 
     /**

@@ -77,14 +77,30 @@ public class NpcAIPlayerOwnedFetchTool extends NpcAI<NpcWorker> {
         return true;
     }
 
+    /**
+     * The slot of the best tool of the kind in the storage, or -1: the highest tier, with a worn tool counting less (rework phase 8: the smithy delivers
+     * new and repaired tools into the storages, and the worker takes the best of them, not the first).
+     */
     private int findToolSlot(IItemHandler handler) {
+        int best = -1;
+        float bestScore = -1.0F;
         for (int slot = 0; slot < handler.getSlots(); slot++) {
             ItemStack stack = handler.getStackInSlot(slot);
             if (!stack.isEmpty() && (wanted != null ? wanted.matches(stack) : npc.isToolForRole(stack)) && !handler.extractItem(slot, 1, true).isEmpty()) {
-                return slot;
+                float score = toolScore(stack);
+                if (score > bestScore) {
+                    bestScore = score;
+                    best = slot;
+                }
             }
         }
-        return -1;
+        return best;
+    }
+
+    private static float toolScore(ItemStack stack) {
+        float speed = stack.getItem() instanceof net.minecraft.world.item.TieredItem tiered ? tiered.getTier().getSpeed() : 1.0F;
+        float condition = stack.isDamageableItem() ? 1.0F - 0.5F * stack.getDamageValue() / Math.max(1, stack.getMaxDamage()) : 1.0F;
+        return (speed + 1.0F) * condition;
     }
 
     @Override

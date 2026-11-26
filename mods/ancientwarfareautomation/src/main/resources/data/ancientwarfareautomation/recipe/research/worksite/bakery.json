@@ -1,0 +1,26 @@
+{
+  "type": "ancientwarfare:research_recipe",
+  "research": "ancientwarfare:agriculture",
+  "pattern": [
+    "___",
+    "GWG",
+    "_C_"
+  ],
+  "key": {
+    "C": {
+      "tag": "c:chests/wooden"
+    },
+    "W": {
+      "item": "minecraft:smoker"
+    },
+    "G": {
+      "tag": "c:gears/wooden"
+    },
+    "_": {
+      "tag": "minecraft:planks"
+    }
+  },
+  "result": {
+    "id": "ancientwarfareautomation:bakery"
+  }
+}

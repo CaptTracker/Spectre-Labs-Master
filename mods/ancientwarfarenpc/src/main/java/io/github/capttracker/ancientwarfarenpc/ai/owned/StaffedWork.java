@@ -406,6 +406,19 @@ public final class StaffedWork {
     }
 
     private void swingEffects(ServerLevel level, WorkTask current, BlockState state) {
+        if (current.action() == io.github.capttracker.ancientwarfare.api.WorkAction.SMITH) {
+            // rework phase 8: the smith hammers at the anvil, sparks fly
+            Vec3 top = Vec3.atCenterOf(current.pos()).add(0.0D, 0.5D, 0.0D);
+            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, top.x, top.y, top.z, 6, 0.25D, 0.1D, 0.25D, 0.15D);
+            level.playSound(null, current.pos(), SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 0.35F, 1.1F + npc.getRandom().nextFloat() * 0.3F);
+            return;
+        }
+        if (current.action() == io.github.capttracker.ancientwarfare.api.WorkAction.TAN) {
+            Vec3 top = Vec3.atCenterOf(current.pos()).add(0.0D, 0.5D, 0.0D);
+            level.sendParticles(ParticleTypes.SPLASH, top.x, top.y, top.z, 6, 0.25D, 0.1D, 0.25D, 0.05D);
+            level.playSound(null, current.pos(), SoundEvents.GENERIC_SPLASH, SoundSource.BLOCKS, 0.2F, 1.2F);
+            return;
+        }
         BlockState shown = state.isAir() ? level.getBlockState(current.pos().below()) : state;
         if (shown.isAir()) {
             return;

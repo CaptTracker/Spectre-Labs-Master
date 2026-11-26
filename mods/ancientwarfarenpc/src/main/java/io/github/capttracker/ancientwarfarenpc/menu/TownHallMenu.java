@@ -18,6 +18,8 @@ import io.github.capttracker.ancientwarfarenpc.settlement.Settlement;
 import io.github.capttracker.ancientwarfarenpc.settlement.SettlementApi;
 import io.github.capttracker.ancientwarfarenpc.settlement.SettlementConfig;
 import io.github.capttracker.ancientwarfarenpc.settlement.SettlementMorale;
+import io.github.capttracker.ancientwarfarenpc.settlement.SettlementNeed;
+import io.github.capttracker.ancientwarfarenpc.settlement.SettlementNeeds;
 import io.github.capttracker.spectrefactions.api.ActorId;
 import io.github.capttracker.spectrefactions.api.FactionsApi;
 import net.minecraft.core.BlockPos;
@@ -71,6 +73,12 @@ public class TownHallMenu extends BlockEntityMenu<TownHallBlockEntity> implement
     /** One line of the morale breakdown: the factor key, the points it gives and its maximum. */
     public record MoraleLine(String key, int points, int max) {}
 
+    /** One need of the Overview (rework phase 8): the name key, how many are missing, the producer status ordinal, the block key of the site and the hint key. */
+    public record NeedView(String label, int count, int status, String siteBlock, String hint) {}
+
+    /** How many needs are sent to the screen. */
+    public static final int MAX_NEED_LINES = 8;
+
     /** The guard settings of the settlement as the Guard tab shows them (the effective values, config defaults included). */
     public record GuardView(boolean patrol, int nightWatchPercent, boolean autoAlarm, int threshold, int clearSeconds, boolean overridden,
                             String captain, int waypoints) {
@@ -101,6 +109,7 @@ public class TownHallMenu extends BlockEntityMenu<TownHallBlockEntity> implement
     private int morale = 50;
     private double moraleFactor = 1.0D;
     private final List<MoraleLine> moraleLines = new ArrayList<>();
+    private final List<NeedView> needs = new ArrayList<>();
     private GuardView guard = GuardView.none();
     private List<Census.Entry> census = new ArrayList<>();
 
@@ -227,6 +236,11 @@ public class TownHallMenu extends BlockEntityMenu<TownHallBlockEntity> implement
 
     public List<MoraleLine> getMoraleLines() {
         return moraleLines;
+    }
+
+    /** The top needs of the settlement, most urgent first (client side). */
+    public List<NeedView> getNeeds() {
+        return needs;
     }
 
     public GuardView getGuard() {
@@ -502,6 +516,20 @@ public class TownHallMenu extends BlockEntityMenu<TownHallBlockEntity> implement
             moraleTags.add(f);
         }
         state.put("moraleLines", moraleTags);
+        ListTag needTags = new ListTag();
+        for (SettlementNeed need : SettlementNeeds.get(settlement)) {
+            if (needTags.size() >= MAX_NEED_LINES) {
+                break;
+            }
+            CompoundTag n = new CompoundTag();
+            n.putString("label", need.label);
+            n.putInt("count", need.count);
+            n.putInt("status", need.status.ordinal());
+            n.putString("site", need.producerBlock);
+            n.putString("hint", need.hint);
+            needTags.add(n);
+        }
+        state.put("needs", needTags);
         CompoundTag g = new CompoundTag();
         g.putBoolean("patrol", settlement.isPatrolEnabled());
         g.putInt("nightWatch", (int) Math.round(settlement.getNightWatchFraction() * 100.0D));
@@ -548,6 +576,12 @@ public class TownHallMenu extends BlockEntityMenu<TownHallBlockEntity> implement
         for (int i = 0; i < moraleList.size(); i++) {
             CompoundTag f = moraleList.getCompound(i);
             moraleLines.add(new MoraleLine(f.getString("key"), f.getInt("points"), f.getInt("max")));
+        }
+        needs.clear();
+        ListTag needList = state.getList("needs", Tag.TAG_COMPOUND);
+        for (int i = 0; i < needList.size(); i++) {
+            CompoundTag n = needList.getCompound(i);
+            needs.add(new NeedView(n.getString("label"), n.getInt("count"), n.getInt("status"), n.getString("site"), n.getString("hint")));
         }
         if (state.contains("guard", Tag.TAG_COMPOUND)) {
             CompoundTag g = state.getCompound("guard");

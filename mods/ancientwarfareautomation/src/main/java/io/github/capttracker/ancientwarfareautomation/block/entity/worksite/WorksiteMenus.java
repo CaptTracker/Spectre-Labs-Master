@@ -45,6 +45,13 @@ public final class WorksiteMenus {
         DOCK,
         APIARY,
         SMELTER,
+        /** The sawmill and the bakery (rework phase 8) and the recipe screen they share, {@code openAltGui}. */
+        SAWMILL,
+        BAKERY,
+        /** The smithy and the tannery (rework phase 8), also on the recipe screen above. */
+        SMITHY,
+        TANNERY,
+        PROCESSING_RECIPES,
         /** The market stall (rework phase 5) and its offers screen, {@code openAltGui}. */
         MARKET_STALL,
         MARKET_OFFERS,

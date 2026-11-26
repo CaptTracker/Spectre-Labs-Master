@@ -15,6 +15,8 @@ import io.github.capttracker.ancientwarfarenpc.settlement.JobBoard;
 import io.github.capttracker.ancientwarfarenpc.settlement.Settlement;
 import io.github.capttracker.ancientwarfarenpc.settlement.SettlementApi;
 import io.github.capttracker.ancientwarfarenpc.settlement.SettlementConfig;
+import io.github.capttracker.ancientwarfarenpc.settlement.SettlementNeed;
+import io.github.capttracker.ancientwarfarenpc.settlement.SettlementNeeds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
@@ -40,6 +42,10 @@ import java.util.function.Predicate;
  * </ol>
  * Worksites are those of the {@link WorksiteRegistry} that implement {@link IWorksiteLogistics} and that the job board of the settlement
  * would let a worker use. The goal sits below the schedule and does not run for a courier with a routing order (those orders override it).
+ *
+ * <p>Settlement demand (rework phase 8): the needs of the settlement ({@link SettlementNeeds}) come first. Products that fill a need are taken before
+ * other output; inputs are stocked in the order of their priority (an input of something the settlement needs first); a tool, weapon or armour piece that
+ * fills a need goes to the storage nearest to the worker or soldier who lacks it (the storage the fetch-tool goal of that worker looks at first).
  */
 public class NpcAIPlayerOwnedLogistics extends NpcAI<NpcCourier> {
     private static final int PLAN_INTERVAL = 100;
@@ -235,13 +241,60 @@ public class NpcAIPlayerOwnedLogistics extends NpcAI<NpcCourier> {
         return false;
     }
 
-    @Nullable
-    private Task planDelivery(IItemHandler pack, List<SettlementApi.StorageHandle> storages, List<BlockEntity> sites) {
+    /** One input need of a worksite. */
+    private record SiteNeed(BlockEntity site, IWorksiteLogistics.Need need) {}
+
+    /** The input needs of the sites with a deficit, the highest priority first (sites nearest first within a priority). */
+    private static List<SiteNeed> siteNeeds(List<BlockEntity> sites) {
+        List<SiteNeed> list = new ArrayList<>();
         for (BlockEntity be : sites) {
             for (IWorksiteLogistics.Need need : ((IWorksiteLogistics) be).getLogisticsNeeds()) {
-                if (need.deficit() > 0 && hasItem(pack, stack -> need.accepts().test(stack) && accepts(need.inventory(), stack))) {
-                    return new Task(be.getBlockPos(), Kind.GIVE, true, stack -> true, 0, -1);
+                if (need.deficit() > 0) {
+                    list.add(new SiteNeed(be, need));
                 }
+            }
+        }
+        list.sort(Comparator.comparingInt((SiteNeed s) -> -s.need().priority())); // stable: the distance order stays
+        return list;
+    }
+
+    /** A stack of the backpack that fills a need of the settlement with a place: to the storage nearest to that place that takes it. */
+    @Nullable
+    private Task planNeedDelivery(IItemHandler pack, List<SettlementApi.StorageHandle> storages) {
+        Settlement settlement = npc.getSettlement().orElse(null);
+        if (settlement == null) {
+            return null;
+        }
+        for (int slot = 0; slot < pack.getSlots(); slot++) {
+            ItemStack stack = pack.getStackInSlot(slot);
+            SettlementNeed need = stack.isEmpty() ? null : SettlementNeeds.find(settlement, stack);
+            if (need == null || need.where == null) {
+                continue;
+            }
+            BlockPos where = need.where;
+            SettlementApi.StorageHandle best = null;
+            for (SettlementApi.StorageHandle storage : storages) {
+                if (accepts(storage.handler(), stack) && (best == null || storage.pos().distSqr(where) < best.pos().distSqr(where))) {
+                    best = storage;
+                }
+            }
+            if (best != null) {
+                return new Task(best.pos(), Kind.GIVE, false, s -> true, 0, -1);
+            }
+        }
+        return null;
+    }
+
+    @Nullable
+    private Task planDelivery(IItemHandler pack, List<SettlementApi.StorageHandle> storages, List<BlockEntity> sites) {
+        Task needed = planNeedDelivery(pack, storages);
+        if (needed != null) {
+            return needed;
+        }
+        for (SiteNeed entry : siteNeeds(sites)) {
+            IWorksiteLogistics.Need need = entry.need();
+            if (hasItem(pack, stack -> need.accepts().test(stack) && accepts(need.inventory(), stack))) {
+                return new Task(entry.site().getBlockPos(), Kind.GIVE, true, stack -> true, 0, -1);
             }
         }
         BlockPos destination = foodDestination;
@@ -263,26 +316,31 @@ public class NpcAIPlayerOwnedLogistics extends NpcAI<NpcCourier> {
 
     @Nullable
     private Task planPickup(IItemHandler pack, List<SettlementApi.StorageHandle> storages, List<BlockEntity> sites) {
-        // 1. products to a storage
-        for (BlockEntity be : sites) {
-            for (IWorksiteLogistics.Output output : ((IWorksiteLogistics) be).getLogisticsOutputs()) {
-                IItemHandler inventory = output.inventory();
-                for (int slot = 0; slot < inventory.getSlots(); slot++) {
-                    ItemStack stack = inventory.getStackInSlot(slot);
-                    if (!stack.isEmpty() && output.takes().test(stack) && accepts(pack, stack)
-                            && storages.stream().anyMatch(s -> accepts(s.handler(), stack))) {
-                        return new Task(be.getBlockPos(), Kind.TAKE, true, s -> true, 0, -1);
+        // 1. products to a storage: the ones that fill a need of the settlement first
+        Settlement settlement = npc.getSettlement().orElse(null);
+        for (boolean needOnly : new boolean[]{true, false}) {
+            if (needOnly && settlement == null) {
+                continue;
+            }
+            for (BlockEntity be : sites) {
+                for (IWorksiteLogistics.Output output : ((IWorksiteLogistics) be).getLogisticsOutputs()) {
+                    IItemHandler inventory = output.inventory();
+                    for (int slot = 0; slot < inventory.getSlots(); slot++) {
+                        ItemStack stack = inventory.getStackInSlot(slot);
+                        if (!stack.isEmpty() && output.takes().test(stack) && accepts(pack, stack)
+                                && (!needOnly || SettlementNeeds.find(settlement, stack) != null)
+                                && storages.stream().anyMatch(s -> accepts(s.handler(), stack))) {
+                            return new Task(be.getBlockPos(), Kind.TAKE, true, s -> true, 0, -1);
+                        }
                     }
                 }
             }
         }
-        // 2. what a worksite lacks, from a storage
-        for (BlockEntity be : sites) {
-            for (IWorksiteLogistics.Need need : ((IWorksiteLogistics) be).getLogisticsNeeds()) {
+        // 2. what a worksite lacks, from a storage (the needs with the highest priority first)
+        for (SiteNeed entry : siteNeeds(sites)) {
+            {
+                IWorksiteLogistics.Need need = entry.need();
                 int deficit = need.deficit();
-                if (deficit <= 0) {
-                    continue;
-                }
                 Predicate<ItemStack> wanted = stack -> need.accepts().test(stack) && accepts(need.inventory(), stack) && accepts(pack, stack);
                 for (SettlementApi.StorageHandle storage : storages) {
                     if (hasItem(storage.handler(), wanted)) {

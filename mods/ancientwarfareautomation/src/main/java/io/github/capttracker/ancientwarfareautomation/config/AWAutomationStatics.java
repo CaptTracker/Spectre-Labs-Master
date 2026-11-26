@@ -134,6 +134,29 @@ public final class AWAutomationStatics {
     public static int stableFeedTarget = 32;
     /** The most horses, donkeys and mules a stable hand lets live in the radius of a stable (the breeding stops there). */
     public static int stableMaxEquines = 8;
+    /** Rework phase 8: the planks a sawmill makes from one log (hand crafting gives 4). */
+    public static int sawmillPlanksPerLog = 6;
+    /** Rework phase 8: whether a bakery burns fuel (coal, charcoal, wood) for its baking. */
+    public static boolean bakeryNeedsFuel = true;
+    /** Rework phase 8: how many of each raw input the couriers keep in the input store of a sawmill or bakery. */
+    public static int productionInputTarget = 64;
+    /** Rework phase 8: whether a smithy burns fuel for each item it makes or repairs. */
+    public static boolean smithyNeedsFuel = true;
+    /** Rework phase 8: the burn time (ticks of a furnace fire; coal is 1600) a smithy uses per item made or repaired. */
+    public static int smithyFuelPerItem = 200;
+    /** Rework phase 8: how much durability, in percent of the maximum, one repair ingot gives back. */
+    public static int smithyRepairPercentPerIngot = 25;
+    /** Rework phase 8: the chance that a master smith saves one ingot of a batch. */
+    public static double smithyMasterSaveChance = 0.15D;
+    /** Rework phase 8: whether couriers bring damaged gear from the storages of the settlement to the smithy. */
+    public static boolean smithyFetchDamaged = true;
+    /** Rework phase 8: the rotten flesh that make one leather at a tannery. */
+    public static int tanneryFleshPerLeather = 4;
+    /** Rework phase 8: the base work time (ticks) of tanning rotten flesh into leather. */
+    public static int tanneryFleshTicks = 600;
+    /** Rework phase 8: whether tanning rotten flesh needs water next to the tannery. */
+    public static boolean tanneryNeedsWater = true;
+    public static boolean demandEnablesRecipes = true;
 
     /** Client only: draw the work bounds box of worksites (toggled by the F8 key). */
     public static boolean renderWorkBounds = true;
@@ -151,6 +174,18 @@ public final class AWAutomationStatics {
     private static final ModConfigSpec.IntValue STABLE_RADIUS;
     private static final ModConfigSpec.IntValue STABLE_FEED_TARGET;
     private static final ModConfigSpec.IntValue STABLE_MAX_EQUINES;
+    private static final ModConfigSpec.IntValue SAWMILL_PLANKS_PER_LOG;
+    private static final ModConfigSpec.BooleanValue BAKERY_NEEDS_FUEL;
+    private static final ModConfigSpec.IntValue PRODUCTION_INPUT_TARGET;
+    private static final ModConfigSpec.BooleanValue SMITHY_NEEDS_FUEL;
+    private static final ModConfigSpec.IntValue SMITHY_FUEL_PER_ITEM;
+    private static final ModConfigSpec.IntValue SMITHY_REPAIR_PERCENT_PER_INGOT;
+    private static final ModConfigSpec.DoubleValue SMITHY_MASTER_SAVE_CHANCE;
+    private static final ModConfigSpec.BooleanValue SMITHY_FETCH_DAMAGED;
+    private static final ModConfigSpec.IntValue TANNERY_FLESH_PER_LEATHER;
+    private static final ModConfigSpec.IntValue TANNERY_FLESH_TICKS;
+    private static final ModConfigSpec.BooleanValue TANNERY_NEEDS_WATER;
+    private static final ModConfigSpec.BooleanValue DEMAND_ENABLES_RECIPES;
     private static final ModConfigSpec.DoubleValue RF_ENERGY_CONVERSION_FACTOR;
     private static final ModConfigSpec.IntValue ENERGY_NETWORK_UPDATE_FREQUENCY;
     private static final ModConfigSpec.BooleanValue ENABLE_SERVER_ENERGY_NETWORK;
@@ -299,6 +334,39 @@ public final class AWAutomationStatics {
         STABLE_MAX_EQUINES = server.comment("The most horses, donkeys and mules the stable hand keeps around a stable: the breeding stops at this number.")
                 .defineInRange("stable_max_equines", 8, 1, 64);
         server.pop();
+        server.comment("Production chains: sawmill, bakery, smithy and tannery (rework phase 8)").push("production");
+        SAWMILL_PLANKS_PER_LOG = server.comment("How many planks a sawmill makes from one log. Hand crafting gives 4. Slabs, stairs, sticks, fences and doors are made from these planks.")
+                .defineInRange("sawmill_planks_per_log", 6, 1, 16);
+        BAKERY_NEEDS_FUEL = server.comment("If true (default), a bakery burns fuel (coal, charcoal, wood and so on) for its baking, and couriers keep its fuel store stocked.",
+                "If false, it bakes without fuel.")
+                .define("bakery_needs_fuel", true);
+        PRODUCTION_INPUT_TARGET = server.comment("How many of each raw input (logs, wheat, sugar and so on) the couriers keep in the input store of a sawmill or bakery.")
+                .defineInRange("production_input_target", 64, 1, 512);
+        SMITHY_NEEDS_FUEL = server.comment("If true (default), a smithy burns fuel (coal, charcoal and so on) for every item it makes or repairs, and couriers keep its fuel store stocked.",
+                "If false, it works without fuel.")
+                .define("smithy_needs_fuel", true);
+        SMITHY_FUEL_PER_ITEM = server.comment("The burn time (ticks of a furnace fire) a smithy uses for each item it makes or repairs. Coal gives 1600, so the default 200 is 8 items per coal.")
+                .defineInRange("smithy_fuel_per_item", 200, 0, 12800);
+        SMITHY_REPAIR_PERCENT_PER_INGOT = server.comment("How much durability, in percent of the maximum, one matching ingot (or diamond, or leather) gives back when the smithy repairs a worn tool, weapon or piece of armour.",
+                "With 25 a half worn item costs 2 ingots and a nearly broken one 4. The item leaves the smithy fully repaired.")
+                .defineInRange("smithy_repair_percent_per_ingot", 25, 5, 100);
+        SMITHY_MASTER_SAVE_CHANCE = server.comment("The chance that a smith of master rank saves one ingot (or diamond, or leather) of a batch: it is not used up. 0 switches the bonus off.")
+                .defineInRange("smithy_master_save_chance", 0.15D, 0.0D, 1.0D);
+        SMITHY_FETCH_DAMAGED = server.comment("If true (default), couriers bring damaged tools, weapons and armour from the storages of the settlement to the input of the smithy (a few at a time),",
+                "and the repaired ones go back to a storage. If false, only what a player puts into the smithy is repaired.")
+                .define("smithy_couriers_fetch_damaged", true);
+        TANNERY_FLESH_PER_LEATHER = server.comment("How many rotten flesh a tannery needs for one leather.")
+                .defineInRange("tannery_flesh_per_leather", 4, 1, 64);
+        TANNERY_FLESH_TICKS = server.comment("The base work time (ticks) of tanning one batch of rotten flesh into leather. Rabbit hide (4 for 1 leather) takes a fifth of it.")
+                .defineInRange("tannery_flesh_ticks", 600, 20, 24000);
+        TANNERY_NEEDS_WATER = server.comment("If true (default), a tannery tans rotten flesh only with water next to it: a water source block or a cauldron with water within 2 blocks.",
+                "Rabbit hide needs no water. If false, nothing needs water.")
+                .define("tannery_needs_water", true);
+        DEMAND_ENABLES_RECIPES = server.comment("If true (default), a production site also makes a recipe whose switch is off when the settlement is short of what it makes",
+                "(a pickaxe for a worker without one, food, planks for the builders): the switch then means \"only when the settlement needs it\".",
+                "If false, a switched-off recipe is never made. Either way, what the settlement needs is made before what is merely below its \"keep N\" target.")
+                .define("demand_enables_recipes", true);
+        server.pop();
         SERVER_SPEC = server.build();
     }
 
@@ -424,6 +492,18 @@ public final class AWAutomationStatics {
         stableRadius = STABLE_RADIUS.get();
         stableFeedTarget = STABLE_FEED_TARGET.get();
         stableMaxEquines = STABLE_MAX_EQUINES.get();
+        sawmillPlanksPerLog = SAWMILL_PLANKS_PER_LOG.get();
+        bakeryNeedsFuel = BAKERY_NEEDS_FUEL.get();
+        productionInputTarget = PRODUCTION_INPUT_TARGET.get();
+        smithyNeedsFuel = SMITHY_NEEDS_FUEL.get();
+        smithyFuelPerItem = SMITHY_FUEL_PER_ITEM.get();
+        smithyRepairPercentPerIngot = SMITHY_REPAIR_PERCENT_PER_INGOT.get();
+        smithyMasterSaveChance = SMITHY_MASTER_SAVE_CHANCE.get();
+        smithyFetchDamaged = SMITHY_FETCH_DAMAGED.get();
+        tanneryFleshPerLeather = TANNERY_FLESH_PER_LEATHER.get();
+        tanneryFleshTicks = TANNERY_FLESH_TICKS.get();
+        tanneryNeedsWater = TANNERY_NEEDS_WATER.get();
+        demandEnablesRecipes = DEMAND_ENABLES_RECIPES.get();
         taskRescanTicks = TASK_RESCAN_TICKS.get();
     }
 

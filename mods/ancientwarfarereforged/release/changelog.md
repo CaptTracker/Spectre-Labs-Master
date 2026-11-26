@@ -42,6 +42,14 @@ First release of Ancient Warfare 2, rebuilt for Minecraft 1.21.1 on NeoForge. Al
 - **New worksites:** Apiary, Smelter, Market Stall, Inn and Stable, plus a staffed animal farm.
 - `machines_work_alone` in the config brings back the old worksites that work without NPCs.
 
+## Production chains
+- **Four new production worksites,** each worked by an NPC and stocked and emptied by couriers: the **Sawmill** (logs to planks, 6 per log by default, and optionally slabs, stairs, sticks, fences and doors), the **Bakery** (bread, cake, pumpkin pie and cookies, with fuel), the **Smithy** (iron, gold and diamond tools, weapons and armour, leather armour, and repair of worn gear) and the **Tannery** (rotten flesh and rabbit hide into leather; flesh needs water nearby).
+- **New worker roles:** the smith and the tanner. The craftsman works the sawmill and the bakery.
+- **Recipe screen:** every recipe has an on/off switch and a "keep N in storage" number, with the stock and the site's status shown.
+- **The settlement tells production what it needs:** tools for workers without one, swords and armour for soldiers, food, and a reserve of planks, stone and glass. Sites make what is needed first, couriers bring those inputs first, and the hall Overview lists the needs and who is making them. A worker waiting for a tool says which site is making it.
+- **Master smiths** sometimes save an ingot. Workers now take the best tool in storage, not the first.
+- **Config:** the `production` section of `ancientwarfareautomation-worksites.toml`, `demand_enables_recipes`, and the `demand` section of `ancientwarfarenpc-settlements.toml`.
+
 ## Vehicles
 - Mouse steering with a chase camera, and smoother controls.
 - Multiple seats with roles; switch seats with the number keys. Riders keep their seats when the world reloads.
