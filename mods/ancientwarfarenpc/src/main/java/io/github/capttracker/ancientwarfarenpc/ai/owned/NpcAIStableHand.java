@@ -409,6 +409,7 @@ public class NpcAIStableHand extends NpcAI<NpcStableHand> {
         ItemStack feed = takeFeed(stable.getFeedStore());
         if (!feed.isEmpty()) {
             npc.swing(InteractionHand.MAIN_HAND);
+            npc.gainSkillXp(io.github.capttracker.ancientwarfarenpc.skill.Skill.HUSBANDRY, io.github.capttracker.ancientwarfarenpc.settlement.SettlementConfig.skillXpWork);
             if (horse.getHealth() < horse.getMaxHealth()) {
                 horse.heal(4.0F);
             }

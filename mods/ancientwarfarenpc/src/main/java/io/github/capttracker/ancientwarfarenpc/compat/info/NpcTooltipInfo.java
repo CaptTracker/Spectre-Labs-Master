@@ -46,6 +46,14 @@ public final class NpcTooltipInfo {
             data.putString("mood", NpcMorale.mood(owned.getPersonalMorale()));
         }
         data.putString("task", NpcThinking.task(npc));
+        io.github.capttracker.ancientwarfarenpc.skill.Skill main = npc.getMainSkill();
+        if (main != null) {
+            data.putString("skill", main.id());
+            data.putInt("rank", npc.getSkills().getRank(main)); // the true rank, also when the name does not show it
+        }
+        if (npc.supportsTraits() && SettlementConfig.traitsEnabled && npc.getTraitMask() != 0) {
+            data.putInt("traits", npc.getTraitMask());
+        }
         tag.put(KEY, data);
     }
 
@@ -64,6 +72,21 @@ public final class NpcTooltipInfo {
             }
             if (data.contains("mood")) {
                 lines.add(Component.translatable("tooltip.ancientwarfarenpc.npc.mood", Component.translatable("guistrings.npc.mood." + data.getString("mood"))));
+            }
+            io.github.capttracker.ancientwarfarenpc.skill.Skill skill = io.github.capttracker.ancientwarfarenpc.skill.Skill.byId(data.getString("skill"));
+            if (skill != null) {
+                lines.add(Component.translatable("tooltip.ancientwarfarenpc.npc.skill", Component.translatable(io.github.capttracker.ancientwarfarenpc.skill.Rank.byIndex(data.getInt("rank")).langKey()),
+                        Component.translatable(skill.langKey())));
+            }
+            if (data.getInt("traits") != 0) {
+                net.minecraft.network.chat.MutableComponent names = Component.empty();
+                for (io.github.capttracker.ancientwarfarenpc.trait.Trait trait : io.github.capttracker.ancientwarfarenpc.trait.NpcTraits.fromMask(data.getInt("traits"))) {
+                    if (!names.getSiblings().isEmpty()) {
+                        names.append(", ");
+                    }
+                    names.append(Component.translatable(trait.langKey()));
+                }
+                lines.add(Component.translatable("tooltip.ancientwarfarenpc.npc.traits", names));
             }
             lines.add(Component.translatable("tooltip.ancientwarfarenpc.npc.task", taskText(data.getString("task"))));
         }

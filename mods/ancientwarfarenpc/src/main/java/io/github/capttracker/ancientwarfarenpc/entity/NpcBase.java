@@ -40,6 +40,13 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import io.github.capttracker.ancientwarfarenpc.skill.NpcSkills;
+import io.github.capttracker.ancientwarfarenpc.skill.Rank;
+import io.github.capttracker.ancientwarfarenpc.skill.Skill;
+import io.github.capttracker.ancientwarfarenpc.skill.SkillEffects;
+import io.github.capttracker.ancientwarfarenpc.trait.NpcTraits;
+import io.github.capttracker.ancientwarfarenpc.trait.Trait;
+import io.github.capttracker.ancientwarfarenpc.trait.TraitEffects;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.resources.ResourceLocation;
@@ -115,6 +122,8 @@ public abstract class NpcBase extends PathfinderMob implements IEntityWithComple
     private static final EntityDataAccessor<Boolean> SWINGING_ARMS = SynchedEntityData.defineId(NpcBase.class, EntityDataSerializers.BOOLEAN);
     /** The generated first name ({@link NpcNames}); empty until the first server tick. */
     private static final EntityDataAccessor<String> GIVEN_NAME = SynchedEntityData.defineId(NpcBase.class, EntityDataSerializers.STRING);
+    /** The rank (0 to 4) of the main skill for the name, or -1 for none (rework phase 7). */
+    private static final EntityDataAccessor<Integer> MAIN_RANK = SynchedEntityData.defineId(NpcBase.class, EntityDataSerializers.INT);
 
     private static final String SLOT_NUM_TAG = "slotNum";
     private static final String CACHED_BED_POS_TAG = "cachedBedPos";
@@ -304,6 +313,7 @@ public abstract class NpcBase extends PathfinderMob implements IEntityWithComple
         builder.define(SWINGING_ARMS, false);
         builder.define(SHIELD_DISABLED_TICK, 0);
         builder.define(GIVEN_NAME, "");
+        builder.define(MAIN_RANK, -1);
     }
 
     /** The generated first name, or empty if there is none yet. */
@@ -401,6 +411,9 @@ public abstract class NpcBase extends PathfinderMob implements IEntityWithComple
     @Override
     public boolean doHurtTarget(Entity target) {
         boolean targetHit = super.doHurtTarget(target);
+        if (targetHit) {
+            gainSkillXp(Skill.COMBAT, SettlementConfig.skillXpHit);
+        }
         if (targetHit && target instanceof LivingEntity livingTarget) {
             ItemStack weapon = getMainHandItem();
             if (!weapon.isEmpty()) {
@@ -625,6 +638,9 @@ public abstract class NpcBase extends PathfinderMob implements IEntityWithComple
         if (source.getEntity() != null && !canBeAttackedBy(source.getEntity())) {
             return false;
         }
+        if (!level().isClientSide && supportsSkills() && source.getEntity() instanceof LivingEntity) {
+            damage *= (float) SkillEffects.damageTakenFactor(getSkills().getRank(Skill.COMBAT)); // a ranked fighter takes less from creatures
+        }
         if (!level().isClientSide) {
             processPreDamageLogic(source, damage);
         }
@@ -745,6 +761,7 @@ public abstract class NpcBase extends PathfinderMob implements IEntityWithComple
     public boolean killedEntity(ServerLevel level, LivingEntity entity) {
         boolean result = super.killedEntity(level, entity);
         addExperience(AWNPCStatics.npcXpFromKill);
+        gainSkillXp(Skill.COMBAT, SettlementConfig.skillXpKill);
         think("won_fight", entity.getName());
         if (entity == getTarget()) {
             setTarget(null);
@@ -854,6 +871,189 @@ public abstract class NpcBase extends PathfinderMob implements IEntityWithComple
      */
     public final void addExperience(int amount) {
         getLevelingStats().addExperience(amount);
+    }
+
+    // ---- skills (rework phase 7) ----
+
+    private static final ResourceLocation SKILL_DAMAGE_ID = ResourceLocation.fromNamespaceAndPath("ancientwarfarenpc", "skill_damage");
+    /** Created on first use, like the mind. */
+    @Nullable
+    private NpcSkills skills;
+    private int appliedCombatRank = -1;
+    /** Game time of the last experience of each skill that has a cooldown ({@link Skill#xpCooldownTicks}); not saved. */
+    private final long[] lastSkillXpAt = new long[Skill.ALL.length];
+
+    /** True for the NPCs that learn skills (the player-owned ones). */
+    public boolean supportsSkills() {
+        return false;
+    }
+
+    /** The experience of this NPC in each skill (server side; the client gets the numbers with the talk menu). */
+    public NpcSkills getSkills() {
+        if (skills == null) {
+            skills = new NpcSkills();
+        }
+        return skills;
+    }
+
+    public int getSkillRank(Skill skill) {
+        return getSkills().getRank(skill);
+    }
+
+    /** The main skill of this NPC (the one its title shows), or null. */
+    @Nullable
+    public Skill getMainSkill() {
+        return supportsSkills() ? Skill.mainOf(getNpcFullType()) : null;
+    }
+
+    /** The rank index of the main skill for the name (client: synced); -1 for none. */
+    public int getMainRank() {
+        return entityData.get(MAIN_RANK);
+    }
+
+    /**
+     * Server side: experience for a skill. {@code base} is the amount before the {@code skill_xp_multiplier}. A new rank is written as a thought, lifts the
+     * morale and plays a sound and a particle.
+     */
+    public final void gainSkillXp(@Nullable Skill skill, int base) {
+        if (skill == null || base <= 0 || level().isClientSide || !supportsSkills() || !isAlive() || SettlementConfig.skillXpMultiplier <= 0.0D) {
+            return;
+        }
+        int cooldown = skill.xpCooldownTicks();
+        if (cooldown > 0) {
+            long now = level().getGameTime();
+            if (lastSkillXpAt[skill.ordinal()] > 0L && now - lastSkillXpAt[skill.ordinal()] < cooldown) {
+                return; // a repeatable action (trades, courier stops) does not farm experience
+            }
+            lastSkillXpAt[skill.ordinal()] = Math.max(1L, now);
+        }
+        int amount = Math.max(1, (int) Math.round(base * SettlementConfig.skillXpMultiplier * TraitEffects.xpFactor(this)));
+        int rank = getSkills().add(skill, amount);
+        if (rank >= 0) {
+            think("skill_rank", Component.translatable(skill.langKey()), Component.translatable(Rank.byIndex(rank).langKey()));
+            refreshSkillState();
+            onRankUp(skill, rank);
+            if (level() instanceof ServerLevel serverLevel) {
+                serverLevel.playSound(null, blockPosition(), SoundEvents.PLAYER_LEVELUP, net.minecraft.sounds.SoundSource.NEUTRAL, 0.4F, 1.3F);
+                serverLevel.sendParticles(net.minecraft.core.particles.ParticleTypes.HAPPY_VILLAGER, getX(), getY() + getBbHeight() + 0.2D, getZ(), 8, 0.4D, 0.3D, 0.4D, 0.0D);
+            }
+        }
+    }
+
+    /** Server side: the skill reached a new rank (the player-owned NPCs lift their morale). */
+    protected void onRankUp(Skill skill, int rank) {
+    }
+
+    /** Server side: brings the synced main rank (the name) and the damage bonus of the combat rank up to date. Cheap; called now and then. */
+    public final void refreshSkillState() {
+        if (level().isClientSide || !supportsSkills()) {
+            return;
+        }
+        Skill main = SettlementConfig.skillRankInName ? getMainSkill() : null;
+        int rank = main == null ? -1 : getSkills().getRank(main);
+        if (entityData.get(MAIN_RANK) != rank) {
+            entityData.set(MAIN_RANK, rank);
+        }
+        int combat = getSkills().getRank(Skill.COMBAT);
+        if (combat != appliedCombatRank) {
+            appliedCombatRank = combat;
+            AttributeInstance damage = getAttribute(Attributes.ATTACK_DAMAGE);
+            if (damage != null) {
+                damage.removeModifier(SKILL_DAMAGE_ID);
+                double bonus = SkillEffects.damageBonus(combat);
+                if (bonus > 0.0D) {
+                    damage.addTransientModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(SKILL_DAMAGE_ID, bonus,
+                            net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+                }
+            }
+        }
+    }
+
+    // ---- traits (rework phase 7) ----
+
+    private static final ResourceLocation TRAIT_DAMAGE_ID = ResourceLocation.fromNamespaceAndPath("ancientwarfarenpc", "trait_damage");
+    private static final ResourceLocation TRAIT_HEALTH_ID = ResourceLocation.fromNamespaceAndPath("ancientwarfarenpc", "trait_health");
+    /** Created on first use, like the skills. */
+    @Nullable
+    private NpcTraits traits;
+    /** False until the traits were read from a save or rolled: an NPC from an older save rolls its traits when it first loads. */
+    private boolean traitsRolled = false;
+    private int appliedTraitMask = -1;
+
+    /** True for the NPCs that have traits (the player-owned ones). */
+    public boolean supportsTraits() {
+        return false;
+    }
+
+    /** The traits of this NPC (server side; the clients get them with the talk menu, the census and the tooltip data). */
+    public NpcTraits getTraits() {
+        if (traits == null) {
+            traits = new NpcTraits();
+        }
+        return traits;
+    }
+
+    /** True if this NPC has the trait (always false when traits are off in the config, and for NPCs that have none). */
+    public boolean hasTrait(Trait trait) {
+        return traits != null && SettlementConfig.traitsEnabled && traits.has(trait);
+    }
+
+    /** The traits as a bit mask (see {@link Trait#bit()}), for the census. */
+    public int getTraitMask() {
+        return traits == null ? 0 : traits.mask();
+    }
+
+    /** Sets the traits (cut to at most 2 that do not contradict) and applies their attribute effects. For the families of phase 10 and for commands. */
+    public void setTraits(java.util.Collection<Trait> list) {
+        getTraits().set(list);
+        traitsRolled = true;
+        refreshTraitState();
+    }
+
+    /** Server side: gives the NPC its traits if it has none yet (a new NPC, or one from an older save). */
+    public final void ensureTraits() {
+        if (traitsRolled || level().isClientSide || !supportsTraits() || !SettlementConfig.traitsEnabled) {
+            return;
+        }
+        traitsRolled = true;
+        traits = NpcTraits.roll(getRandom());
+        refreshTraitState();
+    }
+
+    /** Server side: brings the attribute modifiers of the traits (health, attack damage) up to date. Cheap; called now and then and after a change. */
+    public final void refreshTraitState() {
+        if (level().isClientSide || !supportsTraits()) {
+            return;
+        }
+        int key = SettlementConfig.traitsEnabled ? getTraitMask() : 0;
+        if (key == appliedTraitMask) {
+            return;
+        }
+        appliedTraitMask = key;
+        AttributeInstance damage = getAttribute(Attributes.ATTACK_DAMAGE);
+        if (damage != null) {
+            damage.removeModifier(TRAIT_DAMAGE_ID);
+            double bonus = TraitEffects.damageBonus(this);
+            if (bonus > 0.0D) {
+                damage.addTransientModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(TRAIT_DAMAGE_ID, bonus,
+                        net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+            }
+        }
+        AttributeInstance health = getAttribute(Attributes.MAX_HEALTH);
+        if (health != null) {
+            boolean wasFull = getHealth() >= getMaxHealth() - 0.01F;
+            health.removeModifier(TRAIT_HEALTH_ID);
+            double bonus = TraitEffects.healthBonus(this);
+            if (bonus > 0.0D) {
+                health.addTransientModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(TRAIT_HEALTH_ID, bonus,
+                        net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+            }
+            if (wasFull) {
+                setHealth(getMaxHealth());
+            } else if (getHealth() > getMaxHealth()) {
+                setHealth(getMaxHealth());
+            }
+        }
     }
 
     // ---- item (spawner) form ----
@@ -976,7 +1176,7 @@ public abstract class NpcBase extends PathfinderMob implements IEntityWithComple
         if (customName != null) {
             return customName;
         }
-        return NpcNames.display(getNpcFullType(), getGivenName());
+        return NpcNames.display(getNpcFullType(), getGivenName(), entityData.get(MAIN_RANK));
     }
 
     public final NpcLevelingStats getLevelingStats() {
@@ -1435,6 +1635,13 @@ public abstract class NpcBase extends PathfinderMob implements IEntityWithComple
         if (tag.contains(LEVELING_STATS_TAG)) {
             getLevelingStats().readFromNBT(tag.getCompound(LEVELING_STATS_TAG));
         }
+        if (tag.contains("skills", Tag.TAG_COMPOUND)) {
+            getSkills().load(tag.getCompound("skills")); // an older save has none: no experience
+        }
+        if (tag.contains("traits", Tag.TAG_LIST)) {
+            getTraits().load(tag.getList("traits", Tag.TAG_STRING));
+            traitsRolled = true;
+        } // an older save has none: the NPC rolls its traits at the first tick (ensureTraits)
         if (tag.contains(MAX_HEALTH_TAG)) {
             attribute(Attributes.MAX_HEALTH).setBaseValue(tag.getFloat(MAX_HEALTH_TAG));
         }
@@ -1478,7 +1685,13 @@ public abstract class NpcBase extends PathfinderMob implements IEntityWithComple
             tag.put(UPKEEP_STACK_TAG, upkeepStack.save(registryAccess()));
         }
         tag.put(LEVELING_STATS_TAG, getLevelingStats().writeToNBT(new CompoundTag()));
-        tag.putFloat(MAX_HEALTH_TAG, getMaxHealth());
+        if (skills != null) {
+            tag.put("skills", skills.save());
+        }
+        if (traitsRolled && traits != null) {
+            tag.put("traits", traits.save());
+        }
+        tag.putFloat(MAX_HEALTH_TAG, (float) attribute(Attributes.MAX_HEALTH).getBaseValue()); // without the modifier of the tough trait
         tag.putFloat(HEALTH_TAG, getHealth());
         if (hasCustomName()) {
             tag.putString("name", getCustomName().getString());

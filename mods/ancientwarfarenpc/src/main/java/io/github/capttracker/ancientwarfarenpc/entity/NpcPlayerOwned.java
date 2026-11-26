@@ -290,7 +290,7 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
 
     /** The part of the day this NPC is in. */
     public Activity getActivity() {
-        return Activity.of(level());
+        return Activity.of(level(), io.github.capttracker.ancientwarfarenpc.trait.TraitEffects.scheduleShift(this));
     }
 
     /** True while the NPC is busy (it has orders, or work); the rain shelter only takes NPCs that are not. */
@@ -312,6 +312,11 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
 
     /** True for an NPC that does not run to shelter when the alarm is on (it rallies, heals, or is fighting for its life). */
     public boolean ignoresAlarmShelter() {
+        return canFightAlarm();
+    }
+
+    /** True for an NPC that stays and fights in an alarm although it is not a soldier (a brave worker with a weapon in its hand). */
+    public boolean canFightAlarm() {
         return false;
     }
 
@@ -507,6 +512,8 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
     private long lastNearDeathAt = -1L;
     private long lastInnMealAt = -1L;
     private long lastSocialAt = -1L;
+    /** Game time of the last new skill rank (rework phase 7), -1 if never (saved). */
+    private long lastLevelUpAt = -1L;
     /** Ticks the NPC has been idle without a job in its work hours (not saved). */
     private int idleTicks = 0;
 
@@ -544,6 +551,27 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
 
     public long getLastSocialAt() {
         return lastSocialAt;
+    }
+
+    public long getLastLevelUpAt() {
+        return lastLevelUpAt;
+    }
+
+    @Override
+    public boolean supportsSkills() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsTraits() {
+        return true;
+    }
+
+    /** A new rank lifts the morale for a while: the morale is computed again at the next tick. */
+    @Override
+    protected void onRankUp(io.github.capttracker.ancientwarfarenpc.skill.Skill skill, int rank) {
+        lastLevelUpAt = level().getGameTime();
+        moraleNext = 0L;
     }
 
     public int getIdleTicks() {
@@ -786,9 +814,14 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
             settlementTick();
             hungerTick();
             moraleTick();
+            ensureTraits(); // a new NPC, or one from an older save, rolls its traits at its first tick
+            if (tickCount % 40 == 1) {
+                refreshSkillState(); // the main rank follows a role change; the combat bonus is applied after a load
+                refreshTraitState(); // the health and damage modifiers of the traits are applied after a load
+            }
         }
         if (foodValueRemaining > 0 && !isSleeping()) {
-            foodValueRemaining--;
+            foodValueRemaining = Math.max(0, foodValueRemaining - io.github.capttracker.ancientwarfarenpc.trait.TraitEffects.hungerDrain(this)); // glutton faster, frugal slower
         }
     }
 
@@ -813,6 +846,7 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
         lastNearDeathAt = tag.contains("lastNearDeathAt") ? tag.getLong("lastNearDeathAt") : -1L;
         lastInnMealAt = tag.contains("lastInnMealAt") ? tag.getLong("lastInnMealAt") : -1L;
         lastSocialAt = tag.contains("lastSocialAt") ? tag.getLong("lastSocialAt") : -1L;
+        lastLevelUpAt = tag.contains("lastLevelUpAt") ? tag.getLong("lastLevelUpAt") : -1L;
         starvingTicks = tag.getInt("starvingTicks");
         if (tag.contains(COMMAND_TAG)) {
             playerIssuedCommand = new Command(tag.getCompound(COMMAND_TAG));
@@ -837,6 +871,7 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
         tag.putLong("lastNearDeathAt", lastNearDeathAt);
         tag.putLong("lastInnMealAt", lastInnMealAt);
         tag.putLong("lastSocialAt", lastSocialAt);
+        tag.putLong("lastLevelUpAt", lastLevelUpAt);
         tag.putInt("starvingTicks", starvingTicks);
         if (playerIssuedCommand != Command.NONE) {
             tag.put(COMMAND_TAG, playerIssuedCommand.writeToNBT(new CompoundTag()));

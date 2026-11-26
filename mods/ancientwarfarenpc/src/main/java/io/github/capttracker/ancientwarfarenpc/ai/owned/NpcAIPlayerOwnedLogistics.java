@@ -160,6 +160,7 @@ public class NpcAIPlayerOwnedLogistics extends NpcAI<NpcCourier> {
             return;
         }
         npc.addExperience(moved * AWNPCStatics.npcXpFromMoveItem);
+        npc.gainSkillXp(io.github.capttracker.ancientwarfarenpc.skill.Skill.HAULING, SettlementConfig.skillXpDelivery);
         waitTicks = (int) Math.ceil(Math.max(10, Math.min(80, moved * 4)) / npc.getWorkFactor());
     }
 

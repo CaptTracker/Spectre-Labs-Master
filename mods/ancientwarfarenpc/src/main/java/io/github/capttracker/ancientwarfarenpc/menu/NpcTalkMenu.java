@@ -34,11 +34,15 @@ import java.util.List;
 public class NpcTalkMenu extends NpcMenuBase<NpcBase> {
     public static final int TAB_TALK = 0;
     public static final int TAB_MORALE = 1;
+    public static final int TAB_SKILLS = 2;
     private static final String STATE_TAG = "talk";
     private static final int REFRESH_TICKS = 20;
 
     /** A thing that happened lately with its age in minutes. */
     public record Event(Line line, int minutes) {}
+
+    /** A skill with its rank (0 to 4), experience, the experience of the next rank (0 at Master), the percent inside the rank, and whether it is the main skill. */
+    public record SkillRow(String id, int rank, int xp, int next, int percent, boolean main) {}
 
     /** A factor of the morale. */
     public record Factor(String key, int delta) {}
@@ -61,6 +65,9 @@ public class NpcTalkMenu extends NpcMenuBase<NpcBase> {
     public double moraleFactor = 1.0D;
     public boolean moraleHasSettlement = false;
     public final List<Factor> factors = new ArrayList<>();
+    public final List<String> traits = new ArrayList<>();
+    public boolean hasSkills = false;
+    public final List<SkillRow> skills = new ArrayList<>();
     public int tab = TAB_TALK;
     @Nullable
     private CompoundTag lastState;
@@ -147,6 +154,30 @@ public class NpcTalkMenu extends NpcMenuBase<NpcBase> {
             }
             state.put("morale", morale);
         }
+        if (npc.supportsTraits() && io.github.capttracker.ancientwarfarenpc.settlement.SettlementConfig.traitsEnabled) {
+            ListTag traitList = new ListTag();
+            for (io.github.capttracker.ancientwarfarenpc.trait.Trait trait : npc.getTraits().list()) {
+                traitList.add(net.minecraft.nbt.StringTag.valueOf(trait.id()));
+            }
+            state.put("traits", traitList);
+        }
+        if (npc.supportsSkills()) {
+            ListTag skillList = new ListTag();
+            io.github.capttracker.ancientwarfarenpc.skill.Skill main = npc.getMainSkill();
+            for (io.github.capttracker.ancientwarfarenpc.skill.Skill skill : io.github.capttracker.ancientwarfarenpc.skill.Skill.ALL) {
+                int xp = npc.getSkills().getXp(skill);
+                int rank = io.github.capttracker.ancientwarfarenpc.skill.Rank.indexOf(xp);
+                CompoundTag s = new CompoundTag();
+                s.putString("id", skill.id());
+                s.putInt("rank", rank);
+                s.putInt("xp", xp);
+                s.putInt("next", rank >= io.github.capttracker.ancientwarfarenpc.skill.Rank.MAX ? 0 : io.github.capttracker.ancientwarfarenpc.skill.Rank.ALL[rank + 1].minXp());
+                s.putInt("pct", (int) Math.round(io.github.capttracker.ancientwarfarenpc.skill.NpcSkills.progress(xp) * 100.0D));
+                s.putBoolean("main", skill == main);
+                skillList.add(s);
+            }
+            state.put("skills", skillList);
+        }
         CompoundTag tag = new CompoundTag();
         tag.put(STATE_TAG, state);
         if (withTab) {
@@ -212,7 +243,21 @@ public class NpcTalkMenu extends NpcMenuBase<NpcBase> {
                 factors.add(new Factor(f.getString("key"), f.getInt("delta")));
             }
         }
-        if (!hasMorale && tab == TAB_MORALE) {
+        traits.clear();
+        ListTag traitList = state.getList("traits", Tag.TAG_STRING);
+        for (int i = 0; i < traitList.size(); i++) {
+            traits.add(traitList.getString(i));
+        }
+        hasSkills = state.contains("skills", Tag.TAG_LIST);
+        skills.clear();
+        if (hasSkills) {
+            ListTag skillList = state.getList("skills", Tag.TAG_COMPOUND);
+            for (int i = 0; i < skillList.size(); i++) {
+                CompoundTag s = skillList.getCompound(i);
+                skills.add(new SkillRow(s.getString("id"), s.getInt("rank"), s.getInt("xp"), s.getInt("next"), s.getInt("pct"), s.getBoolean("main")));
+            }
+        }
+        if (!hasMorale && tab == TAB_MORALE || !hasSkills && tab == TAB_SKILLS) {
             tab = TAB_TALK;
         }
     }

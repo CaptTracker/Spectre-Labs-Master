@@ -60,11 +60,25 @@ public final class NpcNames {
 
     /** The displayed name of an NPC of the full type ({@code worker.miner}, {@code norska.archer}) with the first name. */
     public static Component display(String fullType, String givenName) {
+        return display(fullType, givenName, -1);
+    }
+
+    /**
+     * As {@link #display(String, String)} with the rank (0 to 4) of the main skill in front: the template {@code npcname.ranked.<id>} of the type takes the
+     * rank name and the first name ("Apprentice Miner Bill"). A negative rank gives the plain name.
+     */
+    public static Component display(String fullType, String givenName, int rank) {
         String given = givenName == null ? "" : givenName;
         if (given.isEmpty()) {
-            return Component.translatable("entity.ancientwarfarenpc." + fullType + ".name");
+            Component typeName = Component.translatable("entity.ancientwarfarenpc." + fullType + ".name");
+            return rank >= 0 && templateKey(fullType) != null
+                    ? Component.translatable("npcname.ranked.unnamed", Component.translatable("npc.skill.rank." + io.github.capttracker.ancientwarfarenpc.skill.Rank.byIndex(rank).id()), typeName)
+                    : typeName;
         }
         String key = templateKey(fullType);
+        if (rank >= 0 && key != null) {
+            return Component.translatable(key.replace("npcname.template.", "npcname.ranked."), Component.translatable("npc.skill.rank." + io.github.capttracker.ancientwarfarenpc.skill.Rank.byIndex(rank).id()), given);
+        }
         if (key == null) {
             return Component.translatable("npcname.template.generic", Component.translatable("entity.ancientwarfarenpc." + fullType + ".name"), given);
         }

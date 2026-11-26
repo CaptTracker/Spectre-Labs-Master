@@ -222,6 +222,7 @@ public class NpcCombat extends NpcPlayerOwned implements RangedAttackMob {
         if (fraction >= 1) {
             return true;
         }
+        fraction = Math.min(1.0D, fraction * io.github.capttracker.ancientwarfarenpc.trait.TraitEffects.nightWatchWeight(this)); // night owls like the watch
         long h = getUUID().getLeastSignificantBits() ^ ((level().getDayTime() / 24000L) * 0x9E3779B97F4A7C15L);
         h ^= h >>> 29;
         h *= 0xBF58476D1CE4E5B9L;
@@ -287,6 +288,9 @@ public class NpcCombat extends NpcPlayerOwned implements RangedAttackMob {
     public void performRangedAttack(LivingEntity target, float force) {
         // minimum inaccuracy = 3.0f, slowly reaches 0 (or close to it) as the NPC reaches max level
         float inaccuracy = 3.0f - ((float) Math.sqrt(getLevelingStats().getBaseLevel()) / (float) Math.sqrt(AWNPCStatics.maxNpcCombatLevel) * 3.0f);
+        inaccuracy *= (float) io.github.capttracker.ancientwarfarenpc.skill.SkillEffects.spreadFactor(getSkillRank(io.github.capttracker.ancientwarfarenpc.skill.Skill.COMBAT));
+        inaccuracy *= (float) io.github.capttracker.ancientwarfarenpc.trait.TraitEffects.spreadFactor(this); // keen eye
+        gainSkillXp(io.github.capttracker.ancientwarfarenpc.skill.Skill.COMBAT, SettlementConfig.skillXpHit);
         RangeAttackHelper.doRangedAttack(this, target, force, inaccuracy);
     }
 

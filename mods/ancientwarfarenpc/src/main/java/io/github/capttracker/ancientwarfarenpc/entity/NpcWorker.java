@@ -73,9 +73,29 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
     public BlockPos autoWorkTarget;
     /** The slots of the carry pouch (rework phase 3). */
     public static final int POUCH_SIZE = 9;
+    /** The most slots the pouch can have: {@link #POUCH_SIZE} and the bonus of the strong trait (the handler always has this many, the usable number varies). */
+    public static final int POUCH_SIZE_MAX = POUCH_SIZE + 3;
 
     /** What the worker carries from staffed worksites (harvest drops) until it empties the pouch into the site's inventory. Saved as {@code pouch}. */
-    private final ItemStackHandler pouch = new ItemStackHandler(POUCH_SIZE);
+    private final ItemStackHandler pouch = new ItemStackHandler(POUCH_SIZE_MAX) {
+        /** Only the usable slots (9, a strong worker 12) take new items; an older save with 9 slots is padded when it loads. */
+        @Override
+        public boolean isItemValid(int slot, ItemStack stack) {
+            return slot < pouchSlots();
+        }
+
+        @Override
+        public void deserializeNBT(net.minecraft.core.HolderLookup.Provider provider, CompoundTag nbt) {
+            super.deserializeNBT(provider, nbt);
+            if (stacks.size() < POUCH_SIZE_MAX) {
+                net.minecraft.core.NonNullList<ItemStack> padded = net.minecraft.core.NonNullList.withSize(POUCH_SIZE_MAX, ItemStack.EMPTY);
+                for (int i = 0; i < stacks.size(); i++) {
+                    padded.set(i, stacks.get(i));
+                }
+                stacks = padded;
+            }
+        }
+    };
     /** The staffed worksite the pouch content came from, where it is taken to; {@code null} if the pouch is empty. Saved as {@code pouchSite}. */
     @Nullable
     public BlockPos pouchSite;
@@ -128,6 +148,7 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
             return;
         }
         entityData.set(ROLE, value);
+        refreshSkillState();
         releaseJob();
         if (!level().isClientSide) {
             refreshMemberRecord();
@@ -301,10 +322,15 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
         return true;
     }
 
+    /** The slots of the pouch this worker can use: {@link #POUCH_SIZE}, and more for a strong worker. */
+    public int pouchSlots() {
+        return Math.min(POUCH_SIZE_MAX, POUCH_SIZE + io.github.capttracker.ancientwarfarenpc.trait.TraitEffects.pouchBonus(this));
+    }
+
     /** The number of empty slots in the pouch. */
     public int pouchFreeSlots() {
         int free = 0;
-        for (int slot = 0; slot < pouch.getSlots(); slot++) {
+        for (int slot = 0; slot < pouchSlots(); slot++) {
             if (pouch.getStackInSlot(slot).isEmpty()) {
                 free++;
             }
@@ -383,6 +409,7 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
         goalSelector.addGoal(0, (horseAI = new NpcAIPlayerOwnedRideHorse(this)));
         goalSelector.addGoal(2, new NpcAIFollowPlayer(this));
         goalSelector.addGoal(2, new NpcAIPlayerOwnedFollowCommand(this));
+        goalSelector.addGoal(2, new io.github.capttracker.ancientwarfarenpc.ai.owned.NpcAIBraveFight(this));
         goalSelector.addGoal(3, new NpcAIFleeHostiles(this));
         goalSelector.addGoal(3, new NpcAIPlayerOwnedAlarmResponse(this));
         goalSelector.addGoal(4, new NpcAIPlayerOwnedGetFood(this));
@@ -416,9 +443,27 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
         return "worker";
     }
 
+    /** A brave worker with a sword or an axe in its hand fights in an alarm instead of running to shelter. */
+    @Override
+    public boolean canFightAlarm() {
+        return hasTrait(io.github.capttracker.ancientwarfarenpc.trait.Trait.BRAVE) && io.github.capttracker.ancientwarfarenpc.trait.TraitEffects.isArmed(this);
+    }
+
     /** 1.12.2: 1 + 5% per level + 5% of the efficiency of the tool material; here the speed of the tier of the held tool. */
     @Override
     public float getWorkEffectiveness(WorkType type) {
+        float effectiveness = getBaseWorkEffectiveness(type);
+        io.github.capttracker.ancientwarfarenpc.skill.Skill skill = io.github.capttracker.ancientwarfarenpc.skill.Skill.ofWorkType(type);
+        if (effectiveness > 0.0F) {
+            double rankFactor = skill != null ? io.github.capttracker.ancientwarfarenpc.skill.SkillEffects.workSpeed(getSkillRank(skill)) : 1.0D; // the skill of the site's kind
+            effectiveness *= (float) io.github.capttracker.ancientwarfarenpc.skill.SkillEffects.clampSpeed(
+                    rankFactor * io.github.capttracker.ancientwarfarenpc.trait.TraitEffects.workSpeed(this, skill)); // with lazy, hardworking, night owl, keen eye
+        }
+        return effectiveness;
+    }
+
+    /** The effectiveness without the skill rank (the staffed work applies the rank of the skill of each task itself). */
+    public float getBaseWorkEffectiveness(WorkType type) {
         if (canWorkAt(type)) {
             float effectiveness = 1.f + this.getLevelingStats().getLevel() * 0.05F;
 

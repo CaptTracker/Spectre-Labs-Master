@@ -84,6 +84,7 @@ public class NpcAIPlayerOwnedWorkRandom extends NpcAI<NpcWorker> {
                 IWorkSite site = te.get();
                 if (site.hasWork()) {
                     npc.addExperience(AWNPCStatics.npcXpFromWork);
+                    npc.gainSkillXp(io.github.capttracker.ancientwarfarenpc.skill.Skill.ofWorkType(site.getWorkType()), io.github.capttracker.ancientwarfarenpc.settlement.SettlementConfig.skillXpWork);
                     site.addEnergyFromWorker(npc);
                 }
                 return; // with no work the worker waits: the job board releases the claim after the idle time

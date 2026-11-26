@@ -142,6 +142,7 @@ public class NpcAIPlayerOwnedWork extends NpcAI<NpcBase> {
                 IWorkSite site = workSite.get();
                 if (site.hasWork()) {
                     npc.addExperience(AWNPCStatics.npcXpFromWork);
+                    npc.gainSkillXp(io.github.capttracker.ancientwarfarenpc.skill.Skill.ofWorkType(site.getWorkType()), io.github.capttracker.ancientwarfarenpc.settlement.SettlementConfig.skillXpWork);
                     site.addEnergyFromWorker(worker);
                 } else {
                     if (shouldMoveFromNoWork()) {

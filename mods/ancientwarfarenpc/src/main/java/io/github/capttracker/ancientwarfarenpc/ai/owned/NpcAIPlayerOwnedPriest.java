@@ -120,6 +120,9 @@ public class NpcAIPlayerOwnedPriest extends NpcAI<NpcPlayerOwned> {
             Vec3 motion = resdNpc.getDeltaMovement();
             resdNpc.setDeltaMovement(motion.x, 0, motion.z);
             entry.resurrected = npc.level().addFreshEntity(resdNpc);
+            if (entry.resurrected) {
+                npc.gainSkillXp(io.github.capttracker.ancientwarfarenpc.skill.Skill.MEDICINE, io.github.capttracker.ancientwarfarenpc.settlement.SettlementConfig.skillXpHeal * 5);
+            }
         }
         Settlement townHall = getSettlement();
         if (townHall != null) {

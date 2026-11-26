@@ -94,7 +94,9 @@ public class PlayerOwnedTradeMenu extends NpcMenuBase<NpcTrader> {
         if (!isRequestAllowed() || tradeList == null || storage == null || !tag.contains("doTrade", Tag.TAG_INT)) {
             return;
         }
-        tradeList.performTrade(player, storage, tag.getInt("doTrade"));
+        if (tradeList.performTrade(player, storage, tag.getInt("doTrade")) && npc != null) {
+            npc.gainSkillXp(io.github.capttracker.ancientwarfarenpc.skill.Skill.TRADING, io.github.capttracker.ancientwarfarenpc.settlement.SettlementConfig.skillXpTrade);
+        }
     }
 
     /** Client side: asks the server to do trade number {@code tradeIndex}. */

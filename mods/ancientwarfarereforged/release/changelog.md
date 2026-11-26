@@ -69,11 +69,24 @@ First release of Ancient Warfare 2, rebuilt for Minecraft 1.21.1 on NeoForge. Al
 - **Workers pick the right tool for each job:** an axe for logs, a pickaxe for stone, a shovel for dirt, a hoe for tilling and shears for leaves and wool. They take it from their hand, a small tool belt or their pouch, or fetch one from your storage. They take their own tool back between jobs (`tool_switching` in the config).
 - Hunger now counts once toward work speed, through the NPC's morale. The config keys `hungry_work_factor` and `starving_work_factor` are gone.
 
+## NPC skills and traits
+- **Skills:** your NPCs learn by doing. Each one has 11 skills (mining, woodcutting, farming, fishing, husbandry, crafting, trading, hauling, combat, medicine and building), and each skill has its own experience. Experience comes from the work: finished tasks at a worksite, hits, arrows and kills, trades, courier deliveries, medic heals, priest resurrections and feeding horses. NPCs from older worlds start at zero.
+- **Ranks:** Novice, Apprentice, Journeyman, Expert and Master. A new rank shows up as a thought, lifts the NPC's morale for half a day and plays a sound with a few particles.
+- **What ranks do:** a higher rank works faster (x0.9 at Novice to x1.4 at Master), has a small chance of one extra ore, crop or log, and a shorter wait for a fish. Fighters hit harder, take less damage from creatures and shoot straighter. Medics heal more.
+- **Names:** the rank of an NPC's main skill is part of its name, like "Apprentice Miner Bill". A name tag still wins. The census and the Jade/WTHIT tooltip show the rank too.
+- **Skills tab:** talk to an NPC to see every skill with its rank, a progress bar and its experience.
+- **Traits:** every NPC is born with one or two traits out of 17: lazy, hardworking, brave, cowardly, glutton, frugal, devout, night owl, early riser, sociable, loner, quick learner, clumsy, strong, tough, green thumb and keen eye. Opposites never go together. Traits change work speed, hunger, fear, daily schedule, learning, fighting and morale, and the morale tab names the points a trait adds. NPCs from older worlds get their traits the first time they load.
+- **Brave NPCs** never run from hostiles, and a brave worker with a sword or axe fights instead of hiding in an alarm. **Cowardly NPCs** spot danger from farther away and run earlier.
+- **Night owls** and **early risers** shift their whole day, and night owls are picked for the night watch more often.
+- The talk screen lists an NPC's traits with a line about each, and the census row and the Jade/WTHIT tooltip show them.
+- Both are tuned in `ancientwarfarenpc-settlements.toml` (sections `skills` and `traits`). `skill_xp_multiplier` scales all experience (0 switches it off), `skill_rank_in_name` hides the ranks in names, and `traits_enabled` switches traits off.
+
 ## Quality of life
 - **Census tab** on the town hall screen: one row for every member of the settlement with its role, mood, distance and direction from the hall (or "unloaded"), what it is doing, and problem icons (starving, hungry, no bed, no tool, no job, badly hurt, no path, alarm). Sort by name, role, mood or problems, and filter by problems or a single role. Click a row to make that NPC glow for 10 seconds with a particle beam leading to it (only you see it); an NPC that is unloaded or out of view gets its last known position in chat. The list refreshes every 2 seconds while the tab is open (`census_refresh_ticks`).
 - **Jade and WTHIT support (optional):** look at an NPC to see its role, owner or faction, mood, current task and health. Look at a worksite (farm, quarry, tree farm, fishing, apiary, smelter, dock, market stall, inn, stable) to see workers out of slots, its status (working, idle, waiting for workers, tools or ladders, storage full, needs a bed and a table) and the settlement it belongs to. Each tooltip can be switched off in the Jade or WTHIT config screen.
 
 ## Known issues
+- Not yet play-tested in a running game: NPC skills, ranks and traits (the effects, the Skills tab and the rank in names).
 - Not yet play-tested in a running game: NPC helmsmen, swimming out to a ship, and the cog's oars.
 - A helmsman only looks ahead over the water. A bay or an island between the ship and the destination is steered round as far as it can see, and it gives up if it makes no headway.
 - A helmsman needs water at least 2 blocks deep at the spot you click. Faction NPCs can't take the helm, and they only crew a ship whose helm is held by an ally.

@@ -157,6 +157,64 @@ public final class SettlementConfig {
         return moraleMinFactor + (moraleMaxFactor - moraleMinFactor) * (Math.max(0, Math.min(100, morale)) / 100.0D);
     }
 
+    // ---- worker skills (rework phase 7) ----
+    /** Multiplier on all skill experience (0 switches the experience off). */
+    public static double skillXpMultiplier = 1.0;
+    /** Experience for a completed work task, a hit, a kill, a trade, a delivery and a heal (before the multiplier). */
+    public static int skillXpWork = 10;
+    public static int skillXpHit = 2;
+    public static int skillXpKill = 20;
+    public static int skillXpTrade = 8;
+    public static int skillXpDelivery = 6;
+    public static int skillXpHeal = 5;
+    /** The experience at which Apprentice, Journeyman, Expert and Master start. */
+    public static int[] skillRankXp = {100, 500, 1500, 4000};
+    /** Work speed factor at Novice and at Master (the ranks between go in equal steps). */
+    public static double skillSpeedNovice = 0.9;
+    public static double skillSpeedMaster = 1.4;
+    /** Chance of one extra item from an ore, crop or log at Master (0 at Novice). */
+    public static double skillYieldChanceMaster = 0.15;
+    /** Extra damage dealt, damage taken less, arrow spread less and extra healing at Master (0 at Novice), as fractions. */
+    public static double skillDamageBonusMaster = 0.3;
+    public static double skillDamageTakenReductionMaster = 0.2;
+    public static double skillSpreadReductionMaster = 0.5;
+    public static double skillHealBonusMaster = 0.5;
+    /** Morale points for a level-up and how long they last in ticks. */
+    public static int skillLevelUpMorale = 4;
+    public static int skillLevelUpMoraleTicks = 12000;
+    /** If true, the rank of the main skill is part of the name of the NPC ("Apprentice Miner Bill"). A name tag always wins. */
+    public static boolean skillRankInName = true;
+
+    // ---- traits (rework phase 7) ----
+    public static boolean traitsEnabled = true;
+    public static double traitSecondChance = 0.5;
+    public static double traitInheritNewChance = 0.2;
+    public static double traitLazySpeed = 0.85;
+    public static double traitLazyPauseChance = 0.3;
+    public static double traitHardworkingSpeed = 1.15;
+    public static int traitHardworkingIdleMorale = -3;
+    public static double traitCowardlyFleeRange = 1.5;
+    public static double traitGluttonHunger = 1.3;
+    public static int traitGluttonMealMorale = 3;
+    public static double traitFrugalHunger = 0.75;
+    public static int traitDevoutMorale = 4;
+    public static int traitDevoutRadius = 24;
+    public static int traitNightOwlShift = 1500;
+    public static int traitEarlyRiserShift = 1000;
+    public static double traitNightOwlSpeed = 1.1;
+    public static double traitNightOwlWatch = 2.0;
+    public static int traitSociableMorale = 3;
+    public static int traitLonerMorale = 3;
+    public static double traitQuickLearnerXp = 1.5;
+    public static double traitClumsyToolChance = 0.04;
+    public static double traitClumsyDropChance = 0.02;
+    public static int traitStrongPouchSlots = 3;
+    public static double traitStrongDamage = 0.15;
+    public static double traitToughHealth = 0.25;
+    public static double traitGreenThumbYield = 0.15;
+    public static double traitKeenEyeSpread = 0.75;
+    public static double traitKeenEyeFishing = 1.2;
+
     // ---- inn and stable hand (rework phase 5) ----
     /** Blocks around the inn within which the innkeeper serves the members that gather. */
     public static int innServeRadius = 6;
@@ -261,6 +319,55 @@ public final class SettlementConfig {
     private static final ModConfigSpec.IntValue NPC_DAY_FOOD;
     private static final ModConfigSpec.IntValue MARKER_MAX_DISTANCE;
     private static final ModConfigSpec.IntValue DEFAULT_RADIUS;
+    private static final ModConfigSpec.DoubleValue SKILL_XP_MULT;
+    private static final ModConfigSpec.IntValue SKILL_XP_WORK;
+    private static final ModConfigSpec.IntValue SKILL_XP_HIT;
+    private static final ModConfigSpec.IntValue SKILL_XP_KILL;
+    private static final ModConfigSpec.IntValue SKILL_XP_TRADE;
+    private static final ModConfigSpec.IntValue SKILL_XP_DELIVERY;
+    private static final ModConfigSpec.IntValue SKILL_XP_HEAL;
+    private static final ModConfigSpec.IntValue SKILL_RANK_APPRENTICE;
+    private static final ModConfigSpec.IntValue SKILL_RANK_JOURNEYMAN;
+    private static final ModConfigSpec.IntValue SKILL_RANK_EXPERT;
+    private static final ModConfigSpec.IntValue SKILL_RANK_MASTER;
+    private static final ModConfigSpec.DoubleValue SKILL_SPEED_NOVICE;
+    private static final ModConfigSpec.DoubleValue SKILL_SPEED_MASTER;
+    private static final ModConfigSpec.DoubleValue SKILL_YIELD_MASTER;
+    private static final ModConfigSpec.DoubleValue SKILL_DAMAGE_MASTER;
+    private static final ModConfigSpec.DoubleValue SKILL_TAKEN_MASTER;
+    private static final ModConfigSpec.DoubleValue SKILL_SPREAD_MASTER;
+    private static final ModConfigSpec.DoubleValue SKILL_HEAL_MASTER;
+    private static final ModConfigSpec.IntValue SKILL_LEVELUP_MORALE;
+    private static final ModConfigSpec.IntValue SKILL_LEVELUP_MORALE_TICKS;
+    private static final ModConfigSpec.BooleanValue SKILL_RANK_IN_NAME;
+    private static final ModConfigSpec.BooleanValue TR_TRAITS_ENABLED;
+    private static final ModConfigSpec.DoubleValue TR_TRAIT_SECOND_CHANCE;
+    private static final ModConfigSpec.DoubleValue TR_TRAIT_INHERIT_NEW_CHANCE;
+    private static final ModConfigSpec.DoubleValue TR_TRAIT_LAZY_SPEED;
+    private static final ModConfigSpec.DoubleValue TR_TRAIT_LAZY_PAUSE_CHANCE;
+    private static final ModConfigSpec.DoubleValue TR_TRAIT_HARDWORKING_SPEED;
+    private static final ModConfigSpec.IntValue TR_TRAIT_HARDWORKING_IDLE_MORALE;
+    private static final ModConfigSpec.DoubleValue TR_TRAIT_COWARDLY_FLEE_RANGE;
+    private static final ModConfigSpec.DoubleValue TR_TRAIT_GLUTTON_HUNGER;
+    private static final ModConfigSpec.IntValue TR_TRAIT_GLUTTON_MEAL_MORALE;
+    private static final ModConfigSpec.DoubleValue TR_TRAIT_FRUGAL_HUNGER;
+    private static final ModConfigSpec.IntValue TR_TRAIT_DEVOUT_MORALE;
+    private static final ModConfigSpec.IntValue TR_TRAIT_DEVOUT_RADIUS;
+    private static final ModConfigSpec.IntValue TR_TRAIT_NIGHT_OWL_SHIFT_TICKS;
+    private static final ModConfigSpec.IntValue TR_TRAIT_EARLY_RISER_SHIFT_TICKS;
+    private static final ModConfigSpec.DoubleValue TR_TRAIT_NIGHT_OWL_SPEED;
+    private static final ModConfigSpec.DoubleValue TR_TRAIT_NIGHT_OWL_WATCH_WEIGHT;
+    private static final ModConfigSpec.IntValue TR_TRAIT_SOCIABLE_MORALE;
+    private static final ModConfigSpec.IntValue TR_TRAIT_LONER_MORALE;
+    private static final ModConfigSpec.DoubleValue TR_TRAIT_QUICK_LEARNER_XP;
+    private static final ModConfigSpec.DoubleValue TR_TRAIT_CLUMSY_TOOL_CHANCE;
+    private static final ModConfigSpec.DoubleValue TR_TRAIT_CLUMSY_DROP_CHANCE;
+    private static final ModConfigSpec.IntValue TR_TRAIT_STRONG_POUCH_SLOTS;
+    private static final ModConfigSpec.DoubleValue TR_TRAIT_STRONG_DAMAGE;
+    private static final ModConfigSpec.DoubleValue TR_TRAIT_TOUGH_HEALTH;
+    private static final ModConfigSpec.DoubleValue TR_TRAIT_GREEN_THUMB_YIELD;
+    private static final ModConfigSpec.DoubleValue TR_TRAIT_KEEN_EYE_SPREAD;
+    private static final ModConfigSpec.DoubleValue TR_TRAIT_KEEN_EYE_FISHING;
     public static final ModConfigSpec SPEC;
 
     static {
@@ -434,6 +541,108 @@ public final class SettlementConfig {
         STABLE_TAME_TICKS = builder.comment("Default = 160", "Ticks a stable hand stays with a wild horse, donkey or mule before it is tame.")
                 .defineInRange("stable_tame_ticks", 160, 20, 6000);
         builder.pop();
+        builder.comment("Worker skills and ranks (server side)").push("skills");
+        SKILL_XP_MULT = builder.comment("Default = 1.0", "Multiplier on all skill experience the NPCs earn. 0 switches skills off.")
+                .defineInRange("skill_xp_multiplier", 1.0, 0.0, 100.0);
+        SKILL_XP_WORK = builder.comment("Default = 10", "Experience for a completed task at a staffed worksite (a block broken, a crop harvested, a fish caught, an animal tended).")
+                .defineInRange("skill_xp_work_task", 10, 0, 1000);
+        SKILL_XP_HIT = builder.comment("Default = 2", "Combat experience for a hit landed (melee or an arrow shot).")
+                .defineInRange("skill_xp_hit", 2, 0, 1000);
+        SKILL_XP_KILL = builder.comment("Default = 20", "Combat experience for a kill.")
+                .defineInRange("skill_xp_kill", 20, 0, 1000);
+        SKILL_XP_TRADE = builder.comment("Default = 8", "Trading experience for a trade a player makes with the trader (at most one gain per 5 seconds per NPC).")
+                .defineInRange("skill_xp_trade", 8, 0, 1000);
+        SKILL_XP_DELIVERY = builder.comment("Default = 6", "Hauling experience for one delivery, a stop where a courier moved items (at most one gain per 5 seconds per NPC).")
+                .defineInRange("skill_xp_delivery", 6, 0, 1000);
+        SKILL_XP_HEAL = builder.comment("Default = 5", "Medicine experience for one heal by a medic (a resurrection by a priest gives 5 times this).")
+                .defineInRange("skill_xp_heal", 5, 0, 1000);
+        SKILL_RANK_APPRENTICE = builder.comment("Default = 100", "Experience in a skill at which the rank Apprentice starts.")
+                .defineInRange("skill_rank_apprentice_xp", 100, 1, 1000000);
+        SKILL_RANK_JOURNEYMAN = builder.comment("Default = 500", "Experience at which Journeyman starts (raised to above Apprentice if lower).")
+                .defineInRange("skill_rank_journeyman_xp", 500, 1, 1000000);
+        SKILL_RANK_EXPERT = builder.comment("Default = 1500", "Experience at which Expert starts (raised to above Journeyman if lower).")
+                .defineInRange("skill_rank_expert_xp", 1500, 1, 1000000);
+        SKILL_RANK_MASTER = builder.comment("Default = 4000", "Experience at which Master starts (raised to above Expert if lower).")
+                .defineInRange("skill_rank_master_xp", 4000, 1, 1000000);
+        SKILL_SPEED_NOVICE = builder.comment("Default = 0.9", "Work speed factor of a Novice at the task of the skill (the ranks go in equal steps to the Master value).")
+                .defineInRange("skill_speed_novice", 0.9, 0.1, 5.0);
+        SKILL_SPEED_MASTER = builder.comment("Default = 1.4", "Work speed factor of a Master. The bite time of fishing shortens the same way.")
+                .defineInRange("skill_speed_master", 1.4, 0.1, 5.0);
+        SKILL_YIELD_MASTER = builder.comment("Default = 0.15", "Chance of one extra item from an ore, a harvested crop or a log at Master (0 at Novice, in equal steps).")
+                .defineInRange("skill_yield_chance_master", 0.15, 0.0, 1.0);
+        SKILL_DAMAGE_MASTER = builder.comment("Default = 0.3", "Extra damage dealt by a Master fighter (0.3 = 30% more; 0 at Novice).")
+                .defineInRange("skill_damage_bonus_master", 0.3, 0.0, 5.0);
+        SKILL_TAKEN_MASTER = builder.comment("Default = 0.2", "Damage a Master fighter takes less from creatures (0.2 = 20% less; 0 at Novice).")
+                .defineInRange("skill_damage_taken_reduction_master", 0.2, 0.0, 0.9);
+        SKILL_SPREAD_MASTER = builder.comment("Default = 0.5", "How much less the arrows of a Master archer spread (0.5 = half; 0 at Novice).")
+                .defineInRange("skill_arrow_spread_reduction_master", 0.5, 0.0, 1.0);
+        SKILL_HEAL_MASTER = builder.comment("Default = 0.5", "Extra healing per try of a Master medic (0.5 = 50% more; 0 at Novice).")
+                .defineInRange("skill_heal_bonus_master", 0.5, 0.0, 5.0);
+        SKILL_LEVELUP_MORALE = builder.comment("Default = 4", "Morale points an NPC gets for a while after it reaches a new rank.")
+                .defineInRange("skill_level_up_morale", 4, 0, 30);
+        SKILL_LEVELUP_MORALE_TICKS = builder.comment("Default = 12000 (half a day)", "How long the level-up morale lasts.")
+                .defineInRange("skill_level_up_morale_ticks", 12000, 20, 2400000);
+        SKILL_RANK_IN_NAME = builder.comment("Default = true", "If true, the rank of the main skill is part of the name (Apprentice Miner Bill). A name tag always replaces it.")
+                .define("skill_rank_in_name", true);
+        builder.pop();
+        builder.comment("NPC traits (server side)").push("traits");
+        TR_TRAITS_ENABLED = builder.comment("Default = true", "If false, NPCs get no traits and traits do nothing.")
+                .define("traits_enabled", true);
+        TR_TRAIT_SECOND_CHANCE = builder.comment("Default = 0.5", "Chance that a new NPC gets a second trait (every NPC gets at least one).")
+                .defineInRange("trait_second_chance", 0.5, 0.0, 1.0);
+        TR_TRAIT_INHERIT_NEW_CHANCE = builder.comment("Default = 0.2", "Chance that a trait a child would inherit is replaced by a newly rolled one (used by the families of phase 10).")
+                .defineInRange("trait_inherit_new_chance", 0.2, 0.0, 1.0);
+        TR_TRAIT_LAZY_SPEED = builder.comment("Default = 0.85", "Work speed factor of a lazy NPC.")
+                .defineInRange("trait_lazy_speed", 0.85, 0.1, 2.0);
+        TR_TRAIT_LAZY_PAUSE_CHANCE = builder.comment("Default = 0.3", "Chance that a lazy NPC idles for a few seconds before a task.")
+                .defineInRange("trait_lazy_pause_chance", 0.3, 0.0, 1.0);
+        TR_TRAIT_HARDWORKING_SPEED = builder.comment("Default = 1.15", "Work speed factor of a hardworking NPC.")
+                .defineInRange("trait_hardworking_speed", 1.15, 0.1, 3.0);
+        TR_TRAIT_HARDWORKING_IDLE_MORALE = builder.comment("Default = -3", "Morale points a hardworking NPC loses while it has no job.")
+                .defineInRange("trait_hardworking_idle_morale", -3, -30, 0);
+        TR_TRAIT_COWARDLY_FLEE_RANGE = builder.comment("Default = 1.5", "Factor on the distance at which a cowardly NPC notices a hostile and runs.")
+                .defineInRange("trait_cowardly_flee_range", 1.5, 1.0, 4.0);
+        TR_TRAIT_GLUTTON_HUNGER = builder.comment("Default = 1.3", "Factor on how fast a glutton uses up its food.")
+                .defineInRange("trait_glutton_hunger", 1.3, 1.0, 4.0);
+        TR_TRAIT_GLUTTON_MEAL_MORALE = builder.comment("Default = 3", "Extra morale points a glutton gets from a meal at the inn (and 2 while well fed).")
+                .defineInRange("trait_glutton_meal_morale", 3, 0, 30);
+        TR_TRAIT_FRUGAL_HUNGER = builder.comment("Default = 0.75", "Factor on how fast a frugal NPC uses up its food.")
+                .defineInRange("trait_frugal_hunger", 0.75, 0.1, 1.0);
+        TR_TRAIT_DEVOUT_MORALE = builder.comment("Default = 4", "Morale points a devout NPC gets near a priest of its settlement (or a chapel, phase 9).")
+                .defineInRange("trait_devout_morale", 4, 0, 30);
+        TR_TRAIT_DEVOUT_RADIUS = builder.comment("Default = 24", "Blocks within which a devout NPC feels near a priest.")
+                .defineInRange("trait_devout_radius", 24, 1, 128);
+        TR_TRAIT_NIGHT_OWL_SHIFT_TICKS = builder.comment("Default = 1500", "How many ticks later the day of a night owl runs (it works, socialises and sleeps later).")
+                .defineInRange("trait_night_owl_shift_ticks", 1500, 0, 6000);
+        TR_TRAIT_EARLY_RISER_SHIFT_TICKS = builder.comment("Default = 1000", "How many ticks earlier the day of an early riser runs.")
+                .defineInRange("trait_early_riser_shift_ticks", 1000, 0, 6000);
+        TR_TRAIT_NIGHT_OWL_SPEED = builder.comment("Default = 1.1", "Work speed factor of a night owl at night.")
+                .defineInRange("trait_night_owl_speed", 1.1, 1.0, 2.0);
+        TR_TRAIT_NIGHT_OWL_WATCH_WEIGHT = builder.comment("Default = 2.0", "How much more likely a night owl is picked for the night watch (an early riser is that much less likely).")
+                .defineInRange("trait_night_owl_watch_weight", 2.0, 1.0, 10.0);
+        TR_TRAIT_SOCIABLE_MORALE = builder.comment("Default = 3", "Morale points a sociable NPC gets from socialising; it loses 1 more than this when alone for a day.")
+                .defineInRange("trait_sociable_morale", 3, 0, 20);
+        TR_TRAIT_LONER_MORALE = builder.comment("Default = 3", "Morale points a loner gets from working away from the others; it gets 2 less from socialising.")
+                .defineInRange("trait_loner_morale", 3, 0, 20);
+        TR_TRAIT_QUICK_LEARNER_XP = builder.comment("Default = 1.5", "Factor on the skill experience of a quick learner.")
+                .defineInRange("trait_quick_learner_xp", 1.5, 1.0, 10.0);
+        TR_TRAIT_CLUMSY_TOOL_CHANCE = builder.comment("Default = 0.04", "Chance per task that a clumsy NPC wastes one more point of durability of its tool.")
+                .defineInRange("trait_clumsy_tool_chance", 0.04, 0.0, 1.0);
+        TR_TRAIT_CLUMSY_DROP_CHANCE = builder.comment("Default = 0.02", "Chance per task that a clumsy worker drops one carried item at the site.")
+                .defineInRange("trait_clumsy_drop_chance", 0.02, 0.0, 1.0);
+        TR_TRAIT_STRONG_POUCH_SLOTS = builder.comment("Default = 3", "Extra slots in the carry pouch of a strong worker (at most 3).")
+                .defineInRange("trait_strong_pouch_slots", 3, 0, 3);
+        TR_TRAIT_STRONG_DAMAGE = builder.comment("Default = 0.15", "Extra attack damage of a strong NPC (0.15 = 15% more).")
+                .defineInRange("trait_strong_damage", 0.15, 0.0, 5.0);
+        TR_TRAIT_TOUGH_HEALTH = builder.comment("Default = 0.25", "Extra health of a tough NPC (0.25 = 25% more).")
+                .defineInRange("trait_tough_health", 0.25, 0.0, 5.0);
+        TR_TRAIT_GREEN_THUMB_YIELD = builder.comment("Default = 0.15", "Extra chance of one more item from a harvested crop for a green thumb.")
+                .defineInRange("trait_green_thumb_yield", 0.15, 0.0, 1.0);
+        TR_TRAIT_KEEN_EYE_SPREAD = builder.comment("Default = 0.75", "Factor on the arrow spread of a keen-eyed NPC (smaller is more accurate).")
+                .defineInRange("trait_keen_eye_spread", 0.75, 0.0, 1.0);
+        TR_TRAIT_KEEN_EYE_FISHING = builder.comment("Default = 1.2", "Fishing speed factor of a keen-eyed NPC.")
+                .defineInRange("trait_keen_eye_fishing", 1.2, 1.0, 3.0);
+        builder.pop();
         builder.comment("Guard captain (server side)").push("guard_captain");
         CAPTAIN_BUFF_RADIUS = builder.comment("Default = 24", "Combat NPCs of the settlement within this many blocks of the captain get Strength I and Resistance I while the captain is in combat.")
                 .defineInRange("captain_buff_radius", 24, 4, 128);
@@ -533,6 +742,56 @@ public final class SettlementConfig {
             captainBuffTicks = CAPTAIN_BUFF_TICKS.get();
             captainLineSpacing = CAPTAIN_LINE_SPACING.get();
             captainLineDistance = CAPTAIN_LINE_DISTANCE.get();
+            skillXpMultiplier = SKILL_XP_MULT.get();
+            skillXpWork = SKILL_XP_WORK.get();
+            skillXpHit = SKILL_XP_HIT.get();
+            skillXpKill = SKILL_XP_KILL.get();
+            skillXpTrade = SKILL_XP_TRADE.get();
+            skillXpDelivery = SKILL_XP_DELIVERY.get();
+            skillXpHeal = SKILL_XP_HEAL.get();
+            int apprentice = SKILL_RANK_APPRENTICE.get();
+            int journeyman = Math.max(apprentice + 1, SKILL_RANK_JOURNEYMAN.get());
+            int expert = Math.max(journeyman + 1, SKILL_RANK_EXPERT.get());
+            int master = Math.max(expert + 1, SKILL_RANK_MASTER.get());
+            skillRankXp = new int[]{apprentice, journeyman, expert, master};
+            skillSpeedNovice = SKILL_SPEED_NOVICE.get();
+            skillSpeedMaster = SKILL_SPEED_MASTER.get();
+            skillYieldChanceMaster = SKILL_YIELD_MASTER.get();
+            skillDamageBonusMaster = SKILL_DAMAGE_MASTER.get();
+            skillDamageTakenReductionMaster = SKILL_TAKEN_MASTER.get();
+            skillSpreadReductionMaster = SKILL_SPREAD_MASTER.get();
+            skillHealBonusMaster = SKILL_HEAL_MASTER.get();
+            skillLevelUpMorale = SKILL_LEVELUP_MORALE.get();
+            skillLevelUpMoraleTicks = SKILL_LEVELUP_MORALE_TICKS.get();
+            skillRankInName = SKILL_RANK_IN_NAME.get();
+            traitsEnabled = TR_TRAITS_ENABLED.get();
+            traitSecondChance = TR_TRAIT_SECOND_CHANCE.get();
+            traitInheritNewChance = TR_TRAIT_INHERIT_NEW_CHANCE.get();
+            traitLazySpeed = TR_TRAIT_LAZY_SPEED.get();
+            traitLazyPauseChance = TR_TRAIT_LAZY_PAUSE_CHANCE.get();
+            traitHardworkingSpeed = TR_TRAIT_HARDWORKING_SPEED.get();
+            traitHardworkingIdleMorale = TR_TRAIT_HARDWORKING_IDLE_MORALE.get();
+            traitCowardlyFleeRange = TR_TRAIT_COWARDLY_FLEE_RANGE.get();
+            traitGluttonHunger = TR_TRAIT_GLUTTON_HUNGER.get();
+            traitGluttonMealMorale = TR_TRAIT_GLUTTON_MEAL_MORALE.get();
+            traitFrugalHunger = TR_TRAIT_FRUGAL_HUNGER.get();
+            traitDevoutMorale = TR_TRAIT_DEVOUT_MORALE.get();
+            traitDevoutRadius = TR_TRAIT_DEVOUT_RADIUS.get();
+            traitNightOwlShift = TR_TRAIT_NIGHT_OWL_SHIFT_TICKS.get();
+            traitEarlyRiserShift = TR_TRAIT_EARLY_RISER_SHIFT_TICKS.get();
+            traitNightOwlSpeed = TR_TRAIT_NIGHT_OWL_SPEED.get();
+            traitNightOwlWatch = TR_TRAIT_NIGHT_OWL_WATCH_WEIGHT.get();
+            traitSociableMorale = TR_TRAIT_SOCIABLE_MORALE.get();
+            traitLonerMorale = TR_TRAIT_LONER_MORALE.get();
+            traitQuickLearnerXp = TR_TRAIT_QUICK_LEARNER_XP.get();
+            traitClumsyToolChance = TR_TRAIT_CLUMSY_TOOL_CHANCE.get();
+            traitClumsyDropChance = TR_TRAIT_CLUMSY_DROP_CHANCE.get();
+            traitStrongPouchSlots = TR_TRAIT_STRONG_POUCH_SLOTS.get();
+            traitStrongDamage = TR_TRAIT_STRONG_DAMAGE.get();
+            traitToughHealth = TR_TRAIT_TOUGH_HEALTH.get();
+            traitGreenThumbYield = TR_TRAIT_GREEN_THUMB_YIELD.get();
+            traitKeenEyeSpread = TR_TRAIT_KEEN_EYE_SPREAD.get();
+            traitKeenEyeFishing = TR_TRAIT_KEEN_EYE_FISHING.get();
         }
     }
 }
