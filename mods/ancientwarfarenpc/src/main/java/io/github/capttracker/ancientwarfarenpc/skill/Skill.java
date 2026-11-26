@@ -16,7 +16,7 @@ import java.util.Locale;
  */
 public enum Skill {
     MINING, WOODCUTTING, FARMING, FISHING, HUSBANDRY, CRAFTING, TRADING, HAULING, COMBAT, MEDICINE,
-    /** Reserved for the builders of phase 9: no work gives experience for it yet. */
+    /** The builders of phase 9 (and the engineer of the combat NPCs): a builder gains it for each block it places or takes down. */
     BUILDING;
 
     public static final Skill[] ALL = values();
@@ -74,6 +74,7 @@ public enum Skill {
             case FORESTRY -> WOODCUTTING;
             case FARMING -> FARMING;
             case CRAFTING, RESEARCH, SMITHING, TANNING -> CRAFTING;
+            case BUILDING -> BUILDING;
             case NONE -> null;
         };
     }
@@ -93,6 +94,7 @@ public enum Skill {
                 case "lumberjack" -> WOODCUTTING;
                 case "miner" -> MINING;
                 case "researcher", "craftsman", "smith", "tanner" -> CRAFTING;
+                case "builder" -> BUILDING;
                 default -> null;
             };
             case "combat" -> switch (sub) {

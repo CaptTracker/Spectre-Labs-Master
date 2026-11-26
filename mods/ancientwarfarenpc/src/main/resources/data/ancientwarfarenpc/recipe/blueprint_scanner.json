@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    { "item": "ancientwarfarenpc:settlement_ledger" },
+    { "item": "minecraft:compass" },
+    { "item": "minecraft:ink_sac" }
+  ],
+  "result": {
+    "id": "ancientwarfarenpc:blueprint_scanner",
+    "count": 1
+  }
+}

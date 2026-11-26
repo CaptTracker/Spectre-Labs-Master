@@ -180,6 +180,7 @@ public class SettlementData extends SavedData {
                 SettlementLife.tick(level, settlement, server.getTickCount() % SettlementLife.SCAN_INTERVAL == 0);
                 SettlementMorale.tick(level, settlement);
                 SettlementNeeds.tick(level, settlement);
+                io.github.capttracker.ancientwarfarenpc.settlement.building.BuildingPlanner.tick(level, settlement);
             }
             if (level != null && settlement.hasAlert(SettlementApi.ALERT_NO_FOOD) && !SettlementApi.storagesWithFood(level, settlement).isEmpty()) {
                 settlement.clearAlert(SettlementApi.ALERT_NO_FOOD);

@@ -72,7 +72,7 @@ Each phase builds and can be played on its own.
 ### Phase 5: Traders and caravans (M to L)
 - **Settlement traders.** Traders buy and sell, with prices and access set by faction reputation.
 - **Caravans.** Travelling caravans with wagons move between settlements and NPC faction camps. Stock depends on the biome and the faction.
-- **New NPC types.** An innkeeper, a stable hand, a guard captain, and a builder. The builder stays parked until structures come back.
+- **New NPC types.** An innkeeper, a stable hand, a guard captain, and a builder. The builder is built in phase 9 (settlement expansion and builders): it places the designs the settlement planner queues, with materials from settlement storage.
 
 ## Owner decisions (2026-11-19)
 - **Q1, land:** **placed boundary markers** decide the settlement's land.
@@ -403,7 +403,7 @@ Each is an owned NPC type, made with a spawner recipe and research in the existi
   - The captain sets the patrol route (the border markers, or waypoints set with the command baton).
   - Rallies soldiers into a line facing the threat during an alarm.
   - The hall gets a **Guard** tab with patrol on or off, the night-watch fraction and the auto-alarm settings. These are stored per settlement and override the config defaults.
-- **Builder.** Stays parked until structures come back.
+- **Builder.** Built in phase 9: it places the building designs of the settlement block by block, taking the blocks from settlement storage.
 
 ## Open questions for the owner
 - **Q1.** Should a settlement claim land automatically as a radius around the hall, or with marker or flag blocks the player places?

@@ -1,0 +1,96 @@
+{
+  "name": "Small Timber House",
+  "category": "house",
+  "style": "timber",
+  "size": [7, 7, 7],
+  "front": "south",
+  "palette": {
+    "W": "minecraft:oak_log[axis=y]",
+    "L": "minecraft:cobblestone",
+    "S": "minecraft:red_bed[part=head,facing=north]",
+    "B": "minecraft:red_bed[part=foot,facing=north]",
+    "C": "minecraft:furnace[facing=east,lit=false]",
+    "D": "minecraft:crafting_table",
+    "F": "minecraft:oak_door[facing=north,half=lower,hinge=left,open=false]",
+    "H": "minecraft:glass_pane[east=true,west=true]",
+    "I": "minecraft:white_terracotta",
+    "J": "minecraft:glass_pane[north=true,south=true]",
+    "K": "minecraft:wall_torch[facing=north]",
+    "M": "minecraft:oak_door[facing=north,half=upper,hinge=left,open=false]",
+    "N": "minecraft:oak_log[axis=x]",
+    "O": "minecraft:oak_log[axis=z]",
+    "P": "minecraft:spruce_stairs[facing=north,half=bottom,shape=straight]",
+    "Q": "minecraft:lantern[hanging=true]",
+    "R": "minecraft:spruce_stairs[facing=south,half=bottom,shape=straight]",
+    "T": "minecraft:chain[axis=y]",
+    "U": "minecraft:spruce_slab[type=bottom]"
+  },
+  "layers": [
+    [
+      "WLLLLLW",
+      "LS...SL",
+      "LB...BL",
+      "L.....L",
+      "L.....L",
+      "LC...DL",
+      "WLWFWLW"
+    ],
+    [
+      "WHIIIHW",
+      "I.....I",
+      "I.....I",
+      "J.....J",
+      "I.....I",
+      "I.K.K.I",
+      "WHWMWHW"
+    ],
+    [
+      "WNNNNNW",
+      "O.....O",
+      "O.....O",
+      "O.....O",
+      "O.....O",
+      "O.....O",
+      "WNWNWNW"
+    ],
+    [
+      "PPPPPPP",
+      "I_____I",
+      "I_____I",
+      "I__Q__I",
+      "I_____I",
+      "I_____I",
+      "RRRRRRR"
+    ],
+    [
+      "_______",
+      "PPPPPPP",
+      "I_____I",
+      "I__T__I",
+      "I_____I",
+      "RRRRRRR",
+      "_______"
+    ],
+    [
+      "_______",
+      "_______",
+      "PPPPPPP",
+      "I__T__I",
+      "RRRRRRR",
+      "_______",
+      "_______"
+    ],
+    [
+      "_______",
+      "_______",
+      "_______",
+      "UUUUUUU",
+      "_______",
+      "_______",
+      "_______"
+    ]
+  ],
+  "beds": 2,
+  "storage": 0,
+  "tags": ["housing_capacity", "upgrade_of=ancientwarfarenpc:tent_canvas"]
+}

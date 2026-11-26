@@ -1,0 +1,133 @@
+{
+  "name": "Small Norse House",
+  "category": "house",
+  "style": "norse",
+  "size": [7, 11, 7],
+  "front": "south",
+  "palette": {
+    "W": "minecraft:dark_oak_log[axis=y]",
+    "L": "minecraft:cobblestone",
+    "S": "minecraft:brown_bed[part=head,facing=north]",
+    "B": "minecraft:brown_bed[part=foot,facing=north]",
+    "C": "minecraft:furnace[facing=east,lit=false]",
+    "D": "minecraft:crafting_table",
+    "F": "minecraft:spruce_door[facing=north,half=lower,hinge=left,open=false]",
+    "H": "minecraft:glass_pane[east=true,west=true]",
+    "I": "minecraft:spruce_planks",
+    "J": "minecraft:glass_pane[north=true,south=true]",
+    "K": "minecraft:wall_torch[facing=north]",
+    "M": "minecraft:spruce_door[facing=north,half=upper,hinge=left,open=false]",
+    "N": "minecraft:spruce_log[axis=x]",
+    "O": "minecraft:spruce_log[axis=z]",
+    "P": "minecraft:dark_oak_stairs[facing=north,half=bottom,shape=straight]",
+    "Q": "minecraft:lantern[hanging=true]",
+    "R": "minecraft:dark_oak_stairs[facing=south,half=bottom,shape=straight]",
+    "T": "minecraft:dark_oak_planks",
+    "U": "minecraft:chain[axis=y]",
+    "V": "minecraft:dark_oak_slab[type=bottom]"
+  },
+  "layers": [
+    [
+      "WLLLLLW",
+      "LS...SL",
+      "LB...BL",
+      "L.....L",
+      "L.....L",
+      "LC...DL",
+      "WLWFWLW"
+    ],
+    [
+      "WHIIIHW",
+      "I.....I",
+      "I.....I",
+      "J.....J",
+      "I.....I",
+      "I.K.K.I",
+      "WHWMWHW"
+    ],
+    [
+      "WNNNNNW",
+      "O.....O",
+      "O.....O",
+      "O.....O",
+      "O.....O",
+      "O.....O",
+      "WNWNWNW"
+    ],
+    [
+      "PPPPPPP",
+      "I_____I",
+      "I_____I",
+      "I__Q__I",
+      "I_____I",
+      "I_____I",
+      "RRRRRRR"
+    ],
+    [
+      "TTTTTTT",
+      "I_____I",
+      "I_____I",
+      "I__U__I",
+      "I_____I",
+      "I_____I",
+      "TTTTTTT"
+    ],
+    [
+      "_______",
+      "PPPPPPP",
+      "I_____I",
+      "I__U__I",
+      "I_____I",
+      "RRRRRRR",
+      "_______"
+    ],
+    [
+      "_______",
+      "TTTTTTT",
+      "I_____I",
+      "I__U__I",
+      "I_____I",
+      "TTTTTTT",
+      "_______"
+    ],
+    [
+      "_______",
+      "_______",
+      "PPPPPPP",
+      "I__U__I",
+      "RRRRRRR",
+      "_______",
+      "_______"
+    ],
+    [
+      "_______",
+      "_______",
+      "TTTTTTT",
+      "I__U__I",
+      "TTTTTTT",
+      "_______",
+      "_______"
+    ],
+    [
+      "_______",
+      "_______",
+      "_______",
+      "TTTTTTT",
+      "_______",
+      "_______",
+      "_______"
+    ],
+    [
+      "_______",
+      "_______",
+      "_______",
+      "VVVVVVV",
+      "_______",
+      "_______",
+      "_______"
+    ]
+  ],
+  "beds": 2,
+  "storage": 0,
+  "tags": ["housing_capacity", "upgrade_of=ancientwarfarenpc:tent_hide"]
+}

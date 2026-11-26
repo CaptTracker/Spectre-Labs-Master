@@ -1,0 +1,48 @@
+{
+  "name": "Hide Tent",
+  "category": "tent",
+  "style": "any",
+  "size": [5, 4, 5],
+  "front": "south",
+  "palette": {
+    "W": "minecraft:brown_wool",
+    "L": "minecraft:red_bed[part=head,facing=north]",
+    "S": "minecraft:red_bed[part=foot,facing=north]",
+    "B": "minecraft:spruce_fence",
+    "C": "minecraft:lantern[hanging=true]",
+    "D": "minecraft:stripped_spruce_log[axis=z]"
+  },
+  "layers": [
+    [
+      "WWWWW",
+      "WL.LW",
+      "WS.SW",
+      "W...W",
+      "WB.BW"
+    ],
+    [
+      "WWWWW",
+      "W...W",
+      "W...W",
+      "W...W",
+      "WB.BW"
+    ],
+    [
+      "_WWW_",
+      "_W.W_",
+      "_WCW_",
+      "_W.W_",
+      "_WWW_"
+    ],
+    [
+      "__D__",
+      "_.D._",
+      "_.D._",
+      "_.D._",
+      "__D__"
+    ]
+  ],
+  "beds": 2,
+  "storage": 0,
+  "tags": ["housing_capacity", "tent"]
+}

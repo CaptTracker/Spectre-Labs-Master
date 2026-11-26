@@ -24,6 +24,9 @@ This one file holds all five Ancient Warfare modules: **Core, Vehicles, Automati
 - **Logistics:** couriers haul goods between storages on their own.
 - **Morale:** settlement morale and each NPC's own mood speed up or slow down their work.
 - **Census tab:** the town hall lists every member with its role, mood, location, task and problems (hungry, no bed, no tool and more). Sort, filter, and click a row to make that NPC glow and see where it is.
+- **Build your own village:** mark **building zones** with the Building Zone Tool and the settlement plans houses, storehouses, workshops and a chapel on its own, with 22 built-in designs in timber, stone, desert and Norse styles. Tents grow into houses as the settlement grows.
+- **Builder NPCs** put each building up block by block, with materials taken from your settlement storage (nothing is free). The hall's **Building** tab shows the queue, what is missing and lets you approve, reorder or queue builds by hand.
+- **Blueprint Scanner:** save any build of yours as a blueprint the settlement can use.
 
 ## Workers who really work
 - Workers walk to the job, swing their tools, break blocks and carry the drops home. They use ladders to get around.

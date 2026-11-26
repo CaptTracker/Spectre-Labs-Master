@@ -10,6 +10,8 @@ import io.github.capttracker.ancientwarfare.api.IWorksiteTasks;
 import io.github.capttracker.ancientwarfare.api.WorksiteRegistry;
 import io.github.capttracker.ancientwarfare.owner.Owner;
 import io.github.capttracker.ancientwarfarenpc.entity.NpcWorker;
+import io.github.capttracker.ancientwarfarenpc.settlement.building.BuildJobs;
+import io.github.capttracker.ancientwarfarenpc.settlement.building.BuildProject;
 import io.github.capttracker.spectrefactions.api.FactionsApi;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -18,6 +20,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -55,6 +58,20 @@ public final class JobBoard {
     }
 
     private final Map<BlockPos, Job> jobs = new LinkedHashMap<>();
+
+    // ---- build jobs (rework phase 9): the builders claim a build of the queue (see BuildJobs), not a worksite ----
+    /** Ticks a claim on one step of a build lasts without being renewed (the builder renews it while it works on the step). */
+    private static final long STEP_CLAIM_TICKS = 300L;
+    private record StepClaim(UUID worker, long expires) {}
+
+    /** The builders that have claimed a build: project id to the builders. */
+    private final Map<UUID, Set<UUID>> buildWorkers = new LinkedHashMap<>();
+    /** Builds that nobody can work on for now (a builder waited for materials too long): project id to the game time they are given out again. */
+    private final Map<UUID, Long> buildBlockedUntil = new HashMap<>();
+    /** The steps that a builder works on, so that two builders never place the same block: project id to step index to the claim. */
+    private final Map<UUID, Map<Integer, StepClaim>> stepClaims = new HashMap<>();
+    private int buildOpenSlots;
+    private int buildFilledSlots;
 
     public List<Job> getJobs() {
         return new ArrayList<>(jobs.values());
@@ -99,6 +116,42 @@ public final class JobBoard {
                 job.workers.remove(job.workers.iterator().next());
             }
         }
+        refreshBuilds(level, settlement, now);
+    }
+
+    /** Drops the claims on builds that are gone or done and the claims of builders that are gone, and counts the builder slots for the hall screen. */
+    private void refreshBuilds(ServerLevel level, Settlement settlement, long now) {
+        Set<UUID> open = new HashSet<>();
+        for (BuildProject project : BuildJobs.jobs(settlement)) {
+            open.add(project.getId());
+        }
+        buildWorkers.keySet().removeIf(id -> !open.contains(id));
+        stepClaims.keySet().removeIf(id -> !open.contains(id));
+        buildBlockedUntil.entrySet().removeIf(entry -> !open.contains(entry.getKey()) || entry.getValue() <= now);
+        for (Set<UUID> workers : buildWorkers.values()) {
+            workers.removeIf(id -> !settlement.isMember(id) || !isBuilder(level, id) || hasOrders(level, id));
+        }
+        buildWorkers.values().removeIf(Set::isEmpty);
+        for (Map<Integer, StepClaim> claims : stepClaims.values()) {
+            claims.values().removeIf(claim -> claim.expires() <= now);
+        }
+        stepClaims.values().removeIf(Map::isEmpty);
+        int openSlots = 0;
+        int filled = 0;
+        for (UUID id : open) {
+            int workers = buildWorkers.containsKey(id) ? buildWorkers.get(id).size() : 0;
+            filled += workers;
+            if (!buildBlockedUntil.containsKey(id)) {
+                openSlots += Math.max(0, SettlementConfig.buildersPerJob - workers);
+            }
+        }
+        buildOpenSlots = openSlots;
+        buildFilledSlots = filled;
+    }
+
+    private static boolean isBuilder(ServerLevel level, UUID id) {
+        Entity entity = level.getEntity(id);
+        return entity instanceof NpcWorker worker && worker.isAlive() && worker.getRoleWorkType() == WorkType.BUILDING;
     }
 
     /** A claim of a worker that is unloaded (its chunk is gone) or dead would block the slot for the others; the worker claims again when it is back. */
@@ -152,7 +205,7 @@ public final class JobBoard {
     }
 
     public boolean isClaiming(UUID worker) {
-        return claimOf(worker).isPresent();
+        return claimOf(worker).isPresent() || buildClaimOf(worker).isPresent();
     }
 
     /**
@@ -180,12 +233,103 @@ public final class JobBoard {
         for (Job job : jobs.values()) {
             job.workers.remove(worker);
         }
+        releaseBuild(worker);
+    }
+
+    // ---------------------------------------------------------------- build jobs
+
+    /**
+     * Claims a build for a builder: the first approved build of the queue that is not blocked, whose plot still exists and that has a free builder slot
+     * ({@code builders_per_job}). The builder holds at most one claim (an old one is released first). The builder checks by itself what it can do on it.
+     */
+    public Optional<UUID> claimBuild(ServerLevel level, Settlement settlement, NpcWorker worker) {
+        UUID id = worker.getUUID();
+        releaseBuild(id);
+        long now = level.getGameTime();
+        for (BuildProject project : BuildJobs.jobs(settlement)) {
+            Long blocked = buildBlockedUntil.get(project.getId());
+            if (blocked != null && blocked > now) {
+                continue;
+            }
+            if (project.getPlotId() != null && settlement.getBuilding().plot(project.getPlotId()).isEmpty()) {
+                continue;
+            }
+            Set<UUID> workers = buildWorkers.get(project.getId());
+            if (workers != null && workers.size() >= SettlementConfig.buildersPerJob) {
+                continue;
+            }
+            buildWorkers.computeIfAbsent(project.getId(), key -> new LinkedHashSet<>()).add(id);
+            return Optional.of(project.getId());
+        }
+        return Optional.empty();
+    }
+
+    /** The build the builder has claimed, if any. */
+    public Optional<UUID> buildClaimOf(UUID worker) {
+        for (Map.Entry<UUID, Set<UUID>> entry : buildWorkers.entrySet()) {
+            if (entry.getValue().contains(worker)) {
+                return Optional.of(entry.getKey());
+            }
+        }
+        return Optional.empty();
+    }
+
+    public boolean holdsBuild(UUID worker, UUID project) {
+        Set<UUID> workers = buildWorkers.get(project);
+        return workers != null && workers.contains(worker);
+    }
+
+    /** The number of builders on a build. */
+    public int buildersOn(UUID project) {
+        Set<UUID> workers = buildWorkers.get(project);
+        return workers == null ? 0 : workers.size();
+    }
+
+    /** Gives up the build claim of a builder and the claims on its steps. */
+    public void releaseBuild(UUID worker) {
+        for (Set<UUID> workers : buildWorkers.values()) {
+            workers.remove(worker);
+        }
+        for (Map<Integer, StepClaim> claims : stepClaims.values()) {
+            claims.values().removeIf(claim -> claim.worker().equals(worker));
+        }
+    }
+
+    /** Nobody is given the build until the game time (a builder waited for materials too long). */
+    public void blockBuild(UUID project, long until) {
+        buildBlockedUntil.put(project, until);
+    }
+
+    /** True if another builder works on the step now. */
+    public boolean isStepClaimedByOther(UUID project, int step, UUID worker, long now) {
+        Map<Integer, StepClaim> claims = stepClaims.get(project);
+        StepClaim claim = claims == null ? null : claims.get(step);
+        return claim != null && claim.expires() > now && !claim.worker().equals(worker);
+    }
+
+    /** Claims (or renews the claim on) a step for a builder. @return false if another builder holds it */
+    public boolean claimStep(UUID project, int step, UUID worker, long now) {
+        if (isStepClaimedByOther(project, step, worker, now)) {
+            return false;
+        }
+        stepClaims.computeIfAbsent(project, key -> new HashMap<>()).put(step, new StepClaim(worker, now + STEP_CLAIM_TICKS));
+        return true;
+    }
+
+    public void releaseStep(UUID project, int step, UUID worker) {
+        Map<Integer, StepClaim> claims = stepClaims.get(project);
+        if (claims != null) {
+            claims.computeIfPresent(step, (key, claim) -> claim.worker().equals(worker) ? null : claim);
+        }
     }
 
     // ---------------------------------------------------------------- counts for the hall screen
 
     /** Free worker slots of the jobs of a work type that have work now. */
     public int openSlots(WorkType type) {
+        if (type == WorkType.BUILDING) {
+            return buildOpenSlots;
+        }
         int count = 0;
         for (Job job : jobs.values()) {
             if (job.type == type && job.hasWork) {
@@ -197,6 +341,9 @@ public final class JobBoard {
 
     /** Worker slots that are taken, for a work type. */
     public int filledSlots(WorkType type) {
+        if (type == WorkType.BUILDING) {
+            return buildFilledSlots;
+        }
         int count = 0;
         for (Job job : jobs.values()) {
             if (job.type == type) {

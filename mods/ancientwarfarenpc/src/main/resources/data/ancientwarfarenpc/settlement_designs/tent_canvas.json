@@ -1,0 +1,60 @@
+{
+  "name": "Canvas Tent",
+  "category": "tent",
+  "style": "any",
+  "size": [7, 5, 6],
+  "front": "south",
+  "palette": {
+    "W": "minecraft:white_wool",
+    "L": "minecraft:red_bed[part=head,facing=north]",
+    "S": "minecraft:red_bed[part=foot,facing=north]",
+    "B": "minecraft:oak_fence",
+    "C": "minecraft:lantern[hanging=true]",
+    "D": "minecraft:red_wool"
+  },
+  "layers": [
+    [
+      "WWWWWWW",
+      "W.L.L.W",
+      "W.S.S.W",
+      "W.....W",
+      "W.....W",
+      "WWB.BWW"
+    ],
+    [
+      "WWWWWWW",
+      "W.....W",
+      "W.....W",
+      "W.....W",
+      "W.....W",
+      "WWB.BWW"
+    ],
+    [
+      "_WWWWW_",
+      "_W...W_",
+      "_W...W_",
+      "_W...W_",
+      "_W...W_",
+      "_WWWWW_"
+    ],
+    [
+      "__WWW__",
+      "_.W.W._",
+      "_.WCW._",
+      "_.W.W._",
+      "_.W.W._",
+      "__WWW__"
+    ],
+    [
+      "___D___",
+      "___D___",
+      "___D___",
+      "___D___",
+      "___D___",
+      "___D___"
+    ]
+  ],
+  "beds": 2,
+  "storage": 0,
+  "tags": ["housing_capacity", "tent"]
+}

@@ -97,6 +97,9 @@ public class Settlement {
     private List<SettlementNeed> needs = new ArrayList<>();
     private long needsNext = 0L;
     private final Map<String, SettlementNeeds.Posted> postedNeeds = new LinkedHashMap<>();
+    /** The plots, the build queue and the planner settings (rework phase 9). Saved. */
+    private final io.github.capttracker.ancientwarfarenpc.settlement.building.SettlementBuilding building =
+            new io.github.capttracker.ancientwarfarenpc.settlement.building.SettlementBuilding(this);
     @Nullable
     private SettlementData data;
 
@@ -144,6 +147,16 @@ public class Settlement {
         if (data != null) {
             data.setDirty();
         }
+    }
+
+    /** Marks the record as changed so it is saved (for the parts of the record that live in other classes, such as the building state). */
+    public void markDirty() {
+        dirty();
+    }
+
+    /** The plots, the build queue and the planner settings of the settlement (rework phase 9). */
+    public io.github.capttracker.ancientwarfarenpc.settlement.building.SettlementBuilding getBuilding() {
+        return building;
     }
 
     // ---------------------------------------------------------------- identity
@@ -772,6 +785,7 @@ public class Settlement {
         CompoundTag alertTag = new CompoundTag();
         alerts.forEach(alertTag::putLong);
         tag.put("alerts", alertTag);
+        tag.put("building", building.save());
         return tag;
     }
 
@@ -845,6 +859,9 @@ public class Settlement {
         CompoundTag alertTag = tag.getCompound("alerts");
         for (String key : alertTag.getAllKeys()) {
             settlement.alerts.put(key, alertTag.getLong(key));
+        }
+        if (tag.contains("building", Tag.TAG_COMPOUND)) {
+            settlement.building.load(tag.getCompound("building"));
         }
         return settlement;
     }

@@ -1,0 +1,54 @@
+{
+  "name": "Market Stall",
+  "category": "business",
+  "style": "any",
+  "size": [7, 4, 5],
+  "front": "south",
+  "palette": {
+    "W": "minecraft:spruce_log[axis=y]",
+    "L": "minecraft:spruce_planks",
+    "S": "minecraft:hay_block[axis=y]",
+    "B": "minecraft:barrel[facing=up]",
+    "C": "ancientwarfareautomation:market_stall[facing=south]",
+    "D": "minecraft:spruce_slab[type=top]",
+    "F": "minecraft:flower_pot",
+    "H": "minecraft:lantern[hanging=true]",
+    "I": "minecraft:red_wool",
+    "J": "minecraft:white_wool"
+  },
+  "layers": [
+    [
+      "WLLLLLW",
+      "_SBCBS_",
+      "_DD.DD_",
+      "_....._",
+      "W.....W"
+    ],
+    [
+      "WLLLLLW",
+      "_....._",
+      "_F...F_",
+      "_....._",
+      "W.....W"
+    ],
+    [
+      "WDDDDDW",
+      "_....._",
+      "_....._",
+      "_H...H_",
+      "W.....W"
+    ],
+    [
+      "IJIJIJI",
+      "IJIJIJI",
+      "IJIJIJI",
+      "IJIJIJI",
+      "IJIJIJI"
+    ]
+  ],
+  "storage": 2,
+  "worksite": {"block": "ancientwarfareautomation:market_stall", "pos": [3, 0, 1]},
+  "min_level": 1,
+  "min_population": 4,
+  "tags": ["business", "market"]
+}

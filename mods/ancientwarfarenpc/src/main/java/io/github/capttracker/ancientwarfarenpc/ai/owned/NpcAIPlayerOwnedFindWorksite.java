@@ -4,13 +4,20 @@
  */
 package io.github.capttracker.ancientwarfarenpc.ai.owned;
 
+import io.github.capttracker.ancientwarfare.api.IWorkSite;
 import io.github.capttracker.ancientwarfarenpc.ai.NpcAI;
 import io.github.capttracker.ancientwarfarenpc.entity.NpcWorker;
 import io.github.capttracker.ancientwarfarenpc.settlement.JobBoard;
 import io.github.capttracker.ancientwarfarenpc.settlement.Settlement;
+import io.github.capttracker.ancientwarfarenpc.settlement.building.BuildJobs;
+import io.github.capttracker.ancientwarfarenpc.settlement.building.BuildProject;
+import io.github.capttracker.ancientwarfarenpc.settlement.building.BuildingDesign;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Sensor goal of the worker (in the target goals, no flags): every 40 ticks, with no work order, it keeps or claims a job on the job board of its
@@ -40,6 +47,11 @@ public class NpcAIPlayerOwnedFindWorksite extends NpcAI<NpcWorker> {
         Optional<Settlement> settlement = npc.getSettlement();
         if (settlement.isEmpty() || !settlement.get().getDimension().equals(npc.level().dimension())) {
             npc.autoWorkTarget = null;
+            npc.buildJobId = null;
+            return;
+        }
+        if (npc.getRoleWorkType() == IWorkSite.WorkType.BUILDING) {
+            findBuild(settlement.get()); // rework phase 9: a builder claims a build of the queue, not a worksite
             return;
         }
         JobBoard board = settlement.get().getJobBoard();
@@ -52,6 +64,22 @@ public class NpcAIPlayerOwnedFindWorksite extends NpcAI<NpcWorker> {
             npc.think("got_job", npc.level().getBlockState(npc.autoWorkTarget).getBlock().getName());
         } else if (npc.getRoleWorkType() != io.github.capttracker.ancientwarfare.api.IWorkSite.WorkType.NONE) {
             npc.think("no_job");
+        }
+    }
+
+    /** A builder keeps the build it claimed (also while it eats or sleeps), or claims the first free one of the queue. */
+    private void findBuild(Settlement settlement) {
+        ServerLevel level = (ServerLevel) npc.level();
+        JobBoard board = settlement.getJobBoard();
+        UUID held = npc.buildJobId;
+        if (held != null && board.holdsBuild(npc.getUUID(), held)) {
+            return;
+        }
+        npc.buildJobId = board.claimBuild(level, settlement, npc).orElse(null);
+        if (npc.buildJobId != null) {
+            BuildProject project = settlement.getBuilding().project(npc.buildJobId).orElse(null);
+            BuildingDesign design = project == null ? null : BuildJobs.designOf(project);
+            npc.think("got_build", design == null ? Component.translatable("npc.thought.building.generic") : Component.literal(design.getName()));
         }
     }
 }

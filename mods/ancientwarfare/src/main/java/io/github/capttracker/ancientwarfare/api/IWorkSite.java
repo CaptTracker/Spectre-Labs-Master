@@ -60,7 +60,9 @@ public interface IWorkSite extends ITorque.ITorqueTile, IBlockBreakHandler, IOwn
         /** Rework phase 8: the smithy (worked by the smith role). */
         SMITHING("work_type.smithing"),
         /** Rework phase 8: the tannery (worked by the tanner role). */
-        TANNING("work_type.tanning"), NONE("work_type.none");
+        TANNING("work_type.tanning"),
+        /** Rework phase 9: building (the builder role; there is no worksite block, builders work the build queue of the settlement). */
+        BUILDING("work_type.building"), NONE("work_type.none");
         public final String regName;
 
         WorkType(String regName) {
