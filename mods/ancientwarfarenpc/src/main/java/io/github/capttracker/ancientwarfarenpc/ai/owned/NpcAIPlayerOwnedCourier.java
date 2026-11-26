@@ -116,6 +116,7 @@ public class NpcAIPlayerOwnedCourier extends NpcAI<NpcCourier> {
                 }
                 ticksToWork = (int) Math.ceil(ticksToWork / npc.getWorkFactor()); // hunger slows the work down
                 npc.addExperience(moved * AWNPCStatics.npcXpFromMoveItem);
+                npc.gainSkillXp(io.github.capttracker.ancientwarfarenpc.skill.Skill.HAULING, io.github.capttracker.ancientwarfarenpc.settlement.SettlementConfig.skillXpDelivery);
                 return;
             }
         }

@@ -121,6 +121,10 @@ public class Settlement {
         public int flags = 0;
         /** The short task key at the last update (see {@code NpcThinking.census}), or empty. */
         public String task = "";
+        /** The rank (0 to 4) of the main skill at the last update, -1 for none (rework phase 7). */
+        public int rank = -1;
+        /** The bit mask of the traits at the last update (rework phase 7). */
+        public int traits = 0;
 
         Member(UUID id, BlockPos pos) {
             this.id = id;
@@ -268,6 +272,8 @@ public class Settlement {
         io.github.capttracker.ancientwarfarenpc.entity.NpcThinking.CensusInfo info = io.github.capttracker.ancientwarfarenpc.entity.NpcThinking.census(npc, this);
         member.flags = info.flags();
         member.task = info.task();
+        member.rank = npc.getMainRank();
+        member.traits = npc.getTraitMask();
     }
 
     public boolean removeMember(UUID npc) {
@@ -695,6 +701,8 @@ public class Settlement {
             memberTag.putInt("morale", member.morale);
             memberTag.putInt("flags", member.flags);
             memberTag.putString("task", member.task);
+            memberTag.putInt("rank", member.rank);
+            memberTag.putInt("traits", member.traits);
             memberList.add(memberTag);
         }
         tag.put("members", memberList);
@@ -775,6 +783,8 @@ public class Settlement {
             member.morale = memberTag.contains("morale") ? memberTag.getInt("morale") : -1;
             member.flags = memberTag.getInt("flags");
             member.task = memberTag.getString("task");
+            member.rank = memberTag.contains("rank") ? memberTag.getInt("rank") : -1;
+            member.traits = memberTag.getInt("traits");
             settlement.members.put(member.id, member);
         }
         ListTag bedList = tag.getList("beds", Tag.TAG_COMPOUND);

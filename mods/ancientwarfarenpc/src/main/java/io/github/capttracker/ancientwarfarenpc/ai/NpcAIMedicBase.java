@@ -111,13 +111,16 @@ public class NpcAIMedicBase<T extends NpcBase> extends NpcAI<T> {
             npc.workSwing(); // the medic works on the patient all the while
             if (healDelay < 0) {
                 healDelay = HEAL_DELAY_MAX;
+                if (patient.getHealth() < patient.getMaxHealth()) {
+                    npc.gainSkillXp(io.github.capttracker.ancientwarfarenpc.skill.Skill.MEDICINE, io.github.capttracker.ancientwarfarenpc.settlement.SettlementConfig.skillXpHeal);
+                }
                 patient.heal(getAmountToHealEachTry());
             }
         }
     }
 
     protected float getAmountToHealEachTry() {
-        return AMOUNT_TO_HEAL_EACH_TRY;
+        return AMOUNT_TO_HEAL_EACH_TRY * (float) io.github.capttracker.ancientwarfarenpc.skill.SkillEffects.healFactor(npc.getSkillRank(io.github.capttracker.ancientwarfarenpc.skill.Skill.MEDICINE));
     }
 
     @Override

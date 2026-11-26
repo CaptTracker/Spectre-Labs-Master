@@ -52,9 +52,9 @@ public final class Census {
 
     /**
      * One member. {@code name} is the custom name (may be empty), {@code given} the generated first name, {@code type} the full type such as
-     * {@code worker.farmer}; {@code morale} is -1 when unknown; {@code loaded} is true when the data was read from the live NPC.
+     * {@code worker.farmer}; {@code morale} is -1 when unknown; {@code rank} is the rank (0 to 4) of the main skill for the name, -1 for none; {@code traits} is the bit mask of the traits ({@code Trait#bit}); {@code loaded} is true when the data was read from the live NPC.
      */
-    public record Entry(UUID id, String name, String given, String type, int morale, BlockPos pos, boolean loaded, int flags, String task) {
+    public record Entry(UUID id, String name, String given, String type, int morale, BlockPos pos, boolean loaded, int flags, String task, int rank, int traits) {
         public boolean hasProblem() {
             return flags != 0;
         }
@@ -77,10 +77,10 @@ public final class Census {
                 NpcThinking.CensusInfo info = NpcThinking.census(npc, settlement);
                 Component custom = npc.getCustomName();
                 entries.add(new Entry(member.id, custom == null ? "" : custom.getString(), npc.getGivenName(), npc.getNpcFullType(), npc.getPersonalMorale(),
-                        npc.blockPosition(), true, info.flags() | bed, info.task()));
+                        npc.blockPosition(), true, info.flags() | bed, info.task(), npc.getMainRank(), npc.getTraitMask()));
             } else {
                 entries.add(new Entry(member.id, member.name, member.given, member.type, member.morale, member.pos, false, (member.flags & ~FLAG_NO_BED) | bed,
-                        member.task.isEmpty() ? "idle" : member.task));
+                        member.task.isEmpty() ? "idle" : member.task, member.rank, member.traits));
             }
         }
         return entries;
@@ -110,6 +110,8 @@ public final class Census {
                         buf.writeBoolean(e.loaded);
                         buf.writeVarInt(e.flags);
                         buf.writeUtf(clip(e.task), MAX_STRING);
+                        buf.writeVarInt(e.rank + 1);
+                        buf.writeVarInt(e.traits);
                     }
                 },
                 buf -> {
@@ -117,7 +119,7 @@ public final class Census {
                     List<Entry> list = new ArrayList<>(count);
                     for (int i = 0; i < count; i++) {
                         list.add(new Entry(buf.readUUID(), buf.readUtf(MAX_STRING), buf.readUtf(MAX_STRING), buf.readUtf(MAX_STRING), buf.readVarInt() - 1,
-                                buf.readBlockPos(), buf.readBoolean(), buf.readVarInt(), buf.readUtf(MAX_STRING)));
+                                buf.readBlockPos(), buf.readBoolean(), buf.readVarInt(), buf.readUtf(MAX_STRING), buf.readVarInt() - 1, buf.readVarInt()));
                     }
                     return new Payload(list);
                 });

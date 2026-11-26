@@ -178,7 +178,19 @@ final class CensusView {
         if (!entry.name().isEmpty()) {
             return entry.name();
         }
-        return NpcNames.display(entry.type(), entry.given()).getString();
+        return NpcNames.display(entry.type(), entry.given(), entry.rank()).getString();
+    }
+
+    /** The names of the traits of a mask, joined with commas; empty for none. */
+    private static String traitsText(int mask) {
+        StringBuilder text = new StringBuilder();
+        for (io.github.capttracker.ancientwarfarenpc.trait.Trait trait : io.github.capttracker.ancientwarfarenpc.trait.NpcTraits.fromMask(mask)) {
+            if (text.length() > 0) {
+                text.append(", ");
+            }
+            text.append(tr(trait.langKey()));
+        }
+        return text.toString();
     }
 
     private static String moodWord(int morale) {
@@ -329,7 +341,9 @@ final class CensusView {
                 return line + "\n" + tr("guistrings.census.click_hint");
             }
             if (col < COL_ROLE) {
-                return displayName(entry) + " (" + roleName(entry.type()) + ")\n" + tr("guistrings.census.click_hint");
+                String traitLine = traitsText(entry.traits());
+                return displayName(entry) + " (" + roleName(entry.type()) + ")" + (traitLine.isEmpty() ? "" : "\n" + tr("guistrings.census.traits", traitLine))
+                        + "\n" + tr("guistrings.census.click_hint");
             }
             return null;
         }
