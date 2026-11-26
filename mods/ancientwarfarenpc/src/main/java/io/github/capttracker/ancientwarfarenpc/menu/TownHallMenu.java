@@ -120,6 +120,13 @@ public class TownHallMenu extends BlockEntityMenu<TownHallBlockEntity> implement
     /** True while the viewer has the Census tab open: only then the snapshot is sent (rework phase 6). */
     private boolean censusOpen;
     private int censusTicks;
+    /** True while the viewer has the Building tab open: only then the building state is sent (rework phase 9). */
+    private boolean buildOpen;
+    private int buildTicks;
+    @Nullable
+    private CompoundTag lastBuild;
+    /** Client side: the building state as the server last sent it (see {@code BuildingMenuSupport}). */
+    private CompoundTag buildState = new CompoundTag();
 
     /** Slots that only take part while the inventory tab is shown. */
     private final class HallSlot extends SlotItemHandler {
@@ -270,6 +277,25 @@ public class TownHallMenu extends BlockEntityMenu<TownHallBlockEntity> implement
         sendDataToServer(tag);
     }
 
+    /** The state of the Building tab as the server last sent it (client side); empty until the first answer. */
+    public CompoundTag getBuildState() {
+        return buildState;
+    }
+
+    /** Client side: tells the server whether the Building tab is shown; the server then sends the building state now and every second while it changes. */
+    public void setBuildOpen(boolean open) {
+        CompoundTag tag = new CompoundTag();
+        tag.putBoolean("buildOpen", open);
+        sendDataToServer(tag);
+    }
+
+    /** Client side: one request of the Building tab (see {@code BuildingMenuSupport.handle}); the server checks it and answers with the new state. */
+    public void sendBuildAction(CompoundTag action) {
+        CompoundTag tag = new CompoundTag();
+        tag.put("buildAct", action);
+        sendDataToServer(tag);
+    }
+
     /** Client side: the screen turns the slots on for the inventory tab only. */
     public void setInventoryVisible(boolean visible) {
         inventoryVisible = visible;
@@ -377,6 +403,10 @@ public class TownHallMenu extends BlockEntityMenu<TownHallBlockEntity> implement
                 censusTicks = 0;
                 sendCensus();
             }
+            if (buildOpen && ++buildTicks >= 20) {
+                buildTicks = 0;
+                sendBuild(false);
+            }
         }
         super.broadcastChanges();
     }
@@ -405,6 +435,25 @@ public class TownHallMenu extends BlockEntityMenu<TownHallBlockEntity> implement
             return;
         }
         blockEntity.getSettlement().ifPresent(settlement -> PacketDistributor.sendToPlayer(serverPlayer, new Census.Payload(Census.snapshot(level, settlement))));
+    }
+
+    /** Sends the state of the Building tab (server side; only while the tab is open and the player may still use the hall). */
+    private void sendBuild(boolean force) {
+        if (!(player.level() instanceof ServerLevel level) || !mayUse(player)) {
+            return;
+        }
+        Optional<Settlement> found = blockEntity.getSettlement();
+        if (found.isEmpty()) {
+            return;
+        }
+        CompoundTag build = io.github.capttracker.ancientwarfarenpc.settlement.building.BuildingMenuSupport.toTag(level, found.get());
+        if (!force && build.equals(lastBuild)) {
+            return;
+        }
+        lastBuild = build;
+        CompoundTag tag = new CompoundTag();
+        tag.put("build", build);
+        sendDataToClient(tag);
     }
 
     private void sendState(boolean force) {
@@ -608,6 +657,9 @@ public class TownHallMenu extends BlockEntityMenu<TownHallBlockEntity> implement
             if (tag.contains("state", Tag.TAG_COMPOUND)) {
                 readState(tag.getCompound("state"));
             }
+            if (tag.contains("build", Tag.TAG_COMPOUND)) {
+                buildState = tag.getCompound("build");
+            }
             refreshGui();
             return;
         }
@@ -629,6 +681,23 @@ public class TownHallMenu extends BlockEntityMenu<TownHallBlockEntity> implement
             if (tag.size() == 1) {
                 return;
             }
+        }
+        if (tag.contains("buildOpen", Tag.TAG_BYTE)) {
+            buildOpen = tag.getBoolean("buildOpen");
+            buildTicks = 0;
+            lastBuild = null;
+            if (buildOpen) {
+                sendBuild(true);
+            }
+            if (tag.size() == 1) {
+                return;
+            }
+        }
+        if (tag.contains("buildAct", Tag.TAG_COMPOUND) && player instanceof ServerPlayer serverPlayer) {
+            io.github.capttracker.ancientwarfarenpc.settlement.building.BuildingMenuSupport.handle(level, settlement, serverPlayer, tag.getCompound("buildAct"));
+            settlement.markDirty();
+            sendBuild(true);
+            return;
         }
         if (tag.contains("clear")) {
             blockEntity.clearDeathNotices();

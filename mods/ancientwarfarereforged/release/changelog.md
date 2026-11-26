@@ -50,6 +50,18 @@ First release of Ancient Warfare 2, rebuilt for Minecraft 1.21.1 on NeoForge. Al
 - **Master smiths** sometimes save an ingot. Workers now take the best tool in storage, not the first.
 - **Config:** the `production` section of `ancientwarfareautomation-worksites.toml`, `demand_enables_recipes`, and the `demand` section of `ancientwarfarenpc-settlements.toml`.
 
+## Settlement expansion and builders
+Your settlement can now plan and build its own houses and workshops. (This is a new settlement builder. The old Ancient Warfare structure templates and scanner are still not included.)
+- **Building zones:** hold the **Building Zone Tool** inside your land and click two corners to make a plot. Sneak and use on a plot removes it. Builders only build inside plots, and while you hold the tool you see your plots, the buildings and the rectangle you are marking.
+- **The planner:** every 30 seconds each settlement looks at what it lacks and plans at most one building: housing for homeless people (a tent while the settlement is small or poor, otherwise a house in your preferred style), a storehouse when the storage is nearly full, a workshop when a need or a worker role has no site (smithy, bakery, sawmill, tannery, smelter and more), a chapel for a bigger settlement without a priest, and upgrades from tent to house. The better building is built first, then the old one is taken down and its blocks go back to storage.
+- **Building tab:** the town hall has a new Building tab. Switch auto planning on or off, choose automatic or manual approval and the preferred style, list and remove plots, and watch the queue: each build shows its state, progress and missing materials, with Approve, Show, Up, Down and Cancel. You can also queue any design by hand, pick the plot, the turn and the position, and see a ghost of it in the world.
+- **Designs:** 22 built-in designs ship with the mod: canvas and hide tents, small and medium houses in timber, stone, desert and Norse styles, storehouses, a sawmill, bakery, tannery, smithy, smelter house, farmhouse, inn, stable, market stall and a chapel. Workshops come with their worksite block already inside. Server owners can add their own in a datapack folder (`data/<namespace>/settlement_designs/`).
+- **Blueprint Scanner:** click two corners of one of your builds and then the entrance, and name it, pick its category and style and mark its worksite block. The build is saved as your own blueprint and the planner and the Building tab can use it. Only blocks are saved: chests are copied empty, and fire, portals and other blocks that have no item are left out. Air inside the box is saved as "clear this", so builders level the site.
+- **Builders:** a new worker role. Set a worker to Builder on the hall's Role button, or spawn one with an iron hammer. Builders clear the site, level the ground and place the building block by block, bottom up, up to three builders per job. They walk and climb (no flying) and put up scaffolding for high places, then take it down again.
+- **Materials come from settlement storage.** There is no free building. A builder walks to a storage that holds what the next blocks need, carries it and places it. The planner posts the materials as settlement needs, so sawmills and couriers supply them. When a material runs out the builder places other blocks first, tells you what is missing and after a while gives the job up until the storage is restocked.
+- Finished buildings count straight away: beds and chests join the settlement, the worksite block belongs to you, and a chapel makes devout NPCs happier. Builders earn Building skill experience, and skill, traits, morale and hunger change their speed.
+- **Config:** the sections `building_designs`, `building_planner` and `builders` of `ancientwarfarenpc-settlements.toml`.
+
 ## Vehicles
 - Mouse steering with a chase camera, and smoother controls.
 - Multiple seats with roles; switch seats with the number keys. Riders keep their seats when the world reloads.
@@ -95,6 +107,7 @@ First release of Ancient Warfare 2, rebuilt for Minecraft 1.21.1 on NeoForge. Al
 
 ## Known issues
 - Not yet play-tested in a running game: NPC skills, ranks and traits (the effects, the Skills tab and the rank in names).
+- Not yet play-tested in a running game: the settlement planner, the Building tab, the Blueprint Scanner and builders (scaffolding, fetching from storage and taking down a building were compiled and checked by reading only).
 - Not yet play-tested in a running game: NPC helmsmen, swimming out to a ship, and the cog's oars.
 - A helmsman only looks ahead over the water. A bay or an island between the ship and the destination is steered round as far as it can see, and it gives up if it makes no headway.
 - A helmsman needs water at least 2 blocks deep at the spot you click. Faction NPCs can't take the helm, and they only crew a ship whose helm is held by an ally.

@@ -58,19 +58,24 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 /**
- * Player-owned farmer, lumberjack, miner, researcher, craftsman, smith and tanner. The subtype is the stored {@code role} (rework phase 2), synced to the clients;
+ * Player-owned farmer, lumberjack, miner, researcher, craftsman, smith, tanner and builder. The subtype is the stored {@code role} (rework phase 2), synced to the clients;
  * it starts from the spawner subtype, or from the tool the worker holds the first time it has none. A tool that matches the role gives full work
  * speed, no matching tool {@code noToolWorkFactor}; a worker without a matching tool fetches one from the storage of its settlement.
  */
 public class NpcWorker extends NpcPlayerOwned implements IWorker {
 
     /** The roles in the order of the Role button of the hall screen. */
-    public static final List<String> ROLES = List.of("farmer", "lumberjack", "miner", "researcher", "craftsman", "smith", "tanner");
+    public static final List<String> ROLES = List.of("farmer", "lumberjack", "miner", "researcher", "craftsman", "smith", "tanner", "builder");
     private static final EntityDataAccessor<String> ROLE = SynchedEntityData.defineId(NpcWorker.class, EntityDataSerializers.STRING);
 
     /** The job the worker has claimed on the board of its settlement (see {@code JobBoard}); {@code null} without one. */
     @Nullable
     public BlockPos autoWorkTarget;
+    /** The build of the settlement (a {@code BuildProject} id) a builder has claimed on the job board; {@code null} without one. Not saved (the builder claims again). */
+    @Nullable
+    public java.util.UUID buildJobId;
+    /** The scaffolding blocks this builder placed and has not taken down yet (rework phase 9). Saved as {@code scaffolds}. */
+    public final java.util.List<BlockPos> scaffolds = new java.util.ArrayList<>();
     /** The slots of the carry pouch (rework phase 3). */
     public static final int POUCH_SIZE = 9;
     /** The most slots the pouch can have: {@link #POUCH_SIZE} and the bonus of the strong trait (the handler always has this many, the usable number varies). */
@@ -170,6 +175,7 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
             case "craftsman" -> WorkType.CRAFTING;
             case "smith" -> WorkType.SMITHING; // rework phase 8: works the smithy
             case "tanner" -> WorkType.TANNING; // rework phase 8: works the tannery
+            case "builder" -> WorkType.BUILDING; // rework phase 9: builds what the settlement queued, see NpcAIBuilderWork
             default -> WorkType.NONE;
         };
     }
@@ -181,6 +187,7 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
     /** Gives up the claim on the job board and the work target (a role change, new orders). */
     public void releaseJob() {
         autoWorkTarget = null;
+        buildJobId = null;
         if (!level().isClientSide) {
             getSettlement().ifPresent(settlement -> settlement.getJobBoard().release(getUUID()));
         }
@@ -284,6 +291,7 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
         }
         return switch (type) {
             case SMITHING -> stack.getItem() instanceof HammerItem; // the smith holds a hammer
+            case BUILDING -> stack.getItem() instanceof HammerItem || WorkTool.PICKAXE.matches(stack) || WorkTool.AXE.matches(stack) || WorkTool.SHOVEL.matches(stack); // the builder holds a hammer, or any digging tool
             case TANNING -> io.github.capttracker.ancientwarfarenpc.ai.owned.WorkTool.SHEARS.matches(stack); // the tanner cuts hides with shears
             default -> workTypeOfTool(stack) == type;
         };
@@ -304,7 +312,7 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
 
     @Override
     protected boolean isIdleWithoutJob() {
-        return getRoleWorkType() != WorkType.NONE && ordersStack.isEmpty() && autoWorkTarget == null && getSettlementId() != null
+        return getRoleWorkType() != WorkType.NONE && ordersStack.isEmpty() && autoWorkTarget == null && buildJobId == null && getSettlementId() != null
                 && getActivity() == Activity.WORK && getTarget() == null && !isAlarmed;
     }
 
@@ -427,6 +435,7 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
         goalSelector.addGoal(5, new NpcAIScheduleGoal(this));
         goalSelector.addGoal(6, (workAI = new NpcAIPlayerOwnedWork(this)));
         goalSelector.addGoal(6, new NpcAIStaffedWork(this));
+        goalSelector.addGoal(6, new io.github.capttracker.ancientwarfarenpc.ai.owned.NpcAIBuilderWork(this)); // rework phase 9: the builder's work on the build queue
         goalSelector.addGoal(7, (workRandomAI = new NpcAIPlayerOwnedWorkRandom(this)));
         goalSelector.addGoal(8, new NpcAIMoveHome(this, 50F, 3F, 30F, 3F));
 
@@ -494,7 +503,7 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
 
     @Override
     public boolean isOnDuty() {
-        return !ordersStack.isEmpty() || autoWorkTarget != null;
+        return !ordersStack.isEmpty() || autoWorkTarget != null || buildJobId != null;
     }
 
     @Override
@@ -573,6 +582,10 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
         pouch.deserializeNBT(registryAccess(), tag.getCompound("pouch"));
         toolBelt.deserializeNBT(registryAccess(), tag.getCompound("toolBelt"));
         pouchSite = tag.contains("pouchSite") ? NbtUtils.readBlockPos(tag, "pouchSite").orElse(null) : null;
+        scaffolds.clear();
+        for (long packed : tag.getLongArray("scaffolds")) {
+            scaffolds.add(BlockPos.of(packed));
+        }
         if (tag.contains("workAI") && workAI != null) {
             workAI.readFromNBT(tag.getCompound("workAI"));
         }
@@ -589,6 +602,13 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
         tag.put("toolBelt", toolBelt.serializeNBT(registryAccess()));
         if (pouchSite != null) {
             tag.put("pouchSite", NbtUtils.writeBlockPos(pouchSite));
+        }
+        if (!scaffolds.isEmpty()) {
+            long[] packed = new long[scaffolds.size()];
+            for (int i = 0; i < packed.length; i++) {
+                packed[i] = scaffolds.get(i).asLong();
+            }
+            tag.putLongArray("scaffolds", packed);
         }
         if (workAI != null) {
             tag.put("workAI", workAI.writeToNBT(new CompoundTag()));

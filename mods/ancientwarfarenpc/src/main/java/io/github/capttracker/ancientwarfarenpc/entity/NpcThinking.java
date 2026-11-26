@@ -15,6 +15,9 @@ import io.github.capttracker.ancientwarfarenpc.settlement.Settlement;
 import io.github.capttracker.ancientwarfarenpc.settlement.SettlementNeed;
 import io.github.capttracker.ancientwarfarenpc.settlement.SettlementNeeds;
 import io.github.capttracker.ancientwarfarenpc.settlement.SettlementConfig;
+import io.github.capttracker.ancientwarfarenpc.settlement.building.BuildJobs;
+import io.github.capttracker.ancientwarfarenpc.settlement.building.BuildProject;
+import io.github.capttracker.ancientwarfarenpc.settlement.building.BuildingDesign;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -306,6 +309,22 @@ public final class NpcThinking {
             }
             if (!worker.ordersStack.isEmpty()) {
                 return now(npc, time, "job.orders");
+            }
+            if (type == WorkType.BUILDING) {
+                // rework phase 9: a builder works on the build queue of the settlement, not on a worksite
+                if (settlement == null) {
+                    return now(npc, time, "nojob.no_settlement");
+                }
+                if (worker.buildJobId != null) {
+                    if (working) {
+                        return null;
+                    }
+                    BuildProject project = settlement.getBuilding().project(worker.buildJobId).orElse(null);
+                    BuildingDesign design = project == null ? null : BuildJobs.designOf(project);
+                    return now(npc, time, "job.building", design == null ? Component.translatable("npc.thought.building.generic") : Component.literal(design.getName()),
+                            where(npc, (ServerLevel) worker.level(), settlement, project == null ? null : project.getOrigin()));
+                }
+                return now(npc, time, BuildJobs.jobs(settlement).isEmpty() ? "nojob.no_build" : "nojob.build_busy");
             }
             if (worker.autoWorkTarget != null) {
                 if (working) {

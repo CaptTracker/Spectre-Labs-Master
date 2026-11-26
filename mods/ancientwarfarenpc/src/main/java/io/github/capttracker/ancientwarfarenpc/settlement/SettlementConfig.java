@@ -17,6 +17,73 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 public final class SettlementConfig {
     public static final String FILE_NAME = "ancientwarfarenpc-settlements.toml";
 
+    /** Longest horizontal side of a scanned blueprint. */
+    public static int blueprintMaxWidth = 48;
+    /** Most layers of a scanned blueprint. */
+    public static int blueprintMaxHeight = 32;
+    /** Most blueprints one player may keep. */
+    public static int blueprintMaxPerPlayer = 64;
+
+    // ---- building zones and the planner (rework phase 9) ----
+    /** The shortest side (blocks) of a building plot marked with the plot marker. */
+    public static int plotMinSide = 5;
+    /** The longest side (blocks) of a building plot. */
+    public static int plotMaxSide = 48;
+    /** The most building plots one settlement may have. */
+    public static int plotsMaxPerSettlement = 24;
+    /** If false, no settlement plans buildings by itself (the owner can still queue builds by hand on the Building tab). */
+    public static boolean plannerEnabled = true;
+    /** Ticks between two planning runs of a settlement (600 = 30 seconds). */
+    public static int plannerIntervalTicks = 600;
+    /** Whether a settlement plans buildings by itself until its owner switches it on the Building tab. */
+    public static boolean autoPlanDefault = true;
+    /** If true, plans of the planner start at once. If false, the owner approves each plan on the Building tab. */
+    public static boolean autoApproveDefault = false;
+    /** The planner makes no new plan while this many builds are planned, queued or under construction. */
+    public static int maxPendingBuilds = 3;
+    /** How many builds at the front of the queue ask for their materials at once (the settlement posts needs for them). */
+    public static int activeBuilds = 2;
+    /** Members per settlement level. A design with min_level N needs N times this many members (and its own min_population). */
+    public static int levelPopulationStep = 6;
+    /** If true, the planner only picks designs whose min_level and min_population the settlement meets. */
+    public static boolean respectDesignMinimums = true;
+    /** Below this many members the planner builds tents for housing, from this many it builds houses (if the materials allow). */
+    public static int tentBelowPopulation = 6;
+    /** The fraction of a house's materials that storage must already hold for the planner to choose a house over a tent. */
+    public static double affordFraction = 0.5;
+    /** The fraction of the materials of the better building that storage must hold before the planner upgrades a tent or small house. */
+    public static double upgradeAffordFraction = 1.0;
+    /** The planner builds a storehouse when this fraction of the storage slots is used. */
+    public static double storageFullFraction = 0.8;
+    /** From this many members the planner builds a chapel when the settlement has no priest and no chapel. */
+    public static int chapelPopulation = 12;
+    /** How many blocks of earth the builders may fill under a building to level its ground. */
+    public static int terrainMaxFill = 2;
+    /** How many blocks of ground the builders may cut away on a building plot to level it. */
+    public static int terrainMaxCut = 3;
+    /** If true, filling ground takes dirt from the storage. If false, earthwork is free (the design's own blocks always come from storage). */
+    public static boolean terrainFillCostsMaterial = false;
+    /** Free blocks the planner keeps between two buildings. */
+    public static int buildingGap = 1;
+    /** If true, a build that needs planks of one wood accepts planks of any wood from the storage (the design's blocks are placed as written). */
+    public static boolean planksAnyWood = true;
+    /** How many builders may work on the same build at once. */
+    public static int buildersPerJob = 3;
+    /** Ticks of work (at speed 1) a builder needs to place one block. */
+    public static int builderPlaceTicks = 12;
+    /** Ticks of work (at speed 1) per unit of hardness when a builder breaks a block (clearing the site, taking a building down). */
+    public static int builderBreakTicksPerHardness = 30;
+    /** If true, builders reach high places with scaffolding that they place and remove again. */
+    public static boolean builderScaffolding = true;
+    /** If true, the scaffolding blocks come from the storage (and go back to it); if false the builder has its own. */
+    public static boolean builderScaffoldCostsMaterial = false;
+    /** The highest a builder builds a scaffolding column above the ground. */
+    public static int builderMaxScaffoldHeight = 24;
+    /** Ticks a builder waits for missing materials before it gives the job up for a while and looks for another one. */
+    public static int builderWaitReleaseTicks = 600;
+    /** Experience of the building skill for each block a builder places or takes down (before the skill_xp_multiplier). */
+    public static int skillXpBuild = 3;
+
     /** How far (blocks, horizontal) a boundary marker may be from the hall it links to. */
     public static int markerMaxDistance = 128;
     /** The radius (blocks) of the area of a settlement with fewer than 3 markers. */
@@ -389,6 +456,38 @@ public final class SettlementConfig {
     private static final ModConfigSpec.DoubleValue TR_TRAIT_GREEN_THUMB_YIELD;
     private static final ModConfigSpec.DoubleValue TR_TRAIT_KEEN_EYE_SPREAD;
     private static final ModConfigSpec.DoubleValue TR_TRAIT_KEEN_EYE_FISHING;
+    private static final ModConfigSpec.IntValue BP_MAX_WIDTH;
+    private static final ModConfigSpec.IntValue BP_MAX_HEIGHT;
+    private static final ModConfigSpec.IntValue BP_MAX_PER_PLAYER;
+    private static final ModConfigSpec.IntValue PLOT_MIN_SIDE;
+    private static final ModConfigSpec.IntValue PLOT_MAX_SIDE;
+    private static final ModConfigSpec.IntValue PLOTS_MAX;
+    private static final ModConfigSpec.BooleanValue PLANNER_ENABLED;
+    private static final ModConfigSpec.IntValue PLANNER_INTERVAL;
+    private static final ModConfigSpec.BooleanValue AUTO_PLAN_DEFAULT;
+    private static final ModConfigSpec.BooleanValue AUTO_APPROVE_DEFAULT;
+    private static final ModConfigSpec.IntValue MAX_PENDING_BUILDS;
+    private static final ModConfigSpec.IntValue ACTIVE_BUILDS;
+    private static final ModConfigSpec.IntValue LEVEL_POP_STEP;
+    private static final ModConfigSpec.BooleanValue RESPECT_MINIMUMS;
+    private static final ModConfigSpec.IntValue TENT_BELOW_POP;
+    private static final ModConfigSpec.DoubleValue AFFORD_FRACTION;
+    private static final ModConfigSpec.DoubleValue UPGRADE_AFFORD_FRACTION;
+    private static final ModConfigSpec.DoubleValue STORAGE_FULL_FRACTION;
+    private static final ModConfigSpec.IntValue CHAPEL_POPULATION;
+    private static final ModConfigSpec.IntValue TERRAIN_MAX_FILL;
+    private static final ModConfigSpec.IntValue TERRAIN_MAX_CUT;
+    private static final ModConfigSpec.BooleanValue TERRAIN_FILL_COSTS;
+    private static final ModConfigSpec.IntValue BUILDING_GAP;
+    private static final ModConfigSpec.BooleanValue PLANKS_ANY;
+    private static final ModConfigSpec.IntValue BUILDERS_PER_JOB;
+    private static final ModConfigSpec.IntValue BUILDER_PLACE_TICKS;
+    private static final ModConfigSpec.IntValue BUILDER_BREAK_TICKS;
+    private static final ModConfigSpec.BooleanValue BUILDER_SCAFFOLDING;
+    private static final ModConfigSpec.BooleanValue BUILDER_SCAFFOLD_COSTS;
+    private static final ModConfigSpec.IntValue BUILDER_MAX_SCAFFOLD;
+    private static final ModConfigSpec.IntValue BUILDER_WAIT_RELEASE;
+    private static final ModConfigSpec.IntValue SKILL_XP_BUILD;
     public static final ModConfigSpec SPEC;
 
     static {
@@ -690,6 +789,77 @@ public final class SettlementConfig {
         CAPTAIN_LINE_DISTANCE = builder.comment("Default = 10", "How far from the hall, towards the threat, the line forms.")
                 .defineInRange("captain_line_distance", 10, 2, 64);
         builder.pop();
+        builder.comment("Building designs and the blueprint scanner (server side)").push("building_designs");
+        BP_MAX_WIDTH = builder.comment("Default = 48",
+                "The longest side (blocks, east-west or north-south) of a blueprint scanned with the blueprint scanner. Hard limit 64.")
+                .defineInRange("blueprint_max_width", 48, 3, 64);
+        BP_MAX_HEIGHT = builder.comment("Default = 32", "The most layers (blocks, up) of a scanned blueprint. Hard limit 64.")
+                .defineInRange("blueprint_max_height", 32, 1, 64);
+        BP_MAX_PER_PLAYER = builder.comment("Default = 64", "How many blueprints one player may keep in this world.")
+                .defineInRange("blueprint_max_per_player", 64, 1, 1000);
+        builder.pop();
+        builder.comment("Building plots, the building planner and the build queue (server side)").push("building_planner");
+        PLOT_MIN_SIDE = builder.comment("Default = 5", "The shortest side (blocks) of a building plot marked with the plot marker.")
+                .defineInRange("plot_min_side", 5, 3, 64);
+        PLOT_MAX_SIDE = builder.comment("Default = 48", "The longest side (blocks) of a building plot.")
+                .defineInRange("plot_max_side", 48, 5, 128);
+        PLOTS_MAX = builder.comment("Default = 24", "The most building plots one settlement may have.")
+                .defineInRange("plots_max_per_settlement", 24, 1, 256);
+        PLANNER_ENABLED = builder.comment("Default = true", "If false, no settlement plans buildings by itself (the owner can still queue builds by hand on the Building tab).")
+                .define("planner_enabled", true);
+        PLANNER_INTERVAL = builder.comment("Default = 600", "Ticks between two planning runs of a settlement (600 = 30 seconds).")
+                .defineInRange("planner_interval_ticks", 600, 100, 72000);
+        AUTO_PLAN_DEFAULT = builder.comment("Default = true", "Whether a settlement plans buildings by itself until its owner switches it on the Building tab.")
+                .define("auto_plan_default", true);
+        AUTO_APPROVE_DEFAULT = builder.comment("Default = false", "If true, plans of the planner start at once. If false, the owner approves each plan on the Building tab.")
+                .define("auto_approve_default", false);
+        MAX_PENDING_BUILDS = builder.comment("Default = 3", "The planner makes no new plan while this many builds are planned, queued or under construction.")
+                .defineInRange("max_pending_builds", 3, 1, 32);
+        ACTIVE_BUILDS = builder.comment("Default = 2", "How many builds at the front of the queue ask for their materials at once (the settlement posts needs for them).")
+                .defineInRange("active_builds", 2, 1, 16);
+        LEVEL_POP_STEP = builder.comment("Default = 6", "Members per settlement level. A design with min_level N needs N times this many members (and its own min_population).")
+                .defineInRange("level_population_step", 6, 1, 200);
+        RESPECT_MINIMUMS = builder.comment("Default = true", "If true, the planner only picks designs whose min_level and min_population the settlement meets.")
+                .define("respect_design_minimums", true);
+        TENT_BELOW_POP = builder.comment("Default = 6", "Below this many members the planner builds tents for housing, from this many it builds houses (if the materials allow).")
+                .defineInRange("tent_below_population", 6, 0, 1000);
+        AFFORD_FRACTION = builder.comment("Default = 0.5", "The fraction of a house's materials that storage must already hold for the planner to choose a house over a tent.")
+                .defineInRange("afford_fraction", 0.5, 0.0, 1.0);
+        UPGRADE_AFFORD_FRACTION = builder.comment("Default = 1.0", "The fraction of the materials of the better building that storage must hold before the planner upgrades a tent or small house.")
+                .defineInRange("upgrade_afford_fraction", 1.0, 0.0, 1.0);
+        STORAGE_FULL_FRACTION = builder.comment("Default = 0.8", "The planner builds a storehouse when this fraction of the storage slots is used.")
+                .defineInRange("storage_full_fraction", 0.8, 0.1, 1.0);
+        CHAPEL_POPULATION = builder.comment("Default = 12", "From this many members the planner builds a chapel when the settlement has no priest and no chapel.")
+                .defineInRange("chapel_population", 12, 1, 1000);
+        TERRAIN_MAX_FILL = builder.comment("Default = 2", "How many blocks of earth the builders may fill under a building to level its ground.")
+                .defineInRange("terrain_max_fill", 2, 0, 8);
+        TERRAIN_MAX_CUT = builder.comment("Default = 3", "How many blocks of ground the builders may cut away on a building plot to level it.")
+                .defineInRange("terrain_max_cut", 3, 0, 8);
+        TERRAIN_FILL_COSTS = builder.comment("Default = false", "If true, filling ground takes dirt from the storage. If false, earthwork is free (the design's own blocks always come from storage).")
+                .define("terrain_fill_costs_material", false);
+        BUILDING_GAP = builder.comment("Default = 1", "Free blocks the planner keeps between two buildings.")
+                .defineInRange("building_gap", 1, 0, 8);
+        PLANKS_ANY = builder.comment("Default = true", "If true, a build that needs planks of one wood accepts planks of any wood from the storage (the design's blocks are placed as written).")
+                .define("planks_any_wood", true);
+        builder.pop();
+        builder.comment("The builder NPCs (rework phase 9, server side)").push("builders");
+        BUILDERS_PER_JOB = builder.comment("Default = 3", "How many builders may work on the same build at once (they never place the same block).")
+                .defineInRange("builders_per_job", 3, 1, 16);
+        BUILDER_PLACE_TICKS = builder.comment("Default = 12", "Ticks of work at speed 1 that a builder needs to place one block. Skills, traits, morale and the tool make it faster or slower.")
+                .defineInRange("builder_place_ticks", 12, 1, 400);
+        BUILDER_BREAK_TICKS = builder.comment("Default = 30", "Ticks of work at speed 1 per unit of hardness when a builder breaks a block (clearing the site, taking a building down); the tool speed counts on top.")
+                .defineInRange("builder_break_ticks_per_hardness", 30, 1, 400);
+        BUILDER_SCAFFOLDING = builder.comment("Default = true", "If true, a builder that cannot reach a high place builds a scaffolding column next to the building and takes it down again afterwards. If false, it only builds what it can reach on foot.")
+                .define("builder_scaffolding", true);
+        BUILDER_SCAFFOLD_COSTS = builder.comment("Default = false", "If true, the scaffolding blocks are taken from the settlement storage (and put back when the scaffolding is taken down). If false, builders bring their own scaffolding.")
+                .define("builder_scaffold_costs_material", false);
+        BUILDER_MAX_SCAFFOLD = builder.comment("Default = 24", "The highest (blocks above the ground) a builder builds a scaffolding column.")
+                .defineInRange("builder_max_scaffold_height", 24, 2, 64);
+        BUILDER_WAIT_RELEASE = builder.comment("Default = 600", "Ticks a builder waits for missing materials (with nothing else to place) before it gives the job up for a while and looks for another build.")
+                .defineInRange("builder_wait_release_ticks", 600, 20, 72000);
+        SKILL_XP_BUILD = builder.comment("Default = 3", "Experience of the building skill for each block a builder places or takes down (before skill_xp_multiplier).")
+                .defineInRange("skill_xp_build", 3, 0, 1000);
+        builder.pop();
         SPEC = builder.build();
     }
 
@@ -836,6 +1006,38 @@ public final class SettlementConfig {
             traitGreenThumbYield = TR_TRAIT_GREEN_THUMB_YIELD.get();
             traitKeenEyeSpread = TR_TRAIT_KEEN_EYE_SPREAD.get();
             traitKeenEyeFishing = TR_TRAIT_KEEN_EYE_FISHING.get();
+            blueprintMaxWidth = BP_MAX_WIDTH.get();
+            blueprintMaxHeight = BP_MAX_HEIGHT.get();
+            blueprintMaxPerPlayer = BP_MAX_PER_PLAYER.get();
+            plotMinSide = PLOT_MIN_SIDE.get();
+            plotMaxSide = PLOT_MAX_SIDE.get();
+            plotsMaxPerSettlement = PLOTS_MAX.get();
+            plannerEnabled = PLANNER_ENABLED.get();
+            plannerIntervalTicks = PLANNER_INTERVAL.get();
+            autoPlanDefault = AUTO_PLAN_DEFAULT.get();
+            autoApproveDefault = AUTO_APPROVE_DEFAULT.get();
+            maxPendingBuilds = MAX_PENDING_BUILDS.get();
+            activeBuilds = ACTIVE_BUILDS.get();
+            levelPopulationStep = LEVEL_POP_STEP.get();
+            respectDesignMinimums = RESPECT_MINIMUMS.get();
+            tentBelowPopulation = TENT_BELOW_POP.get();
+            affordFraction = AFFORD_FRACTION.get();
+            upgradeAffordFraction = UPGRADE_AFFORD_FRACTION.get();
+            storageFullFraction = STORAGE_FULL_FRACTION.get();
+            chapelPopulation = CHAPEL_POPULATION.get();
+            terrainMaxFill = TERRAIN_MAX_FILL.get();
+            terrainMaxCut = TERRAIN_MAX_CUT.get();
+            terrainFillCostsMaterial = TERRAIN_FILL_COSTS.get();
+            buildingGap = BUILDING_GAP.get();
+            planksAnyWood = PLANKS_ANY.get();
+            buildersPerJob = BUILDERS_PER_JOB.get();
+            builderPlaceTicks = BUILDER_PLACE_TICKS.get();
+            builderBreakTicksPerHardness = BUILDER_BREAK_TICKS.get();
+            builderScaffolding = BUILDER_SCAFFOLDING.get();
+            builderScaffoldCostsMaterial = BUILDER_SCAFFOLD_COSTS.get();
+            builderMaxScaffoldHeight = BUILDER_MAX_SCAFFOLD.get();
+            builderWaitReleaseTicks = BUILDER_WAIT_RELEASE.get();
+            skillXpBuild = SKILL_XP_BUILD.get();
         }
     }
 }

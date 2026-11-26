@@ -35,6 +35,7 @@ public class GuiTownHallInventory extends GuiContainerBase<TownHallMenu> {
         STORAGE("guistrings.settlement.tab.storage"),
         DEATHS("guistrings.npc.death_list"),
         GUARD("guistrings.settlement.tab.guard"),
+        BUILDING("guistrings.settlement.tab.building"),
         INVENTORY("guistrings.settlement.tab.inventory");
 
         final String key;
@@ -52,6 +53,9 @@ public class GuiTownHallInventory extends GuiContainerBase<TownHallMenu> {
     private CompositeScrolled area;
     private final CensusView census = new CensusView();
     private boolean censusAsked = false;
+    private final BuildingTabView building = new BuildingTabView();
+    private boolean buildAsked = false;
+    private int previewTicks = 0;
     private boolean areaShown = false;
 
     // overview elements (made once per visit of the tab)
@@ -68,7 +72,7 @@ public class GuiTownHallInventory extends GuiContainerBase<TownHallMenu> {
     private List<String> builtAlerts = new ArrayList<>();
 
     public GuiTownHallInventory(TownHallMenu menu) {
-        super(menu, 350, 3 * 18 + 4 * 18 + 8 + 8 + 4 + 8 + 16);
+        super(menu, 380, 3 * 18 + 4 * 18 + 8 + 8 + 4 + 8 + 16);
         menu.setInventoryVisible(false);
     }
 
@@ -93,6 +97,7 @@ public class GuiTownHallInventory extends GuiContainerBase<TownHallMenu> {
     private void select(Tab tab) {
         current = tab;
         census.invalidate();
+        building.invalidate();
         getContainer().setInventoryVisible(tab == Tab.INVENTORY);
         refreshGui();
     }
@@ -107,6 +112,14 @@ public class GuiTownHallInventory extends GuiContainerBase<TownHallMenu> {
         if ((current == Tab.CENSUS) != censusAsked) {
             censusAsked = current == Tab.CENSUS;
             getContainer().setCensusOpen(censusAsked);
+        }
+        // the server only sends the building state while the Building tab is open; the ghost of a build only shows there
+        if ((current == Tab.BUILDING) != buildAsked) {
+            buildAsked = current == Tab.BUILDING;
+            getContainer().setBuildOpen(buildAsked);
+            if (!buildAsked) {
+                building.close();
+            }
         }
         boolean wantArea = current != Tab.INVENTORY;
         if (wantArea && !areaShown) {
@@ -127,6 +140,9 @@ public class GuiTownHallInventory extends GuiContainerBase<TownHallMenu> {
         if (current == Tab.CENSUS && built == Tab.CENSUS && !census.needsBuild(getContainer())) {
             return;
         }
+        if (current == Tab.BUILDING && built == Tab.BUILDING && !building.needsBuild(getContainer())) {
+            return;
+        }
         area.clearElements();
         switch (current) {
             case OVERVIEW -> buildOverview();
@@ -135,6 +151,7 @@ public class GuiTownHallInventory extends GuiContainerBase<TownHallMenu> {
             case STORAGE -> buildStorage();
             case DEATHS -> buildDeaths();
             case GUARD -> buildGuard();
+            case BUILDING -> area.setAreaSize(building.build(area, getContainer(), this::refreshGui));
             default -> {
             }
         }
@@ -523,8 +540,24 @@ public class GuiTownHallInventory extends GuiContainerBase<TownHallMenu> {
     }
 
     @Override
+    protected void containerTick() {
+        super.containerTick();
+        if (current == Tab.BUILDING && ++previewTicks >= 5) {
+            previewTicks = 0;
+            building.tickPreview(getContainer());
+        }
+    }
+
+    @Override
+    public void removed() {
+        building.close();
+        super.removed();
+    }
+
+    @Override
     protected boolean onGuiCloseRequested() {
         getContainer().setInventoryVisible(true);
+        building.close();
         return super.onGuiCloseRequested();
     }
 }

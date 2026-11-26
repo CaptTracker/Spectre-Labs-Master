@@ -12,6 +12,7 @@ import io.github.capttracker.ancientwarfarenpc.settlement.SettlementMarkerBlock;
 import io.github.capttracker.ancientwarfarenpc.settlement.SettlementMarkerBlockEntity;
 import io.github.capttracker.ancientwarfarenpc.settlement.SettlementMarkerItem;
 import io.github.capttracker.ancientwarfarenpc.settlement.SettlementNetwork;
+import io.github.capttracker.ancientwarfarenpc.settlement.building.BlueprintScannerItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -43,6 +44,15 @@ public final class AwNpcSettlements {
     public static final DeferredItem<SettlementLedgerItem> SETTLEMENT_LEDGER = AncientWarfareNPC.REG.item("settlement_ledger",
             SettlementLedgerItem::new, new Item.Properties().stacksTo(1));
 
+    /** The blueprint scanner (rework phase 9): scans a build into a player blueprint. */
+    public static final DeferredItem<BlueprintScannerItem> BLUEPRINT_SCANNER = AncientWarfareNPC.REG.item("blueprint_scanner",
+            BlueprintScannerItem::new, new Item.Properties().stacksTo(1));
+
+    /** The building zone tool (rework phase 9): marks the plots the builders build in. */
+    public static final DeferredItem<io.github.capttracker.ancientwarfarenpc.settlement.building.BuildingZoneItem> BUILDING_ZONE_TOOL =
+            AncientWarfareNPC.REG.item("building_zone_tool", io.github.capttracker.ancientwarfarenpc.settlement.building.BuildingZoneItem::new,
+                    new Item.Properties().stacksTo(1));
+
     /** Forces this class (and so the registrations above) to initialise. Call from the mod constructor. */
     public static void load() {}
 
@@ -51,6 +61,7 @@ public final class AwNpcSettlements {
         SettlementConfig.register(modBus, container);
         modBus.addListener(AwNpcSettlements::onRegisterPayloads);
         NeoForge.EVENT_BUS.register(SettlementEvents.INSTANCE);
+        io.github.capttracker.ancientwarfarenpc.settlement.building.ChapelSites.register(); // rework phase 9: a finished chapel is a devout place
         NeoForge.EVENT_BUS.register(io.github.capttracker.ancientwarfarenpc.caravan.CaravanScheduler.INSTANCE);
     }
 

@@ -1,0 +1,95 @@
+{
+  "name": "Timber Storehouse",
+  "category": "storehouse",
+  "style": "timber",
+  "size": [9, 7, 7],
+  "front": "south",
+  "palette": {
+    "W": "minecraft:oak_log[axis=y]",
+    "L": "minecraft:cobblestone",
+    "S": "minecraft:chest[facing=south,type=single]",
+    "B": "minecraft:barrel[facing=east]",
+    "C": "minecraft:barrel[facing=west]",
+    "D": "minecraft:oak_door[facing=north,half=lower,hinge=left,open=false]",
+    "F": "minecraft:white_terracotta",
+    "H": "minecraft:glass_pane[east=true,west=true]",
+    "I": "minecraft:glass_pane[north=true,south=true]",
+    "J": "minecraft:wall_torch[facing=north]",
+    "K": "minecraft:oak_door[facing=north,half=upper,hinge=left,open=false]",
+    "M": "minecraft:oak_log[axis=x]",
+    "N": "minecraft:oak_log[axis=z]",
+    "O": "minecraft:spruce_stairs[facing=north,half=bottom,shape=straight]",
+    "P": "minecraft:lantern[hanging=true]",
+    "Q": "minecraft:spruce_stairs[facing=south,half=bottom,shape=straight]",
+    "R": "minecraft:chain[axis=y]",
+    "T": "minecraft:spruce_slab[type=bottom]"
+  },
+  "layers": [
+    [
+      "WLLLLLLLW",
+      "LSSSSSSSL",
+      "L.......L",
+      "LB.....CL",
+      "LB.....CL",
+      "LB.....CL",
+      "WLLWDWLLW"
+    ],
+    [
+      "WFHFFFHFW",
+      "F.......F",
+      "F.......F",
+      "IB.....CI",
+      "F.......F",
+      "F..J.J..F",
+      "WFHWKWHFW"
+    ],
+    [
+      "WMMMMMMMW",
+      "N.......N",
+      "N.......N",
+      "N.......N",
+      "N.......N",
+      "N.......N",
+      "WMMWMWMMW"
+    ],
+    [
+      "OOOOOOOOO",
+      "F_______F",
+      "F_______F",
+      "F_P___P_F",
+      "F_______F",
+      "F_______F",
+      "QQQQQQQQQ"
+    ],
+    [
+      "_________",
+      "OOOOOOOOO",
+      "F_______F",
+      "F_R___R_F",
+      "F_______F",
+      "QQQQQQQQQ",
+      "_________"
+    ],
+    [
+      "_________",
+      "_________",
+      "OOOOOOOOO",
+      "F_R___R_F",
+      "QQQQQQQQQ",
+      "_________",
+      "_________"
+    ],
+    [
+      "_________",
+      "_________",
+      "_________",
+      "TTTTTTTTT",
+      "_________",
+      "_________",
+      "_________"
+    ]
+  ],
+  "storage": 12,
+  "min_population": 3,
+  "tags": ["storage"]
+}

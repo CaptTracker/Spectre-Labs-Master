@@ -83,6 +83,7 @@ public final class SettlementNeeds {
             case "researcher" -> "quill";
             case "craftsman", "smith" -> "hammer";
             case "tanner" -> "shears";
+            case "builder" -> "hammer";
             default -> null;
         };
     }
