@@ -117,6 +117,10 @@ public class Settlement {
         public String given = "";
         /** The personal morale at the last update, or -1 if the NPC has not computed one yet. */
         public int morale = -1;
+        /** The census problem flags ({@link Census}{@code .FLAG_*}) at the last update; the bed flag is not kept here, the beds say it. */
+        public int flags = 0;
+        /** The short task key at the last update (see {@code NpcThinking.census}), or empty. */
+        public String task = "";
 
         Member(UUID id, BlockPos pos) {
             this.id = id;
@@ -254,13 +258,16 @@ public class Settlement {
         }
     }
 
-    private static void refresh(NpcPlayerOwned npc, Member member) {
+    private void refresh(NpcPlayerOwned npc, Member member) {
         member.pos = npc.blockPosition();
         member.type = npc.getNpcFullType();
         Component custom = npc.getCustomName();
         member.name = custom == null ? "" : custom.getString();
         member.given = npc.getGivenName();
         member.morale = npc.getPersonalMorale();
+        io.github.capttracker.ancientwarfarenpc.entity.NpcThinking.CensusInfo info = io.github.capttracker.ancientwarfarenpc.entity.NpcThinking.census(npc, this);
+        member.flags = info.flags();
+        member.task = info.task();
     }
 
     public boolean removeMember(UUID npc) {
@@ -686,6 +693,8 @@ public class Settlement {
             memberTag.putString("name", member.name);
             memberTag.putString("given", member.given);
             memberTag.putInt("morale", member.morale);
+            memberTag.putInt("flags", member.flags);
+            memberTag.putString("task", member.task);
             memberList.add(memberTag);
         }
         tag.put("members", memberList);
@@ -764,6 +773,8 @@ public class Settlement {
             member.name = memberTag.getString("name");
             member.given = memberTag.getString("given");
             member.morale = memberTag.contains("morale") ? memberTag.getInt("morale") : -1;
+            member.flags = memberTag.getInt("flags");
+            member.task = memberTag.getString("task");
             settlement.members.put(member.id, member);
         }
         ListTag bedList = tag.getList("beds", Tag.TAG_COMPOUND);

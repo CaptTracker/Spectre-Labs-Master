@@ -8,6 +8,7 @@ import io.github.capttracker.ancientwarfare.api.IWorkSite.WorkType;
 import io.github.capttracker.ancientwarfarenpc.ai.NpcAI;
 import io.github.capttracker.ancientwarfarenpc.entity.NpcMind.Line;
 import io.github.capttracker.ancientwarfarenpc.entity.faction.NpcFaction;
+import io.github.capttracker.ancientwarfarenpc.settlement.Census;
 import io.github.capttracker.ancientwarfarenpc.settlement.JobBoard;
 import io.github.capttracker.ancientwarfarenpc.settlement.NpcMorale;
 import io.github.capttracker.ancientwarfarenpc.settlement.Settlement;
@@ -130,6 +131,75 @@ public final class NpcThinking {
             return "";
         }
         return text.substring(0, 1).toUpperCase(Locale.ROOT) + text.substring(1);
+    }
+
+    // ---------------------------------------------------------------- census (rework phase 6)
+
+    /** What the census of the town hall shows of a member: the short task key (for example {@code work.chop}) and the problem flags ({@code Census.FLAG_*}). */
+    public record CensusInfo(String task, int flags) {}
+
+    /** How long a "no way to the task" event counts as recent for the census flag (1 minute). */
+    private static final long NO_PATH_RECENT_TICKS = 1200L;
+
+    /**
+     * The short task key and the problem flags of a member, from the same activity and job lines as the talk screen ({@link #describe}); the screen shows the
+     * key as a few words ({@code guistrings.census.task.<key>}). The bed flag is not set here: the settlement knows the beds ({@link Census}). Server side.
+     */
+    public static CensusInfo census(NpcPlayerOwned npc, @Nullable Settlement settlement) {
+        if (!(npc.level() instanceof ServerLevel level)) {
+            return new CensusInfo("idle", 0);
+        }
+        long time = level.getGameTime();
+        Line activity = activity(npc, level, settlement, time);
+        String task = shortKey(activity.key());
+        int flags = 0;
+        if (npc.isStarving()) {
+            flags |= Census.FLAG_STARVING;
+        } else if (npc.isHungry()) {
+            flags |= Census.FLAG_HUNGRY;
+        }
+        Line job = job(npc, npc, settlement, time, task.startsWith("work."));
+        if (job != null) {
+            String key = shortKey(job.key());
+            if (key.equals("job.no_tool") || key.equals("job.no_weapon")) {
+                flags |= Census.FLAG_NO_TOOL;
+            } else if (key.equals("job.no_role") || key.startsWith("nojob.")) {
+                flags |= Census.FLAG_NO_JOB;
+            }
+        }
+        if (npc.getHealth() < npc.getMaxHealth() * 0.5F) {
+            flags |= Census.FLAG_HURT;
+        }
+        String noPath = NpcMind.EVENT_PREFIX + "no_reach.";
+        for (NpcMind.Thought thought : npc.getMind().thoughts()) {
+            if (time - thought.time() <= NO_PATH_RECENT_TICKS && thought.line().key().startsWith(noPath)) {
+                flags |= Census.FLAG_NO_PATH;
+                break;
+            }
+        }
+        if (npc.isAlarmed || (npc.getAITasks() & (NpcAI.TASK_FLEE | NpcAI.TASK_ALARM)) != 0) {
+            flags |= Census.FLAG_ALARM;
+        }
+        return new CensusInfo(task, flags);
+    }
+
+    /**
+     * The short task key of any NPC, owned or faction (for example {@code work.chop}; the text is {@code guistrings.census.task.<key>}), for the look-at
+     * tooltips of Jade and WTHIT. Server side; "idle" on a client level.
+     */
+    public static String task(NpcBase npc) {
+        if (!(npc.level() instanceof ServerLevel level)) {
+            return "idle";
+        }
+        Settlement settlement = npc instanceof NpcPlayerOwned owned ? owned.getSettlement().orElse(null) : null;
+        return shortKey(activity(npc, level, settlement, level.getGameTime()).key());
+    }
+
+    /** {@code npc.thought.now.work.chop.2} becomes {@code work.chop}. */
+    private static String shortKey(String lineKey) {
+        String key = lineKey.startsWith("npc.thought.now.") ? lineKey.substring("npc.thought.now.".length()) : lineKey;
+        int dot = key.lastIndexOf('.');
+        return dot > 0 ? key.substring(0, dot) : key;
     }
 
     // ---------------------------------------------------------------- activity
