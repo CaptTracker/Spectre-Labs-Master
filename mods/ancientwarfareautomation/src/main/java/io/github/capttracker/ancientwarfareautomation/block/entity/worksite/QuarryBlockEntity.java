@@ -4,6 +4,7 @@
  */
 package io.github.capttracker.ancientwarfareautomation.block.entity.worksite;
 
+import io.github.capttracker.ancientwarfare.api.IWorksiteStatus;
 import io.github.capttracker.ancientwarfare.api.WorkAction;
 import io.github.capttracker.ancientwarfare.api.WorkTask;
 import io.github.capttracker.ancientwarfare.block.BlockRotationHandler.RelativeSide;
@@ -72,7 +73,7 @@ import java.util.Set;
  * is 1; quality 1 = 2, quality 2 = 3, quality 3 = everything). Blocks that mods put in the {@code incorrect_for_*}
  * tags only are not recognised.
  */
-public final class QuarryBlockEntity extends InventoryWorksiteBlockEntity implements MineSite {
+public final class QuarryBlockEntity extends InventoryWorksiteBlockEntity implements MineSite, IWorksiteStatus {
     private static final int UNSET_Y = Integer.MIN_VALUE;
     private static final int MAX_TASKS = 48;
     private static final int PLACE_TICKS = 15;
@@ -141,6 +142,11 @@ public final class QuarryBlockEntity extends InventoryWorksiteBlockEntity implem
     /** The mine needs a ladder and the ladder slots are empty: it waits for a courier or a player to stock them. */
     public boolean isWaitingForLadder() {
         return waitingForLadder;
+    }
+
+    @Override
+    public String getWaitingFor() {
+        return waitingForLadder ? LADDERS : null;
     }
 
     @Override

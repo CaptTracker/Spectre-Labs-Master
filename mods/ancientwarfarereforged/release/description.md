@@ -13,6 +13,7 @@ This one file holds all five Ancient Warfare modules: **Core, Vehicles, Automati
 - Spectre Factions (required)
 - Spectre Lib (required)
 - JEI (optional)
+- Jade or WTHIT (optional, for look-at tooltips on NPCs and worksites)
 
 ## Settlements
 - Mark out your land with **boundary markers**, with no town hall range limit.
@@ -22,6 +23,7 @@ This one file holds all five Ancient Warfare modules: **Core, Vehicles, Automati
 - **Defence:** an alarm sounds and bells ring when hostiles enter your land. Guards rally and patrol the border, and a guard captain leads them.
 - **Logistics:** couriers haul goods between storages on their own.
 - **Morale:** settlement morale and each NPC's own mood speed up or slow down their work.
+- **Census tab:** the town hall lists every member with its role, mood, location, task and problems (hungry, no bed, no tool and more). Sort, filter, and click a row to make that NPC glow and see where it is.
 
 ## Workers who really work
 - Workers walk to the job, swing their tools, break blocks and carry the drops home. They use ladders to get around.
@@ -37,6 +39,7 @@ This one file holds all five Ancient Warfare modules: **Core, Vehicles, Automati
 - **Each NPC has its own morale:** food, a bed, sleep, injuries, friends and fear all count.
 - Workers switch to the right tool for each block.
 - **New NPC types:** trader, innkeeper, stable hand and guard captain.
+- **Jade and WTHIT (optional):** look at an NPC to see its role, mood, task and health, or at a worksite to see its workers, status and settlement.
 
 ## Factions and trade
 - NPC teams run on **Spectre Factions**. Faction relations are hostile, neutral, friendly or allied, and NPCs help their friends in a fight.

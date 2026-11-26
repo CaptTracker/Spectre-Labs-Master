@@ -146,6 +146,8 @@ public final class SettlementConfig {
     public static int moraleIdleTicks = 1200;
     /** How long a thought is not noted again when it comes up again (playtest fixes: what the NPC is thinking). */
     public static int thoughtRepeatTicks = 600;
+    /** Ticks between two census snapshots sent to a player who has the Census tab of the town hall open (rework phase 6). */
+    public static int censusRefreshTicks = 40;
 
     /** The work speed factor a morale from 0 to 100 gives: {@code moraleMinFactor} at 0 to {@code moraleMaxFactor} at 100. 1 when the morale is switched off. */
     public static double moraleWorkFactor(int morale) {
@@ -194,6 +196,7 @@ public final class SettlementConfig {
     private static final ModConfigSpec.IntValue MORALE_BARD_WINDOW;
     private static final ModConfigSpec.IntValue MORALE_IDLE;
     private static final ModConfigSpec.IntValue THOUGHT_REPEAT;
+    private static final ModConfigSpec.IntValue CENSUS_REFRESH;
     private static final ModConfigSpec.IntValue INN_SERVE_RADIUS;
     private static final ModConfigSpec.IntValue INN_SERVE_INTERVAL;
     private static final ModConfigSpec.IntValue INN_DRINK_FOOD;
@@ -408,6 +411,8 @@ public final class SettlementConfig {
                 .defineInRange("morale_idle_ticks", 1200, 20, 240000);
         THOUGHT_REPEAT = builder.comment("Default = 600 (30 seconds)", "Ticks before the same event is written to the recent thoughts of an NPC again (the 'talk to NPC' screen).")
                 .defineInRange("thought_repeat_ticks", 600, 0, 240000);
+        CENSUS_REFRESH = builder.comment("Default = 40 (2 seconds)", "Ticks between two refreshes of the member list (Census tab) of the town hall screen. Only sent to players who have the tab open.")
+                .defineInRange("census_refresh_ticks", 40, 10, 1200);
         builder.pop();
         builder.comment("Inn and stable hand (server side)").push("inn_and_stable");
         INN_SERVE_RADIUS = builder.comment("Default = 6", "Blocks around the inn in which the innkeeper serves the members that gather there.")
@@ -514,6 +519,7 @@ public final class SettlementConfig {
             moraleBardWindowTicks = MORALE_BARD_WINDOW.get();
             moraleIdleTicks = MORALE_IDLE.get();
             thoughtRepeatTicks = THOUGHT_REPEAT.get();
+            censusRefreshTicks = CENSUS_REFRESH.get();
             innServeRadius = INN_SERVE_RADIUS.get();
             innServeInterval = INN_SERVE_INTERVAL.get();
             innDrinkFood = INN_DRINK_FOOD.get();

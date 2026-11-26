@@ -10,6 +10,7 @@ import io.github.capttracker.ancientwarfarenpc.block.entity.TownHallBlockEntity;
 import io.github.capttracker.ancientwarfarenpc.init.AwNpcMenus;
 import io.github.capttracker.ancientwarfare.api.IWorkSite;
 import io.github.capttracker.ancientwarfarenpc.entity.NpcWorker;
+import io.github.capttracker.ancientwarfarenpc.settlement.Census;
 import io.github.capttracker.ancientwarfarenpc.settlement.JobBoard;
 import io.github.capttracker.ancientwarfarenpc.settlement.MemberStatus;
 import io.github.capttracker.ancientwarfarenpc.settlement.NpcDeathEntry;
@@ -38,6 +39,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.items.SlotItemHandler;
 
 import javax.annotation.Nullable;
@@ -48,7 +50,7 @@ import java.util.UUID;
 
 /**
  * The town hall menu (1.12.2: {@code GUI_NPC_TOWN_HALL}, 41), reworked for settlements: the 27 slot inventory plus a data channel for the tabs of the
- * screen (overview, members, storage, deaths). The server sends a state tag (name, owner, food, alarm, alerts, members, storages) when the menu
+ * screen (overview, census, members, storage, deaths). The server sends a state tag (name, owner, food, alarm, alerts, members, storages) when the menu
  * opens and again whenever it changes (checked once a second), and the death list whenever the settlement records a death ({@link ITownHallViewer}).
  * The client asks for: {@code rename}, {@code alarm}, {@code dismiss} (member UUID), {@code unlink} (storage position as long) and {@code clear}.
  * Every request is checked on the server: the player must be the owner of the hall or a member of the owning faction.
@@ -100,11 +102,15 @@ public class TownHallMenu extends BlockEntityMenu<TownHallBlockEntity> implement
     private double moraleFactor = 1.0D;
     private final List<MoraleLine> moraleLines = new ArrayList<>();
     private GuardView guard = GuardView.none();
+    private List<Census.Entry> census = new ArrayList<>();
 
     // server side
     @Nullable
     private CompoundTag lastState;
     private int stateTicks;
+    /** True while the viewer has the Census tab open: only then the snapshot is sent (rework phase 6). */
+    private boolean censusOpen;
+    private int censusTicks;
 
     /** Slots that only take part while the inventory tab is shown. */
     private final class HallSlot extends SlotItemHandler {
@@ -227,6 +233,29 @@ public class TownHallMenu extends BlockEntityMenu<TownHallBlockEntity> implement
         return guard;
     }
 
+    /** The member list of the Census tab as the server last sent it (client side). */
+    public List<Census.Entry> getCensus() {
+        return census;
+    }
+
+    /** The position of the hall, the origin of the distances and directions of the census. */
+    public BlockPos getHallPos() {
+        return blockEntity.getBlockPos();
+    }
+
+    /** Client side: a snapshot arrived ({@link Census.Payload}). */
+    public void receiveCensus(List<Census.Entry> entries) {
+        census = entries;
+        refreshGui();
+    }
+
+    /** Client side: tells the server whether the Census tab is shown; the server then sends a snapshot now and every {@code census_refresh_ticks}. */
+    public void setCensusOpen(boolean open) {
+        CompoundTag tag = new CompoundTag();
+        tag.putBoolean("census", open);
+        sendDataToServer(tag);
+    }
+
     /** Client side: the screen turns the slots on for the inventory tab only. */
     public void setInventoryVisible(boolean visible) {
         inventoryVisible = visible;
@@ -330,6 +359,10 @@ public class TownHallMenu extends BlockEntityMenu<TownHallBlockEntity> implement
                 stateTicks = 0;
                 sendState(false);
             }
+            if (censusOpen && ++censusTicks >= SettlementConfig.censusRefreshTicks) {
+                censusTicks = 0;
+                sendCensus();
+            }
         }
         super.broadcastChanges();
     }
@@ -350,6 +383,14 @@ public class TownHallMenu extends BlockEntityMenu<TownHallBlockEntity> implement
         CompoundTag tag = new CompoundTag();
         tag.put("deathList", list);
         sendDataToClient(tag);
+    }
+
+    /** Sends the snapshot of all members to the viewer (server side; only while the Census tab is open and the player may still use the hall). */
+    private void sendCensus() {
+        if (!(player instanceof ServerPlayer serverPlayer) || !(player.level() instanceof ServerLevel level) || !mayUse(player)) {
+            return;
+        }
+        blockEntity.getSettlement().ifPresent(settlement -> PacketDistributor.sendToPlayer(serverPlayer, new Census.Payload(Census.snapshot(level, settlement))));
     }
 
     private void sendState(boolean force) {
@@ -545,6 +586,16 @@ public class TownHallMenu extends BlockEntityMenu<TownHallBlockEntity> implement
             return;
         }
         Settlement settlement = found.get();
+        if (tag.contains("census", Tag.TAG_BYTE)) {
+            censusOpen = tag.getBoolean("census");
+            censusTicks = 0;
+            if (censusOpen) {
+                sendCensus();
+            }
+            if (tag.size() == 1) {
+                return;
+            }
+        }
         if (tag.contains("clear")) {
             blockEntity.clearDeathNotices();
         }

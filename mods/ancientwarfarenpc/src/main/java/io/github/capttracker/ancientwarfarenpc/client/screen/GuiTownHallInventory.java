@@ -30,6 +30,7 @@ import java.util.Locale;
 public class GuiTownHallInventory extends GuiContainerBase<TownHallMenu> {
     private enum Tab {
         OVERVIEW("guistrings.settlement.tab.overview"),
+        CENSUS("guistrings.settlement.tab.census"),
         MEMBERS("guistrings.settlement.tab.members"),
         STORAGE("guistrings.settlement.tab.storage"),
         DEATHS("guistrings.npc.death_list"),
@@ -49,6 +50,8 @@ public class GuiTownHallInventory extends GuiContainerBase<TownHallMenu> {
     private Tab built = null;
     private final Button[] tabButtons = new Button[Tab.values().length];
     private CompositeScrolled area;
+    private final CensusView census = new CensusView();
+    private boolean censusAsked = false;
     private boolean areaShown = false;
 
     // overview elements (made once per visit of the tab)
@@ -88,6 +91,7 @@ public class GuiTownHallInventory extends GuiContainerBase<TownHallMenu> {
 
     private void select(Tab tab) {
         current = tab;
+        census.invalidate();
         getContainer().setInventoryVisible(tab == Tab.INVENTORY);
         refreshGui();
     }
@@ -98,6 +102,11 @@ public class GuiTownHallInventory extends GuiContainerBase<TownHallMenu> {
             tabButtons[tab.ordinal()].setEnabled(tab != current);
         }
         getContainer().setInventoryVisible(current == Tab.INVENTORY);
+        // the server only sends the member snapshot while the Census tab is open
+        if ((current == Tab.CENSUS) != censusAsked) {
+            censusAsked = current == Tab.CENSUS;
+            getContainer().setCensusOpen(censusAsked);
+        }
         boolean wantArea = current != Tab.INVENTORY;
         if (wantArea && !areaShown) {
             addGuiElement(area);
@@ -114,9 +123,13 @@ public class GuiTownHallInventory extends GuiContainerBase<TownHallMenu> {
             updateOverview();
             return;
         }
+        if (current == Tab.CENSUS && built == Tab.CENSUS && !census.needsBuild(getContainer())) {
+            return;
+        }
         area.clearElements();
         switch (current) {
             case OVERVIEW -> buildOverview();
+            case CENSUS -> area.setAreaSize(census.build(area, getContainer(), this::refreshGui));
             case MEMBERS -> buildMembers();
             case STORAGE -> buildStorage();
             case DEATHS -> buildDeaths();

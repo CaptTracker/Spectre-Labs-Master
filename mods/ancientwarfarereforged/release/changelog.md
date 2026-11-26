@@ -4,6 +4,8 @@ First release of Ancient Warfare 2, rebuilt for Minecraft 1.21.1 on NeoForge. Al
 
 **Requires:** Spectre Factions 1.0.0+ and Spectre Lib 1.1.0+.
 
+**Optional:** JEI, Jade or WTHIT (neither Jade nor WTHIT is needed; the look-at tooltips only appear if you install one).
+
 ## Ported from 1.12.2
 - **Core:** research, the engineering bench, tools, the in-game manual and the JEI recipe category. With JEI, the "+" button fills the grid of the engineering bench, the auto crafting block and the warehouse crafting station (shift-"+" fills it with as many sets as you have, up to a stack).
 - **Automation:** worksites, the warehouse and torque power.
@@ -21,7 +23,7 @@ First release of Ancient Warfare 2, rebuilt for Minecraft 1.21.1 on NeoForge. Al
 - Mark out your land with boundary markers instead of relying on a town hall's range.
 - A settlement ledger and linked storage feed your people.
 - Hunger is gentler: NPCs slow down when hungry, eat early and starve only late.
-- **Town hall screen:** tabs for overview, members, jobs, guards and morale.
+- **Town hall screen:** tabs for overview, census, members, jobs, guards and morale.
 - **Daily life:**
   - A job board with worker roles.
   - Beds and sleep.
@@ -66,6 +68,10 @@ First release of Ancient Warfare 2, rebuilt for Minecraft 1.21.1 on NeoForge. Al
 - NPCs swing their tools at a natural pace while working.
 - **Workers pick the right tool for each job:** an axe for logs, a pickaxe for stone, a shovel for dirt, a hoe for tilling and shears for leaves and wool. They take it from their hand, a small tool belt or their pouch, or fetch one from your storage. They take their own tool back between jobs (`tool_switching` in the config).
 - Hunger now counts once toward work speed, through the NPC's morale. The config keys `hungry_work_factor` and `starving_work_factor` are gone.
+
+## Quality of life
+- **Census tab** on the town hall screen: one row for every member of the settlement with its role, mood, distance and direction from the hall (or "unloaded"), what it is doing, and problem icons (starving, hungry, no bed, no tool, no job, badly hurt, no path, alarm). Sort by name, role, mood or problems, and filter by problems or a single role. Click a row to make that NPC glow for 10 seconds with a particle beam leading to it (only you see it); an NPC that is unloaded or out of view gets its last known position in chat. The list refreshes every 2 seconds while the tab is open (`census_refresh_ticks`).
+- **Jade and WTHIT support (optional):** look at an NPC to see its role, owner or faction, mood, current task and health. Look at a worksite (farm, quarry, tree farm, fishing, apiary, smelter, dock, market stall, inn, stable) to see workers out of slots, its status (working, idle, waiting for workers, tools or ladders, storage full, needs a bed and a table) and the settlement it belongs to. Each tooltip can be switched off in the Jade or WTHIT config screen.
 
 ## Known issues
 - Not yet play-tested in a running game: NPC helmsmen, swimming out to a ship, and the cog's oars.
