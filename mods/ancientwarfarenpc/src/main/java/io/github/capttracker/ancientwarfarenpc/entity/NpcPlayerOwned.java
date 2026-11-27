@@ -129,6 +129,37 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
     public void clearSailOrder() {
         sailTarget = null;
         sailFollow = null;
+        sailRoute = List.of();
+    }
+
+    /** How the last sail order of the helmsman ended (rework phase 11: a trade route reads it). */
+    public enum SailResult { NONE, ARRIVED, STUCK }
+
+    private SailResult sailResult = SailResult.NONE;
+    /** The waypoints the helmsman steers through on the way to its sail target (planned by whoever gave the order); not saved. */
+    private List<Vec3> sailRoute = List.of();
+
+    /** Sail to {@code target} through the waypoints (water positions, the last one next to the target): the helmsman only passes them and stops at the target. */
+    public void setSailRouteOrder(BlockPos target, List<Vec3> route) {
+        sailTarget = target;
+        sailFollow = null;
+        sailRoute = route == null ? List.of() : List.copyOf(route);
+        sailResult = SailResult.NONE;
+    }
+
+    public List<Vec3> getSailRoute() {
+        return sailRoute;
+    }
+
+    public void setSailResult(SailResult result) {
+        sailResult = result;
+    }
+
+    /** The way the last sail order ended, and forgets it. */
+    public SailResult takeSailResult() {
+        SailResult result = sailResult;
+        sailResult = SailResult.NONE;
+        return result;
     }
 
     @Nullable

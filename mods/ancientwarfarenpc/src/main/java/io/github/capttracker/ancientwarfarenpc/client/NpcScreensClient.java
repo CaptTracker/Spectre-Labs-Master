@@ -19,6 +19,7 @@ import io.github.capttracker.ancientwarfarenpc.client.screen.GuiNpcPlayerOwnedTr
 import io.github.capttracker.ancientwarfarenpc.client.screen.GuiNpcTalk;
 import io.github.capttracker.ancientwarfarenpc.client.screen.GuiRoutingOrder;
 import io.github.capttracker.ancientwarfarenpc.client.screen.GuiTownHallInventory;
+import io.github.capttracker.ancientwarfarenpc.client.screen.GuiSeaRoute;
 import io.github.capttracker.ancientwarfarenpc.client.screen.GuiTradeOrder;
 import io.github.capttracker.ancientwarfarenpc.client.screen.GuiUpkeepOrder;
 import io.github.capttracker.ancientwarfarenpc.client.screen.GuiWorkOrder;
@@ -37,6 +38,7 @@ import io.github.capttracker.ancientwarfarenpc.menu.NpcTalkMenu;
 import io.github.capttracker.ancientwarfarenpc.menu.PlayerOwnedTradeMenu;
 import io.github.capttracker.ancientwarfarenpc.menu.RoutingOrderMenu;
 import io.github.capttracker.ancientwarfarenpc.menu.TownHallMenu;
+import io.github.capttracker.ancientwarfarenpc.menu.SeaRouteMenu;
 import io.github.capttracker.ancientwarfarenpc.menu.TradeOrderMenu;
 import io.github.capttracker.ancientwarfarenpc.menu.UpkeepOrderMenu;
 import io.github.capttracker.ancientwarfarenpc.menu.WorkOrderMenu;
@@ -77,5 +79,6 @@ public final class NpcScreensClient {
         event.<CombatOrderMenu, GuiCombatOrder>register(AwNpcMenus.COMBAT_ORDER_MENU.get(), (menu, inventory, title) -> new GuiCombatOrder(menu));
         event.<RoutingOrderMenu, GuiRoutingOrder>register(AwNpcMenus.ROUTING_ORDER_MENU.get(), (menu, inventory, title) -> new GuiRoutingOrder(menu));
         event.<TradeOrderMenu, GuiTradeOrder>register(AwNpcMenus.TRADE_ORDER_MENU.get(), (menu, inventory, title) -> new GuiTradeOrder(menu));
+        event.<SeaRouteMenu, GuiSeaRoute>register(AwNpcMenus.SEA_ROUTE_MENU.get(), (menu, inventory, title) -> new GuiSeaRoute(menu));
     }
 }

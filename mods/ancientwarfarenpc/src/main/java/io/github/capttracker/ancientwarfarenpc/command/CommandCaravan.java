@@ -8,6 +8,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import io.github.capttracker.ancientwarfarenpc.caravan.CaravanScheduler;
 import io.github.capttracker.ancientwarfarenpc.caravan.CaravanSpawner;
+import io.github.capttracker.ancientwarfarenpc.caravan.SeaCaravanSpawner;
 import io.github.capttracker.ancientwarfarenpc.settlement.Settlement;
 import io.github.capttracker.ancientwarfarenpc.settlement.SettlementApi;
 import net.minecraft.commands.CommandSourceStack;
@@ -21,6 +22,9 @@ import java.util.Optional;
 /**
  * {@code /awcaravan [faction]}: sends a caravan at once to the settlement whose land holds the command source (else the one with the nearest hall in the same
  * dimension). Without a faction one is drawn from the factions that are NEUTRAL or better to the settlement owner. Needs permission level 2.
+ *
+ * <p>{@code /awcaravan sea [faction]} (rework phase 11) sends a trade ship by sea instead: it needs a dock of the settlement with deep water access and a player
+ * near the sea.
  */
 public final class CommandCaravan {
     private CommandCaravan() {}
@@ -28,12 +32,16 @@ public final class CommandCaravan {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("awcaravan")
                 .requires(source -> source.hasPermission(2))
-                .executes(context -> run(context.getSource(), null))
+                .executes(context -> run(context.getSource(), null, false))
+                .then(Commands.literal("sea")
+                        .executes(context -> run(context.getSource(), null, true))
+                        .then(Commands.argument("faction", StringArgumentType.word())
+                                .executes(context -> run(context.getSource(), StringArgumentType.getString(context, "faction"), true))))
                 .then(Commands.argument("faction", StringArgumentType.word())
-                        .executes(context -> run(context.getSource(), StringArgumentType.getString(context, "faction")))));
+                        .executes(context -> run(context.getSource(), StringArgumentType.getString(context, "faction"), false))));
     }
 
-    private static int run(CommandSourceStack source, String faction) {
+    private static int run(CommandSourceStack source, String faction, boolean sea) {
         ServerLevel level = source.getLevel();
         Optional<Settlement> found = SettlementApi.findByPosition(level, net.minecraft.core.BlockPos.containing(source.getPosition()));
         if (found.isEmpty()) {
@@ -60,12 +68,13 @@ public final class CommandCaravan {
             }
             chosen = eligible.get(level.getRandom().nextInt(eligible.size()));
         }
-        if (CaravanSpawner.spawn(level, settlement, chosen)) {
+        if (sea ? SeaCaravanSpawner.spawn(level, settlement, chosen) : CaravanSpawner.spawn(level, settlement, chosen)) {
             String name = chosen;
-            source.sendSuccess(() -> Component.translatable("command.ancientwarfarenpc.caravan.sent", name, settlement.getName()), true);
+            source.sendSuccess(() -> Component.translatable(sea ? "command.ancientwarfarenpc.caravan.sea_sent" : "command.ancientwarfarenpc.caravan.sent", name,
+                    settlement.getName()), true);
             return 1;
         }
-        source.sendFailure(Component.translatable("command.ancientwarfarenpc.caravan.failed"));
+        source.sendFailure(Component.translatable(sea ? "command.ancientwarfarenpc.caravan.sea_failed" : "command.ancientwarfarenpc.caravan.failed"));
         return 0;
     }
 }

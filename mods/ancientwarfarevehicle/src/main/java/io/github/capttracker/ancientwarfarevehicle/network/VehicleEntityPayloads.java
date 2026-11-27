@@ -131,6 +131,30 @@ public final class VehicleEntityPayloads {
         }
     }
 
+    /** Client to server (rework phase 11): the owner sets the stance of a ship, from the toggle of its screen. Only the owner (or anyone, for a ship with no owner) may. */
+    public record StanceCommand(int entityId, boolean aggressive) implements VehiclePayload {
+        public static final Type<StanceCommand> TYPE = payloadType("stance_command");
+        public static final StreamCodec<RegistryFriendlyByteBuf, StanceCommand> CODEC = StreamCodec.composite(
+                ByteBufCodecs.VAR_INT, StanceCommand::entityId,
+                ByteBufCodecs.BOOL, StanceCommand::aggressive,
+                StanceCommand::new);
+
+        @Override
+        public Type<StanceCommand> type() {
+            return TYPE;
+        }
+
+        public static void handle(StanceCommand payload, IPayloadContext context) {
+            net.minecraft.world.entity.player.Player sender = context.player();
+            VehicleNetwork.withVehicle(context, payload.entityId, Authority.REACH, vehicle -> {
+                boolean allowed = vehicle.getOwner().equals(io.github.capttracker.ancientwarfare.owner.Owner.EMPTY) || vehicle.isOwner(sender);
+                if (vehicle.isShip() && allowed) {
+                    vehicle.setAggressive(payload.aggressive);
+                }
+            });
+        }
+    }
+
     /** Server to clients: the count of one ammo type. */
     public record SingleAmmoUpdate(int entityId, String ammoRegistryName, int count) implements VehiclePayload {
         public static final Type<SingleAmmoUpdate> TYPE = payloadType("single_ammo_update");

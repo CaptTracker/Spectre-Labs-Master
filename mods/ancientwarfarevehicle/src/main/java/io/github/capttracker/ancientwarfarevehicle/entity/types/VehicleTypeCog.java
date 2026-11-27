@@ -14,13 +14,13 @@ import io.github.capttracker.ancientwarfarevehicle.registry.UpgradeRegistry;
 /**
  * Type 24: the cog, a cargo ship 5 blocks wide and 10 long with one square sail, a helm, four passenger seats, four sweep benches for rowers (each rower
  * adds a tenth of the top speed with no wind; the model draws two oars a side that row while the benches are manned), 54 slots of cargo and a ballista on a swivel at the bow that a gunner
- * works. The seat and turret positions are estimates from the model.
+ * works. Its bow has a weak ram (rework phase 11). The seat and turret positions are estimates from the model.
  */
 public class VehicleTypeCog extends VehicleTypeShip {
     public VehicleTypeCog(int typeNum) {
         super(typeNum, "cog", new ShipSpec("cog", new int[] {1, 3, 5, 5, 5, 5, 5, 5, 5, 3}, 1.0f, 0.55f, 0.9f)
                 .gangway(4, 5).mast(0.5f, 0.f, 6.0f)
-                .power(0.f, 1.8f, 0.4f).motion(0.0025f, 0.004f, 0.05f)
+                .power(0.f, 1.8f, 0.4f).motion(0.0025f, 0.004f, 0.05f).ram(12.f, 1.1f)
                 .hardpoint(ShipSpec.Weapon.BALLISTA, 3.4f, 0.f, 1.55f + 0.1f, 0.f, 180.f, -10.f, 30.f));
         this.baseHealth = 300;
         this.weight = 4000;
@@ -59,6 +59,7 @@ public class VehicleTypeCog extends VehicleTypeShip {
         this.displayTooltip.add(tooltipKey("rowers"));
         this.displayTooltip.add(tooltipKey("hardpoints"));
         this.displayTooltip.add(tooltipKey("torsion"));
+        this.displayTooltip.add(tooltipKey("ram"));
     }
 
     @Override

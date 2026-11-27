@@ -102,6 +102,11 @@ public abstract class NpcFaction extends NpcBase {
     private Map<String, Long> revengePlayers = new HashMap<>();
     private FactionAdditionalAttributes additionalAttributes = FactionAdditionalAttributes.NONE;
     private boolean canDespawn = false;
+    /** True if this NPC belongs to a caravan or trade ship (rework phase 11: its crew stays aboard whoever is at the helm). */
+    public boolean isCaravanMember() {
+        return caravanLeader != null;
+    }
+
     /** The leader of the caravan this NPC escorts (rework phase 5), or null. */
     @Nullable
     private UUID caravanLeader;
@@ -116,6 +121,7 @@ public abstract class NpcFaction extends NpcBase {
     @Override
     protected void registerGoals() {
         goalSelector.addGoal(0, new io.github.capttracker.ancientwarfarenpc.ai.vehicle.NpcAIShipCrew(this));
+        goalSelector.addGoal(1, new io.github.capttracker.ancientwarfarenpc.ai.vehicle.NpcAIShipBoard(this)); // boarding and defending decks (rework phase 11)
         goalSelector.addGoal(1, new NpcAICaravanEscort(this));
         goalSelector.addGoal(3, new io.github.capttracker.ancientwarfarenpc.ai.vehicle.NpcAIShipFactionCrew(this));
         goalSelector.addGoal(2, new NpcAIFactionRestrictSun(this));

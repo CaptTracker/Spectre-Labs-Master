@@ -64,6 +64,19 @@ public class GuiVehicleInventory extends GuiContainerBase<VehicleInventoryMenu> 
         };
         addGuiElement(pack);
 
+        if (vehicle.isShip()) {
+            // rework phase 11: the stance of a ship decides whether its NPC helmsman rams and its crew throws hooks and boards hostile ships
+            Button stance = new Button(8 + 2 * (45 + 4), 4, 80, 16, stanceKey(vehicle)) {
+                @Override
+                protected void onPressed() {
+                    boolean aggressive = !vehicle.isAggressive();
+                    VehicleNetwork.sendToServer(new VehicleEntityPayloads.StanceCommand(vehicle.getId(), aggressive));
+                    setText(stanceKey(vehicle, aggressive));
+                }
+            };
+            addGuiElement(stance);
+        }
+
         if (hasStorage) {
             Button minus = new Button(171, menu.storageY - 1, 16, 16, "-") {
                 @Override
@@ -80,6 +93,14 @@ public class GuiVehicleInventory extends GuiContainerBase<VehicleInventoryMenu> 
             };
             addGuiElement(plus);
         }
+    }
+
+    private static String stanceKey(VehicleBase vehicle) {
+        return stanceKey(vehicle, vehicle.isAggressive());
+    }
+
+    private static String stanceKey(VehicleBase vehicle, boolean aggressive) {
+        return aggressive ? "gui.ancientwarfarevehicles.inventory.stance_aggressive" : "gui.ancientwarfarevehicles.inventory.stance_passive";
     }
 
     @Override

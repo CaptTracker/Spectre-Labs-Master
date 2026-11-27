@@ -27,7 +27,9 @@ public final class OrderGuiBridge {
         /** GUI_NPC_ROUTING_ORDER (37). */
         ROUTING_ORDER,
         /** GUI_NPC_TRADE_ORDER (6). */
-        TRADE_ORDER
+        TRADE_ORDER,
+        /** Rework phase 11: the sea route chart. */
+        SEA_ROUTE
     }
 
     @FunctionalInterface

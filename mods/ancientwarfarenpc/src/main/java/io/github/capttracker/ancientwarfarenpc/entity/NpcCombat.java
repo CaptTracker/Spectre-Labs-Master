@@ -88,6 +88,7 @@ public class NpcCombat extends NpcPlayerOwned implements RangedAttackMob {
         goalSelector.addGoal(0, new NpcAIDoor(this, true));
         goalSelector.addGoal(0, horseAI);
         goalSelector.addGoal(1, new NpcAIPlayerOwnedFollowCommand(this));
+        goalSelector.addGoal(1, new io.github.capttracker.ancientwarfarenpc.ai.vehicle.NpcAIShipBoard(this)); // boarding and defending decks (rework phase 11)
         goalSelector.addGoal(2, new NpcAIPlayerOwnedGetFood(this));
 
         //3==NpcAIShieldBlock

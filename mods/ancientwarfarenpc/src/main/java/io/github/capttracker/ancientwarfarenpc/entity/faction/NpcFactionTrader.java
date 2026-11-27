@@ -76,6 +76,11 @@ public class NpcFactionTrader extends NpcFaction {
         this.caravan = caravan;
     }
 
+    @Override
+    public boolean isCaravanMember() {
+        return caravan != null || super.isCaravanMember();
+    }
+
     public void startTrade(Player player) {
         trader = player;
     }

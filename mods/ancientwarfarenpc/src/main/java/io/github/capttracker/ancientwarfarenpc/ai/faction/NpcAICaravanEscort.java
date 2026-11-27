@@ -34,7 +34,7 @@ public class NpcAICaravanEscort extends NpcAI<NpcFaction> {
 
     @Override
     public boolean canUse() {
-        if (!super.canUse() || npc.getCaravanLeader() == null || npc.getTarget() != null || !(npc.level() instanceof ServerLevel level)) {
+        if (!super.canUse() || npc.getCaravanLeader() == null || npc.getTarget() != null || npc.isPassenger() || !(npc.level() instanceof ServerLevel level)) {
             return false;
         }
         Entity found = level.getEntity(npc.getCaravanLeader());

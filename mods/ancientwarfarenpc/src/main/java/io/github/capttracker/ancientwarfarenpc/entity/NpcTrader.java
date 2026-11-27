@@ -16,9 +16,13 @@ import io.github.capttracker.ancientwarfarenpc.ai.owned.NpcAIMarketStall;
 import io.github.capttracker.ancientwarfarenpc.ai.owned.NpcAIPlayerOwnedGetFood;
 import io.github.capttracker.ancientwarfarenpc.ai.owned.NpcAIPlayerOwnedRideHorse;
 import io.github.capttracker.ancientwarfarenpc.ai.owned.NpcAIPlayerOwnedTrader;
+import io.github.capttracker.ancientwarfarenpc.ai.owned.NpcAISeaTrade;
+import io.github.capttracker.ancientwarfarenpc.orders.SeaRoute;
 import io.github.capttracker.ancientwarfarenpc.orders.TradeOrder;
 import io.github.capttracker.ancientwarfarenpc.trade.MarketApi;
 import io.github.capttracker.ancientwarfarenpc.trade.POTradeList;
+import io.github.capttracker.ancientwarfarenpc.trade.SeaTrade;
+import io.github.capttracker.ancientwarfarenpc.trade.SeaTradeState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
@@ -64,6 +68,7 @@ public class NpcTrader extends NpcPlayerOwned {
         goalSelector.addGoal(2, new NpcAIPlayerOwnedFollowCommand(this));
         goalSelector.addGoal(3, new NpcAIFleeHostiles(this));
         goalSelector.addGoal(3, new NpcAIPlayerOwnedAlarmResponse(this));
+        goalSelector.addGoal(3, new NpcAISeaTrade(this));
         goalSelector.addGoal(4, (tradeAI = new NpcAIPlayerOwnedTrader(this)));
         goalSelector.addGoal(5, new NpcAIPlayerOwnedGetFood(this));
         goalSelector.addGoal(6, new NpcAIScheduleGoal(this));
@@ -78,13 +83,14 @@ public class NpcTrader extends NpcPlayerOwned {
 
     @Override
     public boolean isValidOrdersStack(ItemStack stack) {
-        return NpcItemIds.is(stack, NpcItemIds.TRADE_ORDER);
+        return NpcItemIds.is(stack, NpcItemIds.TRADE_ORDER) || NpcItemIds.is(stack, NpcItemIds.SEA_ROUTE);
     }
 
     @Override
     public void onOrdersInventoryChanged() {
+        seaRouteKnown = false;
         tradeList = null;
-        if (isValidOrdersStack(ordersStack)) {
+        if (NpcItemIds.is(ordersStack, NpcItemIds.TRADE_ORDER)) {
             tradeList = TradeOrder.getTradeOrder(ordersStack).getTradeList();
         }
         if (tradeAI != null) {
@@ -130,6 +136,36 @@ public class NpcTrader extends NpcPlayerOwned {
             }
         }
         return true;
+    }
+
+    // ---- sea trade (rework phase 11): a sea route chart in the orders slot makes the trader sail a cargo ship from dock to dock ----
+
+    private final SeaTradeState seaState = new SeaTradeState();
+    @Nullable
+    private SeaRoute seaRoute;
+    private boolean seaRouteKnown = false;
+
+    /** What this trader remembers of its sea route: the ship, the stop, the phase. */
+    public SeaTradeState getSeaState() {
+        return seaState;
+    }
+
+    /** The sea route chart in the orders slot (a copy, kept until the slot changes), or null if the trader has no chart. */
+    @Nullable
+    public SeaRoute getSeaRoute() {
+        if (!seaRouteKnown) {
+            seaRoute = SeaRoute.get(ordersStack);
+            seaRouteKnown = true;
+        }
+        return seaRoute;
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (!level().isClientSide) {
+            SeaTrade.tick(this);
+        }
     }
 
     /** The wagon this trader hauls along its trade route (rework phase 5), saved. */
@@ -199,6 +235,7 @@ public class NpcTrader extends NpcPlayerOwned {
         if (wagonId != null) {
             tag.putUUID("wagon", wagonId);
         }
+        tag.put("sea", seaState.save());
     }
 
     @Override
@@ -208,6 +245,10 @@ public class NpcTrader extends NpcPlayerOwned {
             tradeAI.readFromNBT(tag.getCompound("tradeAI"));
         }
         wagonId = tag.hasUUID("wagon") ? tag.getUUID("wagon") : null;
+        seaRouteKnown = false;
+        if (tag.contains("sea")) {
+            seaState.load(tag.getCompound("sea"));
+        }
     }
 
 }

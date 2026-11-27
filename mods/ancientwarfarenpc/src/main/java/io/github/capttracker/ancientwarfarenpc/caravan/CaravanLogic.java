@@ -36,6 +36,9 @@ import java.util.UUID;
 /**
  * The caravan's behaviour, run by its leader ({@link NpcFactionTrader#tick}) on the server: the wagon follows the leader, the phases change
  * (approach, trading, leaving), the stall buy orders are filled from the wagon, and the caravan vanishes when it has left. Killing the leader drops the coins the caravan earned (goods for buy orders are made only at the trade).
+ *
+ * <p>Rework phase 11: a trade ship ({@link CaravanState#ship}) is the same caravan with a cog for the wagon; its sailing is {@link SeaCaravanLogic}, and it shares the
+ * buy order sales ({@link #fillBuyOrders}), the despawn and the kill rules (the cargo is dropped by the ship's own inventory rules, coins only) with the one by land.
  */
 public final class CaravanLogic {
     /** Ticks a caravan may take to reach the settlement before it gives up. */
@@ -69,6 +72,10 @@ public final class CaravanLogic {
             return;
         }
         VehicleBase wagon = wagonOf(level, state);
+        if (state.ship) {
+            SeaCaravanLogic.tick(leader, state, level, wagon);
+            return;
+        }
         if (wagon != null && wagon.hitch.isHitched()) {
             // the leader is not saved on the hitch, so it is set every tick
             wagon.hitch.setLeader(leader, 3.0D);
@@ -95,7 +102,7 @@ public final class CaravanLogic {
             }
             case TRADING -> {
                 if (leader.tickCount % 60 == 0 && wagon != null && settlement.isPresent()) {
-                    fillBuyOrders(leader, level, settlement.get(), wagon, state);
+                    fillBuyOrders(leader, level, settlement.get(), wagon, state, ORDER_RANGE_SQ);
                 }
                 if (leader.tickCount % 100 == 0 && settlement.isPresent()) {
                     CaravanGuests.rentBeds(level, settlement.get(), leader, state);
@@ -115,9 +122,14 @@ public final class CaravanLogic {
 
     /** Tells the players who run the settlement that the caravan has come. */
     private static void announce(ServerLevel level, Settlement settlement, NpcFactionTrader leader) {
+        announce(level, settlement, leader, "message.ancientwarfarenpc.caravan.arrived");
+    }
+
+    /** As {@link #announce(ServerLevel, Settlement, NpcFactionTrader)} with the message of your choice (a trade ship has its own). */
+    static void announce(ServerLevel level, Settlement settlement, NpcFactionTrader leader, String key) {
         String faction = leader.getFaction() == null ? "" : leader.getFaction();
         Component name = Component.literal(faction.isEmpty() ? faction : faction.substring(0, 1).toUpperCase(Locale.ROOT) + faction.substring(1));
-        Component message = Component.translatable("message.ancientwarfarenpc.caravan.arrived", name, settlement.getName());
+        Component message = Component.translatable(key, name, settlement.getName());
         for (ServerPlayer player : level.players()) {
             if (SettlementApi.mayManage(settlement, player) && player.distanceToSqr(leader) < 200.0D * 200.0D) {
                 player.sendSystemMessage(message);
@@ -133,7 +145,7 @@ public final class CaravanLogic {
      * into a scratch inventory next to room for the coins, the stall does its all-or-nothing trade with that inventory, and then the coins move into the wagon
      * and what is left of the goods is thrown away. Goods that were never paid for never exist as items in the wagon, so a killed caravan cannot drop them.
      */
-    private static void fillBuyOrders(NpcFactionTrader leader, ServerLevel level, Settlement settlement, VehicleBase wagon, CaravanState state) {
+    static void fillBuyOrders(NpcFactionTrader leader, ServerLevel level, Settlement settlement, VehicleBase wagon, CaravanState state, double orderRangeSq) {
         if (leader.distanceToSqr(wagon) > CARGO_RANGE_SQ) {
             return;
         }
@@ -141,7 +153,7 @@ public final class CaravanLogic {
         if (!state.virtualCargo) {
             // a caravan from before the change: its wagon may hold goods, sell those as before
             for (MarketApi.PostedOrder posted : MarketApi.listBuyOrders(level, settlement)) {
-                if (inRange(leader, posted.stall())
+                if (inRange(leader, posted.stall(), orderRangeSq)
                         && MarketApi.fillBuyOrder(posted.stall(), posted.order().index(), Math.max(1, posted.order().deals()), cargo).deals() > 0) {
                     leader.playSound(net.minecraft.sounds.SoundEvents.VILLAGER_TRADE, 1.0F, 1.0F);
                 }
@@ -152,7 +164,7 @@ public final class CaravanLogic {
             IMarketStall stall = posted.stall();
             ItemStack item = posted.order().item();
             ItemStack price = posted.order().price();
-            if (!inRange(leader, stall) || item.isEmpty() || price.isEmpty() || item.getCount() < 1) {
+            if (!inRange(leader, stall, orderRangeSq) || item.isEmpty() || price.isEmpty() || item.getCount() < 1) {
                 continue;
             }
             String id = BuiltInRegistries.ITEM.getKey(item.getItem()).toString();
@@ -195,8 +207,8 @@ public final class CaravanLogic {
         }
     }
 
-    private static boolean inRange(NpcFactionTrader leader, IMarketStall stall) {
-        return leader.distanceToSqr(stall.getStallPos().getX() + 0.5D, stall.getStallPos().getY(), stall.getStallPos().getZ() + 0.5D) <= ORDER_RANGE_SQ;
+    private static boolean inRange(NpcFactionTrader leader, IMarketStall stall, double rangeSq) {
+        return leader.distanceToSqr(stall.getStallPos().getX() + 0.5D, stall.getStallPos().getY(), stall.getStallPos().getZ() + 0.5D) <= rangeSq;
     }
 
     /** True when the whole stack can be put into the handler. */
@@ -209,7 +221,7 @@ public final class CaravanLogic {
     /** The caravan has left: the leader, the guards, the horses and the wagon vanish (what is left in the wagon goes with it). */
     public static void despawn(NpcFactionTrader leader, ServerLevel level, CaravanState state) {
         VehicleBase wagon = wagonOf(level, state);
-        if (wagon != null) {
+        if (wagon != null && !state.ship) {
             wagon.hitch.unhitchAll(false);
         }
         for (UUID id : state.horses) {
@@ -241,8 +253,15 @@ public final class CaravanLogic {
         }
         VehicleBase wagon = wagonOf(level, state);
         if (wagon != null) {
-            wagon.hitch.setLeader(null, 3.0D);
-            wagon.hitch.unhitchAll(false);
+            if (state.ship) {
+                if (wagon.ship != null) {
+                    wagon.ship.clearPilot(); // the crew is freed below: the ship runs down where it is
+                }
+                io.github.capttracker.ancientwarfarenpc.event.ShipPrizeEvents.markAbandoned(wagon); // a prize for the players, gone after a day if nobody takes it
+            } else {
+                wagon.hitch.setLeader(null, 3.0D);
+                wagon.hitch.unhitchAll(false);
+            }
             dropCargo(level, wagon, state.virtualCargo);
         }
         for (UUID id : state.guards) {
@@ -272,8 +291,13 @@ public final class CaravanLogic {
         }
     }
 
-    private static void finish(ServerLevel level, CaravanState state, NpcFactionTrader leader) {
-        CaravanData.get(level.getServer()).finish(state.settlement, leader.getUUID());
+    static void finish(ServerLevel level, CaravanState state, NpcFactionTrader leader) {
+        CaravanData data = CaravanData.get(level.getServer());
+        if (state.ship) {
+            data.finishSea(leader.getUUID());
+        } else {
+            data.finish(state.settlement, leader.getUUID());
+        }
     }
 
     /** The guards (loaded ones) of a caravan. */

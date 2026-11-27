@@ -243,6 +243,63 @@ public final class SettlementConfig {
     /** If true, a trader that follows a route with a wagon loads and unloads at the linked storages of the settlements it stops at. */
     public static boolean tradeRouteLoading = true;
 
+    // ---- sea trade (rework phase 11) ----
+    /** If false, traders do not sail sea routes and no faction trade ships come. */
+    public static boolean seaTradeEnabled = true;
+    /** How far (blocks) from a trader with a sea route chart it looks for a cargo ship to take. */
+    public static int seaTradeBindRange = 32;
+    /** The mooring of a ship is looked for within 70% of this many blocks of the dock block; a ship that has stopped at it (within this many plus 12 blocks of the dock block) counts as moored. */
+    public static int seaTradeMoorRange = 20;
+    /** The longest leg (blocks between two docks, in a straight line) a sea route may have. */
+    public static int seaTradeMaxLeg = 256;
+    /** Ticks a ship may take for one leg before the helmsman tries again (and in the end gives the stop up). */
+    public static int seaTradeLegTicks = 18000;
+    /** Ticks a ship waits at the last reachable point for a dock that is not loaded before it goes on to the next stop. */
+    public static int seaTradeDockWaitTicks = 12000;
+    /** If true, a trade ship also loads and unloads at the linked storages of the settlement round its dock (the dock's own storage comes first). */
+    public static boolean seaTradeSettlementStorage = true;
+    /** If false, no faction trade ships come to the settlements (the faction caravans by land are not affected). */
+    public static boolean seaCaravansEnabled = true;
+    /** In-game days between two trade ship rolls. */
+    public static int seaCaravanIntervalDays = 3;
+    /** The chance, at each roll, that a trade ship goes to a settlement with a dock. */
+    public static double seaCaravanChance = 0.35;
+    /** The most trade ships a settlement has at its docks at one time. */
+    public static int seaCaravanMaxPerSettlement = 1;
+    /** The most trade ships at sea at once in a world. */
+    public static int seaCaravanMaxActive = 3;
+    /** A dock only counts as reachable from the sea if the water at its mooring is this many blocks deep (at least) and a 5 x 5 hull fits. */
+    public static int seaCaravanMinDepth = 3;
+    /** A trade ship only appears where its route to the dock is at least this many blocks long (it must come from beyond view). */
+    public static int seaCaravanMinRoute = 48;
+    /** Ticks a trade ship stays moored and trades (9000 is 7.5 minutes). */
+    public static int seaCaravanStayTicks = 9000;
+    /** How many faction soldiers row a trade ship, and how many more guard it. */
+    public static int seaCaravanRowers = 2;
+    public static int seaCaravanGuards = 2;
+    /** A trade ship fills the buy orders of the market stalls within this many blocks of its trader. */
+    public static int seaCaravanOrderRange = 64;
+
+    // ---- naval combat (rework phase 11; the vehicle side is in the Vehicles module's config) ----
+    /** NPC crew members throw grappling hooks at hostile ships (owned crews only when the ship's stance is aggressive). */
+    public static boolean navalNpcGrapple = true;
+    /** How far (blocks, hull to hull) an NPC throws a hook. */
+    public static int navalNpcGrappleRange = 14;
+    /** Ticks a ship waits after an NPC threw a hook before one of its crew throws another. */
+    public static int navalNpcGrappleCooldownTicks = 600;
+    /** Soldiers of the NPC factions (their ships: the trade ships) throw hooks and board hostile ships too, not only the owned crews. */
+    public static boolean navalFactionBoarding = true;
+    /** Soldiers aboard a ship grappled to a hostile one cross to its deck and fight; crews defend their own deck. */
+    public static boolean navalBoarding = true;
+    /** An NPC helmsman rams hostile ships when the ship's stance is aggressive. */
+    public static boolean navalHelmRam = true;
+    /** How far (blocks) an aggressive helmsman looks for a ship to ram. */
+    public static int navalHelmRamRange = 48;
+    /** A helmsman of a ship under attack that is not aggressive sails for the nearest dock of its owner. */
+    public static boolean navalHelmFlee = true;
+    /** A ship of an NPC faction whose crew is dead can be taken as a prize by a player (the faction's reputation drops as for an attack). */
+    public static boolean navalPrize = true;
+
     // ---- morale (rework phase 5) ----
     /** If false, the morale is not computed and gives no work speed change. */
     public static boolean moraleEnabled = true;
@@ -397,6 +454,33 @@ public final class SettlementConfig {
     private static final ModConfigSpec.IntValue CARAVAN_MAX_ACTIVE;
     private static final ModConfigSpec.BooleanValue CARAVAN_TAILOR;
     private static final ModConfigSpec.BooleanValue TRADE_ROUTE_LOADING;
+    private static final ModConfigSpec.BooleanValue SEA_TRADE_ENABLED;
+    private static final ModConfigSpec.IntValue SEA_TRADE_BIND_RANGE;
+    private static final ModConfigSpec.IntValue SEA_TRADE_MOOR_RANGE;
+    private static final ModConfigSpec.IntValue SEA_TRADE_MAX_LEG;
+    private static final ModConfigSpec.IntValue SEA_TRADE_LEG_TICKS;
+    private static final ModConfigSpec.IntValue SEA_TRADE_DOCK_WAIT_TICKS;
+    private static final ModConfigSpec.BooleanValue SEA_TRADE_SETTLEMENT_STORAGE;
+    private static final ModConfigSpec.BooleanValue SEA_CARAVANS_ENABLED;
+    private static final ModConfigSpec.IntValue SEA_CARAVAN_INTERVAL_DAYS;
+    private static final ModConfigSpec.DoubleValue SEA_CARAVAN_CHANCE;
+    private static final ModConfigSpec.IntValue SEA_CARAVAN_MAX_PER_SETTLEMENT;
+    private static final ModConfigSpec.IntValue SEA_CARAVAN_MAX_ACTIVE;
+    private static final ModConfigSpec.IntValue SEA_CARAVAN_MIN_DEPTH;
+    private static final ModConfigSpec.IntValue SEA_CARAVAN_MIN_ROUTE;
+    private static final ModConfigSpec.IntValue SEA_CARAVAN_STAY_TICKS;
+    private static final ModConfigSpec.IntValue SEA_CARAVAN_ROWERS;
+    private static final ModConfigSpec.IntValue SEA_CARAVAN_GUARDS;
+    private static final ModConfigSpec.IntValue SEA_CARAVAN_ORDER_RANGE;
+    private static final ModConfigSpec.BooleanValue NAVAL_NPC_GRAPPLE;
+    private static final ModConfigSpec.IntValue NAVAL_NPC_GRAPPLE_RANGE;
+    private static final ModConfigSpec.IntValue NAVAL_NPC_GRAPPLE_COOLDOWN;
+    private static final ModConfigSpec.BooleanValue NAVAL_FACTION_BOARDING;
+    private static final ModConfigSpec.BooleanValue NAVAL_BOARDING;
+    private static final ModConfigSpec.BooleanValue NAVAL_HELM_RAM;
+    private static final ModConfigSpec.IntValue NAVAL_HELM_RAM_RANGE;
+    private static final ModConfigSpec.BooleanValue NAVAL_HELM_FLEE;
+    private static final ModConfigSpec.BooleanValue NAVAL_PRIZE;
     private static final ModConfigSpec.DoubleValue FRIENDLY_DISCOUNT;
     private static final ModConfigSpec.DoubleValue ALLIED_DISCOUNT;
     private static final ModConfigSpec.IntValue TRADE_REPUTATION;
@@ -698,6 +782,69 @@ public final class SettlementConfig {
         TRADE_ROUTE_LOADING = builder.comment("Default = true",
                 "If true, a player-owned trader that follows a trade route with a hitched wagon loads and unloads the wagon at the linked storages of the settlements it stops at (using the deposit and withdraw lists of its trade order).")
                 .define("trade_route_loading", true);
+        builder.pop();
+        builder.comment("Sea trade: trade routes of cargo ships between docks, and the trade ships of the factions (server side)").push("sea_trade");
+        SEA_TRADE_ENABLED = builder.comment("Default = true", "If false, owned traders do not sail sea routes (the sea route chart) and no faction trade ships come.")
+                .define("sea_trade_enabled", true);
+        SEA_TRADE_BIND_RANGE = builder.comment("Default = 32", "How far (blocks) from a trader that holds a sea route chart it looks for a cargo ship (a cog of its owner with a free helm) to take.")
+                .defineInRange("sea_trade_bind_range", 32, 4, 128);
+        SEA_TRADE_MOOR_RANGE = builder.comment("Default = 20", "The mooring place of a ship is looked for within 70% of this many blocks of the dock block (the water nearest to it where the hull fits). A ship that has stopped there counts as moored and trades.")
+                .defineInRange("sea_trade_moor_range", 20, 6, 64);
+        SEA_TRADE_MAX_LEG = builder.comment("Default = 256", "The longest leg (blocks, straight line between two docks) of a sea route. A longer leg is skipped and the owner is told.")
+                .defineInRange("sea_trade_max_leg", 256, 32, 400);
+        SEA_TRADE_LEG_TICKS = builder.comment("Default = 18000 (15 minutes)", "Ticks a ship may take for one leg before its helmsman plans it again; three failed tries give the stop up.")
+                .defineInRange("sea_trade_leg_ticks", 18000, 600, 240000);
+        SEA_TRADE_DOCK_WAIT_TICKS = builder.comment("Default = 12000 (10 minutes)", "Ticks a ship waits at the last point it can reach for a dock that is not loaded, before it goes on to the next stop.")
+                .defineInRange("sea_trade_dock_wait_ticks", 12000, 200, 240000);
+        SEA_TRADE_SETTLEMENT_STORAGE = builder.comment("Default = true",
+                "If true, a ship that moors at a dock inside a settlement of its owner also loads and unloads at the linked storages of that settlement (the inventory of the dock comes first).")
+                .define("sea_trade_settlement_storage", true);
+        SEA_CARAVANS_ENABLED = builder.comment("Default = true", "If false, no faction trade ships come to the docks of the settlements.")
+                .define("sea_caravans_enabled", true);
+        SEA_CARAVAN_INTERVAL_DAYS = builder.comment("Default = 3", "In-game days between two trade ship rolls (counted in game time and saved).")
+                .defineInRange("sea_caravan_interval_days", 3, 1, 1000);
+        SEA_CARAVAN_CHANCE = builder.comment("Default = 0.35",
+                "The chance, at each roll, that a trade ship goes to a settlement that has a dock with deep water access. Only factions whose relation to the settlement owner is NEUTRAL or better are drawn.")
+                .defineInRange("sea_caravan_chance", 0.35, 0.0, 1.0);
+        SEA_CARAVAN_MAX_PER_SETTLEMENT = builder.comment("Default = 1", "The most trade ships at the docks of one settlement at a time.")
+                .defineInRange("sea_caravan_max_per_settlement", 1, 1, 8);
+        SEA_CARAVAN_MAX_ACTIVE = builder.comment("Default = 3", "The most trade ships at sea at once in a world.")
+                .defineInRange("sea_caravan_max_active", 3, 1, 50);
+        SEA_CARAVAN_MIN_DEPTH = builder.comment("Default = 3", "A dock only gets trade ships if the water at its mooring is at least this many blocks deep (and a 5 x 5 block hull fits there).")
+                .defineInRange("sea_caravan_min_depth", 3, 2, 16);
+        SEA_CARAVAN_MIN_ROUTE = builder.comment("Default = 48", "A trade ship only appears where its route over the water to the dock is at least this many blocks long, so that it comes from beyond view.")
+                .defineInRange("sea_caravan_min_route", 48, 16, 300);
+        SEA_CARAVAN_STAY_TICKS = builder.comment("Default = 9000 (7.5 minutes)", "How long a trade ship stays moored at the dock and trades.")
+                .defineInRange("sea_caravan_stay_ticks", 9000, 200, 240000);
+        SEA_CARAVAN_ROWERS = builder.comment("Default = 2", "How many faction soldiers row a trade ship (each adds a tenth of the speed of the cog; it has four benches).")
+                .defineInRange("sea_caravan_rowers", 2, 0, 4);
+        SEA_CARAVAN_GUARDS = builder.comment("Default = 2", "How many more faction soldiers guard a trade ship (in the gunner and passenger seats).")
+                .defineInRange("sea_caravan_guards", 2, 0, 5);
+        SEA_CARAVAN_ORDER_RANGE = builder.comment("Default = 64", "A trade ship fills the buy orders of the market stalls within this many blocks of its trader (a ship cannot come as near as a wagon).")
+                .defineInRange("sea_caravan_order_range", 64, 8, 256);
+        builder.pop();
+        builder.comment("Naval combat: NPCs ramming, throwing grappling hooks and boarding (server side). Ramming, hooks and sinking cargo themselves are in the Vehicles module's config.").push("naval_combat");
+        NAVAL_NPC_GRAPPLE = builder.comment("Default = true",
+                "If true, soldiers aboard a ship throw grappling hooks at a hostile ship that is close. A ship of a player only does so when its owner set the aggressive stance (the toggle in the ship's screen).")
+                .define("naval_npc_grapple_enabled", true);
+        NAVAL_NPC_GRAPPLE_RANGE = builder.comment("Default = 14", "How far (blocks, from hull to hull) an NPC throws a grappling hook.")
+                .defineInRange("naval_npc_grapple_range", 14, 4, 64);
+        NAVAL_NPC_GRAPPLE_COOLDOWN = builder.comment("Default = 600 (30 seconds)", "Ticks a ship waits after one of its crew threw a hook before another throw.")
+                .defineInRange("naval_npc_grapple_cooldown_ticks", 600, 40, 24000);
+        NAVAL_FACTION_BOARDING = builder.comment("Default = true", "If true, the soldiers of NPC factions (on their trade ships) throw hooks and board ships that their faction is HOSTILE to, as the owned crews do with the aggressive stance.")
+                .define("naval_faction_boarding", true);
+        NAVAL_BOARDING = builder.comment("Default = true",
+                "If true, melee soldiers sitting on a ship that is grappled to a hostile ship cross to its deck and fight there, and the crew of a ship fights boarders on its own deck. If false, crews stay in their seats.")
+                .define("naval_boarding_enabled", true);
+        NAVAL_HELM_RAM = builder.comment("Default = true", "If true, an owned NPC helmsman of a ship with a ram and the aggressive stance steers to ram hostile ships.")
+                .define("naval_helm_ram_enabled", true);
+        NAVAL_HELM_RAM_RANGE = builder.comment("Default = 48", "How far (blocks) an aggressive helmsman looks for a hostile ship to ram.")
+                .defineInRange("naval_helm_ram_range", 48, 8, 128);
+        NAVAL_HELM_FLEE = builder.comment("Default = true", "If true, an owned helmsman whose ship was hurt in the last 5 seconds and has no aggressive stance sails for the nearest dock of its owner (within 256 blocks), if there is one; otherwise it keeps its course.")
+                .define("naval_helm_flee_home", true);
+        NAVAL_PRIZE = builder.comment("Default = true",
+                "If true, a player who uses a ship of an NPC faction that has no crew left alive aboard takes it as a prize (the ship becomes his and the reputation with the faction drops as for an attack).")
+                .define("naval_prize_enabled", true);
         builder.pop();
         builder.comment("Settlement morale (server side)").push("morale");
         MORALE_ENABLED = builder.comment("Default = true", "If false, the morale of a settlement is not computed and does not change the work speed.")
@@ -1060,6 +1207,33 @@ public final class SettlementConfig {
             caravanMaxActive = CARAVAN_MAX_ACTIVE.get();
             caravanTailorBuyOrders = CARAVAN_TAILOR.get();
             tradeRouteLoading = TRADE_ROUTE_LOADING.get();
+            seaTradeEnabled = SEA_TRADE_ENABLED.get();
+            seaTradeBindRange = SEA_TRADE_BIND_RANGE.get();
+            seaTradeMoorRange = SEA_TRADE_MOOR_RANGE.get();
+            seaTradeMaxLeg = SEA_TRADE_MAX_LEG.get();
+            seaTradeLegTicks = SEA_TRADE_LEG_TICKS.get();
+            seaTradeDockWaitTicks = SEA_TRADE_DOCK_WAIT_TICKS.get();
+            seaTradeSettlementStorage = SEA_TRADE_SETTLEMENT_STORAGE.get();
+            seaCaravansEnabled = SEA_CARAVANS_ENABLED.get();
+            seaCaravanIntervalDays = SEA_CARAVAN_INTERVAL_DAYS.get();
+            seaCaravanChance = SEA_CARAVAN_CHANCE.get();
+            seaCaravanMaxPerSettlement = SEA_CARAVAN_MAX_PER_SETTLEMENT.get();
+            seaCaravanMaxActive = SEA_CARAVAN_MAX_ACTIVE.get();
+            seaCaravanMinDepth = SEA_CARAVAN_MIN_DEPTH.get();
+            seaCaravanMinRoute = SEA_CARAVAN_MIN_ROUTE.get();
+            seaCaravanStayTicks = SEA_CARAVAN_STAY_TICKS.get();
+            seaCaravanRowers = SEA_CARAVAN_ROWERS.get();
+            seaCaravanGuards = SEA_CARAVAN_GUARDS.get();
+            seaCaravanOrderRange = SEA_CARAVAN_ORDER_RANGE.get();
+            navalNpcGrapple = NAVAL_NPC_GRAPPLE.get();
+            navalNpcGrappleRange = NAVAL_NPC_GRAPPLE_RANGE.get();
+            navalNpcGrappleCooldownTicks = NAVAL_NPC_GRAPPLE_COOLDOWN.get();
+            navalFactionBoarding = NAVAL_FACTION_BOARDING.get();
+            navalBoarding = NAVAL_BOARDING.get();
+            navalHelmRam = NAVAL_HELM_RAM.get();
+            navalHelmRamRange = NAVAL_HELM_RAM_RANGE.get();
+            navalHelmFlee = NAVAL_HELM_FLEE.get();
+            navalPrize = NAVAL_PRIZE.get();
             moraleEnabled = MORALE_ENABLED.get();
             moraleIntervalTicks = MORALE_INTERVAL.get();
             moraleMinFactor = Math.min(MORALE_MIN_FACTOR.get(), MORALE_MAX_FACTOR.get());
