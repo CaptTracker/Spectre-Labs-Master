@@ -33,13 +33,13 @@ description='''${mod_description}'''
 [[dependencies.${mod_id}]]
     modId="ancientwarfare"
     type="required"
-    versionRange="[1.0.0,)"
+    versionRange="[1.1.0,)"
     ordering="AFTER"
     side="BOTH"
 
 [[dependencies.${mod_id}]]
     modId="ancientwarfarevehicle"
     type="required"
-    versionRange="[1.0.0,)"
+    versionRange="[1.1.0,)"
     ordering="AFTER"
     side="BOTH"

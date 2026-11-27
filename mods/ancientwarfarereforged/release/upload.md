@@ -1,9 +1,9 @@
 | Field | Value |
 |---|---|
 | Project name | Ancient Warfare Reforged |
-| File | `ancientwarfarereforged-1.21.1-1.0.0.jar` |
-| Display name | Ancient Warfare Reforged 1.0.0 |
-| Release type | Beta (first public build, not play-tested on a server with players yet) |
+| File | `ancientwarfarereforged-1.21.1-1.1.0.jar` |
+| Display name | Ancient Warfare Reforged 1.1.0 |
+| Release type | Release |
 | Game version | 1.21.1 |
 | Mod loader | NeoForge |
 | Java | 21 |

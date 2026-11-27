@@ -1,8 +1,8 @@
-# Ancient Warfare Reforged 1.0.0 (NeoForge 1.21.1)
+# Ancient Warfare Reforged 1.1.0 (NeoForge 1.21.1)
 
 First release of Ancient Warfare 2, rebuilt for Minecraft 1.21.1 on NeoForge. All five modules come in one file: Core, Vehicles, Automation, NPCs and Structures.
 
-**Requires:** Spectre Factions 1.0.0+ and Spectre Lib 1.1.0+.
+**Requires:** Spectre Factions 1.1.0+ and Spectre Lib 1.1.0+.
 
 **Optional:** JEI, Jade or WTHIT (neither Jade nor WTHIT is needed; the look-at tooltips only appear if you install one).
 
@@ -136,9 +136,58 @@ Your settlement can now plan and build its own houses and workshops. (This is a 
 - **Census tab** on the town hall screen: one row for every member of the settlement with its role, mood, distance and direction from the hall (or "unloaded"), what it is doing, and problem icons (starving, hungry, no bed, no tool, no job, badly hurt, no path, alarm). Sort by name, role, mood or problems, and filter by problems or a single role. Click a row to make that NPC glow for 10 seconds with a particle beam leading to it (only you see it); an NPC that is unloaded or out of view gets its last known position in chat. The list refreshes every 2 seconds while the tab is open (`census_refresh_ticks`).
 - **Jade and WTHIT support (optional):** look at an NPC to see its role, owner or faction, mood, current task and health. Look at a worksite (farm, quarry, tree farm, fishing, apiary, smelter, dock, market stall, inn, stable) to see workers out of slots, its status (working, idle, waiting for workers, tools or ladders, storage full, needs a bed and a table) and the settlement it belongs to. Each tooltip can be switched off in the Jade or WTHIT config screen.
 
-## Known issues
-**Not play-tested yet.** Everything below the port itself was built, checked by reading and loaded on a dedicated server, but has not been played in a world: the census and tooltips, skills and traits, production and settlement needs, the planner and builders, families, NPC ship crews and helmsmen, sea trade and naval combat, and siege towers. Expect rough edges, and please report what you find.
+## Controls
+All keys can be rebound in **Options > Controls**. Vehicle keys only act while you ride a vehicle, and the item keys only while you hold an Ancient Warfare item, so they don't clash with your normal keys.
 
+**Driving (every vehicle)**
+| Key | Action |
+|---|---|
+| W / S | Throttle forward / reverse |
+| A / D | Steer (with mouse steering on, A/D turn the hull of vehicles that have a turret) |
+| C | Switch between mouse steering (the vehicle turns where you look) and classic key steering |
+| 1 to 9 | Switch seats on vehicles with more than one seat. On a ship, 1 takes the helm back from an NPC helmsman |
+
+**Weapons (siege engines and ship gun seats)**
+| Key | Action |
+|---|---|
+| Space | Fire |
+| R / F | Aim up / down |
+| Z / X | Turn the turret left / right |
+| T / G | Previous / next ammo |
+| V | Open the ammo selection |
+
+**Siege tower**
+| Key | Action |
+|---|---|
+| W / S in a ladder seat | Climb up / down |
+| B | Lower or raise the drop bridge (driver, ladder or platform seat) |
+
+**Items and worksites**
+| Key | Action |
+|---|---|
+| Z, X, C, V, B | Alt-use keys 1 to 5 for Ancient Warfare items (for example, alt key 1 adds a dock to a Sea Route Chart) |
+| F8 | Show or hide worksite work areas |
+
+**With the mouse**
+| Action | Result |
+|---|---|
+| Right-click a vehicle | Board it |
+| Sneak + right-click a vehicle | Open its inventory (ships: the Stance passive / aggressive button) |
+| Right-click a cart with a lead while leading a horse | Hitch the horse (sneak + right-click with a lead unhitches) |
+| Use a Grappling Hook from your ship at another ship | Throw a line (sneak-use the hook to let go) |
+| Right-click an NPC you don't own, or sneak + right-click your own with an empty hand | Talk to it |
+| Command baton, attack mode at a wall or gate | Start a siege with your towers, mantlets and rams |
+
+## Commands
+| Command | Who | What |
+|---|---|---|
+| `/awsettlement birth`, `age`, `growup`, `families` | Operators | Force a birth, age a child, grow a child up now, list households |
+| `/awcaravan [faction]` | Operators | Call a faction caravan to your settlement by land |
+| `/awcaravan sea [faction]` | Operators | Call a faction trade ship |
+| `/awresearch add/remove <player> <goal>`, `fill <player>`, `clear <player>` | Operators | Give or take research |
+| `/awnpcdebug` | Operators | Toggle the NPC AI debug display |
+
+## Known issues
 **Settlements and production**
 - Soldiers don't put on new weapons or armour by themselves. Gear the smithy makes for them is delivered to the storage nearest to them.
 - A recipe switched off is still made when the settlement needs it. Set `demand_enables_recipes = false` for a hard off.

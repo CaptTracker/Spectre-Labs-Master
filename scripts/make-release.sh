@@ -65,3 +65,16 @@ for dir in "${uploads[@]}"; do
 
   echo "Wrote $dest"
 done
+
+# One changelog covering every upload, for posting in one place (Discord, a forum thread, the repo release page).
+all="$out_root/CHANGELOG-ALL.md"
+{
+  echo "# Spectre Labs changelog"
+  echo
+  echo "Minecraft $mc, NeoForge. Install all three: Ancient Warfare Reforged needs Spectre Factions and Spectre Lib."
+  for dir in "${uploads[@]}"; do
+    echo
+    sed 's/^#/##/' "$dir/release/changelog.md"
+  done
+} > "$all"
+echo "Wrote $all"

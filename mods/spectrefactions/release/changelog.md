@@ -1,4 +1,4 @@
-# Spectre Factions 1.0.0 (NeoForge 1.21.1)
+# Spectre Factions 1.1.0 (NeoForge 1.21.1)
 
 First public release.
 
@@ -18,3 +18,16 @@ First public release.
 - **NPC factions** that other mods can register, with reputation just like players.
 - The **faction screen** (G key) and the `/faction` command (`/f` for short).
 - A server config for all the numbers.
+
+## Controls
+| Key | Action |
+|---|---|
+| G | Open the faction screen (rebind in Options > Controls) |
+
+## Commands
+`/faction` (or `/f`) followed by:
+- **Membership:** `create`, `join`, `leave`, `invite`, `accept`, `deny`, `kick`, `promote`, `demote`, `transfer`, `disband`
+- **Info:** `info`, `list`, `relation`
+- **Settings:** `set name`, `set tag`, `set color`, `set open`, `guard`
+- **Diplomacy:** `war`, `peace`, `ally`, `breaktreaty`, `cancel`
+- **Server admins:** `admin`, for example `admin setrep` and `admin reload`

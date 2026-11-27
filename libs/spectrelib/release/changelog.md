@@ -3,3 +3,5 @@
 First public release.
 - Renamed from CaptTracker Lib to Spectre Lib (mod id `spectrelib`).
 - Registration helper, resource-id helpers and item stack utilities used by Spectre Factions and Ancient Warfare Reforged.
+
+No controls, commands or settings: Spectre Lib adds nothing to the game by itself.
