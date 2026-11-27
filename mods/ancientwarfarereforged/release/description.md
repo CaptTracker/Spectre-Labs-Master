@@ -44,6 +44,7 @@ This one file holds all five Ancient Warfare modules: **Core, Vehicles, Automati
 - Workers switch to the right tool for each block.
 - **Skills and ranks:** NPCs learn mining, woodcutting, farming, fishing, husbandry, crafting, trading, hauling, combat and medicine by doing the work. They rise from Novice to Master, work faster and fight better, and the rank shows in their name, like "Apprentice Miner Bill".
 - **Traits:** every NPC has one or two quirks, like lazy, hardworking, brave, cowardly, glutton, night owl, quick learner, clumsy or tough. They change how an NPC works, eats, fights and feels, and the talk screen lists them.
+- **Families:** NPCs have surnames, fall in love (any two adults can pair up), share a home, have children and grieve when a loved one dies. Children play around the settlement, grow up in 2 in-game years (192 days by default, set in the config) and become workers.
 - **New NPC types:** trader, innkeeper, stable hand and guard captain.
 - **Jade and WTHIT (optional):** look at an NPC to see its role, mood, task and health, or at a worksite to see its workers, status and settlement.
 

@@ -84,7 +84,8 @@ public final class SettlementMorale {
             collectKinds(ref.handler(), kinds);
         }
         double days = (double) foodTicks / Math.max(1, SettlementConfig.npcDayFoodTicks);
-        double perMember = members == 0 ? days : days / members;
+        double foodMembers = settlement.foodMembers(); // a child eats less (rework phase 10)
+        double perMember = members == 0 ? days : days / Math.max(0.01D, foodMembers);
         factors.add(new Factor("food", scale(FOOD, perMember / SettlementConfig.moraleFoodDays), FOOD));
         factors.add(new Factor("variety", scale(VARIETY, (double) kinds.size() / SettlementConfig.moraleVarietyGoal), VARIETY));
 

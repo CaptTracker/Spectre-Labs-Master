@@ -37,7 +37,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * is on. It makes at most one new project per run, in this order of importance:
  * <ol>
  *   <li>housing, when the members outnumber the beds (the beds of builds that are planned or running count): a tent while the settlement is small or the
- *       storage lacks the materials of a house, else a house (the one whose beds fit the shortage best);</li>
+ *       storage lacks the materials of a house, else a house (the one whose beds fit the shortage best); or, for the reason {@code family_home}, when a
+ *       couple or a parent has no home (rework phase 10): a house, a tent only when no house can be afforded;</li>
  *   <li>a storehouse, when the storage is nearly full;</li>
  *   <li>a business, when a need says that no site can make it (no smithy: a smithy design with that tag), or when a member has a worker role whose
  *       worksite does not exist (the design whose worksite block has the work type of the role);</li>
@@ -196,12 +197,28 @@ public final class BuildingPlanner {
         return true;
     }
 
+    /** The homes that builds for the reason {@code family_home} will give (planned, queued or under construction). */
+    private static int pendingFamilyHomes(Settlement settlement) {
+        int pending = 0;
+        for (BuildProject project : settlement.getBuilding().getProjects()) {
+            if (project.getKind() == BuildProject.Kind.BUILD && project.isOpen() && "family_home".equals(project.getReason())) {
+                pending++;
+            }
+        }
+        return pending;
+    }
+
     private static boolean tryHousing(ServerLevel level, Settlement settlement) {
         int members = settlement.getMembers().size();
-        int deficit = members - settlement.getBeds().size() - pendingBeds(settlement);
-        if (deficit <= 0) {
+        int bedDeficit = members - settlement.getBeds().size() - pendingBeds(settlement);
+        // a couple (or a parent) without a home asks for a house of its own: two beds in one building (rework phase 10)
+        int familyHomes = SettlementConfig.familiesEnabled ? settlement.getFamilies().homesWanted() - pendingFamilyHomes(settlement) : 0;
+        boolean family = familyHomes > 0;
+        if (bedDeficit <= 0 && !family) {
             return false;
         }
+        int deficit = Math.max(bedDeficit, family ? 2 * familyHomes : 0);
+        String reason = family ? "family_home" : "homeless";
         List<BuildingDesign> houses = pool(settlement, d -> isHousing(d) && d.getCategory() == DesignCategory.HOUSE && d.getBeds() > 0);
         List<BuildingDesign> tents = pool(settlement, d -> isHousing(d) && d.getCategory() == DesignCategory.TENT && d.getBeds() > 0);
         Comparator<BuildingDesign> byFit = Comparator.comparingInt((BuildingDesign d) -> Math.abs(d.getBeds() - deficit)).thenComparing((BuildingDesign d) -> -d.getBeds());
@@ -209,8 +226,9 @@ public final class BuildingPlanner {
         tents.sort(byFit);
         boolean small = members < SettlementConfig.tentBelowPopulation;
         boolean canAffordHouse = !houses.isEmpty() && afford(BuildMaterials.stock(level, settlement), houses.get(0), SettlementConfig.affordFraction);
-        boolean tentFirst = (small || !canAffordHouse) && !tents.isEmpty();
-        return make(level, settlement, tentFirst ? tents : houses, "homeless", null) || make(level, settlement, tentFirst ? houses : tents, "homeless", null);
+        // a family wants a house; a tent only when no house can be afforded
+        boolean tentFirst = (family ? !canAffordHouse : small || !canAffordHouse) && !tents.isEmpty();
+        return make(level, settlement, tentFirst ? tents : houses, reason, null) || make(level, settlement, tentFirst ? houses : tents, reason, null);
     }
 
     // ---------------------------------------------------------------- storage

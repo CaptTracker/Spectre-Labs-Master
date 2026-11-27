@@ -294,6 +294,9 @@ public final class NpcThinking {
     @Nullable
     private static Line job(NpcBase npc, @Nullable NpcPlayerOwned owned, @Nullable Settlement settlement, long time, boolean working) {
         if (npc instanceof NpcWorker worker) {
+            if (worker.isChild()) {
+                return null; // a child has no job (rework phase 10)
+            }
             if (worker.getRole().isEmpty()) {
                 return now(npc, time, "job.no_role");
             }

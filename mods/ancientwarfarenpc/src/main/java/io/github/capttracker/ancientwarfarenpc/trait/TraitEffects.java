@@ -54,7 +54,7 @@ public final class TraitEffects {
 
     /** The factor on how fast the food runs out: glutton more, frugal less. */
     public static double hungerFactor(NpcBase npc) {
-        double m = 1.0D;
+        double m = npc.isChild() ? SettlementConfig.childHungerFactor : 1.0D; // a child eats less (rework phase 10)
         if (npc.hasTrait(Trait.GLUTTON)) {
             m *= SettlementConfig.traitGluttonHunger;
         }

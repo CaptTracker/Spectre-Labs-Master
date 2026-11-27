@@ -204,6 +204,40 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
         return settlementId;
     }
 
+    /** The UUID this NPC had before it was made from a spawner item again (a resurrection), or null. Server side; see {@link Settlement#addMember}. */
+    @Nullable
+    private UUID formerId;
+
+    @Nullable
+    public UUID getFormerId() {
+        return formerId;
+    }
+
+    public void clearFormerId() {
+        formerId = null;
+    }
+
+    /** Player-owned NPCs have a family name (rework phase 10). */
+    @Override
+    protected boolean supportsSurname() {
+        return true;
+    }
+
+    /** The item form keeps the UUID, so that a resurrected NPC (a new entity) can take its place in the family records of the settlement. */
+    @Override
+    public void writeAdditionalItemData(CompoundTag tag) {
+        super.writeAdditionalItemData(tag);
+        tag.putUUID("formerId", getUUID());
+    }
+
+    @Override
+    public void readAdditionalItemData(CompoundTag tag) {
+        super.readAdditionalItemData(tag);
+        if (tag.hasUUID("formerId")) {
+            formerId = tag.getUUID("formerId");
+        }
+    }
+
     /** The settlement this NPC belongs to (server side only). */
     public Optional<Settlement> getSettlement() {
         if (settlementId == null || !(level() instanceof ServerLevel serverLevel)) {
@@ -272,6 +306,7 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
             } else {
                 Settlement settlement = current.get();
                 isAlarmed = settlement.isAlarmActive();
+                settlement.syncSurname(this);
                 if ((tickCount + getId()) % MEMBER_UPDATE_INTERVAL == 0) {
                     settlement.updateMember(this, computeStatus());
                 }
@@ -853,6 +888,7 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
         }
         settlementId = tag.hasUUID(SETTLEMENT_TAG) ? tag.getUUID(SETTLEMENT_TAG) : null;
         settlementDismissed = tag.getBoolean(DISMISSED_TAG);
+        formerId = tag.hasUUID("formerId") ? tag.getUUID("formerId") : null;
         if (tag.contains(UPKEEP_POS_TAG)) {
             upkeepAutoBlock = BlockPos.of(tag.getLong(UPKEEP_POS_TAG));
         }
@@ -880,6 +916,9 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
             tag.putUUID(SETTLEMENT_TAG, settlementId);
         }
         tag.putBoolean(DISMISSED_TAG, settlementDismissed);
+        if (formerId != null) {
+            tag.putUUID("formerId", formerId);
+        }
         if (upkeepAutoBlock != null) {
             tag.putLong(UPKEEP_POS_TAG, upkeepAutoBlock.asLong());
         }

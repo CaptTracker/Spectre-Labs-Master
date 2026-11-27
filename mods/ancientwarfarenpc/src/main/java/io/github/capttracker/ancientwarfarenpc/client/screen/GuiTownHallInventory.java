@@ -330,9 +330,11 @@ public class GuiTownHallInventory extends GuiContainerBase<TownHallMenu> {
         }
         for (TownHallMenu.MemberView member : members) {
             String type = tr("entity.ancientwarfarenpc." + member.type() + ".name");
-            String title = member.name().isEmpty() ? io.github.capttracker.ancientwarfarenpc.entity.NpcNames.display(member.type(), member.given()).getString() : member.name() + " (" + type + ")";
+            String title = member.name().isEmpty() ? (member.child() ? io.github.capttracker.ancientwarfarenpc.entity.NpcNames.child(member.given()) : io.github.capttracker.ancientwarfarenpc.entity.NpcNames.display(member.type(), member.given())).getString() : member.name() + " (" + type + ")";
             area.addGuiElement(new Label(6, y + 2, fit(title, 74)));
-            if (member.type().startsWith("worker")) {
+            if (member.child()) {
+                area.addGuiElement(new Label(86, y + 2, fit(tr("guistrings.census.child"), 44)).setColor(0xFFAAAAAA));
+            } else if (member.type().startsWith("worker")) {
                 String role = member.type().length() > 7 ? member.type().substring(7) : "";
                 String roleText = role.isEmpty() ? tr("guistrings.settlement.role.none") : tr("guistrings.settlement.role." + role);
                 area.addGuiElement(new Button(82, y, 50, 12, fit(roleText, 44)) {

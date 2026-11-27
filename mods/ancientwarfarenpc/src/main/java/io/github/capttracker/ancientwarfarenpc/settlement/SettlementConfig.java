@@ -84,6 +84,42 @@ public final class SettlementConfig {
     /** Experience of the building skill for each block a builder places or takes down (before the skill_xp_multiplier). */
     public static int skillXpBuild = 3;
 
+    // ---- families (rework phase 10) ----
+    public static boolean familiesEnabled = true;
+    public static int yearLengthDays = 96;
+    public static double yearsToAdulthood = 2.0;
+    public static int coupleMinPopulation = 4;
+    public static int coupleMinMorale = 60;
+    public static int coupleBondSeconds = 240;
+    public static double coupleChancePerDay = 0.3;
+    public static int coupleSocialRadius = 8;
+    public static double coupleSociableBonus = 0.5;
+    public static double coupleLonerFactor = 0.5;
+    public static boolean partnersShareSurname = true;
+    public static int widowRepartnerDays = 6;
+    public static int griefDays = 3;
+    public static int griefMorale = 25;
+    public static int partnerMorale = 3;
+    public static int partnerNearbyMorale = 2;
+    public static int partnerNearbyRadius = 10;
+    public static int familyHomeMorale = 3;
+    public static int childrenNearMorale = 2;
+    public static int childrenNearRadius = 12;
+    public static int childMinMorale = 55;
+    public static double childMinFoodDays = 3.0;
+    public static int maxChildrenPerHousehold = 3;
+    public static int birthCooldownDays = 8;
+    public static double birthChancePerDay = 0.25;
+    public static double childHungerFactor = 0.5;
+    public static int childSkillHeadStart = 40;
+    public static double childScaleStart = 0.5;
+    public static int childPlayRadius = 12;
+    public static double familyDebugFastGrowth = 1.0;
+    /** Ticks a child needs to grow up: {@code years_to_adulthood} years of {@code year_length_days} days. */
+    public static long adulthoodTicks() {
+        return Math.max(1L, Math.round(yearsToAdulthood * yearLengthDays * 24000.0D));
+    }
+
     /** How far (blocks, horizontal) a boundary marker may be from the hall it links to. */
     public static int markerMaxDistance = 128;
     /** The radius (blocks) of the area of a settlement with fewer than 3 markers. */
@@ -488,6 +524,36 @@ public final class SettlementConfig {
     private static final ModConfigSpec.IntValue BUILDER_MAX_SCAFFOLD;
     private static final ModConfigSpec.IntValue BUILDER_WAIT_RELEASE;
     private static final ModConfigSpec.IntValue SKILL_XP_BUILD;
+    private static final ModConfigSpec.BooleanValue FAM_ENABLED;
+    private static final ModConfigSpec.IntValue FAM_YEAR_DAYS;
+    private static final ModConfigSpec.DoubleValue FAM_YEARS_TO_ADULT;
+    private static final ModConfigSpec.IntValue FAM_COUPLE_MIN_POP;
+    private static final ModConfigSpec.IntValue FAM_COUPLE_MIN_MORALE;
+    private static final ModConfigSpec.IntValue FAM_BOND_SECONDS;
+    private static final ModConfigSpec.DoubleValue FAM_CHANCE;
+    private static final ModConfigSpec.IntValue FAM_SOCIAL_RADIUS;
+    private static final ModConfigSpec.DoubleValue FAM_SOCIABLE_BONUS;
+    private static final ModConfigSpec.DoubleValue FAM_LONER_FACTOR;
+    private static final ModConfigSpec.BooleanValue FAM_SHARE_SURNAME;
+    private static final ModConfigSpec.IntValue FAM_WIDOW_DAYS;
+    private static final ModConfigSpec.IntValue FAM_GRIEF_DAYS;
+    private static final ModConfigSpec.IntValue FAM_GRIEF_MORALE;
+    private static final ModConfigSpec.IntValue FAM_PARTNER_MORALE;
+    private static final ModConfigSpec.IntValue FAM_PARTNER_NEAR_MORALE;
+    private static final ModConfigSpec.IntValue FAM_PARTNER_NEAR_RADIUS;
+    private static final ModConfigSpec.IntValue FAM_HOME_MORALE;
+    private static final ModConfigSpec.IntValue FAM_CHILDREN_MORALE;
+    private static final ModConfigSpec.IntValue FAM_CHILDREN_RADIUS;
+    private static final ModConfigSpec.IntValue FAM_CHILD_MIN_MORALE;
+    private static final ModConfigSpec.DoubleValue FAM_CHILD_FOOD_DAYS;
+    private static final ModConfigSpec.IntValue FAM_MAX_CHILDREN;
+    private static final ModConfigSpec.IntValue FAM_BIRTH_COOLDOWN;
+    private static final ModConfigSpec.DoubleValue FAM_BIRTH_CHANCE;
+    private static final ModConfigSpec.DoubleValue FAM_CHILD_HUNGER;
+    private static final ModConfigSpec.IntValue FAM_CHILD_SKILL_XP;
+    private static final ModConfigSpec.DoubleValue FAM_CHILD_SCALE;
+    private static final ModConfigSpec.IntValue FAM_CHILD_PLAY_RADIUS;
+    private static final ModConfigSpec.DoubleValue FAM_DEBUG_GROWTH;
     public static final ModConfigSpec SPEC;
 
     static {
@@ -860,6 +926,68 @@ public final class SettlementConfig {
         SKILL_XP_BUILD = builder.comment("Default = 3", "Experience of the building skill for each block a builder places or takes down (before skill_xp_multiplier).")
                 .defineInRange("skill_xp_build", 3, 0, 1000);
         builder.pop();
+        builder.comment("Families: names, couples, homes and children (server side)").push("families");
+        FAM_ENABLED = builder.comment("Default = true", "If false, no couples form, no homes are claimed and families have no effect on morale (existing families are kept in the save).")
+                .define("families_enabled", true);
+        FAM_YEAR_DAYS = builder.comment("Default = 96", "Length of one in-game year in days, the unit the children grow up in. The default is the year of Serene Seasons.")
+                .defineInRange("year_length_days", 96, 1, 10000);
+        FAM_YEARS_TO_ADULT = builder.comment("Default = 2.0", "How many in-game years a child needs to grow up into a working adult (2 years of 96 days = 192 days by default).")
+                .defineInRange("years_to_adulthood", 2.0, 0.05, 50.0);
+        FAM_COUPLE_MIN_POP = builder.comment("Default = 4", "A settlement needs at least this many members before couples form.")
+                .defineInRange("couple_min_population", 4, 2, 1000);
+        FAM_COUPLE_MIN_MORALE = builder.comment("Default = 60", "Both members of a new couple need a personal morale of at least this.")
+                .defineInRange("couple_min_morale", 60, 0, 100);
+        FAM_BOND_SECONDS = builder.comment("Default = 240", "Seconds of shared social time (both at a gathering point, near each other) two members need before they can become partners.")
+                .defineInRange("couple_bond_seconds", 240, 1, 100000);
+        FAM_CHANCE = builder.comment("Default = 0.3", "Chance per in-game day that a pair of members that has enough shared social time becomes a couple (at most one new couple per settlement and day).")
+                .defineInRange("couple_chance_per_day", 0.3, 0.0, 1.0);
+        FAM_SOCIAL_RADIUS = builder.comment("Default = 8", "How close (blocks) two socialising members must be for their time to count as shared.")
+                .defineInRange("couple_social_radius", 8, 1, 64);
+        FAM_SOCIABLE_BONUS = builder.comment("Default = 0.5", "Extra shared social time per second for each sociable member of the pair.")
+                .defineInRange("couple_sociable_bonus", 0.5, 0.0, 5.0);
+        FAM_LONER_FACTOR = builder.comment("Default = 0.5", "Factor on the shared social time for each loner in the pair (1.0 = loners bond as fast as everyone).")
+                .defineInRange("couple_loner_factor", 0.5, 0.0, 1.0);
+        FAM_SHARE_SURNAME = builder.comment("Default = true", "If true, the member that joins a household takes the surname of the household (the children have it too).")
+                .define("partners_share_surname", true);
+        FAM_WIDOW_DAYS = builder.comment("Default = 6", "In-game days after the death of a partner before the survivor can become a partner again.")
+                .defineInRange("widow_repartner_days", 6, 0, 1000);
+        FAM_GRIEF_DAYS = builder.comment("Default = 3", "In-game days the grief for a dead partner or child lasts (full for the first half, then fading).")
+                .defineInRange("grief_days", 3, 0, 1000);
+        FAM_GRIEF_MORALE = builder.comment("Default = 25", "Morale points a grieving member loses at first (a positive number; it is subtracted).")
+                .defineInRange("grief_morale", 25, 0, 100);
+        FAM_PARTNER_MORALE = builder.comment("Default = 3", "Morale points of having a partner.")
+                .defineInRange("partner_morale", 3, 0, 30);
+        FAM_PARTNER_NEAR_MORALE = builder.comment("Default = 2", "Extra morale points while the partner is within 'partner_nearby_radius' blocks.")
+                .defineInRange("partner_nearby_morale", 2, 0, 30);
+        FAM_PARTNER_NEAR_RADIUS = builder.comment("Default = 10", "Blocks within which the partner counts as nearby.")
+                .defineInRange("partner_nearby_radius", 10, 1, 64);
+        FAM_HOME_MORALE = builder.comment("Default = 3", "Morale points for living together in the home of the household (sleeping in one of its beds).")
+                .defineInRange("family_home_morale", 3, 0, 30);
+        FAM_CHILDREN_MORALE = builder.comment("Default = 2", "Morale points a parent gets while one of its children is within 'children_near_radius' blocks.")
+                .defineInRange("children_near_morale", 2, 0, 30);
+        FAM_CHILDREN_RADIUS = builder.comment("Default = 12", "Blocks within which a child counts as being around its parent.")
+                .defineInRange("children_near_radius", 12, 1, 64);
+        FAM_CHILD_MIN_MORALE = builder.comment("Default = 55", "Both parents need a personal morale of at least this for the household to have a child.")
+                .defineInRange("child_min_morale", 55, 0, 100);
+        FAM_CHILD_FOOD_DAYS = builder.comment("Default = 3.0", "The settlement storage must hold food for at least this many days per member before the household can have a child.")
+                .defineInRange("child_min_food_days", 3.0, 0.0, 100.0);
+        FAM_MAX_CHILDREN = builder.comment("Default = 3", "The most children (not yet grown up) a household has at one time.")
+                .defineInRange("max_children_per_household", 3, 0, 20);
+        FAM_BIRTH_COOLDOWN = builder.comment("Default = 8", "In-game days between two births in the same household.")
+                .defineInRange("birth_cooldown_days", 8, 0, 1000);
+        FAM_BIRTH_CHANCE = builder.comment("Default = 0.25", "Chance per in-game day that a household that may have a child (see child_min_morale, child_min_food_days, max_children_per_household, birth_cooldown_days, and a free bed for it) has one.")
+                .defineInRange("birth_chance_per_day", 0.25, 0.0, 1.0);
+        FAM_CHILD_HUNGER = builder.comment("Default = 0.5", "How much a child eats compared with an adult: the food a child holds, how fast it runs out, and the weight of a child in the food of the settlement (food days per member, the food need and the food morale).")
+                .defineInRange("child_hunger_factor", 0.5, 0.05, 1.0);
+        FAM_CHILD_SKILL_XP = builder.comment("Default = 40", "Experience in one of the best skills of the parents that a newborn child starts with (100 is the rank Apprentice by default). 0 for no head start.")
+                .defineInRange("child_skill_head_start_xp", 40, 0, 100000);
+        FAM_CHILD_SCALE = builder.comment("Default = 0.5", "Size of a newborn child (1.0 is a grown NPC); it grows to full size with its age. Uses the scale attribute of the game.")
+                .defineInRange("child_scale_start", 0.5, 0.0625, 1.0);
+        FAM_CHILD_PLAY_RADIUS = builder.comment("Default = 12", "Blocks around the home (or the gathering point, or the hall) within which a child plays in the day.")
+                .defineInRange("child_play_radius", 12, 3, 64);
+        FAM_DEBUG_GROWTH = builder.comment("Default = 1.0", "Testing only: multiplier on how fast children age (10.0 = ten times as fast). The command /awsettlement (operators only) can also age a child or force a birth.")
+                .defineInRange("family_debug_fast_growth", 1.0, 0.0, 100000.0);
+        builder.pop();
         SPEC = builder.build();
     }
 
@@ -1038,6 +1166,36 @@ public final class SettlementConfig {
             builderMaxScaffoldHeight = BUILDER_MAX_SCAFFOLD.get();
             builderWaitReleaseTicks = BUILDER_WAIT_RELEASE.get();
             skillXpBuild = SKILL_XP_BUILD.get();
+            familiesEnabled = FAM_ENABLED.get();
+            yearLengthDays = FAM_YEAR_DAYS.get();
+            yearsToAdulthood = FAM_YEARS_TO_ADULT.get();
+            coupleMinPopulation = FAM_COUPLE_MIN_POP.get();
+            coupleMinMorale = FAM_COUPLE_MIN_MORALE.get();
+            coupleBondSeconds = FAM_BOND_SECONDS.get();
+            coupleChancePerDay = FAM_CHANCE.get();
+            coupleSocialRadius = FAM_SOCIAL_RADIUS.get();
+            coupleSociableBonus = FAM_SOCIABLE_BONUS.get();
+            coupleLonerFactor = FAM_LONER_FACTOR.get();
+            partnersShareSurname = FAM_SHARE_SURNAME.get();
+            widowRepartnerDays = FAM_WIDOW_DAYS.get();
+            griefDays = FAM_GRIEF_DAYS.get();
+            griefMorale = FAM_GRIEF_MORALE.get();
+            partnerMorale = FAM_PARTNER_MORALE.get();
+            partnerNearbyMorale = FAM_PARTNER_NEAR_MORALE.get();
+            partnerNearbyRadius = FAM_PARTNER_NEAR_RADIUS.get();
+            familyHomeMorale = FAM_HOME_MORALE.get();
+            childrenNearMorale = FAM_CHILDREN_MORALE.get();
+            childrenNearRadius = FAM_CHILDREN_RADIUS.get();
+            childMinMorale = FAM_CHILD_MIN_MORALE.get();
+            childMinFoodDays = FAM_CHILD_FOOD_DAYS.get();
+            maxChildrenPerHousehold = FAM_MAX_CHILDREN.get();
+            birthCooldownDays = FAM_BIRTH_COOLDOWN.get();
+            birthChancePerDay = FAM_BIRTH_CHANCE.get();
+            childHungerFactor = FAM_CHILD_HUNGER.get();
+            childSkillHeadStart = FAM_CHILD_SKILL_XP.get();
+            childScaleStart = FAM_CHILD_SCALE.get();
+            childPlayRadius = FAM_CHILD_PLAY_RADIUS.get();
+            familyDebugFastGrowth = FAM_DEBUG_GROWTH.get();
         }
     }
 }

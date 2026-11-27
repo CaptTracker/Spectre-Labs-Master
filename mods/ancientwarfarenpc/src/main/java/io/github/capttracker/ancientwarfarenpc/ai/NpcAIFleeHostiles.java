@@ -79,7 +79,7 @@ public class NpcAIFleeHostiles extends NpcAI<NpcPlayerOwned> {
         if (!super.canUse()) {
             return false;
         }
-        if (npc.hasTrait(io.github.capttracker.ancientwarfarenpc.trait.Trait.BRAVE)) {
+        if (!npc.isChild() && npc.hasTrait(io.github.capttracker.ancientwarfarenpc.trait.Trait.BRAVE)) { // a brave child still runs
             stayOutOfSightTimer = 0; // a brave NPC does not run
             return false;
         }
