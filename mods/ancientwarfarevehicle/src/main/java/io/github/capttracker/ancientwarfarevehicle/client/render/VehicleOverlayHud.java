@@ -52,6 +52,8 @@ public final class VehicleOverlayHud implements LayeredDraw.Layer {
             line(graphics, mc, "pitch", ONE_DECIMAL.format(vehicle.getXRot()), 20, WHITE);
             line(graphics, mc, "climb_rate", ONE_DECIMAL.format(motion.y * 20), 30, WHITE);
             line(graphics, mc, "elevation", ONE_DECIMAL.format(vehicle.getY()), 40, WHITE);
+        } else if (vehicle.vehicleType.isPushed()) {
+            drawSiegeOverlay(graphics, mc, vehicle);
         } else if (vehicle.ship == null) {
             line(graphics, mc, "range", ONE_DECIMAL.format(vehicle.firingHelper.clientHitRange), 10, WHITE);
             line(graphics, mc, "turret_pitch", ONE_DECIMAL.format(vehicle.firingHelper.clientTurretPitch), 20, WHITE);
@@ -60,7 +62,7 @@ public final class VehicleOverlayHud implements LayeredDraw.Layer {
         }
 
         IAmmo ammo = vehicle.ammoHelper.getCurrentAmmoType();
-        if (vehicle.ship != null && vehicle.vehicleType.getValidAmmoTypes().isEmpty()) {
+        if ((vehicle.ship != null || vehicle.vehicleType.isPushed()) && vehicle.vehicleType.getValidAmmoTypes().isEmpty()) {
             // a ship with no weapon: nothing about ammo (the ship HUD shows the rest)
         } else if (ammo != null) {
             int count = vehicle.ammoHelper.getCurrentAmmoCount();
@@ -78,6 +80,18 @@ public final class VehicleOverlayHud implements LayeredDraw.Layer {
             graphics.drawString(mc.font, Component.translatable("ancientwarfarevehicle.overlay.speed",
                     ONE_DECIMAL.format(velocity * 20.f), ONE_DECIMAL.format(vehicle.currentForwardSpeedMax * 20)), X, 70, WHITE);
             line(graphics, mc, "yaw_rate", ONE_DECIMAL.format(vehicle.moveHelper.getRotationSpeed() * 20.f), 80, WHITE);
+        }
+    }
+
+    /** The siege works (rework phase 12): the pushers and the speed they give, and for a tower the state of the bridge and the keys. */
+    private static void drawSiegeOverlay(GuiGraphics graphics, Minecraft mc, VehicleBase vehicle) {
+        int full = vehicle.vehicleType.getPushersForFullSpeed();
+        line(graphics, mc, "pushers", vehicle.getPushCount() + "/" + full, 10, vehicle.getPushCount() > 0 ? WHITE : RED);
+        if (vehicle.siege != null) {
+            float progress = vehicle.siege.bridgeProgress(mc.getTimer().getGameTimeDeltaPartialTick(false));
+            String state = vehicle.siege.isBridgeFullyDown() ? "bridge_down" : progress > 0.001F || vehicle.isBridgeDown() ? "bridge_moving" : "bridge_up";
+            graphics.drawString(mc.font, Component.translatable("ancientwarfarevehicle.overlay." + state), X, 20, WHITE);
+            graphics.drawString(mc.font, Component.translatable("ancientwarfarevehicle.overlay.siege_keys"), X, 30, WHITE);
         }
     }
 

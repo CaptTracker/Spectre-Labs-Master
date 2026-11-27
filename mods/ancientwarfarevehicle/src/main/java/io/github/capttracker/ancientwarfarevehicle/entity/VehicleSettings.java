@@ -42,6 +42,19 @@ public final class VehicleSettings {
     public static int sinkingCrateTicks = 6000;
     public static int sinkingCrateMax = 8;
 
+    // siege works (rework phase 12), the section siege of the common config
+    public static int siegeTowerMediumHeight = 6;
+    public static int siegeTowerLargeHeight = 9;
+    public static int siegeBridgeLength = 3;
+    public static double siegePushSpeedScale = 1.0D;
+    public static double siegeClimbSpeed = 0.12D;
+    public static double siegeArrowDamageFront = 0.1D;
+    public static double siegeArrowDamageOther = 0.4D;
+    public static double siegeFireDamageFactor = 2.0D;
+    public static boolean siegeAutoBridge = true;
+    public static boolean mantletBlocksProjectiles = true;
+    public static double mantletDamageFactor = 1.0D;
+
     // vehicleStats
     public static int vehicleBallistaHealth = 100;
     public static int vehicleBallistaBoatHealth = 100;

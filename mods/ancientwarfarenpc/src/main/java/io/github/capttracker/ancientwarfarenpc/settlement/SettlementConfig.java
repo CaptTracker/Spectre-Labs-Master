@@ -300,6 +300,32 @@ public final class SettlementConfig {
     /** A ship of an NPC faction whose crew is dead can be taken as a prize by a player (the faction's reputation drops as for an attack). */
     public static boolean navalPrize = true;
 
+    // ---- siege AI (rework phase 12) ----
+    /** Soldiers and archers ordered at a wall crew the siege equipment of their owner. */
+    public static boolean siegeAi = true;
+    /** How far (blocks) around an NPC it looks for siege equipment of its owner. */
+    public static int siegeSearchRadius = 48;
+    /** A target block with at least this many solid blocks from it up counts as a wall. */
+    public static int siegeWallMinHeight = 3;
+    /** At most this many towers, mantlets and rams are crewed for one order. */
+    public static int siegeMaxTowers = 2;
+    public static int siegeMaxMantlets = 3;
+    public static int siegeMaxRams = 2;
+    /** Archers who follow a mantlet and shoot from behind it, besides the one who pushes it. */
+    public static int siegeMantletCover = 3;
+    /** A mantlet stops this far (blocks) from the target. */
+    public static int siegeMantletStopDistance = 28;
+    /** How far (blocks) from its start a pushed vehicle plans its way, and how many search steps a plan may take. */
+    public static int siegePlanRange = 128;
+    public static int siegePlanNodes = 6000;
+    /** Ticks without headway after which a pushed vehicle plans its way again (twice), then gives up. */
+    public static int siegeStuckTicks = 160;
+    /** Soldiers crew battering rams to break a gate that is in the way. */
+    public static boolean siegeRam = true;
+    /** Ticks a crew holds the cover behind a mantlet, and a docked tower waits for its climbers, before the duty ends. */
+    public static int siegeCoverMaxTicks = 6000;
+    public static int siegeDockWaitTicks = 1800;
+
     // ---- morale (rework phase 5) ----
     /** If false, the morale is not computed and gives no work speed change. */
     public static boolean moraleEnabled = true;
@@ -481,6 +507,20 @@ public final class SettlementConfig {
     private static final ModConfigSpec.IntValue NAVAL_HELM_RAM_RANGE;
     private static final ModConfigSpec.BooleanValue NAVAL_HELM_FLEE;
     private static final ModConfigSpec.BooleanValue NAVAL_PRIZE;
+    private static final ModConfigSpec.BooleanValue SIEGE_AI;
+    private static final ModConfigSpec.IntValue SIEGE_SEARCH_RADIUS;
+    private static final ModConfigSpec.IntValue SIEGE_WALL_MIN_HEIGHT;
+    private static final ModConfigSpec.IntValue SIEGE_MAX_TOWERS;
+    private static final ModConfigSpec.IntValue SIEGE_MAX_MANTLETS;
+    private static final ModConfigSpec.IntValue SIEGE_MAX_RAMS;
+    private static final ModConfigSpec.IntValue SIEGE_MANTLET_COVER;
+    private static final ModConfigSpec.IntValue SIEGE_MANTLET_STOP;
+    private static final ModConfigSpec.IntValue SIEGE_PLAN_RANGE;
+    private static final ModConfigSpec.IntValue SIEGE_PLAN_NODES;
+    private static final ModConfigSpec.IntValue SIEGE_STUCK_TICKS;
+    private static final ModConfigSpec.BooleanValue SIEGE_RAM;
+    private static final ModConfigSpec.IntValue SIEGE_COVER_MAX_TICKS;
+    private static final ModConfigSpec.IntValue SIEGE_DOCK_WAIT_TICKS;
     private static final ModConfigSpec.DoubleValue FRIENDLY_DISCOUNT;
     private static final ModConfigSpec.DoubleValue ALLIED_DISCOUNT;
     private static final ModConfigSpec.IntValue TRADE_REPUTATION;
@@ -845,6 +885,36 @@ public final class SettlementConfig {
         NAVAL_PRIZE = builder.comment("Default = true",
                 "If true, a player who uses a ship of an NPC faction that has no crew left alive aboard takes it as a prize (the ship becomes his and the reputation with the faction drops as for an attack).")
                 .define("naval_prize_enabled", true);
+        builder.pop();
+        builder.comment("Siege AI: soldiers and archers ordered at a wall (the command baton's attack mode aimed at a block) crew the towers, mantlets and battering rams of their owner (server side). The vehicles themselves are in the Vehicles module's config.").push("siege");
+        SIEGE_AI = builder.comment("Default = true", "If false, an attack order at a wall is the plain 'walk to the area' order and no NPC takes a siege role.")
+                .define("siege_ai_enabled", true);
+        SIEGE_SEARCH_RADIUS = builder.comment("Default = 48", "How far (blocks) around itself an NPC with an attack order at a wall looks for siege equipment (tower, mantlet, battering ram) of its owner.")
+                .defineInRange("siege_search_radius", 48, 8, 160);
+        SIEGE_WALL_MIN_HEIGHT = builder.comment("Default = 3", "A block that the baton's attack order aims at counts as a wall when this many solid blocks (the block itself and the ones above it) stand on top of each other. A gate (Ancient Warfare gate, door or fence gate) next to the target also counts.")
+                .defineInRange("siege_wall_min_height", 3, 2, 16);
+        SIEGE_MAX_TOWERS = builder.comment("Default = 2", "At most this many siege towers are crewed for one order.")
+                .defineInRange("siege_max_towers", 2, 1, 4);
+        SIEGE_MAX_MANTLETS = builder.comment("Default = 3", "At most this many mantlets are pushed for one order.")
+                .defineInRange("siege_max_mantlets", 3, 1, 6);
+        SIEGE_MAX_RAMS = builder.comment("Default = 2", "At most this many battering rams are crewed for one order at a gate.")
+                .defineInRange("siege_max_rams", 2, 1, 3);
+        SIEGE_MANTLET_COVER = builder.comment("Default = 3", "How many archers besides the pusher follow a mantlet and shoot from behind it.")
+                .defineInRange("siege_mantlet_cover_archers", 3, 0, 6);
+        SIEGE_MANTLET_STOP = builder.comment("Default = 28", "A mantlet stops this many blocks from the target (never farther than the archers' attack range) and the archers shoot from behind it.")
+                .defineInRange("siege_mantlet_stop_distance", 28, 8, 64);
+        SIEGE_PLAN_RANGE = builder.comment("Default = 128", "How far (blocks) from its start a pushed vehicle (tower, mantlet, ram) plans its way to the wall.")
+                .defineInRange("siege_plan_range", 128, 32, 256);
+        SIEGE_PLAN_NODES = builder.comment("Default = 6000", "How many search steps one plan of a pushed vehicle may take (the work is spread over ticks, 300 steps a tick).")
+                .defineInRange("siege_plan_nodes", 6000, 500, 40000);
+        SIEGE_STUCK_TICKS = builder.comment("Default = 160 (8 seconds)", "Ticks a pushed vehicle with a crew may make no headway before it plans its way again; after two new plans it gives up and the crew goes on with the plain order.")
+                .defineInRange("siege_stuck_ticks", 160, 40, 1200);
+        SIEGE_RAM = builder.comment("Default = true", "If true, soldiers crew battering rams and drive them at a gate (Ancient Warfare gate, door or fence gate) that is at the target of the order.")
+                .define("siege_ram_enabled", true);
+        SIEGE_COVER_MAX_TICKS = builder.comment("Default = 6000 (5 minutes)", "Ticks archers hold the cover behind a mantlet that has reached its place before the duty ends.")
+                .defineInRange("siege_cover_max_ticks", 6000, 600, 72000);
+        SIEGE_DOCK_WAIT_TICKS = builder.comment("Default = 1800 (90 seconds)", "Ticks a tower that has docked at the wall waits for soldiers still on their way to the ladder before the order is over for it.")
+                .defineInRange("siege_dock_wait_ticks", 1800, 200, 24000);
         builder.pop();
         builder.comment("Settlement morale (server side)").push("morale");
         MORALE_ENABLED = builder.comment("Default = true", "If false, the morale of a settlement is not computed and does not change the work speed.")
@@ -1234,6 +1304,20 @@ public final class SettlementConfig {
             navalHelmRamRange = NAVAL_HELM_RAM_RANGE.get();
             navalHelmFlee = NAVAL_HELM_FLEE.get();
             navalPrize = NAVAL_PRIZE.get();
+            siegeAi = SIEGE_AI.get();
+            siegeSearchRadius = SIEGE_SEARCH_RADIUS.get();
+            siegeWallMinHeight = SIEGE_WALL_MIN_HEIGHT.get();
+            siegeMaxTowers = SIEGE_MAX_TOWERS.get();
+            siegeMaxMantlets = SIEGE_MAX_MANTLETS.get();
+            siegeMaxRams = SIEGE_MAX_RAMS.get();
+            siegeMantletCover = SIEGE_MANTLET_COVER.get();
+            siegeMantletStopDistance = SIEGE_MANTLET_STOP.get();
+            siegePlanRange = SIEGE_PLAN_RANGE.get();
+            siegePlanNodes = SIEGE_PLAN_NODES.get();
+            siegeStuckTicks = SIEGE_STUCK_TICKS.get();
+            siegeRam = SIEGE_RAM.get();
+            siegeCoverMaxTicks = SIEGE_COVER_MAX_TICKS.get();
+            siegeDockWaitTicks = SIEGE_DOCK_WAIT_TICKS.get();
             moraleEnabled = MORALE_ENABLED.get();
             moraleIntervalTicks = MORALE_INTERVAL.get();
             moraleMinFactor = Math.min(MORALE_MIN_FACTOR.get(), MORALE_MAX_FACTOR.get());

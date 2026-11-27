@@ -1,0 +1,22 @@
+{
+  "type": "ancientwarfare:shapeless_research_recipe",
+  "research": "ancientwarfare:siege_warfare",
+  "ingredients": [
+    {
+      "item": "ancientwarfarevehicle:ironshod_wood",
+      "count": 3
+    },
+    {
+      "tag": "c:strings",
+      "count": 2
+    }
+  ],
+  "result": {
+    "id": "ancientwarfarevehicle:mantlet_spawner",
+    "components": {
+      "ancientwarfarevehicle:vehicle_spawn_data": {
+        "level": 2
+      }
+    }
+  }
+}

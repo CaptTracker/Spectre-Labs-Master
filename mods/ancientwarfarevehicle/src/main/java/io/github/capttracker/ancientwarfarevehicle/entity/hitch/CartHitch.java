@@ -452,7 +452,7 @@ public final class CartHitch {
         double yaw = Math.toRadians(horse.getYRot() + steer * 55.0F);
         double speed = throttle > 0.02F ? 0.5D + 0.85D * throttle : 0.06D;
         horse.getNavigation().stop();
-        horse.getMoveControl().setWantedPosition(horse.getX() - Math.sin(yaw) * 3.0D, horse.getY(), horse.getZ() + Math.cos(yaw) * 3.0D, speed);
+        horse.getMoveControl().setWantedPosition(horse.getX() - Math.sin(yaw) * 3.0D, horse.getY(), horse.getZ() + Math.cos(yaw) * 3.0D, speed * towScale());
     }
 
     private void follow(AbstractHorse horse, Entity target) {
@@ -483,10 +483,16 @@ public final class CartHitch {
         }
     }
 
-    private static void walkTo(AbstractHorse horse, double x, double y, double z, double speed) {
+    /** The fraction of its walking speed that a horse of this vehicle is held to: 1 for a cart, less for a siege tower (rework phase 12). */
+    private double towScale() {
+        return Math.max(0.05D, vehicle.vehicleType.getTowSpeedScale());
+    }
+
+    private void walkTo(AbstractHorse horse, double x, double y, double z, double speed) {
+        double scaled = speed * towScale();
         if (!horse.getNavigation().isInProgress() || horse.tickCount % 10 == 0) {
-            if (!horse.getNavigation().moveTo(x, y, z, speed)) {
-                horse.getMoveControl().setWantedPosition(x, y, z, speed);
+            if (!horse.getNavigation().moveTo(x, y, z, scaled)) {
+                horse.getMoveControl().setWantedPosition(x, y, z, scaled);
             }
         }
     }

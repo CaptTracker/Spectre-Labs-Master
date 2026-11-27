@@ -22,6 +22,7 @@ import io.github.capttracker.ancientwarfarenpc.ai.vehicle.NpcAIDismountVehicle;
 import io.github.capttracker.ancientwarfarenpc.ai.vehicle.NpcAIFindVehicle;
 import io.github.capttracker.ancientwarfarenpc.ai.vehicle.NpcAIFireVehicle;
 import io.github.capttracker.ancientwarfarenpc.ai.vehicle.NpcAIMountVehicle;
+import io.github.capttracker.ancientwarfarenpc.ai.vehicle.NpcAISiegeAdvance;
 import io.github.capttracker.ancientwarfarenpc.entity.NpcPlayerOwned;
 import io.github.capttracker.ancientwarfarenpc.npccommand.NpcCommand;
 import io.github.capttracker.ancientwarfarevehicle.entity.VehicleBase;
@@ -93,6 +94,7 @@ public class NpcSiegeEngineer extends NpcPlayerOwned implements IVehicleUser {
         goalSelector.addGoal(7, new NpcAIMountVehicle<>(this));
         goalSelector.addGoal(8, new NpcAIAimVehicle<>(this));
         goalSelector.addGoal(9, new NpcAIFireVehicle<>(this));
+        goalSelector.addGoal(10, new NpcAISiegeAdvance<>(this));
 
         goalSelector.addGoal(101, new LookAtPlayerGoal(this, Player.class, 3.0F, 1.0F));
         goalSelector.addGoal(102, new NpcAIWander(this) {

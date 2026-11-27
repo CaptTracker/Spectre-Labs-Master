@@ -123,6 +123,15 @@ Your settlement can now plan and build its own houses and workshops. (This is a 
 - The talk screen lists an NPC's traits with a line about each, and the census row and the Jade/WTHIT tooltip show them.
 - Both are tuned in `ancientwarfarenpc-settlements.toml` (sections `skills` and `traits`). `skill_xp_multiplier` scales all experience (0 switches it off), `skill_rank_in_name` hides the ranks in names, and `traits_enabled` switches traits off.
 
+## Siege towers and mantlets
+- **Siege tower and large siege tower:** wooden towers on wheels, 3 x 3 blocks, with the top platform 6 blocks (medium) or 9 blocks (large) up (`siege_tower_medium_height`, `siege_tower_large_height`). Riders in the driver and pusher seats push it, each adding an equal share of the top speed, and nobody pushing means it stands still. It climbs no blocks and stops at a wall. Up to two hitched horses can tow it at a slow walk.
+- **Ladder and drop bridge:** riders in the ladder seats climb up inside the tower (forward and reverse keys) to the platform seats. The bridge key (default B) lowers a drop bridge onto the wall top and raises it again. The tower stands still while the bridge is down, and the bridge cannot be raised with someone on it. Step out of a platform seat and you land on the bridge.
+- **Armour:** arrows do only 10% damage to the front of a tower and 40% elsewhere, fire does double damage (`siege_arrow_damage_front`, `siege_arrow_damage_other`, `siege_fire_damage_factor`).
+- **Mantlet:** a 3 block wide wooden shield that one rider pushes. It stops arrows, bolts and missiles that fly into its front; shots from behind, the sides or over the top pass, so archers can shoot from behind it (`mantlet_blocks_projectiles`, `mantlet_damage_factor`).
+- All three come in five material levels, with spawner items, research recipes, tooltips and Jade/WTHIT lines.
+- **NPC siege crews:** aim the command baton's attack mode at a wall or gate. Soldiers push the owner's siege towers along a planned ground route to the wall, lower the bridge and climb across to the wall top. One archer pushes each mantlet to bow range and more archers shoot from behind it. One soldier per battering ram drives it at a gate and swings until it is open (`siege` section of `ancientwarfarenpc-settlements.toml`, switch off with `siege_ai_enabled`). Siege engineers also push towers and mantlets in a straight line to their target.
+- Needs matching client and server versions (new network message).
+
 ## Quality of life
 - **Census tab** on the town hall screen: one row for every member of the settlement with its role, mood, distance and direction from the hall (or "unloaded"), what it is doing, and problem icons (starving, hungry, no bed, no tool, no job, badly hurt, no path, alarm). Sort by name, role, mood or problems, and filter by problems or a single role. Click a row to make that NPC glow for 10 seconds with a particle beam leading to it (only you see it); an NPC that is unloaded or out of view gets its last known position in chat. The list refreshes every 2 seconds while the tab is open (`census_refresh_ticks`).
 - **Jade and WTHIT support (optional):** look at an NPC to see its role, owner or faction, mood, current task and health. Look at a worksite (farm, quarry, tree farm, fishing, apiary, smelter, dock, market stall, inn, stable) to see workers out of slots, its status (working, idle, waiting for workers, tools or ladders, storage full, needs a bed and a table) and the settlement it belongs to. Each tooltip can be switched off in the Jade or WTHIT config screen.
@@ -132,6 +141,8 @@ Your settlement can now plan and build its own houses and workshops. (This is a 
 - Not yet play-tested in a running game: NPC skills, ranks and traits (the effects, the Skills tab and the rank in names).
 - Not yet play-tested in a running game: the settlement planner, the Building tab, the Blueprint Scanner and builders (scaffolding, fetching from storage and taking down a building were compiled and checked by reading only).
 - Not yet play-tested in a running game: NPC helmsmen, swimming out to a ship, and the cog's oars.
+- Not yet play-tested in a running game: siege towers, the drop bridge, mantlets and the NPC siege crews (compiled and read only; model and seat positions are estimates).
+- Siege towers: the bridge always lowers at the platform height, so a wall top at another height needs a short drop or jump. NPC crews plan routes over open ground only and do not open gates. Faction war parties do not use siege engines yet.
 - A helmsman only looks ahead over the water. A bay or an island between the ship and the destination is steered round as far as it can see, and it gives up if it makes no headway.
 - A helmsman needs water at least 2 blocks deep at the spot you click. Faction NPCs can't take the helm, and they only crew a ship whose helm is held by an ally.
 

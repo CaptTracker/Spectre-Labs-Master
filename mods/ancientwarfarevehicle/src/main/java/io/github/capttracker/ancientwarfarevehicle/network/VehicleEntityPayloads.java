@@ -248,6 +248,60 @@ public final class VehicleEntityPayloads {
         }
     }
 
+    /**
+     * Client to server (rework phase 12): what a rider of a siege tower asks of it. {@link #CLIMB_STOP}, {@link #CLIMB_UP} and {@link #CLIMB_DOWN} set how the rider on the ladder moves
+     * (sent when the keys change); {@link #BRIDGE} lowers or raises the drop bridge. The server checks that the sender rides this tower, that his seat has the role the action needs (the ladder
+     * for the climb; the driver, the ladder or the platform for the bridge), ignores any other action byte, and the bridge has its own cooldown and conditions (the tower must stand still to lower
+     * it, nobody may be on the bridge to raise it).
+     */
+    public record SiegeCommand(int entityId, byte action) implements VehiclePayload {
+        public static final byte CLIMB_STOP = 0;
+        public static final byte CLIMB_UP = 1;
+        public static final byte CLIMB_DOWN = 2;
+        public static final byte BRIDGE = 3;
+        public static final Type<SiegeCommand> TYPE = payloadType("siege_command");
+        public static final StreamCodec<RegistryFriendlyByteBuf, SiegeCommand> CODEC = StreamCodec.composite(
+                ByteBufCodecs.VAR_INT, SiegeCommand::entityId,
+                ByteBufCodecs.BYTE, SiegeCommand::action,
+                SiegeCommand::new);
+
+        @Override
+        public Type<SiegeCommand> type() {
+            return TYPE;
+        }
+
+        public static void handle(SiegeCommand payload, IPayloadContext context) {
+            VehicleNetwork.withVehicle(context, payload.entityId, Authority.PASSENGER, vehicle -> {
+                net.minecraft.world.entity.player.Player sender = context.player();
+                int seat = vehicle.seatOf(sender);
+                if (vehicle.siege == null || seat < 0 || seat >= vehicle.getSeatCount()) {
+                    return;
+                }
+                io.github.capttracker.ancientwarfarevehicle.entity.SeatRole role = vehicle.getSeat(seat).role();
+                switch (payload.action) {
+                    case CLIMB_STOP -> vehicle.siege.setClimb(seat, 0);
+                    case CLIMB_UP -> vehicle.siege.setClimb(seat, 1);
+                    case CLIMB_DOWN -> vehicle.siege.setClimb(seat, -1);
+                    case BRIDGE -> {
+                        boolean allowed = role == io.github.capttracker.ancientwarfarevehicle.entity.SeatRole.DRIVER
+                                || role == io.github.capttracker.ancientwarfarevehicle.entity.SeatRole.LADDER
+                                || role == io.github.capttracker.ancientwarfarevehicle.entity.SeatRole.PLATFORM;
+                        if (allowed) {
+                            io.github.capttracker.ancientwarfarevehicle.entity.siege.SiegeHelper.Result result = vehicle.siege.toggleBridge();
+                            if (result != io.github.capttracker.ancientwarfarevehicle.entity.siege.SiegeHelper.Result.BUSY) {
+                                sender.displayClientMessage(net.minecraft.network.chat.Component.translatable(
+                                        "message.ancientwarfarevehicle.bridge." + result.name().toLowerCase(java.util.Locale.ROOT)), true);
+                            }
+                        }
+                    }
+                    default -> {
+                        // an unknown action: ignored
+                    }
+                }
+            });
+        }
+    }
+
     /** Server to clients: position, yaw, pitch and speed of a vehicle (the custom movement sync that replaces vanilla's). */
     public record VehicleMove(int entityId, double x, double y, double z, boolean air, float motion, float yaw, float pitch) implements VehiclePayload {
         public static final Type<VehicleMove> TYPE = payloadType("vehicle_move");

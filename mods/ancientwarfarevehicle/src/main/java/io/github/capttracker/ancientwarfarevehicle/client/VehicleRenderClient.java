@@ -23,6 +23,8 @@ import io.github.capttracker.ancientwarfarevehicle.client.model.ModelCart;
 import io.github.capttracker.ancientwarfarevehicle.client.model.ModelChestCart;
 import io.github.capttracker.ancientwarfarevehicle.client.model.ModelCog;
 import io.github.capttracker.ancientwarfarevehicle.client.model.ModelFishingBoat;
+import io.github.capttracker.ancientwarfarevehicle.client.model.ModelMantlet;
+import io.github.capttracker.ancientwarfarevehicle.client.model.ModelSiegeTower;
 import io.github.capttracker.ancientwarfarevehicle.client.model.ModelWarGalley;
 import io.github.capttracker.ancientwarfarevehicle.client.render.ShipHud;
 import io.github.capttracker.ancientwarfarevehicle.client.model.ModelHwacha;
@@ -82,6 +84,9 @@ public final class VehicleRenderClient {
         layer(event, ModelFishingBoat.LAYER, ModelFishingBoat::createLayer);
         layer(event, ModelCog.LAYER, ModelCog::createLayer);
         layer(event, ModelWarGalley.LAYER, ModelWarGalley::createLayer);
+        layer(event, ModelSiegeTower.MEDIUM_LAYER, ModelSiegeTower::createMediumLayer);
+        layer(event, ModelSiegeTower.LARGE_LAYER, ModelSiegeTower::createLargeLayer);
+        layer(event, ModelMantlet.LAYER, ModelMantlet::createLayer);
         layer(event, ModelArrow2.LAYER, ModelArrow2::createLayer);
         layer(event, ModelShot.LAYER, ModelShot::createLayer);
     }
@@ -94,6 +99,7 @@ public final class VehicleRenderClient {
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(AwVehicles.VEHICLE.get(), VehicleRenderer::new);
         event.registerEntityRenderer(AwVehicles.SHIP.get(), VehicleRenderer::new);
+        event.registerEntityRenderer(AwVehicles.SIEGE_TOWER.get(), VehicleRenderer::new);
         event.registerEntityRenderer(AwVehicles.MISSILE.get(), MissileRenderer::new);
         event.registerEntityRenderer(AwVehicles.GRAPPLE_HOOK.get(), GrappleHookRenderer::new);
         event.registerEntityRenderer(AwVehicles.FLOATING_CRATE.get(), FloatingCrateRenderer::new);

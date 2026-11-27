@@ -9,13 +9,14 @@ import io.github.capttracker.ancientwarfare.api.IMarketStall;
 import io.github.capttracker.ancientwarfare.api.IStable;
 import io.github.capttracker.ancientwarfare.api.IWorkSite;
 import io.github.capttracker.ancientwarfarenpc.entity.NpcBase;
+import io.github.capttracker.ancientwarfarevehicle.entity.VehicleBase;
 import net.minecraft.world.level.block.Block;
 import snownee.jade.api.IWailaClientRegistration;
 import snownee.jade.api.IWailaCommonRegistration;
 import snownee.jade.api.IWailaPlugin;
 import snownee.jade.api.WailaPlugin;
 
-/** The providers are toggleable in the Jade config screen under their ids ({@code ancientwarfarenpc:npc_info} and {@code ancientwarfarenpc:worksite_info}). */
+/** The providers are toggleable in the Jade config screen under their ids ({@code ancientwarfarenpc:npc_info}, {@code ancientwarfarenpc:worksite_info} and, for the siege towers and the mantlet, {@code ancientwarfarenpc:siege_info}). */
 @WailaPlugin
 public class AwJadePlugin implements IWailaPlugin {
     @Override
@@ -31,5 +32,6 @@ public class AwJadePlugin implements IWailaPlugin {
     public void registerClient(IWailaClientRegistration registration) {
         registration.registerEntityComponent(NpcJadeProvider.INSTANCE, NpcBase.class);
         registration.registerBlockComponent(WorksiteJadeProvider.INSTANCE, Block.class);
+        registration.registerEntityComponent(VehicleJadeProvider.INSTANCE, VehicleBase.class);
     }
 }

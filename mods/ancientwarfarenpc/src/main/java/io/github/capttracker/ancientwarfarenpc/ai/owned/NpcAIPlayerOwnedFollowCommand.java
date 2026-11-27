@@ -39,6 +39,9 @@ public class NpcAIPlayerOwnedFollowCommand extends NpcAI<NpcPlayerOwned> {
             return false;
         }
         Command cmd = npc.getCurrentCommand();
+        if (npc instanceof io.github.capttracker.ancientwarfarenpc.entity.NpcCombat combat && combat.onSiegeDuty()) {
+            return false; // the siege duty (rework phase 12) carries the attack order out
+        }
         return cmd != Command.NONE && (!(cmd.type == CommandType.GUARD || cmd.type == CommandType.ATTACK_AREA) || npc.getTarget() == null);
     }
 
@@ -49,6 +52,9 @@ public class NpcAIPlayerOwnedFollowCommand extends NpcAI<NpcPlayerOwned> {
 
     @Override
     public void stop() {
+        if (npc instanceof io.github.capttracker.ancientwarfarenpc.entity.NpcCombat combat && combat.onSiegeDuty()) {
+            return; // pushed aside by the siege duty: the order stays
+        }
         Command cmd = npc.getCurrentCommand();
         if (cmd != Command.NONE && (npc.getTarget() == null || !cmd.type.isPersistent())) {
             npc.handlePlayerCommand(Command.NONE);
