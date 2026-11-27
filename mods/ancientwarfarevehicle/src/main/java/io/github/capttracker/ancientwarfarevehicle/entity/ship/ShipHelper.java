@@ -9,11 +9,13 @@ import io.github.capttracker.ancientwarfare.util.Trig;
 import io.github.capttracker.ancientwarfarevehicle.entity.SeatRole;
 import io.github.capttracker.ancientwarfarevehicle.entity.VehicleBase;
 import io.github.capttracker.ancientwarfarevehicle.entity.VehicleSeat;
+import io.github.capttracker.ancientwarfarevehicle.entity.VehicleSettings;
 import io.github.capttracker.ancientwarfarevehicle.entity.VehicleSounds;
 import io.github.capttracker.ancientwarfarevehicle.missiles.MissileBase;
 import io.github.capttracker.ancientwarfarevehicle.network.VehicleEntityPayloads;
 import io.github.capttracker.ancientwarfarevehicle.wind.Wind;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -27,7 +29,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
@@ -37,7 +41,10 @@ import org.slf4j.Logger;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Everything that makes a {@link VehicleBase} of a ship type a ship: the hull of {@link ShipPart}s that moves and turns with it, the movement on the water (it
@@ -74,6 +81,20 @@ public final class ShipHelper {
     private int violations = 0;
     private int recheckTicks = 0;
     private int ramCooldown = 0;
+
+    // ---- naval combat (rework phase 11) ----
+    /** SERVER: the grappling lines this ship is at either end of (the hooks register themselves). */
+    private final List<GrappleHook> lines = new ArrayList<>();
+    /** SERVER: what grappling lines asked this ship to move by this tick (blocks, degrees); applied and cleared by {@link #step}. */
+    private double pullX = 0.D;
+    private double pullZ = 0.D;
+    private float pullYaw = 0.F;
+    /** SERVER: the tick of the last damage, and who did it (for a helmsman that flees or fights back). */
+    private int lastHurtTick = -100000;
+    @Nullable
+    private UUID lastAttacker = null;
+    /** SERVER: the tick before which no NPC of this ship throws another grappling hook. */
+    private int npcGrappleReadyTick = 0;
     /** Ticks left that the ship counts as aground because a move or turn was stopped by shallow water or a block. */
     private int blockedTicks = 0;
 
@@ -432,6 +453,9 @@ public final class ShipHelper {
         }
         ship.noPhysics = true;
         if (sinkTicks >= 0) {
+            pullX = 0.D;
+            pullZ = 0.D;
+            pullYaw = 0.F;
             sink();
             return;
         }
@@ -482,7 +506,8 @@ public final class ShipHelper {
         double y = ship.getY();
         double z = ship.getZ();
         float yaw = ship.getYRot();
-        boolean moving = Math.abs(speed) > 0.002F || Math.abs(turnRate) > 0.002F;
+        boolean pulled = pullX != 0.D || pullZ != 0.D || pullYaw != 0.F;
+        boolean moving = Math.abs(speed) > 0.002F || Math.abs(turnRate) > 0.002F || pulled;
         if (!moving && (++recheckTicks >= 20 || !havePrevPose)) {
             violations = violationsAt(x, z, yaw, y);
             recheckTicks = 0;
@@ -492,20 +517,20 @@ public final class ShipHelper {
         double newZ = z;
         float newYaw = yaw;
         if (moving) {
-            if (turnRate != 0.F) {
-                float tryYaw = yaw - turnRate;
+            if (turnRate != 0.F || pullYaw != 0.F) {
+                float tryYaw = yaw - turnRate + pullYaw;
                 int v = violationsAt(x, z, tryYaw, y);
                 if (v == 0 || v <= violations) {
                     newYaw = tryYaw;
                     violations = v;
-                } else {
+                } else if (turnRate != 0.F) {
                     turnRate = 0.F;
                     blockedTicks = 15;
                 }
             }
             double rad = Math.toRadians(newYaw);
-            double dx = -Math.sin(rad) * speed;
-            double dz = -Math.cos(rad) * speed;
+            double dx = -Math.sin(rad) * speed + pullX;
+            double dz = -Math.cos(rad) * speed + pullZ;
             if (Math.abs(dx) + Math.abs(dz) > 1.0E-5D) {
                 int v = violationsAt(x + dx, z + dz, newYaw, y);
                 if (v == 0 || v <= violations) {
@@ -537,6 +562,9 @@ public final class ShipHelper {
             blockedTicks--;
         }
         aground = violations > 0 || blockedTicks > 0;
+        pullX = 0.D;
+        pullZ = 0.D;
+        pullYaw = 0.F;
 
         // height: the hull floats at the water's surface, or rests on the bottom, or on the ground when there is no water at all
         double newY = surfaceHeight(newX, newZ, newYaw, y);
@@ -624,6 +652,7 @@ public final class ShipHelper {
         }
         if (sinkTicks >= 200 || (down && sinkTicks > 40)) {
             ship.setHealth(0.F);
+            FloatingCrate.releaseCargo(ship); // part of the hold floats up in crates, the rest is lost (rework phase 11)
             ship.kill();
         }
     }
@@ -757,31 +786,83 @@ public final class ShipHelper {
 
     // ---- ram ----
 
+    /**
+     * The ram (rework phase 11): a ship with a ram ({@link ShipSpec#hasRam}: the war galley's is strong, the cog's weak, the fishing boat has none) hurts the first thing
+     * in the box at its bow. The damage is the ram's base damage times how fast the bow closes in on the target along the ship's heading (its own speed less the target's
+     * speed in that direction) over the ship's top speed, at most 1.5 times; a ship, boat or vehicle that is hit takes it on its hull (and its deck is knocked), the ramming
+     * ship takes {@code ship_ram_recoil_fraction} of it, and a cooldown keeps one collision from hitting every tick.
+     */
     private void ram() {
         ShipSpec design = spec;
         if (ramCooldown > 0) {
             ramCooldown--;
             return;
         }
-        float speed = ship.moveHelper.forwardMotion;
-        if (design.ramDamage <= 0.F || speed < 0.05F) {
+        if (!VehicleSettings.shipRamEnabled || !design.hasRam()) {
+            return;
+        }
+        double yawRad = Math.toRadians(ship.getYRot());
+        double hx = -Math.sin(yawRad);
+        double hz = -Math.cos(yawRad);
+        Vec3 motion = ship.getDeltaMovement();
+        double own = motion.x * hx + motion.z * hz;
+        if (own < VehicleSettings.shipRamMinSpeed) {
             return;
         }
         Vec3 tip = toWorld(design.bow() + design.ramReach * 0.5F, 0.F, 0.F);
         AABB box = new AABB(tip.x - 0.9D, tip.y + 0.2D, tip.z - 0.9D, tip.x + 0.9D, tip.y + design.deckTop() + 0.6D, tip.z + 0.9D);
-        float damage = design.ramDamage * Math.min(1.5F, speed / Math.max(0.05F, ship.baseForwardSpeed));
-        for (Entity target : ship.level().getEntities(ship, box, this::canRam)) {
-            Vec3 push = new Vec3(tip.x - ship.getX(), 0.D, tip.z - ship.getZ()).normalize();
-            if (target.hurt(ship.createBatteringDamage(), damage)) {
-                if (target instanceof LivingEntity living) {
-                    living.setDeltaMovement(living.getDeltaMovement().add(push.x * 0.6D, 0.25D, push.z * 0.6D));
-                    living.hurtMarked = true;
-                }
-                ramCooldown = 15;
-                ship.moveHelper.forwardMotion = speed * 0.6F;
-                VehicleSounds.play(ship, VehicleSounds.BATTERING_RAM_HIT_WOOD, 2.0F, 1.0F);
-                return;
+        for (Entity found : ship.level().getEntities(ship, box, this::canRam)) {
+            Entity target = found instanceof ShipPart part ? part.getParent() : found;
+            if (target == ship || isLinkedTo(target) || (target instanceof VehicleBase other && sameOwner(other))) {
+                continue;
             }
+            Vec3 theirs = target.getDeltaMovement();
+            double closing = own - (theirs.x * hx + theirs.z * hz);
+            if (closing < VehicleSettings.shipRamMinSpeed) {
+                continue;
+            }
+            float damage = (float) (design.ramDamage * VehicleSettings.shipRamDamageScale * Math.min(1.5D, closing / Math.max(0.05D, ship.baseForwardSpeed)));
+            boolean vessel = target instanceof VehicleBase || target instanceof Boat;
+            boolean hit = target instanceof VehicleBase vehicle ? vehicle.ramHurt(ship.createBatteringDamage(), damage) : target.hurt(ship.createBatteringDamage(), damage);
+            if (!hit) {
+                continue;
+            }
+            ramCooldown = VehicleSettings.shipRamCooldownTicks;
+            if (target instanceof LivingEntity living) {
+                living.setDeltaMovement(living.getDeltaMovement().add(hx * 0.6D, 0.25D, hz * 0.6D));
+                living.hurtMarked = true;
+            }
+            if (target instanceof VehicleBase struck && struck.ship != null) {
+                struck.ship.knockDeck(hx, hz, VehicleSettings.shipRamDeckKnock);
+            }
+            if (vessel) {
+                ship.ramHurt(ship.createBatteringDamage(), (float) (damage * VehicleSettings.shipRamRecoilFraction));
+            }
+            ship.moveHelper.forwardMotion = (float) (ship.moveHelper.forwardMotion * (vessel ? 0.5D : 0.8D));
+            VehicleSounds.play(ship, VehicleSounds.BATTERING_RAM_HIT_WOOD, 2.0F, 1.0F);
+            ship.playSound(SoundEvents.WOOD_BREAK, 1.5F, 0.7F);
+            if (ship.level() instanceof ServerLevel server) {
+                server.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, Blocks.OAK_PLANKS.defaultBlockState()), tip.x, tip.y + 0.8D, tip.z, 24, 0.5D, 0.4D, 0.5D, 0.1D);
+                server.sendParticles(ParticleTypes.SPLASH, tip.x, tip.y + 0.2D, tip.z, 20, 0.6D, 0.1D, 0.6D, 0.2D);
+            }
+            return;
+        }
+    }
+
+    private boolean sameOwner(VehicleBase other) {
+        return !ship.getOwner().equals(io.github.capttracker.ancientwarfare.owner.Owner.EMPTY) && ship.getOwner().equals(other.getOwner());
+    }
+
+    /** SERVER: knocks what stands on the deck of this (rammed) ship along a direction: living things and items, not riders in a seat. */
+    public void knockDeck(double dirX, double dirZ, double strength) {
+        if (spec == null || strength <= 0.D) {
+            return;
+        }
+        double radius = Math.max(spec.length(), spec.width()) / 2.0D + 1.5D;
+        AABB box = new AABB(ship.getX() - radius, ship.getY() - 0.5D, ship.getZ() - radius, ship.getX() + radius, ship.getY() + spec.deckTop() + 3.0D, ship.getZ() + radius);
+        for (Entity entity : ship.level().getEntities(ship, box, e -> (e instanceof LivingEntity || e instanceof ItemEntity) && !e.isPassenger() && isOnDeck(e))) {
+            entity.setDeltaMovement(entity.getDeltaMovement().add(dirX * strength, 0.2D, dirZ * strength));
+            entity.hurtMarked = true;
         }
     }
 
@@ -789,8 +870,95 @@ public final class ShipHelper {
         if (entity instanceof ShipPart part && part.getParent() == ship) {
             return false;
         }
-        return !(entity instanceof MissileBase) && !(entity instanceof ItemEntity) && !entity.isRemoved() && entity.isAlive() && !entity.isSpectator()
+        return !(entity instanceof MissileBase) && !(entity instanceof ItemEntity) && !(entity instanceof GrappleHook) && !(entity instanceof FloatingCrate)
+                && !entity.isRemoved() && entity.isAlive() && !entity.isSpectator()
                 && entity != ship && entity.getVehicle() != ship && !ship.hasPassenger(entity);
+    }
+
+    // ---- grappling lines, damage memory (rework phase 11) ----
+
+    /** SERVER: a grappling line has this ship at one end. */
+    void addLine(GrappleHook hook) {
+        if (!lines.contains(hook)) {
+            lines.add(hook);
+        }
+    }
+
+    void removeLine(GrappleHook hook) {
+        lines.remove(hook);
+    }
+
+    public int lineCount() {
+        lines.removeIf(GrappleHook::isRemoved);
+        return lines.size();
+    }
+
+    public List<GrappleHook> lines() {
+        lines.removeIf(GrappleHook::isRemoved);
+        return Collections.unmodifiableList(lines);
+    }
+
+    /** True if a grappling line joins this ship and the entity (a ship). */
+    public boolean isLinkedTo(Entity other) {
+        for (GrappleHook hook : lines()) {
+            if (hook.otherThan(ship) == other) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** The ships that this one is grappled to, side by side (the lines have pulled the hulls together). */
+    public List<VehicleBase> alongside() {
+        List<VehicleBase> result = new ArrayList<>();
+        for (GrappleHook hook : lines()) {
+            VehicleBase other = hook.otherThan(ship);
+            if (other != null && hook.isHeld() && !result.contains(other)) {
+                result.add(other);
+            }
+        }
+        return result;
+    }
+
+    /** SERVER: cuts every line of this ship. */
+    public void cutAllLines() {
+        for (GrappleHook hook : new ArrayList<>(lines)) {
+            hook.cut(false);
+        }
+    }
+
+    /** A line asks this ship to move: blocks along x and z and degrees of yaw, added up until the next step of the ship (shallows and blocks stop it as ever). */
+    public void addPull(double dx, double dz, float dyaw) {
+        pullX += dx;
+        pullZ += dz;
+        pullYaw += dyaw;
+    }
+
+    /** SERVER: the ship was damaged by this entity (may be null). */
+    public void noteHurt(@Nullable Entity attacker) {
+        lastHurtTick = ship.tickCount;
+        if (attacker != null) {
+            lastAttacker = attacker.getUUID();
+        }
+    }
+
+    /** Ticks since the ship was last damaged (a big number if it never was). */
+    public int ticksSinceHurt() {
+        return ship.tickCount - lastHurtTick;
+    }
+
+    @Nullable
+    public UUID lastAttacker() {
+        return lastAttacker;
+    }
+
+    /** True if no NPC of this ship may throw a grappling hook yet. */
+    public boolean npcGrappleOnCooldown() {
+        return ship.tickCount < npcGrappleReadyTick;
+    }
+
+    public void setNpcGrappleCooldown(int ticks) {
+        npcGrappleReadyTick = ship.tickCount + ticks;
     }
 
     // ---- turret mounts ----
@@ -930,6 +1098,7 @@ public final class ShipHelper {
         CompoundTag data = new CompoundTag();
         data.putFloat("trim", trim);
         data.putInt("sink", sinkTicks);
+        data.putBoolean("aggressive", ship.isAggressive());
         net.minecraft.nbt.ListTag list = new net.minecraft.nbt.ListTag();
         for (ShipHardpoint hardpoint : hardpoints) {
             CompoundTag entry = new CompoundTag();
@@ -944,6 +1113,7 @@ public final class ShipHelper {
         CompoundTag data = tag.getCompound("ship");
         trim = data.getFloat("trim");
         sinkTicks = data.contains("sink") ? data.getInt("sink") : -1;
+        ship.setAggressive(data.getBoolean("aggressive"));
         net.minecraft.nbt.ListTag list = data.getList("hardpoints", net.minecraft.nbt.Tag.TAG_COMPOUND);
         for (int i = 0; i < list.size() && i < hardpoints.length; i++) {
             hardpoints[i].load(list.getCompound(i));

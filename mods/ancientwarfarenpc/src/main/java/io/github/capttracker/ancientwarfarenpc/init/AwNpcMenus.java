@@ -23,6 +23,7 @@ import io.github.capttracker.ancientwarfarenpc.menu.NpcSpellcasterMenu;
 import io.github.capttracker.ancientwarfarenpc.menu.NpcTalkMenu;
 import io.github.capttracker.ancientwarfarenpc.menu.PlayerOwnedTradeMenu;
 import io.github.capttracker.ancientwarfarenpc.menu.RoutingOrderMenu;
+import io.github.capttracker.ancientwarfarenpc.menu.SeaRouteMenu;
 import io.github.capttracker.ancientwarfarenpc.menu.TownHallMenu;
 import io.github.capttracker.ancientwarfarenpc.menu.TradeOrderMenu;
 import io.github.capttracker.ancientwarfarenpc.menu.UpkeepOrderMenu;
@@ -101,6 +102,9 @@ public final class AwNpcMenus {
     // GUI_NPC_TRADE_ORDER (6)
     public static final DeferredHolder<MenuType<?>, MenuType<TradeOrderMenu>> TRADE_ORDER_MENU =
             AncientWarfareNPC.REG.menus.register("trade_order", () -> IMenuTypeExtension.create(TradeOrderMenu::new));
+    // rework phase 11: the sea route chart
+    public static final DeferredHolder<MenuType<?>, MenuType<SeaRouteMenu>> SEA_ROUTE_MENU =
+            AncientWarfareNPC.REG.menus.register("sea_route", () -> IMenuTypeExtension.create(SeaRouteMenu::new));
 
     /** Forces this class (and so the registrations above) to initialise. Call from the mod constructor. */
     public static void load() {}
@@ -115,6 +119,7 @@ public final class AwNpcMenus {
                 case COMBAT_ORDER -> CombatOrderMenu.open(player, hand);
                 case ROUTING_ORDER -> RoutingOrderMenu.open(player, hand);
                 case TRADE_ORDER -> TradeOrderMenu.open(player, hand);
+                case SEA_ROUTE -> SeaRouteMenu.open(player, hand);
             }
         });
         TownHallBlockEntity.setMenuOpener(TownHallMenu::open);

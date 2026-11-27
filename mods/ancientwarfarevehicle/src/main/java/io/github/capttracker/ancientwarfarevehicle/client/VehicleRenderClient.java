@@ -31,6 +31,8 @@ import io.github.capttracker.ancientwarfarevehicle.client.model.ModelWagon;
 import io.github.capttracker.ancientwarfarevehicle.client.model.ModelTrebuchetMobileFixed;
 import io.github.capttracker.ancientwarfarevehicle.client.model.ModelTrebuchetStandFixed;
 import io.github.capttracker.ancientwarfarevehicle.client.model.ModelTrebuchetStandTurret;
+import io.github.capttracker.ancientwarfarevehicle.client.render.FloatingCrateRenderer;
+import io.github.capttracker.ancientwarfarevehicle.client.render.GrappleHookRenderer;
 import io.github.capttracker.ancientwarfarevehicle.client.render.MissileRenderer;
 import io.github.capttracker.ancientwarfarevehicle.client.render.VehicleOverlayHud;
 import io.github.capttracker.ancientwarfarevehicle.client.render.VehicleRenderer;
@@ -93,6 +95,8 @@ public final class VehicleRenderClient {
         event.registerEntityRenderer(AwVehicles.VEHICLE.get(), VehicleRenderer::new);
         event.registerEntityRenderer(AwVehicles.SHIP.get(), VehicleRenderer::new);
         event.registerEntityRenderer(AwVehicles.MISSILE.get(), MissileRenderer::new);
+        event.registerEntityRenderer(AwVehicles.GRAPPLE_HOOK.get(), GrappleHookRenderer::new);
+        event.registerEntityRenderer(AwVehicles.FLOATING_CRATE.get(), FloatingCrateRenderer::new);
     }
 
     /** The text HUD over everything else, as the 1.12.2 render tick handler drew it. */

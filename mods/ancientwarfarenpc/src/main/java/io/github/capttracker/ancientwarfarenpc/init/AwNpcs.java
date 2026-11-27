@@ -63,6 +63,7 @@ import io.github.capttracker.ancientwarfarenpc.item.ItemShield;
 import io.github.capttracker.ancientwarfarenpc.item.ItemSickle;
 import io.github.capttracker.ancientwarfarenpc.item.order.ItemCombatOrder;
 import io.github.capttracker.ancientwarfarenpc.item.order.ItemRoutingOrder;
+import io.github.capttracker.ancientwarfarenpc.item.order.ItemSeaRoute;
 import io.github.capttracker.ancientwarfarenpc.item.order.ItemTradeOrder;
 import io.github.capttracker.ancientwarfarenpc.item.order.ItemUpkeepOrder;
 import io.github.capttracker.ancientwarfarenpc.item.order.ItemWorkOrder;
@@ -216,6 +217,7 @@ public final class AwNpcs {
     public static final DeferredItem<ItemCombatOrder> COMBAT_ORDER;
     public static final DeferredItem<ItemRoutingOrder> ROUTING_ORDER;
     public static final DeferredItem<ItemTradeOrder> TRADE_ORDER;
+    public static final DeferredItem<ItemSeaRoute> SEA_ROUTE;
     /** Stack size 16. The creative tab lists one stack per NPC type, subtype and faction (added by the item slice). */
     public static final DeferredItem<ItemNpcSpawner> NPC_SPAWNER;
     public static final DeferredItem<ItemMacuahuitl> MACUAHUITL;
@@ -261,6 +263,7 @@ public final class AwNpcs {
         COMBAT_ORDER = REG.item("combat_order", ItemCombatOrder::new);
         ROUTING_ORDER = REG.item("routing_order", ItemRoutingOrder::new);
         TRADE_ORDER = REG.item("trade_order", ItemTradeOrder::new);
+        SEA_ROUTE = REG.item("sea_route", ItemSeaRoute::new);
         NPC_SPAWNER = REG.item("npc_spawner", ItemNpcSpawner::new, new Item.Properties().stacksTo(16));
 
         for (String metal : new String[]{"ancient", "gold", "silver", "copper"}) {
@@ -604,6 +607,7 @@ public final class AwNpcs {
                 first.add(COMBAT_ORDER);
                 first.add(ROUTING_ORDER);
                 first.add(TRADE_ORDER);
+                first.add(SEA_ROUTE);
                 first.addAll(COMMAND_BATONS.values());
                 first.addAll(BARD_INSTRUMENTS.values());
                 for (Supplier<? extends Item> item : first) {
@@ -651,6 +655,7 @@ public final class AwNpcs {
         CompatLoader.registerCompat(new TwilightForestCompat());
 
         NeoForge.EVENT_BUS.register(NpcEventHandler.INSTANCE);
+        NeoForge.EVENT_BUS.register(io.github.capttracker.ancientwarfarenpc.event.ShipPrizeEvents.INSTANCE);
         AwFactions.init();
         NeoForge.EVENT_BUS.addListener(AwNpcs::onRegisterCommands);
         NeoForge.EVENT_BUS.addListener((ServerStartedEvent event) -> CommandDebugAI.loadDebugMode(event.getServer()));

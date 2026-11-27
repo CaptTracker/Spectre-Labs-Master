@@ -25,6 +25,23 @@ public final class VehicleSettings {
     /** Was {@code clientSettings.adjustMissilesForAccuracy}, but the server reads it when it spawns missiles. */
     public static boolean adjustMissilesForAccuracy = true;
 
+    // naval combat (rework phase 11), the section naval_combat of the common config
+    public static boolean shipRamEnabled = true;
+    public static double shipRamDamageScale = 1.0D;
+    public static double shipRamRecoilFraction = 0.25D;
+    public static int shipRamCooldownTicks = 30;
+    public static double shipRamMinSpeed = 0.04D;
+    public static double shipRamDeckKnock = 0.4D;
+    public static boolean grappleEnabled = true;
+    public static int grappleRange = 24;
+    public static double grapplePullSpeed = 0.08D;
+    public static int grappleMaxLines = 2;
+    public static int grappleTimeoutTicks = 6000;
+    public static int grappleSnapDistance = 40;
+    public static double sinkingCargoFraction = 0.5D;
+    public static int sinkingCrateTicks = 6000;
+    public static int sinkingCrateMax = 8;
+
     // vehicleStats
     public static int vehicleBallistaHealth = 100;
     public static int vehicleBallistaBoatHealth = 100;

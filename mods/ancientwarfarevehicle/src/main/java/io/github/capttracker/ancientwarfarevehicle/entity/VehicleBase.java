@@ -102,6 +102,9 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
     /** The entity ids of the horses a horse-drawn cart is hitched to, "12,-1" (-1: not loaded), as {@link CartHitch} publishes them (rework phase 4). */
     private static final EntityDataAccessor<String> HITCH_DATA = SynchedEntityData.defineId(VehicleBase.class, EntityDataSerializers.STRING);
 
+    /** A ship's stance (rework phase 11): true if its owner wants its NPC crew to ram, grapple and board hostile ships (the toggle of the ship's screen). */
+    private static final EntityDataAccessor<Boolean> AGGRESSIVE_DATA = SynchedEntityData.defineId(VehicleBase.class, EntityDataSerializers.BOOLEAN);
+
     /** The damage type of the battering ram (a datapack entry: {@code data/ancientwarfarevehicle/damage_type/battering.json}). */
     public static final ResourceKey<DamageType> BATTERING_DAMAGE = ResourceKey.create(Registries.DAMAGE_TYPE, Ids.of(AncientWarfareVehicles.MOD_ID, "battering"));
 
@@ -293,6 +296,16 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
         builder.define(VEHICLE_HEALTH, 100f);
         builder.define(SEAT_DATA, "");
         builder.define(HITCH_DATA, "");
+        builder.define(AGGRESSIVE_DATA, false);
+    }
+
+    /** True if the owner of this ship set the aggressive stance: its NPC helmsman rams, its crew throws grappling hooks and boards (rework phase 11). */
+    public boolean isAggressive() {
+        return entityData.get(AGGRESSIVE_DATA);
+    }
+
+    public void setAggressive(boolean aggressive) {
+        entityData.set(AGGRESSIVE_DATA, aggressive);
     }
 
     @Override
@@ -1158,6 +1171,9 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
         level().broadcastDamageEvent(this, damageSource);
         float adjDmg = upgradeHelper.getScaledDamage(damageSource, amount);
         this.setHealth(getHealth() - adjDmg);
+        if (ship != null) {
+            ship.noteHurt(damageSource.getEntity());
+        }
         if (getHealth() <= 0) {
             if (ship != null) {
                 // a ship goes down slowly and drops its cargo on the way (ShipHelper)
@@ -1573,6 +1589,30 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
 
     public boolean isAmmoLoaded() {
         return vehicleType.getValidAmmoTypes().stream().anyMatch(a -> ammoHelper.getCountOf(a) > 0);
+    }
+
+    /**
+     * SERVER (rework phase 11): damage from a ramming ship. It does not use up the short invulnerability of a blow (a ram has a cooldown of its own); a ship goes
+     * down by it as by any damage. False if nothing was done (client, removed, a ship that is sinking already).
+     */
+    public boolean ramHurt(DamageSource source, float amount) {
+        if (level().isClientSide || isRemoved() || amount <= 0.F || (ship != null && ship.isSinking())) {
+            return false;
+        }
+        markHurt();
+        level().broadcastDamageEvent(this, source);
+        this.setHealth(getHealth() - upgradeHelper.getScaledDamage(source, amount));
+        if (ship != null) {
+            ship.noteHurt(source.getEntity());
+        }
+        if (getHealth() <= 0) {
+            if (ship != null) {
+                ship.startSinking();
+            } else {
+                kill();
+            }
+        }
+        return true;
     }
 
     /** The ram's damage source: the {@code ancientwarfarevehicle:battering} damage type without an attacker, as in the original. */

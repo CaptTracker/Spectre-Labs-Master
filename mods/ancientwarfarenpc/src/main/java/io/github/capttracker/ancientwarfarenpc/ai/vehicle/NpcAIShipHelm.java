@@ -29,20 +29,15 @@ import java.util.UUID;
  * way to the destination is not clear (shallows, the shore, a block in the hull's way) it steers to the nearest heading that is, to the side it chose last, and goes
  * back to the straight line when that is clear again. It gives up, stops the ship and says so when nothing is clear for 3 seconds or when it made no headway for
  * {@code ship_helm_stuck_seconds}. Rowers add speed by sitting in their seats, as with a player at the helm.
+ *
+ * <p>Rework phase 11: the steering itself is {@link ShipSteering} (shared with the faction trade ships). A sail order may carry planned waypoints
+ * ({@code NpcPlayerOwned.setSailRouteOrder}, the sea trade routes): the helmsman passes them without stopping. How an order ended (arrived, stuck) is kept in
+ * {@code NpcPlayerOwned.takeSailResult} for whoever gave it.
  */
 public class NpcAIShipHelm extends NpcAI<NpcPlayerOwned> {
-    private static final float[] OFFSETS = {20.0F, 40.0F, 60.0F, 90.0F, 120.0F, 150.0F};
-    private static final int SCAN_INTERVAL = 5;
-    private static final int BLOCKED_GIVE_UP_TICKS = 60;
-
-    private int scanDelay = 0;
-    private boolean avoiding = false;
-    private float courseHeading = 0.0F;
-    /** +1 or -1: the side of the straight line the helmsman last steered round an obstacle on, 0 if none. */
-    private int avoidSide = 0;
-    private int blockedTicks = 0;
-    private Vec3 checkPos = Vec3.ZERO;
-    private int checkTimer = 0;
+    private final ShipSteering steering = new ShipSteering();
+    /** The steering of the flight to a dock (rework phase 11), apart from the one of the orders so that the two do not share their course. */
+    private final ShipSteering fleeSteering = new ShipSteering();
 
     public NpcAIShipHelm(NpcPlayerOwned npc) {
         super(npc);
@@ -66,22 +61,13 @@ public class NpcAIShipHelm extends NpcAI<NpcPlayerOwned> {
 
     @Override
     public void start() {
-        resetCourse();
+        steering.reset();
     }
 
     @Override
     public void stop() {
         npc.clearSailOrder(); // it is not at the helm any more (a player took it, it was ordered off): the order goes with the helm
-        resetCourse();
-    }
-
-    private void resetCourse() {
-        scanDelay = 0;
-        avoiding = false;
-        avoidSide = 0;
-        blockedTicks = 0;
-        checkTimer = 0;
-        checkPos = Vec3.ZERO;
+        steering.reset();
     }
 
     @Override
@@ -95,6 +81,9 @@ public class NpcAIShipHelm extends NpcAI<NpcPlayerOwned> {
         ShipCrew.eatAboard(npc, ship);
         if (!AWNPCStatics.shipHelmsmen) {
             return;
+        }
+        if (ShipCombat.helmTick(npc, ship, fleeSteering)) {
+            return; // ramming a hostile ship, or fleeing to a dock: the sail order waits (rework phase 11)
         }
         double length = helper.spec().length();
 
@@ -112,91 +101,24 @@ public class NpcAIShipHelm extends NpcAI<NpcPlayerOwned> {
             target = new Vec3(sail.getX() + 0.5D, ship.getY(), sail.getZ() + 0.5D);
             arrive = 2.0D + length * 0.3D;
         } else {
-            resetCourse();
+            steering.reset();
             return; // no order: the ship runs down by itself
         }
         npc.setDoing(follow ? "ship.follow" : "ship.helm", BlockPos.containing(target), Component.empty());
 
-        double dx = target.x - ship.getX();
-        double dz = target.z - ship.getZ();
-        double dist = Math.sqrt(dx * dx + dz * dz);
-        float speed = ship.moveHelper.forwardMotion;
-        if (!follow && dist <= arrive + 1.0D && Math.abs(speed) < 0.04F) {
-            npc.clearSailOrder();
-            npc.think("ship_arrived");
-            resetCourse();
-            return;
-        }
-        if (follow && dist <= arrive) {
-            helper.setPilot(target, arrive, true); // hold station beside the vessel
-            blockedTicks = 0;
-            checkTimer = 0;
-            return;
-        }
-
-        // look ahead over the water, every few ticks
-        float bearing = (float) Math.toDegrees(Math.atan2(-dx, -dz));
-        double ahead = Math.max(5.0D, length * 0.8D + Math.abs(speed) * 40.0D);
-        if (--scanDelay <= 0) {
-            scanDelay = SCAN_INTERVAL;
-            chooseCourse(helper, bearing, ahead, dist);
-        }
-        if (blockedTicks > 0) {
-            // nowhere clear to go: hold the ship still, and give up if it stays so
-            helper.setPilot(ship.position(), 1.0D, true);
-            if (blockedTicks > BLOCKED_GIVE_UP_TICKS) {
-                giveUp("ship_stuck");
+        switch (steering.tick(ship, target, follow ? null : npc.getSailRoute(), arrive, follow, AWNPCStatics.shipHelmStuckSeconds)) {
+            case ARRIVED -> {
+                npc.clearSailOrder();
+                npc.think("ship_arrived");
+                npc.setSailResult(NpcPlayerOwned.SailResult.ARRIVED);
             }
-            return;
-        }
-        if (avoiding) {
-            double rad = Math.toRadians(courseHeading);
-            helper.setPilot(new Vec3(ship.getX() - Math.sin(rad) * ahead * 2.0D, ship.getY(), ship.getZ() - Math.cos(rad) * ahead * 2.0D), 3.0D, false);
-        } else {
-            helper.setPilot(target, arrive, true);
-        }
-
-        // no headway for too long
-        if (++checkTimer >= AWNPCStatics.shipHelmStuckSeconds * 20) {
-            checkTimer = 0;
-            if (checkPos != Vec3.ZERO && ship.position().distanceToSqr(checkPos) < 2.25D) {
-                giveUp("ship_stuck");
-                return;
+            case STUCK -> {
+                npc.clearSailOrder();
+                npc.think("ship_stuck");
+                npc.setSailResult(NpcPlayerOwned.SailResult.STUCK);
             }
-            checkPos = ship.position();
+            case SAILING -> { }
         }
-    }
-
-    /** Picks the heading: the straight line to the target if it is clear for the look-ahead distance, else the nearest clear one, else none (blocked). */
-    private void chooseCourse(ShipHelper helper, float bearing, double ahead, double dist) {
-        double reach = Math.min(ahead, dist);
-        // after steering round something, the straight line has to be clear for longer before the helmsman goes back to it
-        double straight = avoiding ? Math.min(ahead * 1.3D, dist) : reach;
-        if (straight < 2.0D || helper.isWaterClear(bearing, straight)) {
-            avoiding = false;
-            blockedTicks = 0;
-            return;
-        }
-        for (int attempt = 0; attempt < 2; attempt++) {
-            int side = attempt == 0 ? (avoidSide == 0 ? 1 : avoidSide) : -(avoidSide == 0 ? 1 : avoidSide);
-            for (float offset : OFFSETS) {
-                float heading = bearing + side * offset;
-                if (helper.isWaterClear(heading, ahead)) {
-                    avoiding = true;
-                    avoidSide = side;
-                    courseHeading = heading;
-                    blockedTicks = 0;
-                    return;
-                }
-            }
-        }
-        blockedTicks += SCAN_INTERVAL;
-    }
-
-    private void giveUp(String event) {
-        npc.clearSailOrder();
-        npc.think(event);
-        resetCourse();
     }
 
     /** The vessel to follow: the one of the follow order, else the one the owner's follow order points to; null if there is none (or it is the NPC's own ship). */

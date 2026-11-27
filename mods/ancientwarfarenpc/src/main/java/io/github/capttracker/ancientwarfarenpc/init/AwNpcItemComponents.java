@@ -14,6 +14,7 @@ import io.github.capttracker.ancientwarfarenpc.item.NpcSpawnerData;
 import io.github.capttracker.ancientwarfarenpc.npccommand.NpcCommand;
 import io.github.capttracker.ancientwarfarenpc.orders.CombatOrder;
 import io.github.capttracker.ancientwarfarenpc.orders.RoutingOrder;
+import io.github.capttracker.ancientwarfarenpc.orders.SeaRoute;
 import io.github.capttracker.ancientwarfarenpc.orders.TradeOrder;
 import io.github.capttracker.ancientwarfarenpc.orders.UpkeepOrder;
 import io.github.capttracker.ancientwarfarenpc.orders.WorkOrder;
@@ -54,6 +55,9 @@ public final class AwNpcItemComponents {
             REG.dataComponent("routing_order", RoutingOrder.CODEC, RoutingOrder.STREAM_CODEC);
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<TradeOrder>> TRADE_ORDER =
             REG.dataComponent("trade_order", TradeOrder.CODEC, TradeOrder.STREAM_CODEC);
+    /** Rework phase 11: the stops of a sea route chart. */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<SeaRoute>> SEA_ROUTE =
+            REG.dataComponent("sea_route", SeaRoute.CODEC, SeaRoute.STREAM_CODEC);
 
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<NpcSpawnerData>> NPC_SPAWNER =
             REG.dataComponent("npc_spawner", NpcSpawnerData.CODEC, NpcSpawnerData.STREAM_CODEC);

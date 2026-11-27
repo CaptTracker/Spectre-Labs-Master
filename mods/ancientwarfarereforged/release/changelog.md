@@ -85,6 +85,17 @@ Your settlement can now plan and build its own houses and workshops. (This is a 
 - **Faction crews:** idle faction soldiers and archers climb aboard a ship whose helm is a player allied to their faction, man a gun or oar and fire at the faction's enemies. They leave when no allied helm is left (`ship_faction_crew`).
 - **Cog oars:** the cog now has two oars a side that row while its rower seats are manned.
 
+## Sea trade and naval combat
+- **Sea trade routes:** the new **Sea Route Chart** lists the docks a cargo ship sails to. Sneak-use it on one of your docks (or press the alt key 1 while looking at one) to add a stop; use it anywhere else to open the editor, where you set the wait at each dock and what is unloaded and loaded there. Put the chart in an owned trader's orders slot: the trader finds your cog within 32 blocks, takes the helm (or a seat beside your helmsman), plans each leg over the water, moors at each dock, unloads and loads between the ship's hold and the dock (and the settlement's linked storage), waits, and sails on, round and round (`sea_trade` settings).
+- A stop that cannot be reached three times is skipped and you are told once. A dock that is not loaded makes the ship wait nearby. If the ship sinks, the chart is kept and the trader looks for another ship.
+- **Faction trade ships:** factions now also send a cog to a settlement with a dock on deep water. It appears out at sea beyond view with a helmsman, rowers, guards and a trader, sails to the dock, trades for a while with the usual trade view and market stall buy orders, then sails off and vanishes. Killing the trader drops only the coins it earned and costs you standing. Operators can call one with `/awcaravan sea [faction]` (`sea_caravan` settings).
+- **Ramming:** the war galley rams hard, the cog has a weak ram and the fishing boat has none. Damage grows with how fast the bow closes in on the target; the rammer takes a quarter of it back.
+- **Grappling hook:** a new craftable item. Aim it at another ship from your ship to pull the two side by side and cross the decks. Cut the line by hitting the hook, with shears, a sword or an axe, or sneak-use the hook item to let go. NPC soldiers throw hooks at hostile ships and fight across the decks; crews defend their own deck.
+- **Stance:** a "Stance: passive / aggressive" button in a ship's inventory screen. An aggressive helmsman rams hostile ships; a passive one whose ship is hit sails for your nearest dock.
+- **Sinking:** when a ship sinks, half of its hold floats up as crates that bob for five minutes. Touch one with a ship or your body to collect it, or hit it to break it open.
+- **Prizes:** a faction trade ship with no crew left alive is yours to take by using it (your standing with that faction drops). An abandoned one vanishes after a day.
+- Needs matching client and server versions (new network message).
+
 ## Traders and new NPCs
 - Market stalls run by your trader, with sell offers and buy orders.
 - Prices depend on reputation: friendly factions get 10% off, allies 20% off, and hostile factions won't trade.

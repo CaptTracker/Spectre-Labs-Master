@@ -9,6 +9,9 @@ import io.github.capttracker.ancientwarfarevehicle.AncientWarfareVehicles;
 import io.github.capttracker.ancientwarfarevehicle.config.AWVehicleStatics;
 import io.github.capttracker.ancientwarfarevehicle.entity.VehicleBase;
 import io.github.capttracker.ancientwarfarevehicle.entity.VehicleBridge;
+import io.github.capttracker.ancientwarfarevehicle.entity.ship.FloatingCrate;
+import io.github.capttracker.ancientwarfarevehicle.entity.ship.GrappleHook;
+import io.github.capttracker.ancientwarfarevehicle.item.GrapplingHookItem;
 import io.github.capttracker.ancientwarfarevehicle.item.ItemAmmo;
 import io.github.capttracker.ancientwarfarevehicle.item.ItemArmor;
 import io.github.capttracker.ancientwarfarevehicle.item.ItemMisc;
@@ -101,6 +104,24 @@ public final class AwVehicles {
                     .setShouldReceiveVelocityUpdates(true)
                     .build(MOD_ID + ":ship"));
 
+    /** The grappling line between two ships (rework phase 11): not saved, a small box at the hook on the target ship's hull. */
+    public static final DeferredHolder<EntityType<?>, EntityType<GrappleHook>> GRAPPLE_HOOK = ENTITY_TYPES.register("grapple_hook",
+            () -> EntityType.Builder.<GrappleHook>of(GrappleHook::new, MobCategory.MISC)
+                    .sized(0.6F, 0.6F)
+                    .clientTrackingRange(10)
+                    .updateInterval(2)
+                    .noSave()
+                    .fireImmune()
+                    .build(MOD_ID + ":grapple_hook"));
+
+    /** The crate that floats up from a sunken ship (rework phase 11). */
+    public static final DeferredHolder<EntityType<?>, EntityType<FloatingCrate>> FLOATING_CRATE = ENTITY_TYPES.register("floating_crate",
+            () -> EntityType.Builder.<FloatingCrate>of(FloatingCrate::new, MobCategory.MISC)
+                    .sized(0.9F, 0.9F)
+                    .clientTrackingRange(8)
+                    .updateInterval(2)
+                    .build(MOD_ID + ":floating_crate"));
+
     /** The projectile entity of all 51 ammo types. Needs a {@code MissileBase(EntityType<MissileBase>, Level)} constructor. */
     public static final DeferredHolder<EntityType<?>, EntityType<MissileBase>> MISSILE = ENTITY_TYPES.register("missile",
             () -> EntityType.Builder.<MissileBase>of(MissileBase::new, MobCategory.MISC)
@@ -125,6 +146,9 @@ public final class AwVehicles {
     public static final DeferredHolder<SoundEvent, SoundEvent> TREBUCHET_LAUNCH = REG.sound("trebuchet_launch");
     public static final DeferredHolder<SoundEvent, SoundEvent> TREBUCHET_RELOAD = REG.sound("trebuchet_reload");
     public static final DeferredHolder<SoundEvent, SoundEvent> VEHICLE_MOVING = REG.sound("vehicle_moving");
+
+    // ---- the grappling hook (rework phase 11) ----
+    public static final DeferredItem<GrapplingHookItem> GRAPPLING_HOOK = REG.item("grappling_hook", p -> new GrapplingHookItem(p.stacksTo(1).durability(64)));
 
     // ---- item data component (1.12.2: NBT "spawnData" of the spawner) ----
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<VehicleSpawnData>> SPAWN_DATA =

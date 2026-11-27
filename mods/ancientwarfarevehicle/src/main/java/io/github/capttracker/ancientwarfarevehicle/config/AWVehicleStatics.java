@@ -168,6 +168,22 @@ public final class AWVehicleStatics {
     private static final ModConfigSpec.BooleanValue USE_VEHICLE_SETUP_TIME;
     private static final ModConfigSpec.BooleanValue ADJUST_MISSILES_FOR_ACCURACY;
 
+    private static final ModConfigSpec.BooleanValue SHIP_RAM_ENABLED;
+    private static final ModConfigSpec.DoubleValue SHIP_RAM_DAMAGE_SCALE;
+    private static final ModConfigSpec.DoubleValue SHIP_RAM_RECOIL_FRACTION;
+    private static final ModConfigSpec.IntValue SHIP_RAM_COOLDOWN_TICKS;
+    private static final ModConfigSpec.DoubleValue SHIP_RAM_MIN_SPEED;
+    private static final ModConfigSpec.DoubleValue SHIP_RAM_DECK_KNOCK;
+    private static final ModConfigSpec.BooleanValue GRAPPLE_ENABLED;
+    private static final ModConfigSpec.IntValue GRAPPLE_RANGE;
+    private static final ModConfigSpec.DoubleValue GRAPPLE_PULL_SPEED;
+    private static final ModConfigSpec.IntValue GRAPPLE_MAX_LINES;
+    private static final ModConfigSpec.IntValue GRAPPLE_TIMEOUT_TICKS;
+    private static final ModConfigSpec.IntValue GRAPPLE_SNAP_DISTANCE;
+    private static final ModConfigSpec.DoubleValue SINKING_CARGO_FRACTION;
+    private static final ModConfigSpec.IntValue SINKING_CRATE_TICKS;
+    private static final ModConfigSpec.IntValue SINKING_CRATE_MAX;
+
     private static final ModConfigSpec.BooleanValue RENDER_VEHICLES_IN_FIRST_PERSON;
     private static final ModConfigSpec.BooleanValue RENDER_VEHICLE_NAMEPLATES;
     private static final ModConfigSpec.BooleanValue RENDER_VEHICLE_NAMEPLATE_HEALTH;
@@ -238,6 +254,36 @@ public final class AWVehicleStatics {
         ADJUST_MISSILES_FOR_ACCURACY = common.comment("Adds random inaccuracy to fired missiles, depending on the accuracy of the vehicle.",
                 "(1.12.2 listed this under the client settings, but the server's firing code reads it.)")
                 .worldRestart().define("adjust_missiles_for_accuracy", true);
+        common.pop();
+
+        common.comment("Naval combat (rework phase 11): ship ramming, grappling hooks and the cargo of sinking ships. Server side.").push("naval_combat");
+        SHIP_RAM_ENABLED = common.comment("Default = true", "If false, ships do no ram damage (the war galley's and the cog's bows).").define("ship_ramming_enabled", true);
+        SHIP_RAM_DAMAGE_SCALE = common.comment("Default = 1.0", "Multiplier of the ram damage of every ship. The base is 35 for the war galley and 12 for the cog at full speed (the fishing boat has no ram);",
+                "the damage grows with the speed the ram closes in on its target along its heading, to at most 1.5 times the base.")
+                .defineInRange("ship_ram_damage_scale", 1.0D, 0.0D, 10.0D);
+        SHIP_RAM_RECOIL_FRACTION = common.comment("Default = 0.25", "The fraction of the ram damage that the ramming ship takes itself when it hits another ship, boat or vehicle.")
+                .defineInRange("ship_ram_recoil_fraction", 0.25D, 0.0D, 1.0D);
+        SHIP_RAM_COOLDOWN_TICKS = common.comment("Default = 30", "Ticks before a ship can ram again, so that one collision does not hit every tick.")
+                .defineInRange("ship_ram_cooldown_ticks", 30, 10, 400);
+        SHIP_RAM_MIN_SPEED = common.comment("Default = 0.04", "The ship must close in on its target at this many blocks a tick (along its heading) at least for the ram to hurt.")
+                .defineInRange("ship_ram_min_speed", 0.04D, 0.01D, 0.5D);
+        SHIP_RAM_DECK_KNOCK = common.comment("Default = 0.4", "How hard what stands on the deck of a rammed ship is knocked along the ram's heading (0 for none).")
+                .defineInRange("ship_ram_deck_knock", 0.4D, 0.0D, 2.0D);
+        GRAPPLE_ENABLED = common.comment("Default = true", "If false, grappling hooks cannot be thrown (by players or by NPCs).").define("grapple_enabled", true);
+        GRAPPLE_RANGE = common.comment("Default = 24", "How far (blocks, from one hull to the other) a grappling hook can be thrown.").defineInRange("grapple_range", 24, 6, 64);
+        GRAPPLE_PULL_SPEED = common.comment("Default = 0.08", "How fast (blocks a tick) a grappling line pulls two ships together, shared between them by weight. The ships stop at hull contact.")
+                .defineInRange("grapple_pull_speed", 0.08D, 0.01D, 0.4D);
+        GRAPPLE_MAX_LINES = common.comment("Default = 2", "The most grappling lines one ship can have at once.").defineInRange("grapple_max_lines", 2, 1, 6);
+        GRAPPLE_TIMEOUT_TICKS = common.comment("Default = 6000 (5 minutes)", "A grappling line that has pulled the ships together comes loose after this many ticks. 0 means it holds until it is cut.")
+                .defineInRange("grapple_timeout_ticks", 6000, 0, 1_000_000);
+        GRAPPLE_SNAP_DISTANCE = common.comment("Default = 40", "A grappling line snaps when the hooks are this many blocks apart (a ship sailing away drags the other, slowly, until then).")
+                .defineInRange("grapple_snap_distance", 40, 10, 128);
+        SINKING_CARGO_FRACTION = common.comment("Default = 0.5", "The fraction of the cargo hold of a ship that floats up from the wreck as floating crates when it sinks. The rest is lost.")
+                .defineInRange("sinking_cargo_fraction", 0.5D, 0.0D, 1.0D);
+        SINKING_CRATE_TICKS = common.comment("Default = 6000 (5 minutes)", "How long a floating crate bobs on the water before it is lost.")
+                .defineInRange("sinking_crate_ticks", 6000, 600, 144_000);
+        SINKING_CRATE_MAX = common.comment("Default = 8", "The most floating crates one wreck makes (27 stacks each, more stacks go into bigger crates).")
+                .defineInRange("sinking_crate_max", 8, 1, 32);
         common.pop();
 
         common.comment("Vehicle Stats Settings").push("vehicle_stats_settings");
@@ -351,6 +397,21 @@ public final class AWVehicleStatics {
         g.allowFriendlyFire = ALLOW_FRIENDLY_FIRE.get();
         g.useVehicleSetupTime = USE_VEHICLE_SETUP_TIME.get();
         clientSettings.adjustMissilesForAccuracy = ADJUST_MISSILES_FOR_ACCURACY.get();
+        VehicleSettings.shipRamEnabled = SHIP_RAM_ENABLED.get();
+        VehicleSettings.shipRamDamageScale = SHIP_RAM_DAMAGE_SCALE.get();
+        VehicleSettings.shipRamRecoilFraction = SHIP_RAM_RECOIL_FRACTION.get();
+        VehicleSettings.shipRamCooldownTicks = SHIP_RAM_COOLDOWN_TICKS.get();
+        VehicleSettings.shipRamMinSpeed = SHIP_RAM_MIN_SPEED.get();
+        VehicleSettings.shipRamDeckKnock = SHIP_RAM_DECK_KNOCK.get();
+        VehicleSettings.grappleEnabled = GRAPPLE_ENABLED.get();
+        VehicleSettings.grappleRange = GRAPPLE_RANGE.get();
+        VehicleSettings.grapplePullSpeed = GRAPPLE_PULL_SPEED.get();
+        VehicleSettings.grappleMaxLines = GRAPPLE_MAX_LINES.get();
+        VehicleSettings.grappleTimeoutTicks = GRAPPLE_TIMEOUT_TICKS.get();
+        VehicleSettings.grappleSnapDistance = GRAPPLE_SNAP_DISTANCE.get();
+        VehicleSettings.sinkingCargoFraction = SINKING_CARGO_FRACTION.get();
+        VehicleSettings.sinkingCrateTicks = SINKING_CRATE_TICKS.get();
+        VehicleSettings.sinkingCrateMax = SINKING_CRATE_MAX.get();
 
         VehicleStats s = vehicleStats;
         s.ammoBallistaBoltDamage = AMMO_BALLISTA_BOLT_DAMAGE.get();
