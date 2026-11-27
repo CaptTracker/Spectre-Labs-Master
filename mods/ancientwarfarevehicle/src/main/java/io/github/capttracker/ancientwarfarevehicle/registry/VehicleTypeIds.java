@@ -42,6 +42,10 @@ public final class VehicleTypeIds {
     public static final int FISHING_BOAT = 23;
     public static final int COG = 24;
     public static final int WAR_GALLEY = 25;
+    /** Rework phase 12: the siege towers (a medium one about 6 blocks tall and a large one about 9, both pushed from behind, with a ladder and a drop bridge) and the mantlet (a shield on wheels). */
+    public static final int SIEGE_TOWER = 26;
+    public static final int SIEGE_TOWER_LARGE = 27;
+    public static final int MANTLET = 28;
 
     /** The {@code IVehicleType#getConfigName()} of each type, indexed by global type index. */
     public static final List<String> CONFIG_NAMES = List.of(
@@ -54,9 +58,10 @@ public final class VehicleTypeIds {
             "chest_cart",
             "boat_ballista", "boat_catapult", "boat_transport",
             "cart", "wagon",
-            "fishing_boat", "cog", "war_galley");
+            "fishing_boat", "cog", "war_galley",
+            "siege_tower", "siege_tower_large", "mantlet");
 
-    /** Number of vehicle types (indices 0 to 25). */
+    /** Number of vehicle types (indices 0 to 28). */
     public static final int COUNT = CONFIG_NAMES.size();
 
     /** Material levels of every type (0 to 4); the 1.12.2 wood and iron tables both had five rows. */

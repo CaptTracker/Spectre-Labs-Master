@@ -104,6 +104,18 @@ public final class AwVehicles {
                     .setShouldReceiveVelocityUpdates(true)
                     .build(MOD_ID + ":ship"));
 
+    /**
+     * The entity type of the siege towers (rework phase 12). The same {@code VehicleBase} class; the type tells the entity to carry the part entities of its drop bridge from its
+     * constructor on (see {@code SiegeHelper}). The box of the entity is the body of the tower (3 x 3, as tall as its top platform; the size is set again when its type is known).
+     */
+    public static final DeferredHolder<EntityType<?>, EntityType<VehicleBase>> SIEGE_TOWER = ENTITY_TYPES.register("siege_tower",
+            () -> EntityType.Builder.<VehicleBase>of(VehicleBase::new, MobCategory.MISC)
+                    .sized(3.0F, 6.0F)
+                    .clientTrackingRange(10)
+                    .updateInterval(3)
+                    .setShouldReceiveVelocityUpdates(true)
+                    .build(MOD_ID + ":siege_tower"));
+
     /** The grappling line between two ships (rework phase 11): not saved, a small box at the hook on the target ship's hull. */
     public static final DeferredHolder<EntityType<?>, EntityType<GrappleHook>> GRAPPLE_HOOK = ENTITY_TYPES.register("grapple_hook",
             () -> EntityType.Builder.<GrappleHook>of(GrappleHook::new, MobCategory.MISC)

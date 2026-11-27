@@ -61,6 +61,7 @@ This one file holds all five Ancient Warfare modules: **Core, Vehicles, Automati
 - **Ships with walkable decks:** a fishing boat, a cog and a war galley, driven by wind and rowers and armed with mounted turrets.
 - **NPC ship crews:** send your NPCs aboard with the command baton, even out in open water: they swim out to the ship. They row, ride as passengers, eat from the ship's stores, and soldiers fire the turrets at your enemies. Allied faction soldiers join a friend's ship too.
 - **NPC helmsmen:** an NPC can take the helm and sail to a spot you point at over the water, or follow another vessel. You can take the helm back at any time.
+- **Siege towers and mantlets:** push a tower to a wall, climb its ladder and lower the drop bridge onto the wall top; hide archers behind a mantlet that stops arrows from the front. Soldiers and archers you send at a wall crew your siege engines on their own.
 - Hitched horses are roped to their cart, and riders keep their seats after a reload.
 - **Sea trade:** put a **Sea Route Chart** in a trader's orders slot and they sail your cog from dock to dock, unloading and loading cargo at each stop. Factions send their own trade ships to your docks.
 - **Naval combat:** the war galley (and, weakly, the cog) ram other ships, **grappling hooks** pull two ships together so crews can fight across the decks, a stance toggle makes your helmsman ram or flee, and a sunk ship's cargo floats up in crates. A faction trade ship left with no crew can be taken as a prize.

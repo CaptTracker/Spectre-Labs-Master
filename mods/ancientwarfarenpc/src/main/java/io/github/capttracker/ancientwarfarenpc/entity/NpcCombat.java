@@ -65,6 +65,70 @@ public class NpcCombat extends NpcPlayerOwned implements RangedAttackMob {
     @Nullable
     private NpcBase distressedTarget;
 
+    // ---- siege duty (rework phase 12) ----
+
+    /** The part this NPC plays in a siege order (crewing a tower, mantlet or ram), or null. Not saved: the attack order is, and it brings the duty back. */
+    @Nullable
+    private io.github.capttracker.ancientwarfarenpc.ai.siege.SiegeDuty siegeDuty;
+    private long siegeNextClaim = 0L;
+    @Nullable
+    private net.minecraft.core.BlockPos lastServedTarget;
+    private long lastServedAt = -100000L;
+
+    @Nullable
+    public io.github.capttracker.ancientwarfarenpc.ai.siege.SiegeDuty getSiegeDuty() {
+        return siegeDuty;
+    }
+
+    public void setSiegeDuty(@Nullable io.github.capttracker.ancientwarfarenpc.ai.siege.SiegeDuty duty) {
+        siegeDuty = duty;
+    }
+
+    public boolean onSiegeDuty() {
+        return siegeDuty != null;
+    }
+
+    /** Ends the duty: leaves the crew of its job, gets off the equipment, and does not ask for a duty at the same target again for 3 minutes (unless the baton orders it again). */
+    public void endSiegeDuty() {
+        io.github.capttracker.ancientwarfarenpc.ai.siege.SiegeDuty duty = siegeDuty;
+        if (duty == null) {
+            return;
+        }
+        siegeDuty = null;
+        duty.job.crew.remove(getUUID());
+        lastServedTarget = duty.job.target();
+        lastServedAt = level().getGameTime();
+        if (getVehicle() instanceof io.github.capttracker.ancientwarfarevehicle.entity.VehicleBase v && v.getUUID().equals(duty.job.vehicleId)) {
+            stopRiding();
+        }
+    }
+
+    public long getSiegeNextClaim() {
+        return siegeNextClaim;
+    }
+
+    public void setSiegeNextClaim(long time) {
+        siegeNextClaim = time;
+    }
+
+    public boolean recentlyServedAt(net.minecraft.core.BlockPos pos) {
+        return pos.equals(lastServedTarget) && level().getGameTime() - lastServedAt < 3600L;
+    }
+
+    /** A new order ends a duty at another target (or any other order), and a new attack order at a block starts afresh. */
+    @Override
+    public void setPlayerCommand(io.github.capttracker.ancientwarfarenpc.npccommand.NpcCommand.Command cmd) {
+        super.setPlayerCommand(cmd);
+        boolean attackArea = cmd.type == io.github.capttracker.ancientwarfarenpc.npccommand.NpcCommand.CommandType.ATTACK_AREA && cmd.isBlockTarget();
+        if (siegeDuty != null && (!attackArea || !cmd.pos.equals(siegeDuty.job.target()))) {
+            endSiegeDuty();
+        }
+        if (attackArea) {
+            lastServedTarget = null;
+            siegeNextClaim = 0L;
+        }
+    }
+
     @Override
     public int getToolMorale() {
         return getMainHandItem().isEmpty() ? -6 : 2;
@@ -87,6 +151,7 @@ public class NpcCombat extends NpcPlayerOwned implements RangedAttackMob {
         goalSelector.addGoal(0, new FloatGoal(this));
         goalSelector.addGoal(0, new NpcAIDoor(this, true));
         goalSelector.addGoal(0, horseAI);
+        goalSelector.addGoal(0, new io.github.capttracker.ancientwarfarenpc.ai.siege.NpcAISiegeDuty(this)); // siege roles on towers, mantlets and rams (rework phase 12)
         goalSelector.addGoal(1, new NpcAIPlayerOwnedFollowCommand(this));
         goalSelector.addGoal(1, new io.github.capttracker.ancientwarfarenpc.ai.vehicle.NpcAIShipBoard(this)); // boarding and defending decks (rework phase 11)
         goalSelector.addGoal(2, new NpcAIPlayerOwnedGetFood(this));

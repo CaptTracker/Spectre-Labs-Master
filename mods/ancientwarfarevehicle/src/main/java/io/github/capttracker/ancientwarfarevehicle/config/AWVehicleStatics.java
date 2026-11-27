@@ -57,6 +57,8 @@ public final class AWVehicleStatics {
     public static final String KEY_VEHICLE_TURRET_RIGHT = "keybind.vehicle.turret.right";
     public static final String KEY_VEHICLE_MOUSE_AIM = "keybind.vehicle.mouse.aim";
     public static final String KEY_VEHICLE_AMMO_SELECT = "keybind.vehicle.ammo.select";
+    /** Rework phase 12: lowers and raises the drop bridge of a siege tower. */
+    public static final String KEY_VEHICLE_BRIDGE = "keybind.vehicle.bridge";
 
     public static final String COMMON_FILE_NAME = "ancientwarfarevehicle-common.toml";
     public static final String CLIENT_FILE_NAME = "ancientwarfarevehicle-client.toml";
@@ -184,6 +186,18 @@ public final class AWVehicleStatics {
     private static final ModConfigSpec.IntValue SINKING_CRATE_TICKS;
     private static final ModConfigSpec.IntValue SINKING_CRATE_MAX;
 
+    private static final ModConfigSpec.IntValue SIEGE_TOWER_MEDIUM_HEIGHT;
+    private static final ModConfigSpec.IntValue SIEGE_TOWER_LARGE_HEIGHT;
+    private static final ModConfigSpec.IntValue SIEGE_BRIDGE_LENGTH;
+    private static final ModConfigSpec.DoubleValue SIEGE_PUSH_SPEED_SCALE;
+    private static final ModConfigSpec.DoubleValue SIEGE_CLIMB_SPEED;
+    private static final ModConfigSpec.DoubleValue SIEGE_ARROW_DAMAGE_FRONT;
+    private static final ModConfigSpec.DoubleValue SIEGE_ARROW_DAMAGE_OTHER;
+    private static final ModConfigSpec.DoubleValue SIEGE_FIRE_DAMAGE_FACTOR;
+    private static final ModConfigSpec.BooleanValue SIEGE_AUTO_BRIDGE;
+    private static final ModConfigSpec.BooleanValue MANTLET_BLOCKS_PROJECTILES;
+    private static final ModConfigSpec.DoubleValue MANTLET_DAMAGE_FACTOR;
+
     private static final ModConfigSpec.BooleanValue RENDER_VEHICLES_IN_FIRST_PERSON;
     private static final ModConfigSpec.BooleanValue RENDER_VEHICLE_NAMEPLATES;
     private static final ModConfigSpec.BooleanValue RENDER_VEHICLE_NAMEPLATE_HEALTH;
@@ -284,6 +298,28 @@ public final class AWVehicleStatics {
                 .defineInRange("sinking_crate_ticks", 6000, 600, 144_000);
         SINKING_CRATE_MAX = common.comment("Default = 8", "The most floating crates one wreck makes (27 stacks each, more stacks go into bigger crates).")
                 .defineInRange("sinking_crate_max", 8, 1, 32);
+        common.pop();
+
+        common.comment("Siege works (rework phase 12): the siege towers and the mantlet. Must match on client and server (the sizes are read when the vehicle types are made, so a change needs a restart).").push("siege");
+        SIEGE_TOWER_MEDIUM_HEIGHT = common.comment("Default = 6", "Height in blocks of the top platform of the medium siege tower over the ground: the box of the tower, the bridge and the top seats use it. Set it to the height of the walls you build.",
+                CLIENT_AND_SERVER_NOTE).worldRestart().defineInRange("siege_tower_medium_height", 6, 3, 12);
+        SIEGE_TOWER_LARGE_HEIGHT = common.comment("Default = 9", "Height in blocks of the top platform of the large siege tower over the ground.",
+                CLIENT_AND_SERVER_NOTE).worldRestart().defineInRange("siege_tower_large_height", 9, 4, 14);
+        SIEGE_BRIDGE_LENGTH = common.comment("Default = 3", "How many blocks long the drop bridge of a siege tower is when it is lowered (2 or 3). It is 3 blocks wide.",
+                CLIENT_AND_SERVER_NOTE).worldRestart().defineInRange("siege_bridge_length", 3, 2, 3);
+        SIEGE_PUSH_SPEED_SCALE = common.comment("Default = 1.0", "Multiplier of the speed that the pushers give a siege tower or a mantlet. Every pusher (the driver counts) adds an equal share of the top speed; with nobody pushing the vehicle does not move.")
+                .defineInRange("siege_push_speed_scale", 1.0D, 0.1D, 4.0D);
+        SIEGE_CLIMB_SPEED = common.comment("Default = 0.12", "How fast (blocks a tick) a rider climbs the ladder of a siege tower.").defineInRange("siege_climb_speed", 0.12D, 0.02D, 0.5D);
+        SIEGE_ARROW_DAMAGE_FRONT = common.comment("Default = 0.1", "Fraction of the damage that an arrow does to a siege tower when it hits the front armour (shot from within 70 degrees of the front).")
+                .defineInRange("siege_arrow_damage_front", 0.1D, 0.0D, 1.0D);
+        SIEGE_ARROW_DAMAGE_OTHER = common.comment("Default = 0.4", "Fraction of the damage that an arrow does to a siege tower when it hits the sides or the back.")
+                .defineInRange("siege_arrow_damage_other", 0.4D, 0.0D, 1.0D);
+        SIEGE_FIRE_DAMAGE_FACTOR = common.comment("Default = 2.0", "Multiplier of fire damage (burning, flame ammo) to a siege tower.").defineInRange("siege_fire_damage_factor", 2.0D, 0.0D, 10.0D);
+        SIEGE_AUTO_BRIDGE = common.comment("Default = true", "If true, a siege tower with an NPC crew member aboard lowers its bridge by itself once it has been pushed against a wall for a second, and NPC passengers climb up and step out onto it.")
+                .define("siege_auto_bridge", true);
+        MANTLET_BLOCKS_PROJECTILES = common.comment("Default = true", "If false, the mantlet no longer stops arrows, bolts and missiles that fly into its front.", CLIENT_AND_SERVER_NOTE)
+                .define("mantlet_blocks_projectiles", true);
+        MANTLET_DAMAGE_FACTOR = common.comment("Default = 1.0", "Multiplier of the damage that the mantlet takes from the projectiles it stops.").defineInRange("mantlet_damage_factor", 1.0D, 0.0D, 10.0D);
         common.pop();
 
         common.comment("Vehicle Stats Settings").push("vehicle_stats_settings");
@@ -412,6 +448,17 @@ public final class AWVehicleStatics {
         VehicleSettings.sinkingCargoFraction = SINKING_CARGO_FRACTION.get();
         VehicleSettings.sinkingCrateTicks = SINKING_CRATE_TICKS.get();
         VehicleSettings.sinkingCrateMax = SINKING_CRATE_MAX.get();
+        VehicleSettings.siegeTowerMediumHeight = SIEGE_TOWER_MEDIUM_HEIGHT.get();
+        VehicleSettings.siegeTowerLargeHeight = SIEGE_TOWER_LARGE_HEIGHT.get();
+        VehicleSettings.siegeBridgeLength = SIEGE_BRIDGE_LENGTH.get();
+        VehicleSettings.siegePushSpeedScale = SIEGE_PUSH_SPEED_SCALE.get();
+        VehicleSettings.siegeClimbSpeed = SIEGE_CLIMB_SPEED.get();
+        VehicleSettings.siegeArrowDamageFront = SIEGE_ARROW_DAMAGE_FRONT.get();
+        VehicleSettings.siegeArrowDamageOther = SIEGE_ARROW_DAMAGE_OTHER.get();
+        VehicleSettings.siegeFireDamageFactor = SIEGE_FIRE_DAMAGE_FACTOR.get();
+        VehicleSettings.siegeAutoBridge = SIEGE_AUTO_BRIDGE.get();
+        VehicleSettings.mantletBlocksProjectiles = MANTLET_BLOCKS_PROJECTILES.get();
+        VehicleSettings.mantletDamageFactor = MANTLET_DAMAGE_FACTOR.get();
 
         VehicleStats s = vehicleStats;
         s.ammoBallistaBoltDamage = AMMO_BALLISTA_BOLT_DAMAGE.get();

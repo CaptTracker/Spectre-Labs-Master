@@ -13,10 +13,26 @@ public enum SeatRole {
     /** Just rides. */
     PASSENGER,
     /** Rows: adds speed to a water vehicle. */
-    ROWER;
+    ROWER,
+    /** Rework phase 12: pushes a siege tower or a mantlet from behind. Each pusher adds to the speed; the driver pushes too. */
+    PUSHER,
+    /** Rework phase 12: on the ladder column inside a siege tower; the rider climbs up and down with the movement keys. */
+    LADDER,
+    /** Rework phase 12: on the top platform of a siege tower; may work the drop bridge and step out onto it. */
+    PLATFORM;
 
     /** True for the roles that work the vehicle's weapon: they may aim, fire and pick ammo. */
     public boolean operatesWeapon() {
         return this == DRIVER || this == GUNNER;
+    }
+
+    /** True for the roles of the siege works (rework phase 12): NPC crew may take them besides the weapon seats. */
+    public boolean isSiegeRole() {
+        return this == PUSHER || this == LADDER || this == PLATFORM;
+    }
+
+    /** True for the roles that add their push to a siege tower or a mantlet: the driver pushes too. */
+    public boolean pushes() {
+        return this == DRIVER || this == PUSHER;
     }
 }

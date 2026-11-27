@@ -23,6 +23,7 @@ public class NpcAIAimVehicle<T extends NpcBase & IVehicleUser> extends NpcAI<T> 
     @Override
     public boolean canUse() {
         return super.canUse() && npc.getVehicleTarget().isPresent() && npc.canContinueRidingVehicle() && npc.isRidingVehicle()
+                && !npc.getAssignedVehicle().map(v -> v.vehicleType.isPushed()).orElse(false) // the siege works have no weapon to aim (NpcAISiegeAdvance steers them)
                 && npc.getVehicleTarget().map(t -> !npc.getAssignedVehicle().map(v -> v.firingHelper.isAimedAt(t)).orElse(false)).orElse(false);
     }
 

@@ -90,6 +90,15 @@ public abstract class VehicleType implements IVehicleType {
     @Nullable
     public io.github.capttracker.ancientwarfarevehicle.entity.ship.ShipSpec shipSpec = null;
 
+    /** Siege works (rework phase 12): see {@link IVehicleType#isPushed()} and the methods after it. */
+    public boolean pushed = false;
+    public int pushersForFullSpeed = 1;
+    public float siegeTopHeight = 0.f;
+    public boolean blocksProjectiles = false;
+    public float maxUpStep = 1.12f;
+    public float towSpeedScale = 1.f;
+    public float pickRadius = 0.f;
+
     public float baseForwardSpeed;
     public float baseStrafeSpeed;
 
@@ -225,6 +234,41 @@ public abstract class VehicleType implements IVehicleType {
     @Override
     public boolean breaksOnAttack() {
         return breaksOnAttack;
+    }
+
+    @Override
+    public boolean isPushed() {
+        return pushed;
+    }
+
+    @Override
+    public int getPushersForFullSpeed() {
+        return pushersForFullSpeed;
+    }
+
+    @Override
+    public float getSiegeTopHeight() {
+        return siegeTopHeight;
+    }
+
+    @Override
+    public boolean blocksProjectiles() {
+        return blocksProjectiles;
+    }
+
+    @Override
+    public float getMaxUpStep() {
+        return maxUpStep;
+    }
+
+    @Override
+    public float getTowSpeedScale() {
+        return towSpeedScale;
+    }
+
+    @Override
+    public float getPickRadius() {
+        return pickRadius;
     }
 
     @Override

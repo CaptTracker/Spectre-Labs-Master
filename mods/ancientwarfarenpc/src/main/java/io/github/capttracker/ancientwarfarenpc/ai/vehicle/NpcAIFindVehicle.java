@@ -21,7 +21,7 @@ import java.util.function.Predicate;
  */
 public class NpcAIFindVehicle<T extends NpcBase & IVehicleUser> extends NpcAI<T> {
     private static final double SEARCH_DISTANCE = 30D;
-    private static final Predicate<VehicleBase> SELECTOR = v -> v != null && v.isDrivable() && v.hasFreeSeat(SeatRole.DRIVER);
+    private static final Predicate<VehicleBase> SELECTOR = v -> v != null && v.isDrivable() && hasCrewSeat(v);
 
     public NpcAIFindVehicle(T npc) {
         super(npc);
@@ -41,7 +41,14 @@ public class NpcAIFindVehicle<T extends NpcBase & IVehicleUser> extends NpcAI<T>
             return;
         }
         List<VehicleBase> vehicles = npc.level().getEntitiesOfClass(VehicleBase.class, npc.getBoundingBox().inflate(SEARCH_DISTANCE), SELECTOR);
-        vehicles.stream().filter(v -> v.hasFreeSeat(SeatRole.DRIVER) && v.vehicleType.canSoldiersPilot())
-                .min(Comparator.comparingDouble(v -> v.distanceToSqr(npc))).ifPresent(v -> npc.setAssignedVehicle(v));
+        // the siege works (rework phase 12: tower, mantlet) are taken only when no weapon is free within reach
+        vehicles.stream().filter(v -> hasCrewSeat(v) && v.vehicleType.canSoldiersPilot())
+                .min(Comparator.<VehicleBase>comparingInt(v -> v.vehicleType.isPushed() ? 1 : 0).thenComparingDouble(v -> v.distanceToSqr(npc)))
+                .ifPresent(v -> npc.setAssignedVehicle(v));
+    }
+
+    /** A free driver seat, or on the siege works a free pusher seat. */
+    private static boolean hasCrewSeat(VehicleBase vehicle) {
+        return vehicle.hasFreeSeat(SeatRole.DRIVER) || (vehicle.vehicleType.isPushed() && vehicle.hasFreeSeat(SeatRole.PUSHER));
     }
 }

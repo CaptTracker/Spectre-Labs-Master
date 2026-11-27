@@ -31,6 +31,7 @@ public final class AwVehicleEntity {
     private static void registerCapabilities(RegisterCapabilitiesEvent event) {
         event.registerEntity(Capabilities.ItemHandler.ENTITY, AwVehicles.VEHICLE.get(), (vehicle, context) -> vehicle.inventory.storageInventory);
         event.registerEntity(Capabilities.ItemHandler.ENTITY, AwVehicles.SHIP.get(), (vehicle, context) -> vehicle.inventory.storageInventory);
+        event.registerEntity(Capabilities.ItemHandler.ENTITY, AwVehicles.SIEGE_TOWER.get(), (vehicle, context) -> vehicle.inventory.storageInventory);
         event.registerEntity(Capabilities.ItemHandler.ENTITY_AUTOMATION, AwVehicles.SHIP.get(), (vehicle, side) -> vehicle.inventory.storageInventory);
         event.registerEntity(Capabilities.ItemHandler.ENTITY_AUTOMATION, AwVehicles.VEHICLE.get(), (vehicle, side) -> vehicle.inventory.storageInventory);
     }

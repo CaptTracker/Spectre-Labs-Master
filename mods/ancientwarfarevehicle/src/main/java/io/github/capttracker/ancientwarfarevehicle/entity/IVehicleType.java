@@ -11,6 +11,7 @@ import io.github.capttracker.ancientwarfarevehicle.missiles.IAmmo;
 import io.github.capttracker.ancientwarfarevehicle.upgrades.IVehicleUpgradeType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
@@ -236,5 +237,52 @@ public interface IVehicleType {
     /** True for the ships: they are spawned as the ship entity type and move with {@code ShipHelper}. */
     default boolean isShip() {
         return getShipSpec() != null;
+    }
+
+    // ---- siege works (rework phase 12) ----
+
+    /** True for the siege towers and the mantlet: ground vehicles that riders push from behind (see {@link SeatRole#PUSHER}); with nobody pushing they do not move. */
+    default boolean isPushed() {
+        return false;
+    }
+
+    /** How many pushers (the driver counts as one) move a pushed vehicle at its full speed; every pusher adds an equal share of it. */
+    default int getPushersForFullSpeed() {
+        return 1;
+    }
+
+    /** The height of the top platform of a siege tower over the ground, in blocks; 0 for every other vehicle. */
+    default float getSiegeTopHeight() {
+        return 0.f;
+    }
+
+    /** True for the siege towers: they are spawned as the siege tower entity type (it carries the part entities of the drop bridge) and have a ladder and a bridge. */
+    default boolean isSiegeTower() {
+        return getSiegeTopHeight() > 0.f;
+    }
+
+    /** True if projectiles that fly into the front of the vehicle are stopped by it (the mantlet); they are tested against its shield, not against its box. */
+    default boolean blocksProjectiles() {
+        return false;
+    }
+
+    /** The highest step the vehicle climbs in blocks (vehicles climb 1.12; a siege tower climbs none). */
+    default float getMaxUpStep() {
+        return 1.12f;
+    }
+
+    /** The fraction of its walking speed a horse hitched to the vehicle is held to (a siege tower is slow). */
+    default float getTowSpeedScale() {
+        return 1.f;
+    }
+
+    /** How far the box of the vehicle counts as bigger when the player aims at it (the mantlet is wider than its box). */
+    default float getPickRadius() {
+        return 0.f;
+    }
+
+    /** What the vehicle makes of damage before armor: the siege tower takes little from arrows and a lot from fire. */
+    default float modifyIncomingDamage(VehicleBase vehicle, DamageSource source, float amount) {
+        return amount;
     }
 }

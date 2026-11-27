@@ -482,6 +482,7 @@ New staffed worksites. Each one turns inputs from storage into outputs, with cou
 - **Siege tower.** A wheeled vehicle that NPCs or horses push to a wall. Troops climb inside and step onto the wall top over a drop bridge.
 - **Mantlet.** Mobile cover for archers.
 - **NPC siege AI.** Soldiers ordered to attack a walled target use towers.
+- **Status.** The siege tower (medium and large) and the mantlet are built for players and for NPC pushers, with an engineer who pushes one to its target in a straight line (see `mods/ancientwarfarevehicle/port-notes/REWORK-PHASE12.md`). The NPC siege AI is built too: an attack order of the baton at a wall gives soldiers and archers roles on the towers, mantlets and rams of their owner, with ground pathing for the pushed vehicles (see the NPC siege AI section of the same notes). Faction war parties do not use it (there are none yet).
 
 ## Open questions for the owner (second round)
 - **Q5.** How long is an in-game year for children growing up? Default proposal: 96 days, so adulthood takes 192 days, about 64 hours of real play. Shorter alternatives: 1 year = 30 days (60 days in total) or 1 year = 8 days (16 days in total). **Answered (2026-11-25): 96 days (Serene Seasons' default year), so adulthood takes 192 days. Built in phase 10 as the config values `year_length_days` = 96 and `years_to_adulthood` = 2.**

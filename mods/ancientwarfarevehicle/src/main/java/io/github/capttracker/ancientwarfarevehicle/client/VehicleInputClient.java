@@ -69,6 +69,8 @@ public final class VehicleInputClient {
     public static final KeyMapping TURRET_RIGHT = key(AWVehicleStatics.KEY_VEHICLE_TURRET_RIGHT, InputConstants.KEY_X);
     public static final KeyMapping MOUSE_AIM = key(AWVehicleStatics.KEY_VEHICLE_MOUSE_AIM, InputConstants.KEY_C);
     public static final KeyMapping AMMO_SELECT = key(AWVehicleStatics.KEY_VEHICLE_AMMO_SELECT, InputConstants.KEY_V);
+    /** Rework phase 12: lowers and raises the drop bridge of a siege tower (the driver, the ladder and the platform riders). */
+    public static final KeyMapping BRIDGE = key(AWVehicleStatics.KEY_VEHICLE_BRIDGE, InputConstants.KEY_B);
 
     /** Furthest point the mouse aim looks at, in blocks. */
     private static final float MAX_RANGE = 140;
@@ -84,6 +86,8 @@ public final class VehicleInputClient {
     @Nullable
     private static VehicleInputData lastSent = null;
     private static int ticksSinceSent = 0;
+    /** The climb direction last sent for the ladder of a siege tower: -1, 0 or 1. */
+    private static int lastClimb = 0;
 
     @Nullable
     private static AmmoSelectionOpener ammoSelectionOpener;
@@ -98,6 +102,7 @@ public final class VehicleInputClient {
         InputHandler.registerCallBack(AMMO_NEXT, new VehicleCallback(v -> v.ammoHelper.setNextAmmo()));
         InputHandler.registerCallBack(AMMO_PREV, new VehicleCallback(v -> v.ammoHelper.setPreviousAmmo()));
         InputHandler.registerCallBack(AMMO_SELECT, new VehicleCallback(VehicleInputClient::handleAmmoSelectAction));
+        InputHandler.registerCallBack(BRIDGE, VehicleInputClient::handleBridgeKey);
     }
 
     private VehicleInputClient() {}
@@ -132,6 +137,7 @@ public final class VehicleInputClient {
         event.register(TURRET_RIGHT);
         event.register(MOUSE_AIM);
         event.register(AMMO_SELECT);
+        event.register(BRIDGE);
     }
 
     private static void toggleSteerMode() {
@@ -148,6 +154,31 @@ public final class VehicleInputClient {
     /** True if the mouse steers this vehicle: the mode is on and the vehicle has no turret that the mouse aims (A/D turn the hull of those). */
     private static boolean isMouseSteering(VehicleBase vehicle) {
         return AWVehicleStatics.clientSettings.mouseSteer && vehicle.isDrivable() && !vehicle.canAimRotate() && vehicle.currentForwardSpeedMax > 0;
+    }
+
+    /** The bridge key: asks the siege tower the player rides to lower or raise its bridge (the server decides, see {@code SiegeCommand}). */
+    private static void handleBridgeKey() {
+        LocalPlayer player = Minecraft.getInstance().player;
+        if (player != null && VehicleKeyConflictContext.INSTANCE.isActive() && player.getVehicle() instanceof VehicleBase vehicle && vehicle.siege != null) {
+            VehicleNetwork.sendToServer(new VehicleEntityPayloads.SiegeCommand(vehicle.getId(), VehicleEntityPayloads.SiegeCommand.BRIDGE));
+        }
+    }
+
+    /** A rider on the ladder of a siege tower climbs with the forward and reverse keys; the direction is sent when it changes. */
+    private static void handleClimbInput(LocalPlayer player, VehicleBase vehicle) {
+        int seat = vehicle.seatOf(player);
+        int direction = 0;
+        if (vehicle.siege != null && seat >= 0 && seat < vehicle.getSeatCount() && vehicle.getSeat(seat).role() == SeatRole.LADDER) {
+            direction = VehicleInputData.axis(FORWARD.isDown(), REVERSE.isDown());
+        }
+        if (direction != lastClimb) {
+            lastClimb = direction;
+            if (vehicle.siege != null) {
+                byte action = direction > 0 ? VehicleEntityPayloads.SiegeCommand.CLIMB_UP
+                        : direction < 0 ? VehicleEntityPayloads.SiegeCommand.CLIMB_DOWN : VehicleEntityPayloads.SiegeCommand.CLIMB_STOP;
+                VehicleNetwork.sendToServer(new VehicleEntityPayloads.SiegeCommand(vehicle.getId(), action));
+            }
+        }
     }
 
     private static void handleAmmoSelectAction(VehicleBase vehicle) {
@@ -177,6 +208,9 @@ public final class VehicleInputClient {
             // a ship's weapons are its turret mounts, fired from the gunner seats
             ShipGunnerClient.fire(player, vehicle);
             return;
+        }
+        if (vehicle.vehicleType.isPushed()) {
+            return; // the siege works have no weapon
         }
         String configName = vehicle.vehicleType.getConfigName();
         if (!vehicle.isAmmoLoaded() && !(configName.equals("battering_ram") || configName.equals("boat_transport") || configName.equals("chest_cart"))) {
@@ -240,12 +274,14 @@ public final class VehicleInputClient {
 
     private static void handleTickInput(LocalPlayer player, VehicleBase vehicle) {
         if (vehicle.getControllingPassenger() != player) {
-            // a gunner or passenger: no movement input (the weapon keys act through their callbacks)
+            // a gunner or passenger: no movement input (the weapon keys act through their callbacks); on a ladder the movement keys climb
             throttle = 0.0F;
             keySteer = 0.0F;
             lastSent = null;
+            handleClimbInput(player, vehicle);
             return;
         }
+        lastClimb = 0;
         byte forwardKeys = VehicleInputData.axis(FORWARD.isDown(), REVERSE.isDown());
         byte turnKeys = VehicleInputData.axis(RIGHT.isDown(), LEFT.isDown());
         throttle = ramp(throttle, forwardKeys);
@@ -327,6 +363,7 @@ public final class VehicleInputClient {
                 throttle = 0.0F;
                 keySteer = 0.0F;
                 lastSent = null;
+                lastClimb = 0;
             }
         }
     }

@@ -762,12 +762,12 @@ public final class ShipHelper {
     }
 
     /** Resets the floating counter of the server's movement check, which a player on a deck over water would otherwise run into. */
-    private static final class FlyCheck {
+    public static final class FlyCheck {
         @Nullable
         private static Field field;
         private static boolean failed = false;
 
-        static void reset(ServerPlayer player) {
+        public static void reset(ServerPlayer player) {
             if (failed || player.connection == null) {
                 return;
             }

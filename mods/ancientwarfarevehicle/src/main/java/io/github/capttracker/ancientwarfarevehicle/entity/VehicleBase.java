@@ -13,6 +13,8 @@ import io.github.capttracker.ancientwarfarevehicle.AncientWarfareVehicles;
 import io.github.capttracker.ancientwarfarevehicle.armors.IVehicleArmor;
 import io.github.capttracker.ancientwarfarevehicle.entity.hitch.CartHitch;
 import io.github.capttracker.ancientwarfarevehicle.entity.ship.ShipHelper;
+import io.github.capttracker.ancientwarfarevehicle.entity.siege.MantletShield;
+import io.github.capttracker.ancientwarfarevehicle.entity.siege.SiegeHelper;
 import io.github.capttracker.ancientwarfarevehicle.entity.ship.ShipSpec;
 import io.github.capttracker.ancientwarfarevehicle.entity.materials.IVehicleMaterial;
 import io.github.capttracker.ancientwarfarevehicle.entity.types.VehicleType;
@@ -104,6 +106,11 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
 
     /** A ship's stance (rework phase 11): true if its owner wants its NPC crew to ram, grapple and board hostile ships (the toggle of the ship's screen). */
     private static final EntityDataAccessor<Boolean> AGGRESSIVE_DATA = SynchedEntityData.defineId(VehicleBase.class, EntityDataSerializers.BOOLEAN);
+
+    /** A siege tower's drop bridge: true if its wish is lowered (rework phase 12); the lowering itself is {@link SiegeHelper}'s progress on each side. */
+    private static final EntityDataAccessor<Boolean> BRIDGE_DOWN_DATA = SynchedEntityData.defineId(VehicleBase.class, EntityDataSerializers.BOOLEAN);
+    /** The height of the rider of each seat of a siege tower over the foot of its ladder, "0.00,3.50" (rework phase 12). */
+    private static final EntityDataAccessor<String> LIFT_DATA = SynchedEntityData.defineId(VehicleBase.class, EntityDataSerializers.STRING);
 
     /** The damage type of the battering ram (a datapack entry: {@code data/ancientwarfarevehicle/damage_type/battering.json}). */
     public static final ResourceKey<DamageType> BATTERING_DAMAGE = ResourceKey.create(Registries.DAMAGE_TYPE, Ids.of(AncientWarfareVehicles.MOD_ID, "battering"));
@@ -200,6 +207,12 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
     /** The ship machinery (hull parts, deck, sails, turrets), non null for an entity of the ship entity type (rework phase 4). */
     @Nullable
     public final ShipHelper ship;
+    /** The siege tower machinery (drop bridge parts, ladder), non null for an entity of the siege tower entity type (rework phase 12). */
+    @Nullable
+    public final SiegeHelper siege;
+    /** SERVER: the seat and ladder lift of the rider that is leaving, read by {@link #getDismountLocationForPassenger} right after {@link #removePassenger} cleared the seat. */
+    private int leavingSeat = -1;
+    private float leavingLift = 0.F;
     /** CLIENT: the ids of the hitched horses, from {@link #HITCH_DATA}. */
     private int[] hitchedIds = new int[0];
     /** Damage that a player's blows have done to a cart, as with a boat: it breaks above 40 (a blow is its damage times 10) and heals 1 a tick. */
@@ -226,6 +239,10 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
             // the parts take the ids after the ship's, so no other entity may get them (what the ender dragon does, MC-158205)
             setId(ENTITY_COUNTER.getAndAdd(ShipSpec.MAX_PARTS + 1) + 1);
         }
+        this.siege = entityType == AwVehicles.SIEGE_TOWER.get() ? new SiegeHelper(this) : null;
+        if (this.siege != null) {
+            setId(ENTITY_COUNTER.getAndAdd(SiegeHelper.MAX_PARTS + 1) + 1);
+        }
     }
 
     /** A new vehicle of the default type; give it its type with {@link #setVehicleType}. */
@@ -235,7 +252,7 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
 
     /** A new vehicle of the entity type that suits the vehicle type: the ship type for a ship, the ordinary one for the rest. */
     public static VehicleBase create(Level level, IVehicleType type) {
-        return new VehicleBase(type.isShip() ? AwVehicles.SHIP.get() : AwVehicles.VEHICLE.get(), level);
+        return new VehicleBase(type.isShip() ? AwVehicles.SHIP.get() : type.isSiegeTower() ? AwVehicles.SIEGE_TOWER.get() : AwVehicles.VEHICLE.get(), level);
     }
 
     /** True for a ship whose design is known. */
@@ -252,11 +269,14 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
 
     @Override
     public boolean isMultipartEntity() {
-        return ship != null;
+        return ship != null || siege != null;
     }
 
     @Override
     public net.neoforged.neoforge.entity.PartEntity<?>[] getParts() {
+        if (siege != null) {
+            return siege.getParts();
+        }
         return ship != null ? ship.getParts() : super.getParts();
     }
 
@@ -266,6 +286,9 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
         if (ship != null) {
             ship.assignPartIds(id);
         }
+        if (siege != null) {
+            siege.assignPartIds(id);
+        }
     }
 
     @Override
@@ -273,6 +296,9 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
         super.setPos(x, y, z);
         if (ship != null) {
             ship.updateParts();
+        }
+        if (siege != null) {
+            siege.updateParts();
         }
     }
 
@@ -282,6 +308,10 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
         if (ship != null && ship.spec() != null) {
             double radius = Math.max(ship.spec().length(), ship.spec().width()) / 2.0D + 2.0D;
             return new AABB(getX() - radius, getY() - 1.0D, getZ() - radius, getX() + radius, getY() + ship.spec().deckTop() + 8.0D, getZ() + radius);
+        }
+        if (siege != null) {
+            // the model rises over the box (the parapet) and the bridge reaches out in front of it
+            return new AABB(getX() - 5.0D, getY() - 1.0D, getZ() - 5.0D, getX() + 5.0D, getY() + vehicleType.getSiegeTopHeight() + 4.0D, getZ() + 5.0D);
         }
         return super.getBoundingBoxForCulling();
     }
@@ -297,6 +327,50 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
         builder.define(SEAT_DATA, "");
         builder.define(HITCH_DATA, "");
         builder.define(AGGRESSIVE_DATA, false);
+        builder.define(BRIDGE_DOWN_DATA, false);
+        builder.define(LIFT_DATA, "");
+    }
+
+    /** True if the drop bridge of this siege tower is wanted down (it may still be on its way). */
+    public boolean isBridgeDown() {
+        return entityData.get(BRIDGE_DOWN_DATA);
+    }
+
+    public void setBridgeDown(boolean down) {
+        entityData.set(BRIDGE_DOWN_DATA, down);
+    }
+
+    /** SERVER: {@link SiegeHelper} publishes the heights of the riders on the ladder. */
+    public void setLiftData(String data) {
+        entityData.set(LIFT_DATA, data);
+    }
+
+    /** True while the vehicle must stand still: a siege tower with its bridge down (or a rider standing on its roof). */
+    public boolean isMovementLocked() {
+        return siege != null && siege.isLocked();
+    }
+
+    /** How many riders push: those in the seats of a role that pushes (the driver and the pushers), as far as they are here. */
+    public int getPushCount() {
+        int count = 0;
+        for (int i = 0; i < getSeatCount() && i < seatOccupants.length; i++) {
+            if (getSeat(i).role().pushes() && occupantAt(i) != null) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    /**
+     * The share of its top speed that a pushed vehicle (siege tower, mantlet) gets from its pushers: each adds an equal part, all of them {@code getPushersForFullSpeed()} give the full
+     * speed (times the config {@code siege_push_speed_scale}); nobody pushing means none. 0 for a vehicle that is not pushed.
+     */
+    public float getPushFactor() {
+        if (!vehicleType.isPushed()) {
+            return 0.F;
+        }
+        float share = Math.min(1.F, getPushCount() / (float) Math.max(1, vehicleType.getPushersForFullSpeed()));
+        return share * (float) VehicleSettings.siegePushSpeedScale;
     }
 
     /** True if the owner of this ship set the aggressive stance: its NPC helmsman rams, its crew throws grappling hooks and boards (rework phase 11). */
@@ -316,6 +390,9 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
         }
         if (HITCH_DATA.equals(key) && level().isClientSide) {
             hitchedIds = parseSeats(entityData.get(HITCH_DATA));
+        }
+        if (LIFT_DATA.equals(key) && level().isClientSide && siege != null) {
+            siege.readLiftData(entityData.get(LIFT_DATA));
         }
     }
 
@@ -371,10 +448,22 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
         return EntityDimensions.scalable(type.getWidth(), type.getHeight()).withEyeHeight(EYE_HEIGHT);
     }
 
-    /** Vehicles climb one block (1.12.2: {@code stepHeight = 1.12f}). */
+    /** Vehicles climb one block (1.12.2: {@code stepHeight = 1.12f}); a siege tower climbs none, a mantlet only a carpet or a slab. */
     @Override
     public float maxUpStep() {
-        return 1.12f;
+        return vehicleType == null ? 1.12f : vehicleType.getMaxUpStep();
+    }
+
+    /** The mantlet is wider than its box: the aim counts it as 3 blocks. */
+    @Override
+    public float getPickRadius() {
+        return vehicleType == null ? 0.F : vehicleType.getPickRadius();
+    }
+
+    /** The shield of a mantlet is not its box: projectiles are stopped by {@link MantletShield}, which tests the front of the shield only, so shots from behind and beside pass. */
+    @Override
+    public boolean canBeHitByProjectile() {
+        return !(vehicleType != null && vehicleType.blocksProjectiles() && VehicleSettings.mantletBlocksProjectiles) && super.canBeHitByProjectile();
     }
 
     @Nullable
@@ -422,6 +511,12 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
             this.seatOccupants = parseSeats(entityData.get(SEAT_DATA));
         } else {
             publishSeats();
+        }
+        if (siege != null) {
+            siege.onTypeSet();
+            if (level().isClientSide) {
+                siege.readLiftData(entityData.get(LIFT_DATA));
+            }
         }
         for (IAmmo ammo : vehicleType.getValidAmmoTypes()) {
             this.ammoHelper.addUseableAmmo(ammo);
@@ -790,14 +885,26 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
         return false;
     }
 
-    /** The roles an entity takes, in order: the wanted one first. NPC crew only take the seats that work the weapon, anyone else any seat. */
-    private static SeatRole[] roleOrder(Entity entity, @Nullable SeatRole wanted, boolean strict) {
+    /**
+     * The roles an entity takes, in order: the wanted one first. NPC crew only take the seats that work the weapon (and, on the siege works, the pushing seats), anyone else any seat; the
+     * siege works have their own seat roles: a player boards the driver seat, then the ladder, the pushers and the platform.
+     */
+    private SeatRole[] roleOrder(Entity entity, @Nullable SeatRole wanted, boolean strict) {
         if (strict && wanted != null) {
             return new SeatRole[] {wanted};
         }
-        SeatRole[] order = entity instanceof IVehicleCrew
-                ? new SeatRole[] {SeatRole.DRIVER, SeatRole.GUNNER}
-                : new SeatRole[] {SeatRole.DRIVER, SeatRole.GUNNER, SeatRole.PASSENGER, SeatRole.ROWER};
+        SeatRole[] order;
+        if (vehicleType.isPushed()) {
+            order = entity instanceof IVehicleCrew
+                    ? new SeatRole[] {SeatRole.DRIVER, SeatRole.PUSHER}
+                    : vehicleType.isSiegeTower()
+                            ? new SeatRole[] {SeatRole.DRIVER, SeatRole.LADDER, SeatRole.PUSHER, SeatRole.PLATFORM}
+                            : new SeatRole[] {SeatRole.DRIVER, SeatRole.PUSHER};
+        } else {
+            order = entity instanceof IVehicleCrew
+                    ? new SeatRole[] {SeatRole.DRIVER, SeatRole.GUNNER}
+                    : new SeatRole[] {SeatRole.DRIVER, SeatRole.GUNNER, SeatRole.PASSENGER, SeatRole.ROWER};
+        }
         if (wanted == null) {
             return order;
         }
@@ -895,12 +1002,15 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
                 return false;
             }
         }
-        if (rider instanceof IVehicleCrew && !getSeat(seat).role().operatesWeapon()) {
+        if (rider instanceof IVehicleCrew && !getSeat(seat).role().operatesWeapon() && !getSeat(seat).role().isSiegeRole()) {
             return false;
         }
         seatOccupants[current] = -1;
         seatOccupants[seat] = rider.getId();
         publishSeats();
+        if (siege != null) {
+            siege.onSeatSwitched(current, seat);
+        }
         return true;
     }
 
@@ -956,6 +1066,12 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
         if (ship != null) {
             ship.postTick();
         }
+        if (siege != null) {
+            siege.tick();
+        }
+        if (vehicleType.blocksProjectiles()) {
+            MantletShield.tick(this);
+        }
         this.firingHelper.onTick();
         this.firingVarsHelper.onTick();
         if (this.hitAnimationTicks > 0) {
@@ -996,6 +1112,10 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
             int seatIndex = seatOf(passenger);
             VehicleSeat seat = getSeat(seatIndex >= 0 && seatIndex < getSeatCount() ? seatIndex : 0);
             return ship.toWorld(seat.forward(), seat.horizontal(), ship.spec().deckTop() + 0.05F);
+        }
+        if (siege != null) {
+            // out of a platform seat onto the bridge, else down the ladder to the ground behind the tower (the seat is already free: removePassenger noted it)
+            return siege.dismountLocation(leavingSeat, leavingLift);
         }
         int xMin = Mth.floor(this.getX() - this.getBbWidth() / 2);
         int zMin = Mth.floor(this.getZ() - this.getBbWidth() / 2);
@@ -1066,8 +1186,15 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
     protected void removePassenger(Entity passenger) {
         super.removePassenger(passenger);
         if (!level().isClientSide) {
+            leavingSeat = -1;
+            leavingLift = 0.F;
             for (int i = 0; i < seatOccupants.length; i++) {
                 if (seatOccupants[i] == passenger.getId()) {
+                    leavingSeat = i;
+                    if (siege != null) {
+                        leavingLift = siege.lift(i);
+                        siege.onRiderLeft(i);
+                    }
                     seatOccupants[i] = -1;
                     publishSeats();
                 }
@@ -1169,7 +1296,7 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
         }
         markHurt();
         level().broadcastDamageEvent(this, damageSource);
-        float adjDmg = upgradeHelper.getScaledDamage(damageSource, amount);
+        float adjDmg = upgradeHelper.getScaledDamage(damageSource, vehicleType.modifyIncomingDamage(this, damageSource, amount));
         this.setHealth(getHealth() - adjDmg);
         if (ship != null) {
             ship.noteHurt(damageSource.getEntity());
@@ -1238,7 +1365,7 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
         float forward = seat.forward();
         float horizontal = seat.horizontal();
         double posX = this.getX();
-        double posY = this.getY() + seat.vertical();
+        double posY = this.getY() + seat.vertical() + (siege != null && seat.role() == SeatRole.LADDER ? siege.lift(seatIndex) : 0.F);
         double posZ = this.getZ();
 
         float yaw = this.vehicleType.moveRiderWithTurret() && seat.role().operatesWeapon() ? localTurretRotation : getYRot();
@@ -1246,7 +1373,8 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
         posX += Trig.sinDegrees(yaw + 90) * horizontal;
         posZ += Trig.cosDegrees(yaw) * -forward;
         posZ += Trig.cosDegrees(yaw + 90) * horizontal;
-        double yOffset = passenger instanceof Player ? -0.35D : 0.D;
+        // the riders of the siege works stand: the seat height is where their feet are
+        double yOffset = passenger instanceof Player && !vehicleType.isPushed() ? -0.35D : 0.D;
         callback.accept(passenger, posX, posY + yOffset, posZ);
         if (passenger instanceof IVehicleCrew) {
             float crewVehicleYaw = localTurretRotation;
@@ -1442,6 +1570,7 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
             this.setupTicks = tag.getInt("sTick");
         }
         this.hitch.load(tag.getList("hitch", Tag.TAG_COMPOUND));
+        this.setBridgeDown(tag.getBoolean("bridgeDown"));
         // the riders attach after the vehicle has loaded: remember who sat where and give the seats back as they arrive
         this.pendingSeats.clear();
         for (Tag entry : tag.getList("seats", Tag.TAG_COMPOUND)) {
@@ -1505,6 +1634,9 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
         tag.putBoolean("setup", this.isSettingUp);
         if (this.isSettingUp) {
             tag.putInt("sTick", this.setupTicks);
+        }
+        if (siege != null && isBridgeDown()) {
+            tag.putBoolean("bridgeDown", true);
         }
         if (ship != null) {
             ship.save(tag);
@@ -1601,7 +1733,7 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
         }
         markHurt();
         level().broadcastDamageEvent(this, source);
-        this.setHealth(getHealth() - upgradeHelper.getScaledDamage(source, amount));
+        this.setHealth(getHealth() - upgradeHelper.getScaledDamage(source, vehicleType.modifyIncomingDamage(this, source, amount)));
         if (ship != null) {
             ship.noteHurt(source.getEntity());
         }

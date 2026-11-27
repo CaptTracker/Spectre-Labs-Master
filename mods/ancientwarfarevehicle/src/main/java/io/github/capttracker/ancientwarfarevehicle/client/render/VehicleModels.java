@@ -23,6 +23,8 @@ import io.github.capttracker.ancientwarfarevehicle.client.model.ModelCart;
 import io.github.capttracker.ancientwarfarevehicle.client.model.ModelChestCart;
 import io.github.capttracker.ancientwarfarevehicle.client.model.ModelCog;
 import io.github.capttracker.ancientwarfarevehicle.client.model.ModelFishingBoat;
+import io.github.capttracker.ancientwarfarevehicle.client.model.ModelMantlet;
+import io.github.capttracker.ancientwarfarevehicle.client.model.ModelSiegeTower;
 import io.github.capttracker.ancientwarfarevehicle.client.model.ModelWarGalley;
 import io.github.capttracker.ancientwarfarevehicle.entity.ship.ShipHardpoint;
 import io.github.capttracker.ancientwarfarevehicle.wind.Wind;
@@ -76,6 +78,9 @@ public final class VehicleModels {
         ModelFishingBoat fishingBoat = new ModelFishingBoat(context.bakeLayer(ModelFishingBoat.LAYER));
         ModelCog cog = new ModelCog(context.bakeLayer(ModelCog.LAYER));
         ModelWarGalley warGalley = new ModelWarGalley(context.bakeLayer(ModelWarGalley.LAYER));
+        ModelSiegeTower siegeTower = new ModelSiegeTower(context.bakeLayer(ModelSiegeTower.MEDIUM_LAYER), 2);
+        ModelSiegeTower siegeTowerLarge = new ModelSiegeTower(context.bakeLayer(ModelSiegeTower.LARGE_LAYER), 3);
+        ModelMantlet mantlet = new ModelMantlet(context.bakeLayer(ModelMantlet.LAYER));
 
         // RenderCatapultStandFixed
         delegates[VehicleTypeIds.CATAPULT_STAND_FIXED] = (veh, yaw, tick, ps, vc, light, overlay, color) -> {
@@ -271,6 +276,22 @@ public final class VehicleModels {
                 poseHardpoint(veh, i, tick, warGalley::setHardpoint);
             }
             warGalley.renderToBuffer(ps, vc, light, overlay, color);
+        };
+
+        // the siege works (rework phase 12): the wheels turn with the speed, the bridge of a tower swings with its lowering progress
+        delegates[VehicleTypeIds.SIEGE_TOWER] = (veh, yaw, tick, ps, vc, light, overlay, color) -> {
+            siegeTower.setWheelRotation(wheelAngle(veh, tick));
+            siegeTower.setBridge(veh.siege != null ? veh.siege.bridgeProgress(tick) : 0.f);
+            siegeTower.renderToBuffer(ps, vc, light, overlay, color);
+        };
+        delegates[VehicleTypeIds.SIEGE_TOWER_LARGE] = (veh, yaw, tick, ps, vc, light, overlay, color) -> {
+            siegeTowerLarge.setWheelRotation(wheelAngle(veh, tick));
+            siegeTowerLarge.setBridge(veh.siege != null ? veh.siege.bridgeProgress(tick) : 0.f);
+            siegeTowerLarge.renderToBuffer(ps, vc, light, overlay, color);
+        };
+        delegates[VehicleTypeIds.MANTLET] = (veh, yaw, tick, ps, vc, light, overlay, color) -> {
+            mantlet.setWheelRotation(wheelAngle(veh, tick));
+            mantlet.renderToBuffer(ps, vc, light, overlay, color);
         };
         return delegates;
     }
