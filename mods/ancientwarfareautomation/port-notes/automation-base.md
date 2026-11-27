@@ -62,7 +62,7 @@ Assets and data (scripts `analysis/port/automation_assets.py`, `automation_compo
 ## Class contract with the other slices
 
 `AwAutomationBase` references these classes. Torque ones exist (taken as written); the others are what the next slices must
-write (or tell the orchestrator their names, only `AwAutomationBase` changes then).
+write (or list their names, only `AwAutomationBase` changes then).
 
 | Class | Package (under `...ancientwarfareautomation`) | Required shape |
 |---|---|---|

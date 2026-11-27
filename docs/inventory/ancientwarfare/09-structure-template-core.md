@@ -43,7 +43,7 @@ This slice defines no blocks, items, tile entities, entities, GUIs, packets, com
 | `StructurePluginRegistrationEvent` | `StructurePluginManager.loadPlugins` (line 59ff) | posted on the Forge event bus so other mods can call `register.registerPlugin(StructureContentPlugin)` | Becomes a NeoForge mod-bus or game-bus event (`Event` subclass). Low effort. |
 | `BiomeEvent.GetVillageBlockID` (Forge TERRAIN_GEN_BUS) | `StructureBuilder.getBiomeSpecificBlockState` | posted per block placed when `blockSwap` is on; handlers can DENY and supply a replacement | No such event in 1.21.1. Replace with an own event or a data-driven swap table. |
 
-### What is in the default pack (measured with a script, `analysis/agents/structure-template-core/stats.py`)
+### What is in the default pack (measured with a script, `analysis/scratch/structure-template-core/stats.py`)
 
 | Metric | Value |
 |---|---|

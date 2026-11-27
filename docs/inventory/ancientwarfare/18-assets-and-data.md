@@ -396,7 +396,7 @@ Left for hand work: the custom research recipe type, OBJ and animated block rend
 
 ## Verification
 
-Checked by a second analyst (scratch scripts in `D:/Spectre Labs Master/analysis/agents/assets-data-verify/`).
+Checked by a second analyst (scratch scripts in `D:/Spectre Labs Master/analysis/scratch/assets-data-verify/`).
 
 Checked and confirmed:
 - Non-template file count 5,861 and per-extension counts (png 4,311, json 865, ogg 587, jpg 49, obj 11, m2f 14, lang 8, mcmeta 12, meta 1, cfg 2).

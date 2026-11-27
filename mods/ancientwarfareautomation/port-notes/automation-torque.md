@@ -82,7 +82,7 @@ Small deliberate changes (all local, each also commented in the code):
   `epsilonEquals`/lerp animation arithmetic, the integer division in the flywheel storage client lerp, the unfixed
   `clientEnergy` keys of the hand crank.
 
-## Wiring needed in shared files (the base slice / orchestrator)
+## Wiring needed in shared files (the base slice)
 
 1. **Registry class** (the base slice's init class, e.g. `init/AwAutomationTorque`), with the names below. Use qualified static
    references inside the lambdas (`AwAutomationTorque.X_BE.get()`) to avoid illegal forward references.

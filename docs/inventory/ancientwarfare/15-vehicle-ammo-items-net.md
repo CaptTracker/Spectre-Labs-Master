@@ -362,7 +362,7 @@ Should stay inside Ancient Warfare:
 
 ## Verification
 
-Checked by a second pass that did not use this report's text as its source. Scripts (if any) would be under `D:/Spectre Labs Master/analysis/agents/vehicle-ammo-items-net-verify/`; the checks were run as grep and JSON parse commands.
+Checked by a second pass that did not use this report's text as its source. Scripts (if any) would be under `D:/Spectre Labs Master/analysis/scratch/vehicle-ammo-items-net-verify/`; the checks were run as grep and JSON parse commands.
 
 What was checked and confirmed:
 

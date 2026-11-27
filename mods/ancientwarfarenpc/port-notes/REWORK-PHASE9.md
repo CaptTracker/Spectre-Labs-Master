@@ -1,6 +1,6 @@
 # Rework phase 9, part 1: building design foundation
 
-Not play-tested. `./gradlew build` passes. Only the foundation is here: the design format, the loader, player blueprints, the scanner item and the ghost helper. No planner, builder NPC or zone tool yet. Built-in design content is written by another agent; one tiny example tent proves the loader.
+Not play-tested. `./gradlew build` passes. Only the foundation is here: the design format, the loader, player blueprints, the scanner item and the ghost helper. No planner, builder NPC or zone tool yet. Built-in design content is a separate part; one tiny example tent proves the loader.
 
 ## What changed
 - **Design format and class** (`settlement/building/BuildingDesign`): immutable, parsed from JSON with strict validation. Placing works in all four directions (`blocks(origin, facing)`, `worksitePos`, `entranceOutside`, `rotatedSize`, `materialCounts`).
@@ -44,7 +44,7 @@ Not play-tested. `./gradlew build` passes. Only the foundation is here: the desi
 - `worksite` (optional): `block` is the registered block id of the worksite block, `pos` is `[x, y, z]` in the authored frame, inside the box. The cell at `pos` should hold that block (a warning if not).
 - `tags` (optional list of strings, lowercased). Used by the planner. Conventions: `housing_capacity` (counts for housing), `upgrade_of=<design id>` (replaces that design when the settlement grows; read with `design.tagValue("upgrade_of")`). Free form otherwise.
 - `min_level`, `min_population` (optional ints, default 0): minimum settlement level and population for the planner to pick it. Nothing reads them yet.
-- Rotation: the design is turned clockwise (seen from above) until `front` looks the requested way; block states are turned with `BlockState.rotate`. The placed box origin is its lowest north-west corner. Doors, beds and other multi-part blocks must list every part as its own cell (the builder places cells one by one; the builder agent must place both halves in the right order).
+- Rotation: the design is turned clockwise (seen from above) until `front` looks the requested way; block states are turned with `BlockState.rotate`. The placed box origin is its lowest north-west corner. Doors, beds and other multi-part blocks must list every part as its own cell (the builder places cells one by one; the builder must place both halves in the right order).
 - Writing by hand or by script: copy `src/main/resources/data/ancientwarfarenpc/settlement_designs/tent_example.json`; check the server log for `Settlement design ... skipped` lines after `/reload`.
 
 ## Files
@@ -188,7 +188,7 @@ Reviewed the whole phase 9 diff (designs, planner, builders) for item loss or du
 - A scanned blueprint also copies blocks of other players' builds when the scanner player can reach them (as noted in the deviations above).
 - Not play-tested in a world: planner, Building tab, scanner screen, the builder walk, scaffolding, fetch and deposit, and take-down.
 
-## Take-down refund fix (orchestrator, after the final check)
+## Take-down refund fix (after the final check)
 
 - `BuildProject` now saves a `paid` bit set: a step is marked paid only when its block was placed with materials taken from storage. A cell that already held the wanted block (skipped for free) is not paid.
 - Taking a building down (`REMOVE` steps of a demolition) refunds the design item only for paid cells (the free half of a door or bed counts with its paid half). Unpaid cells break like mined terrain and give their normal drops. This closes the free-item gap noted in the final check.

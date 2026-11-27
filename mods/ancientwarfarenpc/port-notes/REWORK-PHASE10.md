@@ -1,6 +1,6 @@
 # Rework phase 10, part 1: family foundations
 
-Not play-tested. `./gradlew build` passes. This part is names, the family registry, couples, homes, morale and the API. Children (births, growing up, school, play) are another agent's part and use the API below.
+Not play-tested. `./gradlew build` passes. This part is names, the family registry, couples, homes, morale and the API. Children (births, growing up, school, play) are a separate part and use the API below.
 
 ## What changed
 - **Surnames.** Every player-owned NPC has a surname (`NpcBase.getSurname/setSurname`, saved as `surname` in the entity data and in the spawner item data, so it survives repacking and resurrection). Existing NPCs roll one at their first tick (`ensureSurname`, right after the first name). The pools are a new `"surnames": [...]` list in each `npc_names` file (default 72, desert 28, eastern 25, nahua 24, norse 26, outlaw 23, roman_greek 28, savage 23). An owned NPC uses the pool of the culture its first name belongs to (a name that is in a culture file, such as Hrolf or Selim, takes that culture's surnames), else the general pool; a faction NPC with a pool of its own would use it (`NpcNames.pickSurname(random, faction, givenName)`). Faction NPCs get no surname.
@@ -19,10 +19,10 @@ Not play-tested. `./gradlew build` passes. This part is names, the family regist
 - **Thoughts** (3 phrasings each): `partnered`, `found_home`, `partner_died`, `child_died`, `partner_back`.
 - **Schedule.** `NpcAIScheduleGoal` picks the same gathering point for both partners of a couple.
 
-## API for the children agent (`settlement/family/FamilyApi`, server side)
+## API for the children part (`settlement/family/FamilyApi`, server side)
 - `getHousehold(npc | settlement, uuid)`: `Optional<Household>` (`getAdults()`, `getChildren()` = the children that are not grown up, `getHomeBeds()`, `getHomeBuilding()`, `getSurname()`, `getLastBirth()`, `isCouple()`, `hasHome()`).
 - `getPartner(...)`: `Optional<UUID>`. `getChildren(...)`: every registered child (grown up or not). `getParents(...)`: the parents of a child. `isMinor(settlement, uuid)`.
-- `registerChild(parentA, parentB, childUuid)` (two loaded parents) or `registerChild(settlement, parentA, parentB, childUuid, gameTime)`: puts the child in the household (the parents must be adults of one household; `parentB` may be null), records the parents and the birth time. The child NPC joins the settlement as usual. The registry makes the child take the household surname (`Settlement.syncSurname` forces it, so the child agent may leave the surname empty), and gives it a home bed when there is one. False if the parents are not a household.
+- `registerChild(parentA, parentB, childUuid)` (two loaded parents) or `registerChild(settlement, parentA, parentB, childUuid, gameTime)`: puts the child in the household (the parents must be adults of one household; `parentB` may be null), records the parents and the birth time. The child NPC joins the settlement as usual. The registry makes the child take the household surname (`Settlement.syncSurname` forces it, so the children code may leave the surname empty), and gives it a home bed when there is one. False if the parents are not a household.
 - `markGrownUp(settlement, childUuid)`: the child leaves the children of its household and is an adult (it may become a partner; the parents stay on record).
 - `homeOf(settlement, household)`: `Optional<Home>` (building id or null, beds, centre).
 - `canHaveChild(level, settlement, household)` / `canHaveChild(npc)` and `childBlocker(...)` (the reason key): a couple with a home; neither grieving; both of morale at least `child_min_morale`; fewer than `max_children_per_household` children; `birth_cooldown_days` since the last birth; a free bed in the home or room for one more; food in storage for `child_min_food_days` days per member.
@@ -34,7 +34,7 @@ Not play-tested. `./gradlew build` passes. This part is names, the family regist
 
 ## Config keys (`ancientwarfarenpc-settlements.toml`, section `families`)
 `families_enabled` (true), `year_length_days` (96), `years_to_adulthood` (2.0), `couple_min_population` (4), `couple_min_morale` (60), `couple_bond_seconds` (240), `couple_chance_per_day` (0.3), `couple_social_radius` (8), `couple_sociable_bonus` (0.5), `couple_loner_factor` (0.5), `partners_share_surname` (true), `widow_repartner_days` (6), `grief_days` (3), `grief_morale` (25), `partner_morale` (3), `partner_nearby_morale` (2), `partner_nearby_radius` (10), `family_home_morale` (3), `children_near_morale` (2), `children_near_radius` (12), `child_min_morale` (55), `child_min_food_days` (3.0), `max_children_per_household` (3), `birth_cooldown_days` (8).
-`year_length_days` and `years_to_adulthood` are the owner's decision (192 days to adulthood by default); `SettlementConfig.adulthoodTicks()` gives the ticks. The children agent must not define them a second time.
+`year_length_days` and `years_to_adulthood` are the owner's decision (192 days to adulthood by default); `SettlementConfig.adulthoodTicks()` gives the ticks. The children part must not define them a second time.
 
 ## Deviations
 - Homes and couples only work while the daily schedule is on (`schedule_enabled`): the bed upkeep that claims homes lives in `SettlementLife.tick`, which does nothing without it.

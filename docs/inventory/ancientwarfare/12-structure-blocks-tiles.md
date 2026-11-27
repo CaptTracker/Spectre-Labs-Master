@@ -300,7 +300,7 @@ Looks generic but should stay inside Ancient Warfare: the sound block (tied to s
 
 ## Verification
 
-Checked by a second pass (scratch helper: `D:/Spectre Labs Master/analysis/agents/structure-blocks-tiles-verify/loot_count.py`).
+Checked by a second pass (scratch helper: `D:/Spectre Labs Master/analysis/scratch/structure-blocks-tiles-verify/loot_count.py`).
 
 Re-derived by route other than the report:
 - Block registrations: `AWStructureBlocks.register` (lines 241-340) has 49 `registry.register(new Block...)` calls. Item registrations in `registerItemBlocks` (159-214) have 49. Both match. The 49 block names in the table match the registration list one-to-one (including the 6 totem cubes and 4 coin stacks).

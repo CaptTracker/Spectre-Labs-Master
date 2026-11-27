@@ -70,7 +70,7 @@ Rework phase 3 (living worksites, spec in `docs/REWORK-ROADMAP.md`) is built in 
 - Bugs in the original listed in LEGACY-INVENTORY.md (worksite efficiency upgrades, battering-ram break chance, animal farm drops, inverted worksite permission check).
 - NPC: Epic Siege compat target goal class name is unverified for 1.21 (needs the 1.21 Epic Siege jar); it warns and disables itself if not found. Faction NPCs no longer target tamed pets and mounts (done, untested in a world).
 - Engineering bench: storage matching is by exact item until the research recipe port lands.
-- Known gaps the build agents left as `TODO(port)` or listed in BUILD.md: NPC command baton has no client key handler yet, so baton commands can't be sent; NPC spawner research recipes still use `custom_data`; JEI compat is only partly ported (see below).
+- Known gaps the build left as `TODO(port)` or listed in BUILD.md: NPC command baton has no client key handler yet, so baton commands can't be sent; NPC spawner research recipes still use `custom_data`; JEI compat is only partly ported (see below).
 - JEI (core): the engineering bench recipes show as a JEI category with the bench stations as catalysts (optional dependency, `compat/jei`). Not ported: the recipe transfer handler (the original's `PacketTransferRecipe`), and a JEI category for other modules' recipes. Not run with JEI installed yet.
 - Done in the core pass: the manual pictures were reduced to 256 colours (core jar 23 MB to 8 MB; `analysis/port/core_shrink_manual_images.py`), and the research bench queue picker now works for other players' books.
 

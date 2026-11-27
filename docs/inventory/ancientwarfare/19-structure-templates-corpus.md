@@ -975,7 +975,7 @@ Port relevance: the credits are attribution obligations owed for third-party bui
 
 ## How the numbers were produced
 
-Scripts, all in `D:/Spectre Labs Master/analysis/agents/templates-corpus/` (run with `python -I`):
+Scripts, all in `D:/Spectre Labs Master/analysis/scratch/templates-corpus/` (run with `python -I`):
 
 - `parse.py`: walks the template folder, reads each file as ISO-8859-1, mirrors `TemplateParser` (header, validation, rule, entity and layer blocks; layer row syntax `NxA|r,B|r`), counts cells per rule number from the layer data, writes `data.json`.
 - `snbt.py`: a small parser for the 1.12 SNBT-like `JSON:{...}` payload (compounds, lists, typed arrays, quoted strings, numeric suffixes).
@@ -1007,7 +1007,7 @@ Method limits: "Templates" columns count a template once per key regardless of h
 
 ## Verification
 
-Checked by a second pass (scripts in `D:/Spectre Labs Master/analysis/agents/templates-corpus-verify/`, run with `python -I`).
+Checked by a second pass (scripts in `D:/Spectre Labs Master/analysis/scratch/templates-corpus-verify/`, run with `python -I`).
 
 Reproduced exactly: 1,495 files (1,484 `.aws`, 10 `.awt`, 1 `.docx`); 143,737,928 bytes; versions (691/690/84/2/17); validation types (ground 1290, island 158, water 36); worldGen/survival matrix (938/90/1/455); 29 files without a `survival` key; 17 files without `mods=` (all version 2.6); 1,286 empty and 181 non-empty `mods=` lists; the `mods=` table (grimoireofgaia 40 ... waystones 1); 594,694,396 total cells; 148,161,611 non-air cells (layer ranges such as `layer: 0-3` count once per layer in the range); 147,067 block rules; 7,479 entity rules (the two truncated files add a partial block, 7,481 if counted); 602 templates with entity rules; 450 block names (226 vanilla, 55 AW, 169 other from 26 namespaces); 1,790 block-state combinations (1,156 vanilla); 70 tile-entity ids in 1,254 templates, with per-id template counts matching the table; 124 mobIDs and 6 gate types; 1,054 templates with `ancientwarfarenpc` spawner entities; 287 biome ids; 73 territory names; 30 `unique`, 195 `preserveBlocks`, 45 `blockSwap=true`, malformed `magical` and `oceanfalse`; 455 templates over 48 blocks and 178 over 100; the folder table (74 two-level folders, counts match); the plugin rule counts (23 plugin names: 18 block, 5 entity); the largest volumes (27,137,880 down to 11,023,480); the 2 truncated files; the 2 name collisions; 5 header names that differ from the file name; no rule with `number=0` (the analyst's claim holds).
 

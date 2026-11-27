@@ -334,7 +334,7 @@ Looks generic but should stay inside Ancient Warfare: the tier/sprite maps (`Tor
 7. Render order and translucency of flywheel windows, and `canRenderInLayer` of altar cloth and sun blocks (`BlockAltarLongCloth`, `BlockAltarShortCloth`, `BlockAltarSun`): the intended layers are in code, but I did not check which JSON models rely on translucent textures.
 8. The `RenderGateHelper`/`render/gate` classes and `ModelGate*` are outside this slice; their port (entity-in-tile rendering for gates) must be planned together with vehicles, which reference `EntityGate` and `TEGateProxy`.
 9. Items in `models/item/*` (102 JSON files: 100 with `textures`, 16 with `overrides`) belong to the item slices and were not analysed here, apart from `models/item/structure/statue.json`.
-10. A helper script exists at `D:/Spectre Labs Master/analysis/agents/render-blocks/bs.py` (blockstate classification); the "jar_stats.json" copy seen in the scratchpad was not used.
+10. A helper script exists at `D:/Spectre Labs Master/analysis/scratch/render-blocks/bs.py` (blockstate classification); the "jar_stats.json" copy seen in the scratchpad was not used.
 
 ## Verification
 

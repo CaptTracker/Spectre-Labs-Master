@@ -282,7 +282,7 @@ Namespace scan of `RES/registry/` and `RES/loot_tables/` for JSON only. `.aws` s
 
 ## What this means for the port
 
-Dependencies to add to the 1.21.1 build (ModDevGradle, per mod `build.gradle` for the modules that need them, shared via `build-logic` conventions if more than one module uses them, as `CLAUDE.md` requires):
+Dependencies to add to the 1.21.1 build (ModDevGradle, per mod `build.gradle` for the modules that need them, shared via `build-logic` conventions if more than one module uses them, as the repo conventions require):
 
 | Dependency | Coordinates | Used by | Required or optional |
 |---|---|---|---|
@@ -321,7 +321,7 @@ Do not move any of this into `capttrackerlib`. Third-party libraries are not sha
 
 ## Verification
 
-Verification run 2026-11-15 by a second analyst. Scratch area: `analysis/agents/deps-modern-verify/` (no scripts were needed; all checks were one-shot curl calls).
+Verification run 2026-11-15 by a second analyst. Scratch area: `analysis/scratch/deps-modern-verify/` (no scripts were needed; all checks were one-shot curl calls).
 
 Checked and confirmed:
 - Maven `https://maven.covers1624.net/io/codechicken/CodeChickenLib/maven-metadata.xml`: 1.21.1 builds end at `1.21.1-4.6.1.529`. Confirmed. Note the same metadata also lists `1.21.11-*` builds for a different Minecraft version, which are not relevant here.

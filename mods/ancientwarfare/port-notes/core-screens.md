@@ -24,7 +24,7 @@ Ported from `core/gui/GuiResearchBook`, `GuiBackpack`, `GuiInfoTool`, `core/gui/
 3. `menu/AwMenu.java`: the refresh listener from `core-gui-toolkit.md` (wiring item 1): `setRefreshListener(Runnable)` public final and `refreshGui()` protected final. `GuiContainerBase`, `ResearchStationMenu` and `GuiResearchStationSelection` call them.
 4. `item/ResearchBookItem.java` (`use`): replace `listResearch(serverPlayer, researcher)` with `ResearchBookMenu.open(serverPlayer);` (the chat listing was a stand-in). Import `menu.ResearchBookMenu`.
 5. `lang/en_us.json`: merge `core-screens.lang.json` (21 `guistrings.*` keys, most already present; `research.*` goal names, already present for 31 of them; the two `item.ancientwarfare.*` keys are only named in menu titles and already exist).
-6. Config screen: nothing to add; `CoreScreensClient.onClientSetup` registers `IConfigScreenFactory` with `ConfigurationScreen::new` (the one line the task mentioned) for the spec from `AWCoreStatics.register(modBus, container)`. If the orchestrator prefers it in the mod constructor, use `container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new)` inside a client-only guard instead and delete it from `CoreScreensClient`.
+6. Config screen: nothing to add; `CoreScreensClient.onClientSetup` registers `IConfigScreenFactory` with `ConfigurationScreen::new` (the one line the spec mentioned) for the spec from `AWCoreStatics.register(modBus, container)`. If it is preferred in the mod constructor, use `container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new)` inside a client-only guard instead and delete it from `CoreScreensClient`.
 
 ## Behaviour and decisions
 

@@ -122,7 +122,7 @@ This is what the GPL text says; it is not legal advice.
 
 ## Verification
 
-Checked by a second analyst against SRC, RES, UP and REPO (read-only; scripts in `D:/Spectre Labs Master/analysis/agents/license-verify/`).
+Checked by a second analyst against SRC, RES, UP and REPO (read-only; scripts in `D:/Spectre Labs Master/analysis/scratch/license-verify/`).
 
 Checked and confirmed: 1,377 `.java` files; 74 with the GPL header (70 "2012", 2 "2012-2013", 2 GotoLink); no Apache, MIT, LGPL or CC named in Java; no COPYING file in UP; all 74 headers say "any later version"; the quoted AWAutomationStatics header matches exactly; the two Olivier Sylvain files; 704 png in the five texture folders; 3,606 skin png; 1,484 `.aws`; 862 json in `assets/ancientwarfare`; 8 `.lang`; 202 and 21 structure and vehicle ogg; 6 bard files and their names; mcmod.info authors and empty credits; README license text and the "All Rights Reserved by default" line; `mod_license` at gradle.properties line 20; `mod_authors=CaptTracker`; no LICENSE file at the repo root; `mods/` empty; no license string in capttrackerlib gradle files; UP git history 2014-02-11 to 2021-08-21; shortlog counts for shadowmage45 (1,710), GotoLink (322), CosmicDan (119+1), WinDanesz (88+71+1), ThatPolishKid99 (29+5+3); the quoted "added a big bunch of sfx files, assigned sounds for all entities"; the quoted "Added the optimized and registered sound files from auto_load"; the quoted credits sentence "freely granted permission to use, in perpetuity, for the Ancient Warfare 2 Mod by Shadowmage and Pepperfly"; the 22 skin credit names; bard source track counts (20, 13, 12, 20, 9) and commit dates 2014-11-14 to 11-18.
 
