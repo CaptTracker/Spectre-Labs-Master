@@ -137,14 +137,34 @@ Your settlement can now plan and build its own houses and workshops. (This is a 
 - **Jade and WTHIT support (optional):** look at an NPC to see its role, owner or faction, mood, current task and health. Look at a worksite (farm, quarry, tree farm, fishing, apiary, smelter, dock, market stall, inn, stable) to see workers out of slots, its status (working, idle, waiting for workers, tools or ladders, storage full, needs a bed and a table) and the settlement it belongs to. Each tooltip can be switched off in the Jade or WTHIT config screen.
 
 ## Known issues
-- Not yet play-tested in a running game: couples, homes, births, children, growing up and the family morale factors (compiled and read only).
-- Not yet play-tested in a running game: NPC skills, ranks and traits (the effects, the Skills tab and the rank in names).
-- Not yet play-tested in a running game: the settlement planner, the Building tab, the Blueprint Scanner and builders (scaffolding, fetching from storage and taking down a building were compiled and checked by reading only).
-- Not yet play-tested in a running game: NPC helmsmen, swimming out to a ship, and the cog's oars.
-- Not yet play-tested in a running game: siege towers, the drop bridge, mantlets and the NPC siege crews (compiled and read only; model and seat positions are estimates).
-- Siege towers: the bridge always lowers at the platform height, so a wall top at another height needs a short drop or jump. NPC crews plan routes over open ground only and do not open gates. Faction war parties do not use siege engines yet.
-- A helmsman only looks ahead over the water. A bay or an island between the ship and the destination is steered round as far as it can see, and it gives up if it makes no headway.
-- A helmsman needs water at least 2 blocks deep at the spot you click. Faction NPCs can't take the helm, and they only crew a ship whose helm is held by an ally.
+**Not play-tested yet.** Everything below the port itself was built, checked by reading and loaded on a dedicated server, but has not been played in a world: the census and tooltips, skills and traits, production and settlement needs, the planner and builders, families, NPC ship crews and helmsmen, sea trade and naval combat, and siege towers. Expect rough edges, and please report what you find.
+
+**Settlements and production**
+- Soldiers don't put on new weapons or armour by themselves. Gear the smithy makes for them is delivered to the storage nearest to them.
+- A recipe switched off is still made when the settlement needs it. Set `demand_enables_recipes = false` for a hard off.
+- Nothing makes copper gear, netherite upgrades, saddles or bundles.
+- Families only work while the daily schedule is on (`schedule_enabled`). A house you built by hand counts as loose beds, not a family house. There are no schools.
+
+**Building**
+- The farmhouse's garden is decoration, not a working crop farm. A shortage of farmers, miners or lumberjacks doesn't plan a building.
+- A chapel you build yourself isn't recognised as a chapel.
+- Blueprints can't be deleted or renamed in game yet.
+- Without a builder in the settlement, queued builds wait and nothing tells you why.
+
+**Ships**
+- A helmsman only looks ahead over the water; an island or bay in the way is steered round only as far as it can see, and it gives up if it makes no headway. The spot you click needs water at least 2 blocks deep.
+- Faction NPCs can't take the helm, and they only crew a ship whose helm is held by an ally.
+- Grappling lines don't survive a reload. NPCs cross between grappled decks with a short leap. Gunners and archers don't board.
+- Sea routes and trade ships only run near a player (in loaded chunks), and legs longer than 256 blocks aren't planned.
+
+**Sieges**
+- The drop bridge always lowers at the platform height, so a lower wall top needs a short drop or jump. After a siege the bridge stays down.
+- NPC siege crews plan routes over open ground only and don't open gates. Siege jobs don't survive a reload (NPCs plan again from where the equipment stands).
+- Anything standing on a tower's roof holds it still. A mantlet's shield can poke through the edge of a wall.
+- Faction NPCs don't use siege engines yet (there are no faction raids).
+
+**Art**
+- New blocks and items reuse vanilla or existing textures (sawmill, bakery, smithy, tannery, grappling hook, crates, scanner, siege engines). Census problem icons are coloured letters.
 
 ## Credits
 Original Ancient Warfare 2 by shadowmage45, P3pp3rF1y and contributors. 1.21.1 port and rework by CaptTracker. Licensed GPL-3.0-or-later.
