@@ -153,6 +153,12 @@ public final class NpcRouteAssist {
         return request(BlockPos.containing(x, y, z), 1.0D, false, false);
     }
 
+    /** Forgets that the last goal had no route (the world changed: a builder put up scaffolding), so the next request plans again. */
+    public void forgetFailure() {
+        failedKey = 0L;
+        failedUntil = Integer.MIN_VALUE;
+    }
+
     private void fail(long key) {
         failedKey = key;
         failedUntil = npc.tickCount + FAIL_CACHE_TICKS;

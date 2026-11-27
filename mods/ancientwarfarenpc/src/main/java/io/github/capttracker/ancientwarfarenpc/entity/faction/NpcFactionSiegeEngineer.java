@@ -16,6 +16,7 @@ import io.github.capttracker.ancientwarfarenpc.ai.vehicle.NpcAIAimVehicle;
 import io.github.capttracker.ancientwarfarenpc.ai.vehicle.NpcAIFindVehicle;
 import io.github.capttracker.ancientwarfarenpc.ai.vehicle.NpcAIFireVehicle;
 import io.github.capttracker.ancientwarfarenpc.ai.vehicle.NpcAIMountVehicle;
+import io.github.capttracker.ancientwarfarenpc.ai.vehicle.NpcAISiegeAdvance;
 import io.github.capttracker.ancientwarfarenpc.entity.vehicle.EntityTarget;
 import io.github.capttracker.ancientwarfarenpc.entity.vehicle.ITarget;
 import io.github.capttracker.ancientwarfarenpc.entity.vehicle.IVehicleUser;
@@ -53,6 +54,7 @@ public class NpcFactionSiegeEngineer extends NpcFaction implements IVehicleUser 
         goalSelector.addGoal(4, new NpcAIMountVehicle<>(this));
         goalSelector.addGoal(5, new NpcAIAimVehicle<>(this));
         goalSelector.addGoal(6, new NpcAIFireVehicle<>(this));
+        goalSelector.addGoal(7, new NpcAISiegeAdvance<>(this));
         //post-100 -- used by delayed shared tasks (look at random stuff, wander)
         goalSelector.addGoal(101, new LookAtPlayerGoal(this, Player.class, 3.0F, 1.0F));
         goalSelector.addGoal(102, new NpcAIWander(this));

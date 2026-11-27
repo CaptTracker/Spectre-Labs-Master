@@ -59,6 +59,12 @@ public class NpcFactionArcher extends NpcFaction implements RangedAttackMob {
         return true;
     }
 
+    /** Soldiers of a faction crew the ships of allied players (see NpcAIShipFactionCrew). */
+    @Override
+    protected boolean canCrewShips() {
+        return true;
+    }
+
     @Override
     public boolean worksInRain() {
         return true;

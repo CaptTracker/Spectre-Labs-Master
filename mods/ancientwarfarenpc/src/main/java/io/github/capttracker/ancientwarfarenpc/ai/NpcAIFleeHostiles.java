@@ -79,6 +79,10 @@ public class NpcAIFleeHostiles extends NpcAI<NpcPlayerOwned> {
         if (!super.canUse()) {
             return false;
         }
+        if (!npc.isChild() && npc.hasTrait(io.github.capttracker.ancientwarfarenpc.trait.Trait.BRAVE)) { // a brave child still runs
+            stayOutOfSightTimer = 0; // a brave NPC does not run
+            return false;
+        }
         if (stayOutOfSightTimer > 0) {
             return true;
         }
@@ -113,8 +117,9 @@ public class NpcAIFleeHostiles extends NpcAI<NpcPlayerOwned> {
     private void findNearbyRelevantEntities() {
         npc.nearbyHostiles.clear();
         nearbySoldiers.clear();
+        double range = DISTANCE_FROM_ENTITY * io.github.capttracker.ancientwarfarenpc.trait.TraitEffects.fleeRangeFactor(npc); // a coward runs earlier
         List<Mob> nearbyHostilesOrFriendlySoldiers = npc.level().getEntitiesOfClass(Mob.class,
-                npc.getBoundingBox().inflate(DISTANCE_FROM_ENTITY, 3.0D, DISTANCE_FROM_ENTITY), hostileOrFriendlyCombatNpcSelector);
+                npc.getBoundingBox().inflate(range, 3.0D, range), hostileOrFriendlyCombatNpcSelector);
         if (nearbyHostilesOrFriendlySoldiers.isEmpty()) {
             return;
         }

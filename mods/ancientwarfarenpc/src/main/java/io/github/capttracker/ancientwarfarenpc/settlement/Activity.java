@@ -33,9 +33,14 @@ public enum Activity {
 
     /** The activity in a level: always work when the schedule is off or the dimension has no day cycle. */
     public static Activity of(Level level) {
+        return of(level, 0);
+    }
+
+    /** The same for an NPC whose clock is {@code shift} ticks ahead (an early riser) or behind (a night owl, negative). */
+    public static Activity of(Level level, int shift) {
         if (!SettlementConfig.scheduleEnabled || level.dimensionType().hasFixedTime()) {
             return WORK;
         }
-        return at(level.getDayTime());
+        return at(level.getDayTime() + shift);
     }
 }

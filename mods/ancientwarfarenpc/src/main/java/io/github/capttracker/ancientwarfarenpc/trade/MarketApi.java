@@ -189,6 +189,7 @@ public final class MarketApi {
         IItemHandler inventory = new PlayerMainInvWrapper(buyer.getInventory());
         TradeResult result = stall.sell(offerIndex, deals, priceMultiplier(relation), inventory);
         if (result == TradeResult.OK) {
+            trader.gainSkillXp(io.github.capttracker.ancientwarfarenpc.skill.Skill.TRADING, SettlementConfig.skillXpTrade);
             seller.ifPresent(actor -> awardTradeReputation(level, buyer, actor));
         }
         return result;

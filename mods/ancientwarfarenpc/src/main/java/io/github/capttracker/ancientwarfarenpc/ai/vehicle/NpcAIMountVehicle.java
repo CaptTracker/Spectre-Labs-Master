@@ -20,7 +20,7 @@ public class NpcAIMountVehicle<T extends NpcBase & IVehicleUser> extends NpcAI<T
     @Override
     public boolean canUse() {
         return super.canUse() && !npc.isPassenger() && npc.canContinueRidingVehicle()
-                && !npc.getAssignedVehicle().map(vehicle -> !vehicle.hasFreeSeat(SeatRole.DRIVER, SeatRole.GUNNER)).orElse(false);
+                && !npc.getAssignedVehicle().map(vehicle -> !vehicle.hasFreeSeat(SeatRole.DRIVER, SeatRole.GUNNER, SeatRole.PUSHER)).orElse(false);
     }
 
     @Override

@@ -1,0 +1,25 @@
+{
+  "name": "Example Tent",
+  "category": "tent",
+  "style": "any",
+  "size": [3, 2, 3],
+  "front": "south",
+  "palette": {
+    "W": "minecraft:white_wool",
+    "B": "minecraft:red_bed[part=foot,facing=north]",
+    "H": "minecraft:red_bed[part=head,facing=north]"
+  },
+  "layers": [
+    [
+      "WHW",
+      "WBW",
+      "WWW"
+    ],
+    [
+      ".W.",
+      "W.W",
+      "..."
+    ]
+  ],
+  "tags": ["housing_capacity"]
+}

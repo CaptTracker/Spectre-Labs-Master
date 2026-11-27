@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    { "item": "ancientwarfarenpc:settlement_ledger" },
+    { "item": "minecraft:stick" },
+    { "item": "minecraft:string" }
+  ],
+  "result": {
+    "id": "ancientwarfarenpc:building_zone_tool",
+    "count": 1
+  }
+}

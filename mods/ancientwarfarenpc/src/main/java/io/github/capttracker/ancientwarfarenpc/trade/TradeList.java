@@ -51,10 +51,8 @@ public abstract class TradeList<T extends Trade> extends OrderingList<T> impleme
      *
      * @param storage where the paid items go and the output comes from; null for a list without stock
      */
-    public void performTrade(Player player, @Nullable IItemHandler storage, int index) {
-        if (index >= 0 && index < size()) {
-            get(index).performTrade(player, storage);
-        }
+    public boolean performTrade(Player player, @Nullable IItemHandler storage, int index) {
+        return index >= 0 && index < size() && get(index).performTrade(player, storage);
     }
 
     /**

@@ -58,24 +58,49 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 /**
- * Player-owned farmer, lumberjack, miner, researcher and craftsman. The subtype is the stored {@code role} (rework phase 2), synced to the clients;
+ * Player-owned farmer, lumberjack, miner, researcher, craftsman, smith, tanner and builder. The subtype is the stored {@code role} (rework phase 2), synced to the clients;
  * it starts from the spawner subtype, or from the tool the worker holds the first time it has none. A tool that matches the role gives full work
  * speed, no matching tool {@code noToolWorkFactor}; a worker without a matching tool fetches one from the storage of its settlement.
  */
 public class NpcWorker extends NpcPlayerOwned implements IWorker {
 
     /** The roles in the order of the Role button of the hall screen. */
-    public static final List<String> ROLES = List.of("farmer", "lumberjack", "miner", "researcher", "craftsman");
+    public static final List<String> ROLES = List.of("farmer", "lumberjack", "miner", "researcher", "craftsman", "smith", "tanner", "builder");
     private static final EntityDataAccessor<String> ROLE = SynchedEntityData.defineId(NpcWorker.class, EntityDataSerializers.STRING);
 
     /** The job the worker has claimed on the board of its settlement (see {@code JobBoard}); {@code null} without one. */
     @Nullable
     public BlockPos autoWorkTarget;
+    /** The build of the settlement (a {@code BuildProject} id) a builder has claimed on the job board; {@code null} without one. Not saved (the builder claims again). */
+    @Nullable
+    public java.util.UUID buildJobId;
+    /** The scaffolding blocks this builder placed and has not taken down yet (rework phase 9). Saved as {@code scaffolds}. */
+    public final java.util.List<BlockPos> scaffolds = new java.util.ArrayList<>();
     /** The slots of the carry pouch (rework phase 3). */
     public static final int POUCH_SIZE = 9;
+    /** The most slots the pouch can have: {@link #POUCH_SIZE} and the bonus of the strong trait (the handler always has this many, the usable number varies). */
+    public static final int POUCH_SIZE_MAX = POUCH_SIZE + 3;
 
     /** What the worker carries from staffed worksites (harvest drops) until it empties the pouch into the site's inventory. Saved as {@code pouch}. */
-    private final ItemStackHandler pouch = new ItemStackHandler(POUCH_SIZE);
+    private final ItemStackHandler pouch = new ItemStackHandler(POUCH_SIZE_MAX) {
+        /** Only the usable slots (9, a strong worker 12) take new items; an older save with 9 slots is padded when it loads. */
+        @Override
+        public boolean isItemValid(int slot, ItemStack stack) {
+            return slot < pouchSlots();
+        }
+
+        @Override
+        public void deserializeNBT(net.minecraft.core.HolderLookup.Provider provider, CompoundTag nbt) {
+            super.deserializeNBT(provider, nbt);
+            if (stacks.size() < POUCH_SIZE_MAX) {
+                net.minecraft.core.NonNullList<ItemStack> padded = net.minecraft.core.NonNullList.withSize(POUCH_SIZE_MAX, ItemStack.EMPTY);
+                for (int i = 0; i < stacks.size(); i++) {
+                    padded.set(i, stacks.get(i));
+                }
+                stacks = padded;
+            }
+        }
+    };
     /** The staffed worksite the pouch content came from, where it is taken to; {@code null} if the pouch is empty. Saved as {@code pouchSite}. */
     @Nullable
     public BlockPos pouchSite;
@@ -112,6 +137,192 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
         builder.define(ROLE, "");
+        builder.define(CHILD, false);
+    }
+
+    // ---- child state (rework phase 10) ----
+    //
+    // A child is a worker with the child state, not an entity type of its own: it must keep its UUID (the family records, the bed and the member record
+    // use it), its name, traits and skills when it grows up, and a second entity type would mean replacing the entity at that moment. The state changes
+    // the goals (see registerGoals), the size (the scale attribute), the food it eats and what it can be given (no orders, no role).
+
+    private static final EntityDataAccessor<Boolean> CHILD = SynchedEntityData.defineId(NpcWorker.class, EntityDataSerializers.BOOLEAN);
+
+    /** The age in ticks, counted up while the child lives (also in the time its chunk was not loaded; the debug multiplier of the config applies). Saved as {@code childAge}. */
+    private long childAge;
+    /** The game time of the last count of {@link #childAge}, -1 if it starts at the next tick (a child from its item form does not age as an item). Saved. */
+    private long childAgeAt = -1L;
+
+    @Override
+    public boolean isChild() {
+        return entityData.get(CHILD);
+    }
+
+    @Override
+    public long getChildAgeTicks() {
+        return childAge;
+    }
+
+    /** Server side: makes this worker a child of the given age (a newborn is 0): small, with the goals of a child. */
+    public void makeChild(long ageTicks) {
+        childAge = Math.max(0L, ageTicks);
+        childAgeAt = level().getGameTime();
+        entityData.set(CHILD, true);
+        releaseJob();
+        applyChildScale();
+        rebuildGoals();
+    }
+
+    /** Server side: adds to the age of a child (the admin command), and lets it grow up if it is old enough. */
+    public void addChildAge(long ticks) {
+        if (isChild() && !level().isClientSide) {
+            childAge = Math.max(0L, childAge + ticks);
+            childAgeAt = level().getGameTime();
+            checkGrowth();
+        }
+    }
+
+    /** The size of the child: {@code child_scale_start} at birth, 1 at the age of an adult. */
+    private double childScale() {
+        double start = Math.min(1.0D, Math.max(0.0625D, SettlementConfig.childScaleStart));
+        return start + (1.0D - start) * io.github.capttracker.ancientwarfarenpc.settlement.family.FamilyAge.progress(childAge);
+    }
+
+    private void applyChildScale() {
+        net.minecraft.world.entity.ai.attributes.AttributeInstance scale = getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.SCALE);
+        if (scale == null) {
+            return;
+        }
+        double wanted = isChild() ? childScale() : 1.0D;
+        if (Math.abs(scale.getBaseValue() - wanted) > 0.004D) {
+            scale.setBaseValue(wanted);
+            refreshDimensions();
+        }
+    }
+
+    /** Swaps the goals when the child state changes (the selectors only fill at construction). The ship crew goals of the base class stay. */
+    private void rebuildGoals() {
+        if (level().isClientSide) {
+            return;
+        }
+        goalSelector.removeAllGoals(goal -> !(goal instanceof io.github.capttracker.ancientwarfarenpc.ai.vehicle.NpcAIShipCrew)
+                && !(goal instanceof io.github.capttracker.ancientwarfarenpc.ai.vehicle.NpcAIShipHelm));
+        targetSelector.removeAllGoals(goal -> true);
+        getNavigation().stop();
+        registerGoals();
+    }
+
+    /** Every second on the server: counts the age and lets the child grow up when it is old enough. */
+    private void childTick() {
+        long now = level().getGameTime();
+        if (childAgeAt < 0L || now < childAgeAt) {
+            childAgeAt = now;
+            return;
+        }
+        long passed = now - childAgeAt;
+        childAgeAt = now;
+        childAge += Math.round(passed * Math.max(0.0D, SettlementConfig.familyDebugFastGrowth));
+        checkGrowth();
+    }
+
+    private void checkGrowth() {
+        if (childAge >= SettlementConfig.adulthoodTicks()) {
+            growUp();
+        } else {
+            applyChildScale();
+        }
+    }
+
+    /**
+     * Server side: the child comes of age. It keeps its name, traits, skills and bed, becomes a worker without a role (the job board and the owner give it
+     * one), and may become a partner. A thought for it and its parents and a message to the owner come from the family code.
+     */
+    public void growUp() {
+        if (!isChild() || level().isClientSide) {
+            return;
+        }
+        entityData.set(CHILD, false);
+        childAge = 0L;
+        childAgeAt = -1L;
+        applyChildScale();
+        rebuildGoals();
+        getSettlement().ifPresent(settlement -> {
+            if (level() instanceof ServerLevel serverLevel) {
+                io.github.capttracker.ancientwarfarenpc.settlement.family.FamilyChildren.onGrownUp(serverLevel, settlement, this);
+            }
+        });
+        refreshMemberRecord();
+        if (level() instanceof ServerLevel serverLevel) {
+            recomputeMorale(serverLevel);
+        }
+    }
+
+    /** A child eats less: a smaller food meter (see also the hunger factor in the traits code). */
+    @Override
+    public int getUpkeepAmount() {
+        int amount = super.getUpkeepAmount();
+        return isChild() ? Math.max(1, (int) Math.round(amount * SettlementConfig.childHungerFactor)) : amount;
+    }
+
+    /** A child cannot be given orders: batons do nothing, the screens open the talk screen. */
+    @Override
+    public void handlePlayerCommand(io.github.capttracker.ancientwarfarenpc.npccommand.NpcCommand.Command cmd) {
+        if (!isChild()) {
+            super.handlePlayerCommand(cmd);
+        }
+    }
+
+    @Override
+    public void openGUI(Player player) {
+        if (isChild()) {
+            openTalk(player);
+        } else {
+            super.openGUI(player);
+        }
+    }
+
+    @Override
+    protected boolean tryCommand(Player player) {
+        if (!isChild()) {
+            return super.tryCommand(player);
+        }
+        if (io.github.capttracker.ancientwarfarenpc.entity.NpcItemIds.isCommandBaton(player.getMainHandItem()) || NpcItemIds.isCommandBaton(player.getOffhandItem())) {
+            return false;
+        }
+        if (level().isClientSide) {
+            return true;
+        }
+        if (isHostileTowards(player)) {
+            return false;
+        }
+        openTalk(player);
+        return true;
+    }
+
+    private void writeChildTags(CompoundTag tag, boolean save) {
+        if (isChild()) {
+            tag.putBoolean("child", true);
+            tag.putLong("childAge", childAge);
+            if (save) {
+                tag.putLong("childAgeAt", childAgeAt);
+            }
+        }
+    }
+
+    /** Reads the child state; a save without it is a grown worker. */
+    private void readChildTags(CompoundTag tag, boolean save) {
+        boolean child = tag.getBoolean("child");
+        childAge = child ? Math.max(0L, tag.getLong("childAge")) : 0L;
+        childAgeAt = child && save && tag.contains("childAgeAt") ? tag.getLong("childAgeAt") : -1L;
+        if (child != isChild()) {
+            entityData.set(CHILD, child);
+            if (!level().isClientSide) {
+                applyChildScale();
+                rebuildGoals();
+            }
+        } else if (child) {
+            applyChildScale();
+        }
     }
 
     // ---- role ----
@@ -123,11 +334,12 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
 
     /** Sets the role (an unknown name clears it). A change drops the claim on the job board and the current work target. */
     public void setRole(String role) {
-        String value = ROLES.contains(role) ? role : "";
+        String value = ROLES.contains(role) && !isChild() ? role : ""; // a child has no role (rework phase 10)
         if (value.equals(getRole())) {
             return;
         }
         entityData.set(ROLE, value);
+        refreshSkillState();
         releaseJob();
         if (!level().isClientSide) {
             refreshMemberRecord();
@@ -147,6 +359,9 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
             case "miner" -> WorkType.MINING;
             case "researcher" -> WorkType.RESEARCH;
             case "craftsman" -> WorkType.CRAFTING;
+            case "smith" -> WorkType.SMITHING; // rework phase 8: works the smithy
+            case "tanner" -> WorkType.TANNING; // rework phase 8: works the tannery
+            case "builder" -> WorkType.BUILDING; // rework phase 9: builds what the settlement queued, see NpcAIBuilderWork
             default -> WorkType.NONE;
         };
     }
@@ -158,6 +373,7 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
     /** Gives up the claim on the job board and the work target (a role change, new orders). */
     public void releaseJob() {
         autoWorkTarget = null;
+        buildJobId = null;
         if (!level().isClientSide) {
             getSettlement().ifPresent(settlement -> settlement.getJobBoard().release(getUUID()));
         }
@@ -256,7 +472,15 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
     /** Whether a stack is a tool for the role (work type) of this worker. */
     public boolean isToolForRole(ItemStack stack) {
         WorkType type = getRoleWorkType();
-        return type != WorkType.NONE && workTypeOfTool(stack) == type;
+        if (type == WorkType.NONE || stack.isEmpty()) {
+            return false;
+        }
+        return switch (type) {
+            case SMITHING -> stack.getItem() instanceof HammerItem; // the smith holds a hammer
+            case BUILDING -> stack.getItem() instanceof HammerItem || WorkTool.PICKAXE.matches(stack) || WorkTool.AXE.matches(stack) || WorkTool.SHOVEL.matches(stack); // the builder holds a hammer, or any digging tool
+            case TANNING -> io.github.capttracker.ancientwarfarenpc.ai.owned.WorkTool.SHEARS.matches(stack); // the tanner cuts hides with shears
+            default -> workTypeOfTool(stack) == type;
+        };
     }
 
     @Override
@@ -274,7 +498,7 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
 
     @Override
     protected boolean isIdleWithoutJob() {
-        return getRoleWorkType() != WorkType.NONE && ordersStack.isEmpty() && autoWorkTarget == null && getSettlementId() != null
+        return getRoleWorkType() != WorkType.NONE && ordersStack.isEmpty() && autoWorkTarget == null && buildJobId == null && getSettlementId() != null
                 && getActivity() == Activity.WORK && getTarget() == null && !isAlarmed;
     }
 
@@ -282,6 +506,13 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
 
     /** The carry pouch as an item handler (the drop target of a staffed worksite's actions). */
     public ItemStackHandler getPouch() {
+        return pouch;
+    }
+
+    /** A worker eats from its pouch aboard a ship when the ship has no food (what it carries is its own inventory). */
+    @Override
+    @javax.annotation.Nullable
+    public net.neoforged.neoforge.items.IItemHandler getCarriedFood() {
         return pouch;
     }
 
@@ -294,10 +525,15 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
         return true;
     }
 
+    /** The slots of the pouch this worker can use: {@link #POUCH_SIZE}, and more for a strong worker. */
+    public int pouchSlots() {
+        return Math.min(POUCH_SIZE_MAX, POUCH_SIZE + io.github.capttracker.ancientwarfarenpc.trait.TraitEffects.pouchBonus(this));
+    }
+
     /** The number of empty slots in the pouch. */
     public int pouchFreeSlots() {
         int free = 0;
-        for (int slot = 0; slot < pouch.getSlots(); slot++) {
+        for (int slot = 0; slot < pouchSlots(); slot++) {
             if (pouch.getStackInSlot(slot).isEmpty()) {
                 free++;
             }
@@ -349,7 +585,10 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
     @Override
     public void tick() {
         super.tick();
-        if (!level().isClientSide && tickCount % 20 == 0 && getRole().isEmpty()) {
+        if (!level().isClientSide && isChild() && (tickCount + getId()) % 20 == 0) {
+            childTick();
+        }
+        if (!level().isClientSide && tickCount % 20 == 0 && getRole().isEmpty() && !isChild()) {
             roleFromTool();
         }
     }
@@ -369,13 +608,44 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
         }
     }
 
+    /** A child gets the goals of a child, a grown worker the goals of the work (rework phase 10: {@link #rebuildGoals} swaps them when the state changes). */
     @Override
     protected void registerGoals() {
+        if (isChild()) {
+            registerChildGoals();
+        } else {
+            registerAdultGoals();
+        }
+    }
+
+    /**
+     * The goals of a child (rework phase 10): it flees from hostiles and shelters in an alarm, eats from the storage, follows the daily schedule (sleeps in its
+     * bed, spends the evening at the gathering point, stays under a roof in the rain) and plays near home by day. It gets no work, fight, command or
+     * horse goals.
+     */
+    private void registerChildGoals() {
+        horseAI = null;
+        workAI = null;
+        workRandomAI = null;
+        goalSelector.addGoal(0, new FloatGoal(this));
+        goalSelector.addGoal(0, new NpcAIDoor(this, true));
+        goalSelector.addGoal(3, new NpcAIFleeHostiles(this));
+        goalSelector.addGoal(3, new NpcAIPlayerOwnedAlarmResponse(this));
+        goalSelector.addGoal(4, new NpcAIPlayerOwnedGetFood(this));
+        goalSelector.addGoal(5, new NpcAIScheduleGoal(this));
+        goalSelector.addGoal(7, new io.github.capttracker.ancientwarfarenpc.ai.owned.NpcAIChildPlay(this));
+        goalSelector.addGoal(101, new LookAtPlayerGoal(this, Player.class, 3.0F, 1.0F));
+        goalSelector.addGoal(102, new NpcAIWander(this));
+        goalSelector.addGoal(103, new LookAtPlayerGoal(this, Mob.class, 8.0F));
+    }
+
+    private void registerAdultGoals() {
         goalSelector.addGoal(0, new FloatGoal(this));
         goalSelector.addGoal(0, new NpcAIDoor(this, true));
         goalSelector.addGoal(0, (horseAI = new NpcAIPlayerOwnedRideHorse(this)));
         goalSelector.addGoal(2, new NpcAIFollowPlayer(this));
         goalSelector.addGoal(2, new NpcAIPlayerOwnedFollowCommand(this));
+        goalSelector.addGoal(2, new io.github.capttracker.ancientwarfarenpc.ai.owned.NpcAIBraveFight(this));
         goalSelector.addGoal(3, new NpcAIFleeHostiles(this));
         goalSelector.addGoal(3, new NpcAIPlayerOwnedAlarmResponse(this));
         goalSelector.addGoal(4, new NpcAIPlayerOwnedGetFood(this));
@@ -384,6 +654,7 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
         goalSelector.addGoal(5, new NpcAIScheduleGoal(this));
         goalSelector.addGoal(6, (workAI = new NpcAIPlayerOwnedWork(this)));
         goalSelector.addGoal(6, new NpcAIStaffedWork(this));
+        goalSelector.addGoal(6, new io.github.capttracker.ancientwarfarenpc.ai.owned.NpcAIBuilderWork(this)); // rework phase 9: the builder's work on the build queue
         goalSelector.addGoal(7, (workRandomAI = new NpcAIPlayerOwnedWorkRandom(this)));
         goalSelector.addGoal(8, new NpcAIMoveHome(this, 50F, 3F, 30F, 3F));
 
@@ -409,9 +680,33 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
         return "worker";
     }
 
+    /** A brave worker with a sword or an axe in its hand fights in an alarm instead of running to shelter. */
+    @Override
+    public boolean canFightAlarm() {
+        return !isChild() && hasTrait(io.github.capttracker.ancientwarfarenpc.trait.Trait.BRAVE) && io.github.capttracker.ancientwarfarenpc.trait.TraitEffects.isArmed(this);
+    }
+
     /** 1.12.2: 1 + 5% per level + 5% of the efficiency of the tool material; here the speed of the tier of the held tool. */
     @Override
     public float getWorkEffectiveness(WorkType type) {
+        float effectiveness = getBaseWorkEffectiveness(type);
+        io.github.capttracker.ancientwarfarenpc.skill.Skill skill = io.github.capttracker.ancientwarfarenpc.skill.Skill.ofWorkType(type);
+        if (effectiveness > 0.0F) {
+            double rankFactor = skill != null ? io.github.capttracker.ancientwarfarenpc.skill.SkillEffects.workSpeed(getSkillRank(skill)) : 1.0D; // the skill of the site's kind
+            effectiveness *= (float) io.github.capttracker.ancientwarfarenpc.skill.SkillEffects.clampSpeed(
+                    rankFactor * io.github.capttracker.ancientwarfarenpc.trait.TraitEffects.workSpeed(this, skill)); // with lazy, hardworking, night owl, keen eye
+        }
+        return effectiveness;
+    }
+
+    /** The rank of the crafting skill, for the bonus of a master smith at the smithy. */
+    @Override
+    public int getCraftingRank() {
+        return getSkillRank(io.github.capttracker.ancientwarfarenpc.skill.Skill.CRAFTING);
+    }
+
+    /** The effectiveness without the skill rank (the staffed work applies the rank of the skill of each task itself). */
+    public float getBaseWorkEffectiveness(WorkType type) {
         if (canWorkAt(type)) {
             float effectiveness = 1.f + this.getLevelingStats().getLevel() * 0.05F;
 
@@ -427,7 +722,7 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
 
     @Override
     public boolean isOnDuty() {
-        return !ordersStack.isEmpty() || autoWorkTarget != null;
+        return !ordersStack.isEmpty() || autoWorkTarget != null || buildJobId != null;
     }
 
     @Override
@@ -452,7 +747,7 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
 
     @Override
     public boolean isValidOrdersStack(ItemStack stack) {
-        return NpcItemIds.is(stack, NpcItemIds.WORK_ORDER);
+        return !isChild() && NpcItemIds.is(stack, NpcItemIds.WORK_ORDER);
     }
 
     /** 1.12.2: hoe is farming, then the tool classes axe, pickaxe, hammer and quill. */
@@ -489,12 +784,14 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
         if (tag.contains("role")) {
             entityData.set(ROLE, ROLES.contains(tag.getString("role")) ? tag.getString("role") : "");
         }
+        readChildTags(tag, false);
     }
 
     @Override
     public void writeAdditionalItemData(CompoundTag tag) {
         super.writeAdditionalItemData(tag);
         tag.putString("role", getRole());
+        writeChildTags(tag, false);
     }
 
     @Override
@@ -503,9 +800,14 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
         if (tag.contains("role")) {
             entityData.set(ROLE, ROLES.contains(tag.getString("role")) ? tag.getString("role") : "");
         }
+        readChildTags(tag, true);
         pouch.deserializeNBT(registryAccess(), tag.getCompound("pouch"));
         toolBelt.deserializeNBT(registryAccess(), tag.getCompound("toolBelt"));
         pouchSite = tag.contains("pouchSite") ? NbtUtils.readBlockPos(tag, "pouchSite").orElse(null) : null;
+        scaffolds.clear();
+        for (long packed : tag.getLongArray("scaffolds")) {
+            scaffolds.add(BlockPos.of(packed));
+        }
         if (tag.contains("workAI") && workAI != null) {
             workAI.readFromNBT(tag.getCompound("workAI"));
         }
@@ -518,10 +820,18 @@ public class NpcWorker extends NpcPlayerOwned implements IWorker {
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         tag.putString("role", getRole());
+        writeChildTags(tag, true);
         tag.put("pouch", pouch.serializeNBT(registryAccess()));
         tag.put("toolBelt", toolBelt.serializeNBT(registryAccess()));
         if (pouchSite != null) {
             tag.put("pouchSite", NbtUtils.writeBlockPos(pouchSite));
+        }
+        if (!scaffolds.isEmpty()) {
+            long[] packed = new long[scaffolds.size()];
+            for (int i = 0; i < packed.length; i++) {
+                packed[i] = scaffolds.get(i).asLong();
+            }
+            tag.putLongArray("scaffolds", packed);
         }
         if (workAI != null) {
             tag.put("workAI", workAI.writeToNBT(new CompoundTag()));

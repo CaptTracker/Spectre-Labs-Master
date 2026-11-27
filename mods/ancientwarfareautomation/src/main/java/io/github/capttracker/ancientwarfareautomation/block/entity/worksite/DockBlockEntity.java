@@ -5,6 +5,7 @@
 package io.github.capttracker.ancientwarfareautomation.block.entity.worksite;
 
 import io.github.capttracker.ancientwarfare.api.IBoatWorksite;
+import io.github.capttracker.ancientwarfare.api.ISeaDock;
 import io.github.capttracker.ancientwarfare.api.WorkAction;
 import io.github.capttracker.ancientwarfare.api.WorkTask;
 import io.github.capttracker.ancientwarfare.util.InventoryTools;
@@ -52,7 +53,7 @@ import java.util.UUID;
  * bobber (a bite, treasure only from open water, the worker's rod and luck, {@link FishingSupport}) and after {@code dock_trip_catches} fish sails home and unloads
  * the catch into this inventory.
  */
-public class DockBlockEntity extends InventoryWorksiteBlockEntity implements IBoatWorksite {
+public class DockBlockEntity extends InventoryWorksiteBlockEntity implements IBoatWorksite, ISeaDock {
     private static final int CAST_TICKS = 40;
     private static final int CHECK_INTERVAL = 10;
     private static final int LOST_TICKS = 100;
@@ -119,6 +120,19 @@ public class DockBlockEntity extends InventoryWorksiteBlockEntity implements IBo
     @Override
     public BlockPos getLanding() {
         return worldPosition.above();
+    }
+
+    // ---- sea trade (rework phase 11): the dock is a stop of a trade route and a place for a faction trade ship ----
+
+    @Override
+    public BlockPos getDockPos() {
+        return worldPosition;
+    }
+
+    /** The inventory of the dock: what a trade ship unloads here goes into it, what it loads comes out of it. */
+    @Override
+    public IItemHandler getDockStorage() {
+        return mainInventory;
     }
 
     @Override

@@ -57,6 +57,8 @@ public final class AWVehicleStatics {
     public static final String KEY_VEHICLE_TURRET_RIGHT = "keybind.vehicle.turret.right";
     public static final String KEY_VEHICLE_MOUSE_AIM = "keybind.vehicle.mouse.aim";
     public static final String KEY_VEHICLE_AMMO_SELECT = "keybind.vehicle.ammo.select";
+    /** Rework phase 12: lowers and raises the drop bridge of a siege tower. */
+    public static final String KEY_VEHICLE_BRIDGE = "keybind.vehicle.bridge";
 
     public static final String COMMON_FILE_NAME = "ancientwarfarevehicle-common.toml";
     public static final String CLIENT_FILE_NAME = "ancientwarfarevehicle-client.toml";
@@ -168,6 +170,34 @@ public final class AWVehicleStatics {
     private static final ModConfigSpec.BooleanValue USE_VEHICLE_SETUP_TIME;
     private static final ModConfigSpec.BooleanValue ADJUST_MISSILES_FOR_ACCURACY;
 
+    private static final ModConfigSpec.BooleanValue SHIP_RAM_ENABLED;
+    private static final ModConfigSpec.DoubleValue SHIP_RAM_DAMAGE_SCALE;
+    private static final ModConfigSpec.DoubleValue SHIP_RAM_RECOIL_FRACTION;
+    private static final ModConfigSpec.IntValue SHIP_RAM_COOLDOWN_TICKS;
+    private static final ModConfigSpec.DoubleValue SHIP_RAM_MIN_SPEED;
+    private static final ModConfigSpec.DoubleValue SHIP_RAM_DECK_KNOCK;
+    private static final ModConfigSpec.BooleanValue GRAPPLE_ENABLED;
+    private static final ModConfigSpec.IntValue GRAPPLE_RANGE;
+    private static final ModConfigSpec.DoubleValue GRAPPLE_PULL_SPEED;
+    private static final ModConfigSpec.IntValue GRAPPLE_MAX_LINES;
+    private static final ModConfigSpec.IntValue GRAPPLE_TIMEOUT_TICKS;
+    private static final ModConfigSpec.IntValue GRAPPLE_SNAP_DISTANCE;
+    private static final ModConfigSpec.DoubleValue SINKING_CARGO_FRACTION;
+    private static final ModConfigSpec.IntValue SINKING_CRATE_TICKS;
+    private static final ModConfigSpec.IntValue SINKING_CRATE_MAX;
+
+    private static final ModConfigSpec.IntValue SIEGE_TOWER_MEDIUM_HEIGHT;
+    private static final ModConfigSpec.IntValue SIEGE_TOWER_LARGE_HEIGHT;
+    private static final ModConfigSpec.IntValue SIEGE_BRIDGE_LENGTH;
+    private static final ModConfigSpec.DoubleValue SIEGE_PUSH_SPEED_SCALE;
+    private static final ModConfigSpec.DoubleValue SIEGE_CLIMB_SPEED;
+    private static final ModConfigSpec.DoubleValue SIEGE_ARROW_DAMAGE_FRONT;
+    private static final ModConfigSpec.DoubleValue SIEGE_ARROW_DAMAGE_OTHER;
+    private static final ModConfigSpec.DoubleValue SIEGE_FIRE_DAMAGE_FACTOR;
+    private static final ModConfigSpec.BooleanValue SIEGE_AUTO_BRIDGE;
+    private static final ModConfigSpec.BooleanValue MANTLET_BLOCKS_PROJECTILES;
+    private static final ModConfigSpec.DoubleValue MANTLET_DAMAGE_FACTOR;
+
     private static final ModConfigSpec.BooleanValue RENDER_VEHICLES_IN_FIRST_PERSON;
     private static final ModConfigSpec.BooleanValue RENDER_VEHICLE_NAMEPLATES;
     private static final ModConfigSpec.BooleanValue RENDER_VEHICLE_NAMEPLATE_HEALTH;
@@ -238,6 +268,58 @@ public final class AWVehicleStatics {
         ADJUST_MISSILES_FOR_ACCURACY = common.comment("Adds random inaccuracy to fired missiles, depending on the accuracy of the vehicle.",
                 "(1.12.2 listed this under the client settings, but the server's firing code reads it.)")
                 .worldRestart().define("adjust_missiles_for_accuracy", true);
+        common.pop();
+
+        common.comment("Naval combat (rework phase 11): ship ramming, grappling hooks and the cargo of sinking ships. Server side.").push("naval_combat");
+        SHIP_RAM_ENABLED = common.comment("Default = true", "If false, ships do no ram damage (the war galley's and the cog's bows).").define("ship_ramming_enabled", true);
+        SHIP_RAM_DAMAGE_SCALE = common.comment("Default = 1.0", "Multiplier of the ram damage of every ship. The base is 35 for the war galley and 12 for the cog at full speed (the fishing boat has no ram);",
+                "the damage grows with the speed the ram closes in on its target along its heading, to at most 1.5 times the base.")
+                .defineInRange("ship_ram_damage_scale", 1.0D, 0.0D, 10.0D);
+        SHIP_RAM_RECOIL_FRACTION = common.comment("Default = 0.25", "The fraction of the ram damage that the ramming ship takes itself when it hits another ship, boat or vehicle.")
+                .defineInRange("ship_ram_recoil_fraction", 0.25D, 0.0D, 1.0D);
+        SHIP_RAM_COOLDOWN_TICKS = common.comment("Default = 30", "Ticks before a ship can ram again, so that one collision does not hit every tick.")
+                .defineInRange("ship_ram_cooldown_ticks", 30, 10, 400);
+        SHIP_RAM_MIN_SPEED = common.comment("Default = 0.04", "The ship must close in on its target at this many blocks a tick (along its heading) at least for the ram to hurt.")
+                .defineInRange("ship_ram_min_speed", 0.04D, 0.01D, 0.5D);
+        SHIP_RAM_DECK_KNOCK = common.comment("Default = 0.4", "How hard what stands on the deck of a rammed ship is knocked along the ram's heading (0 for none).")
+                .defineInRange("ship_ram_deck_knock", 0.4D, 0.0D, 2.0D);
+        GRAPPLE_ENABLED = common.comment("Default = true", "If false, grappling hooks cannot be thrown (by players or by NPCs).").define("grapple_enabled", true);
+        GRAPPLE_RANGE = common.comment("Default = 24", "How far (blocks, from one hull to the other) a grappling hook can be thrown.").defineInRange("grapple_range", 24, 6, 64);
+        GRAPPLE_PULL_SPEED = common.comment("Default = 0.08", "How fast (blocks a tick) a grappling line pulls two ships together, shared between them by weight. The ships stop at hull contact.")
+                .defineInRange("grapple_pull_speed", 0.08D, 0.01D, 0.4D);
+        GRAPPLE_MAX_LINES = common.comment("Default = 2", "The most grappling lines one ship can have at once.").defineInRange("grapple_max_lines", 2, 1, 6);
+        GRAPPLE_TIMEOUT_TICKS = common.comment("Default = 6000 (5 minutes)", "A grappling line that has pulled the ships together comes loose after this many ticks. 0 means it holds until it is cut.")
+                .defineInRange("grapple_timeout_ticks", 6000, 0, 1_000_000);
+        GRAPPLE_SNAP_DISTANCE = common.comment("Default = 40", "A grappling line snaps when the hooks are this many blocks apart (a ship sailing away drags the other, slowly, until then).")
+                .defineInRange("grapple_snap_distance", 40, 10, 128);
+        SINKING_CARGO_FRACTION = common.comment("Default = 0.5", "The fraction of the cargo hold of a ship that floats up from the wreck as floating crates when it sinks. The rest is lost.")
+                .defineInRange("sinking_cargo_fraction", 0.5D, 0.0D, 1.0D);
+        SINKING_CRATE_TICKS = common.comment("Default = 6000 (5 minutes)", "How long a floating crate bobs on the water before it is lost.")
+                .defineInRange("sinking_crate_ticks", 6000, 600, 144_000);
+        SINKING_CRATE_MAX = common.comment("Default = 8", "The most floating crates one wreck makes (27 stacks each, more stacks go into bigger crates).")
+                .defineInRange("sinking_crate_max", 8, 1, 32);
+        common.pop();
+
+        common.comment("Siege works (rework phase 12): the siege towers and the mantlet. Must match on client and server (the sizes are read when the vehicle types are made, so a change needs a restart).").push("siege");
+        SIEGE_TOWER_MEDIUM_HEIGHT = common.comment("Default = 6", "Height in blocks of the top platform of the medium siege tower over the ground: the box of the tower, the bridge and the top seats use it. Set it to the height of the walls you build.",
+                CLIENT_AND_SERVER_NOTE).worldRestart().defineInRange("siege_tower_medium_height", 6, 3, 12);
+        SIEGE_TOWER_LARGE_HEIGHT = common.comment("Default = 9", "Height in blocks of the top platform of the large siege tower over the ground.",
+                CLIENT_AND_SERVER_NOTE).worldRestart().defineInRange("siege_tower_large_height", 9, 4, 14);
+        SIEGE_BRIDGE_LENGTH = common.comment("Default = 3", "How many blocks long the drop bridge of a siege tower is when it is lowered (2 or 3). It is 3 blocks wide.",
+                CLIENT_AND_SERVER_NOTE).worldRestart().defineInRange("siege_bridge_length", 3, 2, 3);
+        SIEGE_PUSH_SPEED_SCALE = common.comment("Default = 1.0", "Multiplier of the speed that the pushers give a siege tower or a mantlet. Every pusher (the driver counts) adds an equal share of the top speed; with nobody pushing the vehicle does not move.")
+                .defineInRange("siege_push_speed_scale", 1.0D, 0.1D, 4.0D);
+        SIEGE_CLIMB_SPEED = common.comment("Default = 0.12", "How fast (blocks a tick) a rider climbs the ladder of a siege tower.").defineInRange("siege_climb_speed", 0.12D, 0.02D, 0.5D);
+        SIEGE_ARROW_DAMAGE_FRONT = common.comment("Default = 0.1", "Fraction of the damage that an arrow does to a siege tower when it hits the front armour (shot from within 70 degrees of the front).")
+                .defineInRange("siege_arrow_damage_front", 0.1D, 0.0D, 1.0D);
+        SIEGE_ARROW_DAMAGE_OTHER = common.comment("Default = 0.4", "Fraction of the damage that an arrow does to a siege tower when it hits the sides or the back.")
+                .defineInRange("siege_arrow_damage_other", 0.4D, 0.0D, 1.0D);
+        SIEGE_FIRE_DAMAGE_FACTOR = common.comment("Default = 2.0", "Multiplier of fire damage (burning, flame ammo) to a siege tower.").defineInRange("siege_fire_damage_factor", 2.0D, 0.0D, 10.0D);
+        SIEGE_AUTO_BRIDGE = common.comment("Default = true", "If true, a siege tower with an NPC crew member aboard lowers its bridge by itself once it has been pushed against a wall for a second, and NPC passengers climb up and step out onto it.")
+                .define("siege_auto_bridge", true);
+        MANTLET_BLOCKS_PROJECTILES = common.comment("Default = true", "If false, the mantlet no longer stops arrows, bolts and missiles that fly into its front.", CLIENT_AND_SERVER_NOTE)
+                .define("mantlet_blocks_projectiles", true);
+        MANTLET_DAMAGE_FACTOR = common.comment("Default = 1.0", "Multiplier of the damage that the mantlet takes from the projectiles it stops.").defineInRange("mantlet_damage_factor", 1.0D, 0.0D, 10.0D);
         common.pop();
 
         common.comment("Vehicle Stats Settings").push("vehicle_stats_settings");
@@ -351,6 +433,32 @@ public final class AWVehicleStatics {
         g.allowFriendlyFire = ALLOW_FRIENDLY_FIRE.get();
         g.useVehicleSetupTime = USE_VEHICLE_SETUP_TIME.get();
         clientSettings.adjustMissilesForAccuracy = ADJUST_MISSILES_FOR_ACCURACY.get();
+        VehicleSettings.shipRamEnabled = SHIP_RAM_ENABLED.get();
+        VehicleSettings.shipRamDamageScale = SHIP_RAM_DAMAGE_SCALE.get();
+        VehicleSettings.shipRamRecoilFraction = SHIP_RAM_RECOIL_FRACTION.get();
+        VehicleSettings.shipRamCooldownTicks = SHIP_RAM_COOLDOWN_TICKS.get();
+        VehicleSettings.shipRamMinSpeed = SHIP_RAM_MIN_SPEED.get();
+        VehicleSettings.shipRamDeckKnock = SHIP_RAM_DECK_KNOCK.get();
+        VehicleSettings.grappleEnabled = GRAPPLE_ENABLED.get();
+        VehicleSettings.grappleRange = GRAPPLE_RANGE.get();
+        VehicleSettings.grapplePullSpeed = GRAPPLE_PULL_SPEED.get();
+        VehicleSettings.grappleMaxLines = GRAPPLE_MAX_LINES.get();
+        VehicleSettings.grappleTimeoutTicks = GRAPPLE_TIMEOUT_TICKS.get();
+        VehicleSettings.grappleSnapDistance = GRAPPLE_SNAP_DISTANCE.get();
+        VehicleSettings.sinkingCargoFraction = SINKING_CARGO_FRACTION.get();
+        VehicleSettings.sinkingCrateTicks = SINKING_CRATE_TICKS.get();
+        VehicleSettings.sinkingCrateMax = SINKING_CRATE_MAX.get();
+        VehicleSettings.siegeTowerMediumHeight = SIEGE_TOWER_MEDIUM_HEIGHT.get();
+        VehicleSettings.siegeTowerLargeHeight = SIEGE_TOWER_LARGE_HEIGHT.get();
+        VehicleSettings.siegeBridgeLength = SIEGE_BRIDGE_LENGTH.get();
+        VehicleSettings.siegePushSpeedScale = SIEGE_PUSH_SPEED_SCALE.get();
+        VehicleSettings.siegeClimbSpeed = SIEGE_CLIMB_SPEED.get();
+        VehicleSettings.siegeArrowDamageFront = SIEGE_ARROW_DAMAGE_FRONT.get();
+        VehicleSettings.siegeArrowDamageOther = SIEGE_ARROW_DAMAGE_OTHER.get();
+        VehicleSettings.siegeFireDamageFactor = SIEGE_FIRE_DAMAGE_FACTOR.get();
+        VehicleSettings.siegeAutoBridge = SIEGE_AUTO_BRIDGE.get();
+        VehicleSettings.mantletBlocksProjectiles = MANTLET_BLOCKS_PROJECTILES.get();
+        VehicleSettings.mantletDamageFactor = MANTLET_DAMAGE_FACTOR.get();
 
         VehicleStats s = vehicleStats;
         s.ammoBallistaBoltDamage = AMMO_BALLISTA_BOLT_DAMAGE.get();

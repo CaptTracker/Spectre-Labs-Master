@@ -5,6 +5,8 @@
 package io.github.capttracker.ancientwarfarenpc.settlement;
 
 import io.github.capttracker.ancientwarfarenpc.entity.NpcPlayerOwned;
+import io.github.capttracker.ancientwarfarenpc.trait.Trait;
+import io.github.capttracker.ancientwarfarenpc.trait.TraitHooks;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.AABB;
 
@@ -23,9 +25,14 @@ import java.util.Optional;
  *   <li>{@code inn}: a meal at the inn in the last day +6;</li>
  *   <li>{@code social}: time at a gathering point in the last day +4;</li>
  *   <li>{@code tool}: the right tool +2, none -8 (workers) or no weapon -6 (soldiers);</li>
+ *   <li>{@code skill}: a new skill rank in the last half day +4 (config);</li>
  *   <li>{@code idle}: too long without a job in the work hours, -2 to -8;</li>
  *   <li>{@code fear}: an alarm on -8, a hostile close by -5;</li>
- *   <li>{@code friends}: other members within 8 blocks, +1 for each up to +4, alone -2.</li>
+ *   <li>{@code friends}: other members within 8 blocks, +1 for each up to +4, alone -2;</li>
+ *   <li>{@code family_partner}, {@code family_partner_near}, {@code family_home}, {@code family_children}, {@code family_grief}: the family (see
+ *       {@code FamilyMorale}, rework phase 10);</li>
+ *   <li>{@code trait_<id>}: what a trait adds (brave and cowardly change the fear, glutton the meals, hardworking idleness, devout a priest nearby,
+ *       sociable and loner the company); the numbers are in the traits section of the config.</li>
  * </ul>
  * The work speed of the NPC uses this value ({@link SettlementConfig#moraleWorkFactor}), so it already includes the settlement part.
  */
@@ -58,11 +65,60 @@ public final class NpcMorale {
         return "inspired";
     }
 
+    /** The factors the traits of the NPC add, each named {@code trait_<id>} so the morale tab shows where the points come from. */
+    private static void addTraitFactors(NpcPlayerOwned npc, ServerLevel level, long now, int fear, int friends, List<Factor> factors) {
+        if (fear < 0 && npc.hasTrait(Trait.BRAVE)) {
+            factors.add(new Factor("trait_brave", -fear / 2)); // half the fear
+        }
+        if (fear < 0 && npc.hasTrait(Trait.COWARDLY)) {
+            factors.add(new Factor("trait_cowardly", fear)); // twice the fear
+        }
+        if (npc.hasTrait(Trait.GLUTTON)) {
+            int meal = 0;
+            if (npc.getLastInnMealAt() >= 0 && now - npc.getLastInnMealAt() <= DAY) {
+                meal += SettlementConfig.traitGluttonMealMorale;
+            }
+            if (npc.requiresUpkeep() && npc.getFoodFraction() > 0.7D) {
+                meal += 2;
+            }
+            if (meal != 0) {
+                factors.add(new Factor("trait_glutton", meal));
+            }
+        }
+        if (npc.hasTrait(Trait.HARDWORKING) && npc.getIdleTicks() > SettlementConfig.moraleIdleTicks / 2) {
+            factors.add(new Factor("trait_hardworking", SettlementConfig.traitHardworkingIdleMorale));
+        }
+        if (npc.hasTrait(Trait.DEVOUT) && TraitHooks.isNearDevoutSite(npc, level)) {
+            factors.add(new Factor("trait_devout", SettlementConfig.traitDevoutMorale));
+        }
+        boolean social = npc.getLastSocialAt() >= 0 && now - npc.getLastSocialAt() <= DAY;
+        if (npc.hasTrait(Trait.SOCIABLE)) {
+            if (social) {
+                factors.add(new Factor("trait_sociable", SettlementConfig.traitSociableMorale));
+            } else if (friends <= 0) {
+                factors.add(new Factor("trait_sociable", -(SettlementConfig.traitSociableMorale + 1))); // alone for a day
+            }
+        }
+        if (npc.hasTrait(Trait.LONER)) {
+            int loner = 0;
+            if (friends <= 0 && npc.getActivity() == Activity.WORK) {
+                loner += SettlementConfig.traitLonerMorale; // working away from the others
+            }
+            if (social) {
+                loner -= 2; // less from socialising
+            }
+            if (loner != 0) {
+                factors.add(new Factor("trait_loner", loner));
+            }
+        }
+    }
+
     public static Result compute(NpcPlayerOwned npc, ServerLevel level) {
         long now = level.getGameTime();
         Optional<Settlement> settlement = npc.getSettlement();
         int base = settlement.map(Settlement::getMorale).orElse(50);
         List<Factor> factors = new ArrayList<>();
+        boolean child = npc.isChild(); // a child has the simple factors: food, bed, sleep, injury, play, fear, company, family (rework phase 10)
 
         if (npc.requiresUpkeep()) {
             int hunger = npc.isStarving() ? -15 : npc.isHungry() ? -8 : npc.getFoodFraction() > 0.7D ? 3 : 0;
@@ -84,19 +140,23 @@ public final class NpcMorale {
         }
         factors.add(new Factor("injury", injury));
 
-        if (npc.getLastInnMealAt() >= 0 && now - npc.getLastInnMealAt() <= DAY) {
+        if (!child && npc.getLastInnMealAt() >= 0 && now - npc.getLastInnMealAt() <= DAY) {
             factors.add(new Factor("inn", 6));
         }
         factors.add(new Factor("social", npc.getLastSocialAt() >= 0 && now - npc.getLastSocialAt() <= DAY ? 4 : 0));
 
-        int tool = npc.getToolMorale();
+        int tool = child ? 0 : npc.getToolMorale();
         if (tool != 0) {
             factors.add(new Factor("tool", tool));
         }
 
         int idleLimit = SettlementConfig.moraleIdleTicks;
-        if (npc.getIdleTicks() > idleLimit) {
+        if (!child && npc.getIdleTicks() > idleLimit) {
             factors.add(new Factor("idle", -(2 + (int) Math.min(6, (npc.getIdleTicks() - idleLimit) / 1200L))));
+        }
+
+        if (!child && npc.getLastLevelUpAt() >= 0 && now - npc.getLastLevelUpAt() < SettlementConfig.skillLevelUpMoraleTicks && SettlementConfig.skillLevelUpMorale > 0) {
+            factors.add(new Factor("skill", SettlementConfig.skillLevelUpMorale));
         }
 
         int fear = 0;
@@ -107,11 +167,20 @@ public final class NpcMorale {
         }
         factors.add(new Factor("fear", fear));
 
+        int friendCount = 0;
         if (settlement.isPresent()) {
             AABB box = npc.getBoundingBox().inflate(FRIENDS_RADIUS);
             int friends = level.getEntitiesOfClass(NpcPlayerOwned.class, box,
                     other -> other != npc && other.isAlive() && settlement.get().getId().equals(other.getSettlementId())).size();
             factors.add(new Factor("friends", friends == 0 ? -2 : Math.min(4, friends)));
+            friendCount = friends;
+        }
+
+        if (!child && SettlementConfig.traitsEnabled && npc.getTraitMask() != 0) {
+            addTraitFactors(npc, level, now, fear, friendCount, factors);
+        }
+        if (settlement.isPresent()) {
+            factors.addAll(io.github.capttracker.ancientwarfarenpc.settlement.family.FamilyMorale.factors(npc, level, settlement.get(), now)); // partner, home, children, grief (phase 10)
         }
 
         int total = base;

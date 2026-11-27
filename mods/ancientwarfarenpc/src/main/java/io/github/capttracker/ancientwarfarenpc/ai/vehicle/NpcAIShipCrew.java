@@ -7,7 +7,9 @@ package io.github.capttracker.ancientwarfarenpc.ai.vehicle;
 import io.github.capttracker.ancientwarfarenpc.ai.AIHelper;
 import io.github.capttracker.ancientwarfarenpc.ai.NpcAI;
 import io.github.capttracker.ancientwarfarenpc.config.AWNPCStatics;
+import io.github.capttracker.ancientwarfarenpc.entity.NpcBase;
 import io.github.capttracker.ancientwarfarenpc.entity.NpcPlayerOwned;
+import io.github.capttracker.ancientwarfarenpc.entity.faction.NpcFaction;
 import io.github.capttracker.ancientwarfarevehicle.entity.VehicleBase;
 import io.github.capttracker.ancientwarfarevehicle.entity.ship.ShipHardpoint;
 import io.github.capttracker.ancientwarfarevehicle.entity.ship.ShipHelper;
@@ -33,7 +35,7 @@ import java.util.List;
  * hit (arc, elevation, reach of the shot, see {@code ShipHelper.solveHardpoint}). It fires only when the mount points at the aim and is reloaded and the ship has
  * ammo (the loaded type is switched when it is out).
  */
-public class NpcAIShipCrew extends NpcAI<NpcPlayerOwned> {
+public class NpcAIShipCrew extends NpcAI<NpcBase> {
     private static final int SCAN_INTERVAL = 10;
     private static final int MAX_CANDIDATES = 12;
     private static final float AIM_SEND_STEP = 0.4F;
@@ -44,7 +46,7 @@ public class NpcAIShipCrew extends NpcAI<NpcPlayerOwned> {
     private float sentYaw = Float.NaN;
     private float sentPitch = Float.NaN;
 
-    public NpcAIShipCrew(NpcPlayerOwned npc) {
+    public NpcAIShipCrew(NpcBase npc) {
         super(npc);
         setMutexBits(MOVE | ATTACK);
     }
@@ -56,7 +58,8 @@ public class NpcAIShipCrew extends NpcAI<NpcPlayerOwned> {
 
     @Override
     public boolean canUse() {
-        return !npc.level().isClientSide && npc.getIsAIEnabled() && npc.isShipCrew();
+        // a soldier that is to board or defend (rework phase 11) is let go of: NpcAIShipBoard takes him out of his seat
+        return !npc.level().isClientSide && npc.getIsAIEnabled() && npc.isShipCrew() && !ShipCombat.shouldLeaveSeat(npc);
     }
 
     @Override
@@ -84,6 +87,15 @@ public class NpcAIShipCrew extends NpcAI<NpcPlayerOwned> {
             return;
         }
         npc.getNavigation().stop();
+        if (npc instanceof NpcPlayerOwned owned) {
+            ShipCrew.eatAboard(owned, ship); // a hungry rower eats from the ship's storage without leaving the seat
+        } else if (npc instanceof NpcFaction faction && !faction.isCaravanMember() && npc.tickCount % 20 == 0 && !ShipCrew.isAlliedHelm(npc, ship)) {
+            // the allied player at the helm is gone: the soldiers of a faction do not stay on a ship of someone else
+            npc.setRefusedShip(ship.getUUID());
+            ShipCrew.disembark(npc, ship, ship.position());
+            return;
+        }
+        ShipCombat.tickCrew(npc, ship); // a soldier may throw a grappling hook at a hostile ship (rework phase 11)
         int mount = ship.ship.hardpointOf(npc);
         if (mount < 0 || !AWNPCStatics.shipGunnersFire || !npc.isShipGunner()) {
             return;

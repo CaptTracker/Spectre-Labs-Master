@@ -1,0 +1,100 @@
+{
+  "name": "Tannery",
+  "category": "business",
+  "style": "timber",
+  "size": [9, 7, 7],
+  "front": "south",
+  "palette": {
+    "W": "minecraft:oak_log[axis=y]",
+    "L": "minecraft:cobblestone",
+    "S": "minecraft:barrel[facing=east]",
+    "B": "ancientwarfareautomation:tannery[facing=south]",
+    "C": "minecraft:water_cauldron[level=3]",
+    "D": "minecraft:composter[level=0]",
+    "F": "minecraft:oak_fence",
+    "H": "minecraft:brown_wool",
+    "I": "minecraft:hay_block[axis=y]",
+    "J": "minecraft:oak_door[facing=north,half=lower,hinge=left,open=false]",
+    "K": "minecraft:white_terracotta",
+    "M": "minecraft:glass_pane[east=true,west=true]",
+    "N": "minecraft:glass_pane[north=true,south=true]",
+    "O": "minecraft:wall_torch[facing=north]",
+    "P": "minecraft:oak_door[facing=north,half=upper,hinge=left,open=false]",
+    "Q": "minecraft:oak_log[axis=x]",
+    "R": "minecraft:oak_log[axis=z]",
+    "T": "minecraft:spruce_stairs[facing=north,half=bottom,shape=straight]",
+    "U": "minecraft:lantern[hanging=true]",
+    "V": "minecraft:spruce_stairs[facing=south,half=bottom,shape=straight]",
+    "X": "minecraft:chain[axis=y]",
+    "Y": "minecraft:spruce_slab[type=bottom]"
+  },
+  "layers": [
+    [
+      "WLLLLLLLW",
+      "LS.B.CD.L",
+      "L......FL",
+      "L......HL",
+      "L......FL",
+      "LII.....L",
+      "WLLWJWLLW"
+    ],
+    [
+      "WKMKKKMKW",
+      "K.......K",
+      "K......FK",
+      "N......HN",
+      "K......FK",
+      "K..O.O..K",
+      "WKMWPWMKW"
+    ],
+    [
+      "WQQQQQQQW",
+      "R.......R",
+      "R......FR",
+      "R.......R",
+      "R......FR",
+      "R.......R",
+      "WQQWQWQQW"
+    ],
+    [
+      "TTTTTTTTT",
+      "K_______K",
+      "K_______K",
+      "K__U_U__K",
+      "K_______K",
+      "K_______K",
+      "VVVVVVVVV"
+    ],
+    [
+      "_________",
+      "TTTTTTTTT",
+      "K_______K",
+      "K__X_X__K",
+      "K_______K",
+      "VVVVVVVVV",
+      "_________"
+    ],
+    [
+      "_________",
+      "_________",
+      "TTTTTTTTT",
+      "K__X_X__K",
+      "VVVVVVVVV",
+      "_________",
+      "_________"
+    ],
+    [
+      "_________",
+      "_________",
+      "_________",
+      "YYYYYYYYY",
+      "_________",
+      "_________",
+      "_________"
+    ]
+  ],
+  "worksite": {"block": "ancientwarfareautomation:tannery", "pos": [3, 0, 1]},
+  "min_level": 1,
+  "min_population": 5,
+  "tags": ["business", "tannery"]
+}

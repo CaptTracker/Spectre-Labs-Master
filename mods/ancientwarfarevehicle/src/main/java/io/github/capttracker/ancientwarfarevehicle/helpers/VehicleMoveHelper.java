@@ -310,6 +310,10 @@ public class VehicleMoveHelper implements INBTSerializable<CompoundTag> {
             stepShip();
             return;
         }
+        if (vehicle.isMovementLocked()) {
+            stepLocked();
+            return;
+        }
         if (vehicle.vehicleType.isHorseDrawn() && vehicle.hitch.isHitched()) {
             stepHorseDrawn();
             return;
@@ -332,8 +336,22 @@ public class VehicleMoveHelper implements INBTSerializable<CompoundTag> {
         this.vehicle.move(MoverType.SELF, vehicle.getDeltaMovement());
         this.wasOnGround = vehicle.onGround();
         if (vehicle.horizontalCollision) {
-            forwardMotion *= 0.65f;
+            // a siege tower or a mantlet stops dead at a wall (it climbs nothing), the others only lose speed
+            forwardMotion *= vehicle.vehicleType.isPushed() ? 0.f : 0.65f;
         }
+    }
+
+    /** SERVER (rework phase 12): a siege tower with its bridge down (or somebody on its roof) stands still; it only falls to the ground. */
+    private void stepLocked() {
+        if (!vehicle.level().isClientSide && vehicle.siege != null && (Math.abs(getDriveThrottle()) > 0.05F || Math.abs(getDriveSteer()) > 0.05F)) {
+            vehicle.siege.notifyLocked();
+        }
+        forwardMotion = 0.f;
+        turnMotion = 0.f;
+        addVerticalMotion(-GRAVITY_PER_TICK);
+        vehicle.setDeltaMovement(0.0D, vehicle.getDeltaMovement().y, 0.0D);
+        vehicle.move(MoverType.SELF, vehicle.getDeltaMovement());
+        this.wasOnGround = vehicle.onGround();
     }
 
     /** SERVER: one tick of a ship, which has its own movement (see {@code ShipHelper}): the input is the sail and oar setting and the helm. */
@@ -396,9 +414,14 @@ public class VehicleMoveHelper implements INBTSerializable<CompoundTag> {
                 moveX = (point.x + Math.sin(yawRad) * length - startX) * HITCH_SPRING;
                 moveZ = (point.z + Math.cos(yawRad) * length - startZ) * HITCH_SPRING;
                 double step = Math.hypot(moveX, moveZ);
-                if (step > HITCH_MAX_STEP) {
-                    moveX *= HITCH_MAX_STEP / step;
-                    moveZ *= HITCH_MAX_STEP / step;
+                // a siege tower is slow: the horses are held to a walk of the type's pace (CartHitch scales their speed), and the tower is never pulled faster than a little over its top speed
+                double cap = vehicle.vehicleType.isPushed() ? Math.max(0.02D, vehicle.currentForwardSpeedMax * 1.3D) : HITCH_MAX_STEP;
+                if (step > cap) {
+                    moveX *= cap / step;
+                    moveZ *= cap / step;
+                    if (vehicle.vehicleType.isPushed() && stretch > 2.0D) {
+                        hitch.balk(horse);
+                    }
                 }
             }
         }
@@ -456,6 +479,11 @@ public class VehicleMoveHelper implements INBTSerializable<CompoundTag> {
         if (vehicle.currentWeight > vehicle.baseWeight) {
             weightAdjust = vehicle.baseWeight / vehicle.currentWeight;
         }
+        if (vehicle.vehicleType.isPushed() && pushFactor() <= 0.f) {
+            // nobody pushes: it rolls to a stop at once
+            forwardMotion = Math.abs(forwardMotion) < 0.005f ? 0.f : forwardMotion * 0.6f;
+            return;
+        }
         if (forwardInput != 0) {
             boolean reverse = (forwardInput == -1 && forwardMotion > 0) || (forwardInput == 1 && forwardMotion < 0);
             float maxSpeed = vehicle.currentForwardSpeedMax * weightAdjust * forwardMag * rowerFactor() * pushFactor();
@@ -475,15 +503,22 @@ public class VehicleMoveHelper implements INBTSerializable<CompoundTag> {
                 forwardMotion = maxReverse;
             }
         } else {
-            forwardMotion *= groundDrag;
+            // a heavy pushed vehicle stops quickly when the pushers let go
+            forwardMotion *= vehicle.vehicleType.isPushed() ? 0.8f : groundDrag;
         }
-        if (Math.abs(forwardMotion) < groundStop && forwardInput == 0) {
+        if (Math.abs(forwardMotion) < (vehicle.vehicleType.isPushed() ? 0.004f : groundStop) && forwardInput == 0) {
             forwardMotion = 0.f;
         }
     }
 
-    /** A horse-drawn cart that gets here has no horse hitched: only its driver's slow push moves it. */
+    /**
+     * A horse-drawn cart that gets here has no horse hitched: only its driver's slow push moves it. A pushed vehicle (siege tower, mantlet) gets the share of its speed
+     * that its pushers give, none at all with nobody pushing.
+     */
     private float pushFactor() {
+        if (vehicle.vehicleType.isPushed()) {
+            return vehicle.getPushFactor();
+        }
         return vehicle.vehicleType.isHorseDrawn() ? CartHitch.PUSH_FACTOR : 1.f;
     }
 
@@ -500,9 +535,16 @@ public class VehicleMoveHelper implements INBTSerializable<CompoundTag> {
         if (vehicle.currentWeight > vehicle.baseWeight) {
             weightAdjust = vehicle.baseWeight / vehicle.currentWeight;
         }
+        // a pushed vehicle turns at the rate of its pushers but at least at 40% of it (the turn is a swing of the push bars), and not at all with nobody pushing
+        float turnScale = vehicle.vehicleType.isPushed() ? (pushFactor() > 0.f ? Math.max(pushFactor(), 0.4f) : 0.f) : Math.max(pushFactor(), 0.4f);
+        if (turnScale <= 0.f) {
+            // nobody pushes a siege tower or a mantlet: it does not turn either
+            turnMotion = 0.f;
+            return;
+        }
         if (turnInput != 0) {
             boolean reverse = (turnInput == -1 && turnMotion > 0) || (turnInput == 1 && turnMotion < 0);
-            float maxSpeed = vehicle.currentStrafeSpeedMax * weightAdjust * turnMag * Math.max(pushFactor(), 0.4f);
+            float maxSpeed = vehicle.currentStrafeSpeedMax * weightAdjust * turnMag * turnScale;
             float percent = 1 - (Math.abs(turnMotion) / maxSpeed);
             percent = reverse ? 1.f : Math.max(percent, -1.f);
             float changeFactor = percent * (turnInput * 2) * inputFactor;

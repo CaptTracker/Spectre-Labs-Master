@@ -1,0 +1,73 @@
+{
+  "name": "Small Desert House",
+  "category": "house",
+  "style": "desert",
+  "size": [7, 5, 7],
+  "front": "south",
+  "palette": {
+    "W": "minecraft:cut_sandstone",
+    "L": "minecraft:sandstone",
+    "S": "minecraft:yellow_bed[part=head,facing=north]",
+    "B": "minecraft:yellow_bed[part=foot,facing=north]",
+    "C": "minecraft:furnace[facing=east,lit=false]",
+    "D": "minecraft:crafting_table",
+    "F": "minecraft:acacia_door[facing=north,half=lower,hinge=left,open=false]",
+    "H": "minecraft:glass_pane[east=true,west=true]",
+    "I": "minecraft:glass_pane[north=true,south=true]",
+    "J": "minecraft:wall_torch[facing=north]",
+    "K": "minecraft:acacia_door[facing=north,half=upper,hinge=left,open=false]",
+    "M": "minecraft:orange_terracotta",
+    "N": "minecraft:lantern[hanging=true]",
+    "O": "minecraft:sandstone_slab[type=bottom]"
+  },
+  "layers": [
+    [
+      "WLLLLLW",
+      "LS...SL",
+      "LB...BL",
+      "L.....L",
+      "L.....L",
+      "LC...DL",
+      "WLLFLLW"
+    ],
+    [
+      "WHLLLHW",
+      "L.....L",
+      "L.....L",
+      "I.....I",
+      "L.....L",
+      "L.J.J.L",
+      "WHLKLHW"
+    ],
+    [
+      "WMMMMMW",
+      "M.....M",
+      "M.....M",
+      "M..N..M",
+      "M.....M",
+      "M.....M",
+      "WMMMMMW"
+    ],
+    [
+      "WWWWWWW",
+      "WWWWWWW",
+      "WWWWWWW",
+      "WWWWWWW",
+      "WWWWWWW",
+      "WWWWWWW",
+      "WWWWWWW"
+    ],
+    [
+      "OOOOOOO",
+      "O_____O",
+      "O_____O",
+      "O_____O",
+      "O_____O",
+      "O_____O",
+      "OOOOOOO"
+    ]
+  ],
+  "beds": 2,
+  "storage": 0,
+  "tags": ["housing_capacity", "upgrade_of=ancientwarfarenpc:tent_canvas"]
+}

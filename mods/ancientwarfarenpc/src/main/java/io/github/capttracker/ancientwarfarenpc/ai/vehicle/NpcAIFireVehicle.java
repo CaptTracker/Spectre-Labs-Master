@@ -19,7 +19,8 @@ public class NpcAIFireVehicle<T extends NpcBase & IVehicleUser> extends NpcAI<T>
 
     @Override
     public boolean canUse() {
-        return super.canUse() && npc.getVehicleTarget().isPresent() && npc.canContinueRidingVehicle() && npc.isRidingVehicle() && isInRange() && canFire();
+        return super.canUse() && npc.getVehicleTarget().isPresent() && npc.canContinueRidingVehicle() && npc.isRidingVehicle()
+                && !npc.getAssignedVehicle().map(v -> v.vehicleType.isPushed()).orElse(false) && isInRange() && canFire();
     }
 
     private boolean canFire() {

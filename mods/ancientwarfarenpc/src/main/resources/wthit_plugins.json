@@ -1,0 +1,6 @@
+{
+  "ancientwarfarenpc:plugin": {
+    "initializer": "io.github.capttracker.ancientwarfarenpc.compat.wthit.AwWthitPlugin",
+    "side": "*"
+  }
+}

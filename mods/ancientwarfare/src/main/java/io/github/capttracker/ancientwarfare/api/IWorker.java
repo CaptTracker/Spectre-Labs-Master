@@ -21,4 +21,12 @@ public interface IWorker {
     boolean canWorkAt(IWorkSite.WorkType type);
 
     double getWorkRangeSq();
+
+    /**
+     * Rework phase 8: the rank (0 novice to 4 master) of the worker in the crafting skill, for the bonuses of the production sites. 0 for a worker
+     * without skills.
+     */
+    default int getCraftingRank() {
+        return 0;
+    }
 }

@@ -14,6 +14,8 @@ import io.github.capttracker.ancientwarfarenpc.ai.path.NpcRouteAssist;
 import io.github.capttracker.ancientwarfarenpc.config.AWNPCStatics;
 import io.github.capttracker.ancientwarfarenpc.entity.NpcWorker;
 import io.github.capttracker.ancientwarfarenpc.settlement.SettlementConfig;
+import io.github.capttracker.ancientwarfarenpc.skill.Skill;
+import io.github.capttracker.ancientwarfarenpc.skill.SkillEffects;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -85,9 +87,14 @@ public final class StaffedWork {
     private WorkTask task;
     @Nullable
     private BlockPos taskSite;
+    /** The skill the current task trains and works with (rework phase 7). */
+    @Nullable
+    private Skill taskSkill;
     private double progress;
     private int crackStage = -1;
     private int swingTimer;
+    /** Ticks a lazy worker still idles before it works on the task it started. */
+    private int idlePause;
     private double holdY = Double.NaN;
     private final Walk taskWalk = new Walk();
     private final Walk siteWalk = new Walk();
@@ -149,6 +156,7 @@ public final class StaffedWork {
                 return State.IDLE;
             }
             task = claimed.get();
+            taskSkill = Skill.ofTask(task.action(), site.getWorkType());
             taskSite = sitePos;
             started = false;
             progress = 0;
@@ -223,6 +231,9 @@ public final class StaffedWork {
         boolean fishing = current.action() == WorkAction.FISH;
         if (!started) {
             started = true;
+            if (io.github.capttracker.ancientwarfarenpc.trait.TraitEffects.lazyPause(npc)) {
+                idlePause = 40 + npc.getRandom().nextInt(60); // a lazy worker idles a while before the task
+            }
             site.taskStarted(id, current, npc);
             if (fishing) {
                 npc.swing(InteractionHand.MAIN_HAND); // the cast
@@ -232,6 +243,10 @@ public final class StaffedWork {
         BlockState state = level.getBlockState(current.pos());
         chooseTool(current, state);
         boolean breaking = current.action().isBreaking() && !state.isAir();
+        if (idlePause > 0) {
+            idlePause--;
+            return State.WORKING;
+        }
         if (npc.advanceWorkTick()) {
             progress += rate(site, state, breaking);
             if (npc.takeBonusWorkTick()) {
@@ -379,7 +394,9 @@ public final class StaffedWork {
 
     /** Progress per working tick: the tool on the block (breaking actions), the worker's skill and the torque boost of the site. */
     private double rate(IWorksiteTasks site, BlockState state, boolean breaking) {
-        double skill = Math.max(0.1D, npc.getWorkEffectiveness(site.getWorkType()));
+        double skill = Math.max(0.1D, npc.getBaseWorkEffectiveness(site.getWorkType()));
+        double rankFactor = taskSkill != null ? SkillEffects.workSpeed(npc.getSkillRank(taskSkill)) : 1.0D; // the rank of the skill of this task: breaking, tending, the bite time of fishing
+        skill *= SkillEffects.clampSpeed(rankFactor * io.github.capttracker.ancientwarfarenpc.trait.TraitEffects.workSpeed(npc, taskSkill)); // with lazy, hardworking, night owl, keen eye
         double tool = 1.0D;
         if (breaking) {
             ItemStack held = npc.getMainHandItem();
@@ -389,6 +406,19 @@ public final class StaffedWork {
     }
 
     private void swingEffects(ServerLevel level, WorkTask current, BlockState state) {
+        if (current.action() == io.github.capttracker.ancientwarfare.api.WorkAction.SMITH) {
+            // rework phase 8: the smith hammers at the anvil, sparks fly
+            Vec3 top = Vec3.atCenterOf(current.pos()).add(0.0D, 0.5D, 0.0D);
+            level.sendParticles(ParticleTypes.ELECTRIC_SPARK, top.x, top.y, top.z, 6, 0.25D, 0.1D, 0.25D, 0.15D);
+            level.playSound(null, current.pos(), SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 0.35F, 1.1F + npc.getRandom().nextFloat() * 0.3F);
+            return;
+        }
+        if (current.action() == io.github.capttracker.ancientwarfare.api.WorkAction.TAN) {
+            Vec3 top = Vec3.atCenterOf(current.pos()).add(0.0D, 0.5D, 0.0D);
+            level.sendParticles(ParticleTypes.SPLASH, top.x, top.y, top.z, 6, 0.25D, 0.1D, 0.25D, 0.05D);
+            level.playSound(null, current.pos(), SoundEvents.GENERIC_SPLASH, SoundSource.BLOCKS, 0.2F, 1.2F);
+            return;
+        }
         BlockState shown = state.isAir() ? level.getBlockState(current.pos().below()) : state;
         if (shown.isAir()) {
             return;
@@ -400,9 +430,13 @@ public final class StaffedWork {
 
     private void finish(IWorksiteTasks site, BlockPos sitePos, WorkTask current, ServerLevel level) {
         int before = npc.pouchItemCount();
+        BlockState targetState = level.getBlockState(current.pos());
+        java.util.Map<net.minecraft.world.item.Item, Integer> pouchBefore = yieldEligible(current, targetState) ? pouchCounts() : null;
+        Skill skill = taskSkill;
         boolean done = site.completeTask(npc.getUUID(), current, npc.getPouch(), npc);
         clearCrack(level);
         task = null;
+        taskSkill = null;
         taskSite = null;
         started = false;
         progress = 0;
@@ -411,9 +445,83 @@ public final class StaffedWork {
                 trip.catches++;
             }
             npc.addExperience(AWNPCStatics.npcXpFromWork);
+            npc.gainSkillXp(skill, SettlementConfig.skillXpWork);
+            if (pouchBefore != null && skill != null) {
+                double rankChance = SkillEffects.yieldChance(npc.getSkillRank(skill));
+                double traitChance = io.github.capttracker.ancientwarfarenpc.trait.TraitEffects.yieldChance(npc, skill); // green thumb
+                extraYield(pouchBefore, 1.0D - (1.0D - rankChance) * (1.0D - traitChance));
+            }
+            clumsy(level);
             if (npc.pouchItemCount() > before) {
                 npc.pouchSite = sitePos;
                 level.playSound(null, npc.blockPosition(), SoundEvents.ITEM_PICKUP, SoundSource.NEUTRAL, 0.2F, 1.0F + npc.getRandom().nextFloat() * 0.4F);
+            }
+        }
+    }
+
+    // ---------------------------------------------------------------- clumsy
+
+    /** A clumsy worker may wear its tool down one more point, and may drop one carried item at the site. */
+    private void clumsy(ServerLevel level) {
+        if (io.github.capttracker.ancientwarfarenpc.trait.TraitEffects.clumsyToolWear(npc)) {
+            ItemStack held = npc.getMainHandItem();
+            if (!held.isEmpty() && held.isDamageableItem()) {
+                held.hurtAndBreak(1, npc, net.minecraft.world.entity.EquipmentSlot.MAINHAND);
+            }
+        }
+        if (io.github.capttracker.ancientwarfarenpc.trait.TraitEffects.clumsyDrop(npc)) {
+            for (int slot = 0; slot < npc.getPouch().getSlots(); slot++) {
+                ItemStack stack = npc.getPouch().getStackInSlot(slot);
+                if (!stack.isEmpty()) {
+                    npc.spawnAtLocation(npc.getPouch().extractItem(slot, 1, false));
+                    break;
+                }
+            }
+        }
+    }
+
+    // ---------------------------------------------------------------- skill yield
+
+    /** Ores, harvested crops and logs can give an extra item for a skilled worker. */
+    private static boolean yieldEligible(WorkTask current, BlockState state) {
+        return switch (current.action()) {
+            case MINE -> state.is(net.neoforged.neoforge.common.Tags.Blocks.ORES);
+            case HARVEST -> true;
+            case CHOP -> true;
+            default -> false;
+        };
+    }
+
+    private java.util.Map<net.minecraft.world.item.Item, Integer> pouchCounts() {
+        java.util.Map<net.minecraft.world.item.Item, Integer> counts = new java.util.HashMap<>();
+        for (int slot = 0; slot < npc.getPouch().getSlots(); slot++) {
+            ItemStack stack = npc.getPouch().getStackInSlot(slot);
+            if (!stack.isEmpty()) {
+                counts.merge(stack.getItem(), stack.getCount(), Integer::sum);
+            }
+        }
+        return counts;
+    }
+
+    /** With the chance of the rank, one more of the item the task gave most of (into the pouch, or at the feet of the worker when it is full). */
+    private void extraYield(java.util.Map<net.minecraft.world.item.Item, Integer> before, double chance) {
+        if (chance <= 0.0D || npc.getRandom().nextDouble() >= chance) {
+            return;
+        }
+        java.util.Map<net.minecraft.world.item.Item, Integer> after = pouchCounts();
+        net.minecraft.world.item.Item best = null;
+        int bestGain = 0;
+        for (java.util.Map.Entry<net.minecraft.world.item.Item, Integer> entry : after.entrySet()) {
+            int gain = entry.getValue() - before.getOrDefault(entry.getKey(), 0);
+            if (gain > bestGain) {
+                bestGain = gain;
+                best = entry.getKey();
+            }
+        }
+        if (best != null) {
+            ItemStack left = ItemHandlerHelper.insertItemStacked(npc.getPouch(), new ItemStack(best), false);
+            if (!left.isEmpty()) {
+                npc.spawnAtLocation(left);
             }
         }
     }

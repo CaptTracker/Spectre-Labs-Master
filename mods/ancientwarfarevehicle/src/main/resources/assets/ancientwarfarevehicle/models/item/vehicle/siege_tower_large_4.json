@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "ancientwarfarevehicle:item/vehicle/siege_tower_large_4"
+  }
+}

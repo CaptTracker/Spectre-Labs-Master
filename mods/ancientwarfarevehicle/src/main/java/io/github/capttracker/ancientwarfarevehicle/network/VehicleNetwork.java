@@ -47,7 +47,7 @@ import java.util.function.Consumer;
  */
 public final class VehicleNetwork {
     /** Bump when a payload's wire format changes. */
-    public static final String VERSION = "3";
+    public static final String VERSION = "5";
 
     static final StreamCodec<ByteBuf, Optional<Float>> OPTIONAL_FLOAT = ByteBufCodecs.optional(ByteBufCodecs.FLOAT);
 
@@ -94,8 +94,10 @@ public final class VehicleNetwork {
         registrar.playBidirectional(AmmoSelect.TYPE, AmmoSelect.CODEC, AmmoSelect::handle);
         registrar.playBidirectional(FireUpdate.TYPE, FireUpdate.CODEC, FireUpdate::handle);
         registrar.playToServer(PackCommand.TYPE, PackCommand.CODEC, PackCommand::handle);
+        registrar.playToServer(VehicleEntityPayloads.StanceCommand.TYPE, VehicleEntityPayloads.StanceCommand.CODEC, VehicleEntityPayloads.StanceCommand::handle);
         registrar.playToServer(VehicleInput.TYPE, VehicleInput.CODEC, VehicleInput::handle);
         registrar.playToServer(SeatSwitch.TYPE, SeatSwitch.CODEC, SeatSwitch::handle);
+        registrar.playToServer(VehicleEntityPayloads.SiegeCommand.TYPE, VehicleEntityPayloads.SiegeCommand.CODEC, VehicleEntityPayloads.SiegeCommand::handle);
         registrar.playBidirectional(VehicleEntityPayloads.HardpointAim.TYPE, VehicleEntityPayloads.HardpointAim.CODEC, VehicleEntityPayloads.HardpointAim::handle);
         registrar.playBidirectional(VehicleEntityPayloads.HardpointFire.TYPE, VehicleEntityPayloads.HardpointFire.CODEC, VehicleEntityPayloads.HardpointFire::handle);
         registrar.playToClient(VehicleEntityPayloads.WindSync.TYPE, VehicleEntityPayloads.WindSync.CODEC, VehicleEntityPayloads.WindSync::handle);

@@ -17,6 +17,109 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 public final class SettlementConfig {
     public static final String FILE_NAME = "ancientwarfarenpc-settlements.toml";
 
+    /** Longest horizontal side of a scanned blueprint. */
+    public static int blueprintMaxWidth = 48;
+    /** Most layers of a scanned blueprint. */
+    public static int blueprintMaxHeight = 32;
+    /** Most blueprints one player may keep. */
+    public static int blueprintMaxPerPlayer = 64;
+
+    // ---- building zones and the planner (rework phase 9) ----
+    /** The shortest side (blocks) of a building plot marked with the plot marker. */
+    public static int plotMinSide = 5;
+    /** The longest side (blocks) of a building plot. */
+    public static int plotMaxSide = 48;
+    /** The most building plots one settlement may have. */
+    public static int plotsMaxPerSettlement = 24;
+    /** If false, no settlement plans buildings by itself (the owner can still queue builds by hand on the Building tab). */
+    public static boolean plannerEnabled = true;
+    /** Ticks between two planning runs of a settlement (600 = 30 seconds). */
+    public static int plannerIntervalTicks = 600;
+    /** Whether a settlement plans buildings by itself until its owner switches it on the Building tab. */
+    public static boolean autoPlanDefault = true;
+    /** If true, plans of the planner start at once. If false, the owner approves each plan on the Building tab. */
+    public static boolean autoApproveDefault = false;
+    /** The planner makes no new plan while this many builds are planned, queued or under construction. */
+    public static int maxPendingBuilds = 3;
+    /** How many builds at the front of the queue ask for their materials at once (the settlement posts needs for them). */
+    public static int activeBuilds = 2;
+    /** Members per settlement level. A design with min_level N needs N times this many members (and its own min_population). */
+    public static int levelPopulationStep = 6;
+    /** If true, the planner only picks designs whose min_level and min_population the settlement meets. */
+    public static boolean respectDesignMinimums = true;
+    /** Below this many members the planner builds tents for housing, from this many it builds houses (if the materials allow). */
+    public static int tentBelowPopulation = 6;
+    /** The fraction of a house's materials that storage must already hold for the planner to choose a house over a tent. */
+    public static double affordFraction = 0.5;
+    /** The fraction of the materials of the better building that storage must hold before the planner upgrades a tent or small house. */
+    public static double upgradeAffordFraction = 1.0;
+    /** The planner builds a storehouse when this fraction of the storage slots is used. */
+    public static double storageFullFraction = 0.8;
+    /** From this many members the planner builds a chapel when the settlement has no priest and no chapel. */
+    public static int chapelPopulation = 12;
+    /** How many blocks of earth the builders may fill under a building to level its ground. */
+    public static int terrainMaxFill = 2;
+    /** How many blocks of ground the builders may cut away on a building plot to level it. */
+    public static int terrainMaxCut = 3;
+    /** If true, filling ground takes dirt from the storage. If false, earthwork is free (the design's own blocks always come from storage). */
+    public static boolean terrainFillCostsMaterial = false;
+    /** Free blocks the planner keeps between two buildings. */
+    public static int buildingGap = 1;
+    /** If true, a build that needs planks of one wood accepts planks of any wood from the storage (the design's blocks are placed as written). */
+    public static boolean planksAnyWood = true;
+    /** How many builders may work on the same build at once. */
+    public static int buildersPerJob = 3;
+    /** Ticks of work (at speed 1) a builder needs to place one block. */
+    public static int builderPlaceTicks = 12;
+    /** Ticks of work (at speed 1) per unit of hardness when a builder breaks a block (clearing the site, taking a building down). */
+    public static int builderBreakTicksPerHardness = 30;
+    /** If true, builders reach high places with scaffolding that they place and remove again. */
+    public static boolean builderScaffolding = true;
+    /** If true, the scaffolding blocks come from the storage (and go back to it); if false the builder has its own. */
+    public static boolean builderScaffoldCostsMaterial = false;
+    /** The highest a builder builds a scaffolding column above the ground. */
+    public static int builderMaxScaffoldHeight = 24;
+    /** Ticks a builder waits for missing materials before it gives the job up for a while and looks for another one. */
+    public static int builderWaitReleaseTicks = 600;
+    /** Experience of the building skill for each block a builder places or takes down (before the skill_xp_multiplier). */
+    public static int skillXpBuild = 3;
+
+    // ---- families (rework phase 10) ----
+    public static boolean familiesEnabled = true;
+    public static int yearLengthDays = 96;
+    public static double yearsToAdulthood = 2.0;
+    public static int coupleMinPopulation = 4;
+    public static int coupleMinMorale = 60;
+    public static int coupleBondSeconds = 240;
+    public static double coupleChancePerDay = 0.3;
+    public static int coupleSocialRadius = 8;
+    public static double coupleSociableBonus = 0.5;
+    public static double coupleLonerFactor = 0.5;
+    public static boolean partnersShareSurname = true;
+    public static int widowRepartnerDays = 6;
+    public static int griefDays = 3;
+    public static int griefMorale = 25;
+    public static int partnerMorale = 3;
+    public static int partnerNearbyMorale = 2;
+    public static int partnerNearbyRadius = 10;
+    public static int familyHomeMorale = 3;
+    public static int childrenNearMorale = 2;
+    public static int childrenNearRadius = 12;
+    public static int childMinMorale = 55;
+    public static double childMinFoodDays = 3.0;
+    public static int maxChildrenPerHousehold = 3;
+    public static int birthCooldownDays = 8;
+    public static double birthChancePerDay = 0.25;
+    public static double childHungerFactor = 0.5;
+    public static int childSkillHeadStart = 40;
+    public static double childScaleStart = 0.5;
+    public static int childPlayRadius = 12;
+    public static double familyDebugFastGrowth = 1.0;
+    /** Ticks a child needs to grow up: {@code years_to_adulthood} years of {@code year_length_days} days. */
+    public static long adulthoodTicks() {
+        return Math.max(1L, Math.round(yearsToAdulthood * yearLengthDays * 24000.0D));
+    }
+
     /** How far (blocks, horizontal) a boundary marker may be from the hall it links to. */
     public static int markerMaxDistance = 128;
     /** The radius (blocks) of the area of a settlement with fewer than 3 markers. */
@@ -77,6 +180,20 @@ public final class SettlementConfig {
     /** The path range (blocks) of the NPCs of a settlement; longer trips go in hops. */
     public static int maxPathRange = 64;
 
+    // ---- settlement demand (rework phase 8) ----
+    /** If true, the settlement counts what it is short of and the production sites work toward it. */
+    public static boolean demandEnabled = true;
+    /** Ticks between two counts of the needs. */
+    public static int demandIntervalTicks = 200;
+    /** The settlement is short of food below this many NPC-days of food for each member. */
+    public static int demandFoodDays = 3;
+    /** The stock of planks, stone and glass the settlement keeps for the builders (0 = no need). */
+    public static int demandReservePlanks = 64;
+    public static int demandReserveStone = 64;
+    public static int demandReserveGlass = 16;
+    /** If true, loaded soldiers with an empty armour slot are a need for armour. */
+    public static boolean demandArmour = true;
+
     // ---- threat response (rework phase 2) ----
     /** If true, the settlement raises the alarm by itself when hostile entities are inside its land. */
     public static boolean autoAlarm = true;
@@ -126,6 +243,89 @@ public final class SettlementConfig {
     /** If true, a trader that follows a route with a wagon loads and unloads at the linked storages of the settlements it stops at. */
     public static boolean tradeRouteLoading = true;
 
+    // ---- sea trade (rework phase 11) ----
+    /** If false, traders do not sail sea routes and no faction trade ships come. */
+    public static boolean seaTradeEnabled = true;
+    /** How far (blocks) from a trader with a sea route chart it looks for a cargo ship to take. */
+    public static int seaTradeBindRange = 32;
+    /** The mooring of a ship is looked for within 70% of this many blocks of the dock block; a ship that has stopped at it (within this many plus 12 blocks of the dock block) counts as moored. */
+    public static int seaTradeMoorRange = 20;
+    /** The longest leg (blocks between two docks, in a straight line) a sea route may have. */
+    public static int seaTradeMaxLeg = 256;
+    /** Ticks a ship may take for one leg before the helmsman tries again (and in the end gives the stop up). */
+    public static int seaTradeLegTicks = 18000;
+    /** Ticks a ship waits at the last reachable point for a dock that is not loaded before it goes on to the next stop. */
+    public static int seaTradeDockWaitTicks = 12000;
+    /** If true, a trade ship also loads and unloads at the linked storages of the settlement round its dock (the dock's own storage comes first). */
+    public static boolean seaTradeSettlementStorage = true;
+    /** If false, no faction trade ships come to the settlements (the faction caravans by land are not affected). */
+    public static boolean seaCaravansEnabled = true;
+    /** In-game days between two trade ship rolls. */
+    public static int seaCaravanIntervalDays = 3;
+    /** The chance, at each roll, that a trade ship goes to a settlement with a dock. */
+    public static double seaCaravanChance = 0.35;
+    /** The most trade ships a settlement has at its docks at one time. */
+    public static int seaCaravanMaxPerSettlement = 1;
+    /** The most trade ships at sea at once in a world. */
+    public static int seaCaravanMaxActive = 3;
+    /** A dock only counts as reachable from the sea if the water at its mooring is this many blocks deep (at least) and a 5 x 5 hull fits. */
+    public static int seaCaravanMinDepth = 3;
+    /** A trade ship only appears where its route to the dock is at least this many blocks long (it must come from beyond view). */
+    public static int seaCaravanMinRoute = 48;
+    /** Ticks a trade ship stays moored and trades (9000 is 7.5 minutes). */
+    public static int seaCaravanStayTicks = 9000;
+    /** How many faction soldiers row a trade ship, and how many more guard it. */
+    public static int seaCaravanRowers = 2;
+    public static int seaCaravanGuards = 2;
+    /** A trade ship fills the buy orders of the market stalls within this many blocks of its trader. */
+    public static int seaCaravanOrderRange = 64;
+
+    // ---- naval combat (rework phase 11; the vehicle side is in the Vehicles module's config) ----
+    /** NPC crew members throw grappling hooks at hostile ships (owned crews only when the ship's stance is aggressive). */
+    public static boolean navalNpcGrapple = true;
+    /** How far (blocks, hull to hull) an NPC throws a hook. */
+    public static int navalNpcGrappleRange = 14;
+    /** Ticks a ship waits after an NPC threw a hook before one of its crew throws another. */
+    public static int navalNpcGrappleCooldownTicks = 600;
+    /** Soldiers of the NPC factions (their ships: the trade ships) throw hooks and board hostile ships too, not only the owned crews. */
+    public static boolean navalFactionBoarding = true;
+    /** Soldiers aboard a ship grappled to a hostile one cross to its deck and fight; crews defend their own deck. */
+    public static boolean navalBoarding = true;
+    /** An NPC helmsman rams hostile ships when the ship's stance is aggressive. */
+    public static boolean navalHelmRam = true;
+    /** How far (blocks) an aggressive helmsman looks for a ship to ram. */
+    public static int navalHelmRamRange = 48;
+    /** A helmsman of a ship under attack that is not aggressive sails for the nearest dock of its owner. */
+    public static boolean navalHelmFlee = true;
+    /** A ship of an NPC faction whose crew is dead can be taken as a prize by a player (the faction's reputation drops as for an attack). */
+    public static boolean navalPrize = true;
+
+    // ---- siege AI (rework phase 12) ----
+    /** Soldiers and archers ordered at a wall crew the siege equipment of their owner. */
+    public static boolean siegeAi = true;
+    /** How far (blocks) around an NPC it looks for siege equipment of its owner. */
+    public static int siegeSearchRadius = 48;
+    /** A target block with at least this many solid blocks from it up counts as a wall. */
+    public static int siegeWallMinHeight = 3;
+    /** At most this many towers, mantlets and rams are crewed for one order. */
+    public static int siegeMaxTowers = 2;
+    public static int siegeMaxMantlets = 3;
+    public static int siegeMaxRams = 2;
+    /** Archers who follow a mantlet and shoot from behind it, besides the one who pushes it. */
+    public static int siegeMantletCover = 3;
+    /** A mantlet stops this far (blocks) from the target. */
+    public static int siegeMantletStopDistance = 28;
+    /** How far (blocks) from its start a pushed vehicle plans its way, and how many search steps a plan may take. */
+    public static int siegePlanRange = 128;
+    public static int siegePlanNodes = 6000;
+    /** Ticks without headway after which a pushed vehicle plans its way again (twice), then gives up. */
+    public static int siegeStuckTicks = 160;
+    /** Soldiers crew battering rams to break a gate that is in the way. */
+    public static boolean siegeRam = true;
+    /** Ticks a crew holds the cover behind a mantlet, and a docked tower waits for its climbers, before the duty ends. */
+    public static int siegeCoverMaxTicks = 6000;
+    public static int siegeDockWaitTicks = 1800;
+
     // ---- morale (rework phase 5) ----
     /** If false, the morale is not computed and gives no work speed change. */
     public static boolean moraleEnabled = true;
@@ -146,6 +346,8 @@ public final class SettlementConfig {
     public static int moraleIdleTicks = 1200;
     /** How long a thought is not noted again when it comes up again (playtest fixes: what the NPC is thinking). */
     public static int thoughtRepeatTicks = 600;
+    /** Ticks between two census snapshots sent to a player who has the Census tab of the town hall open (rework phase 6). */
+    public static int censusRefreshTicks = 40;
 
     /** The work speed factor a morale from 0 to 100 gives: {@code moraleMinFactor} at 0 to {@code moraleMaxFactor} at 100. 1 when the morale is switched off. */
     public static double moraleWorkFactor(int morale) {
@@ -154,6 +356,64 @@ public final class SettlementConfig {
         }
         return moraleMinFactor + (moraleMaxFactor - moraleMinFactor) * (Math.max(0, Math.min(100, morale)) / 100.0D);
     }
+
+    // ---- worker skills (rework phase 7) ----
+    /** Multiplier on all skill experience (0 switches the experience off). */
+    public static double skillXpMultiplier = 1.0;
+    /** Experience for a completed work task, a hit, a kill, a trade, a delivery and a heal (before the multiplier). */
+    public static int skillXpWork = 10;
+    public static int skillXpHit = 2;
+    public static int skillXpKill = 20;
+    public static int skillXpTrade = 8;
+    public static int skillXpDelivery = 6;
+    public static int skillXpHeal = 5;
+    /** The experience at which Apprentice, Journeyman, Expert and Master start. */
+    public static int[] skillRankXp = {100, 500, 1500, 4000};
+    /** Work speed factor at Novice and at Master (the ranks between go in equal steps). */
+    public static double skillSpeedNovice = 0.9;
+    public static double skillSpeedMaster = 1.4;
+    /** Chance of one extra item from an ore, crop or log at Master (0 at Novice). */
+    public static double skillYieldChanceMaster = 0.15;
+    /** Extra damage dealt, damage taken less, arrow spread less and extra healing at Master (0 at Novice), as fractions. */
+    public static double skillDamageBonusMaster = 0.3;
+    public static double skillDamageTakenReductionMaster = 0.2;
+    public static double skillSpreadReductionMaster = 0.5;
+    public static double skillHealBonusMaster = 0.5;
+    /** Morale points for a level-up and how long they last in ticks. */
+    public static int skillLevelUpMorale = 4;
+    public static int skillLevelUpMoraleTicks = 12000;
+    /** If true, the rank of the main skill is part of the name of the NPC ("Apprentice Miner Bill"). A name tag always wins. */
+    public static boolean skillRankInName = true;
+
+    // ---- traits (rework phase 7) ----
+    public static boolean traitsEnabled = true;
+    public static double traitSecondChance = 0.5;
+    public static double traitInheritNewChance = 0.2;
+    public static double traitLazySpeed = 0.85;
+    public static double traitLazyPauseChance = 0.3;
+    public static double traitHardworkingSpeed = 1.15;
+    public static int traitHardworkingIdleMorale = -3;
+    public static double traitCowardlyFleeRange = 1.5;
+    public static double traitGluttonHunger = 1.3;
+    public static int traitGluttonMealMorale = 3;
+    public static double traitFrugalHunger = 0.75;
+    public static int traitDevoutMorale = 4;
+    public static int traitDevoutRadius = 24;
+    public static int traitNightOwlShift = 1500;
+    public static int traitEarlyRiserShift = 1000;
+    public static double traitNightOwlSpeed = 1.1;
+    public static double traitNightOwlWatch = 2.0;
+    public static int traitSociableMorale = 3;
+    public static int traitLonerMorale = 3;
+    public static double traitQuickLearnerXp = 1.5;
+    public static double traitClumsyToolChance = 0.04;
+    public static double traitClumsyDropChance = 0.02;
+    public static int traitStrongPouchSlots = 3;
+    public static double traitStrongDamage = 0.15;
+    public static double traitToughHealth = 0.25;
+    public static double traitGreenThumbYield = 0.15;
+    public static double traitKeenEyeSpread = 0.75;
+    public static double traitKeenEyeFishing = 1.2;
 
     // ---- inn and stable hand (rework phase 5) ----
     /** Blocks around the inn within which the innkeeper serves the members that gather. */
@@ -194,6 +454,7 @@ public final class SettlementConfig {
     private static final ModConfigSpec.IntValue MORALE_BARD_WINDOW;
     private static final ModConfigSpec.IntValue MORALE_IDLE;
     private static final ModConfigSpec.IntValue THOUGHT_REPEAT;
+    private static final ModConfigSpec.IntValue CENSUS_REFRESH;
     private static final ModConfigSpec.IntValue INN_SERVE_RADIUS;
     private static final ModConfigSpec.IntValue INN_SERVE_INTERVAL;
     private static final ModConfigSpec.IntValue INN_DRINK_FOOD;
@@ -219,6 +480,47 @@ public final class SettlementConfig {
     private static final ModConfigSpec.IntValue CARAVAN_MAX_ACTIVE;
     private static final ModConfigSpec.BooleanValue CARAVAN_TAILOR;
     private static final ModConfigSpec.BooleanValue TRADE_ROUTE_LOADING;
+    private static final ModConfigSpec.BooleanValue SEA_TRADE_ENABLED;
+    private static final ModConfigSpec.IntValue SEA_TRADE_BIND_RANGE;
+    private static final ModConfigSpec.IntValue SEA_TRADE_MOOR_RANGE;
+    private static final ModConfigSpec.IntValue SEA_TRADE_MAX_LEG;
+    private static final ModConfigSpec.IntValue SEA_TRADE_LEG_TICKS;
+    private static final ModConfigSpec.IntValue SEA_TRADE_DOCK_WAIT_TICKS;
+    private static final ModConfigSpec.BooleanValue SEA_TRADE_SETTLEMENT_STORAGE;
+    private static final ModConfigSpec.BooleanValue SEA_CARAVANS_ENABLED;
+    private static final ModConfigSpec.IntValue SEA_CARAVAN_INTERVAL_DAYS;
+    private static final ModConfigSpec.DoubleValue SEA_CARAVAN_CHANCE;
+    private static final ModConfigSpec.IntValue SEA_CARAVAN_MAX_PER_SETTLEMENT;
+    private static final ModConfigSpec.IntValue SEA_CARAVAN_MAX_ACTIVE;
+    private static final ModConfigSpec.IntValue SEA_CARAVAN_MIN_DEPTH;
+    private static final ModConfigSpec.IntValue SEA_CARAVAN_MIN_ROUTE;
+    private static final ModConfigSpec.IntValue SEA_CARAVAN_STAY_TICKS;
+    private static final ModConfigSpec.IntValue SEA_CARAVAN_ROWERS;
+    private static final ModConfigSpec.IntValue SEA_CARAVAN_GUARDS;
+    private static final ModConfigSpec.IntValue SEA_CARAVAN_ORDER_RANGE;
+    private static final ModConfigSpec.BooleanValue NAVAL_NPC_GRAPPLE;
+    private static final ModConfigSpec.IntValue NAVAL_NPC_GRAPPLE_RANGE;
+    private static final ModConfigSpec.IntValue NAVAL_NPC_GRAPPLE_COOLDOWN;
+    private static final ModConfigSpec.BooleanValue NAVAL_FACTION_BOARDING;
+    private static final ModConfigSpec.BooleanValue NAVAL_BOARDING;
+    private static final ModConfigSpec.BooleanValue NAVAL_HELM_RAM;
+    private static final ModConfigSpec.IntValue NAVAL_HELM_RAM_RANGE;
+    private static final ModConfigSpec.BooleanValue NAVAL_HELM_FLEE;
+    private static final ModConfigSpec.BooleanValue NAVAL_PRIZE;
+    private static final ModConfigSpec.BooleanValue SIEGE_AI;
+    private static final ModConfigSpec.IntValue SIEGE_SEARCH_RADIUS;
+    private static final ModConfigSpec.IntValue SIEGE_WALL_MIN_HEIGHT;
+    private static final ModConfigSpec.IntValue SIEGE_MAX_TOWERS;
+    private static final ModConfigSpec.IntValue SIEGE_MAX_MANTLETS;
+    private static final ModConfigSpec.IntValue SIEGE_MAX_RAMS;
+    private static final ModConfigSpec.IntValue SIEGE_MANTLET_COVER;
+    private static final ModConfigSpec.IntValue SIEGE_MANTLET_STOP;
+    private static final ModConfigSpec.IntValue SIEGE_PLAN_RANGE;
+    private static final ModConfigSpec.IntValue SIEGE_PLAN_NODES;
+    private static final ModConfigSpec.IntValue SIEGE_STUCK_TICKS;
+    private static final ModConfigSpec.BooleanValue SIEGE_RAM;
+    private static final ModConfigSpec.IntValue SIEGE_COVER_MAX_TICKS;
+    private static final ModConfigSpec.IntValue SIEGE_DOCK_WAIT_TICKS;
     private static final ModConfigSpec.DoubleValue FRIENDLY_DISCOUNT;
     private static final ModConfigSpec.DoubleValue ALLIED_DISCOUNT;
     private static final ModConfigSpec.IntValue TRADE_REPUTATION;
@@ -233,6 +535,13 @@ public final class SettlementConfig {
     private static final ModConfigSpec.IntValue FOOD_LOW_NPC_DAYS;
     private static final ModConfigSpec.IntValue FOOD_SPARE_NPC_DAYS;
     private static final ModConfigSpec.IntValue MAX_PATH_RANGE;
+    private static final ModConfigSpec.BooleanValue DEMAND_ENABLED;
+    private static final ModConfigSpec.IntValue DEMAND_INTERVAL;
+    private static final ModConfigSpec.IntValue DEMAND_FOOD_DAYS;
+    private static final ModConfigSpec.IntValue DEMAND_RESERVE_PLANKS;
+    private static final ModConfigSpec.IntValue DEMAND_RESERVE_STONE;
+    private static final ModConfigSpec.IntValue DEMAND_RESERVE_GLASS;
+    private static final ModConfigSpec.BooleanValue DEMAND_ARMOUR;
     private static final ModConfigSpec.BooleanValue SCHEDULE_ENABLED;
     private static final ModConfigSpec.IntValue WAKE_END;
     private static final ModConfigSpec.IntValue WORK_END;
@@ -258,6 +567,117 @@ public final class SettlementConfig {
     private static final ModConfigSpec.IntValue NPC_DAY_FOOD;
     private static final ModConfigSpec.IntValue MARKER_MAX_DISTANCE;
     private static final ModConfigSpec.IntValue DEFAULT_RADIUS;
+    private static final ModConfigSpec.DoubleValue SKILL_XP_MULT;
+    private static final ModConfigSpec.IntValue SKILL_XP_WORK;
+    private static final ModConfigSpec.IntValue SKILL_XP_HIT;
+    private static final ModConfigSpec.IntValue SKILL_XP_KILL;
+    private static final ModConfigSpec.IntValue SKILL_XP_TRADE;
+    private static final ModConfigSpec.IntValue SKILL_XP_DELIVERY;
+    private static final ModConfigSpec.IntValue SKILL_XP_HEAL;
+    private static final ModConfigSpec.IntValue SKILL_RANK_APPRENTICE;
+    private static final ModConfigSpec.IntValue SKILL_RANK_JOURNEYMAN;
+    private static final ModConfigSpec.IntValue SKILL_RANK_EXPERT;
+    private static final ModConfigSpec.IntValue SKILL_RANK_MASTER;
+    private static final ModConfigSpec.DoubleValue SKILL_SPEED_NOVICE;
+    private static final ModConfigSpec.DoubleValue SKILL_SPEED_MASTER;
+    private static final ModConfigSpec.DoubleValue SKILL_YIELD_MASTER;
+    private static final ModConfigSpec.DoubleValue SKILL_DAMAGE_MASTER;
+    private static final ModConfigSpec.DoubleValue SKILL_TAKEN_MASTER;
+    private static final ModConfigSpec.DoubleValue SKILL_SPREAD_MASTER;
+    private static final ModConfigSpec.DoubleValue SKILL_HEAL_MASTER;
+    private static final ModConfigSpec.IntValue SKILL_LEVELUP_MORALE;
+    private static final ModConfigSpec.IntValue SKILL_LEVELUP_MORALE_TICKS;
+    private static final ModConfigSpec.BooleanValue SKILL_RANK_IN_NAME;
+    private static final ModConfigSpec.BooleanValue TR_TRAITS_ENABLED;
+    private static final ModConfigSpec.DoubleValue TR_TRAIT_SECOND_CHANCE;
+    private static final ModConfigSpec.DoubleValue TR_TRAIT_INHERIT_NEW_CHANCE;
+    private static final ModConfigSpec.DoubleValue TR_TRAIT_LAZY_SPEED;
+    private static final ModConfigSpec.DoubleValue TR_TRAIT_LAZY_PAUSE_CHANCE;
+    private static final ModConfigSpec.DoubleValue TR_TRAIT_HARDWORKING_SPEED;
+    private static final ModConfigSpec.IntValue TR_TRAIT_HARDWORKING_IDLE_MORALE;
+    private static final ModConfigSpec.DoubleValue TR_TRAIT_COWARDLY_FLEE_RANGE;
+    private static final ModConfigSpec.DoubleValue TR_TRAIT_GLUTTON_HUNGER;
+    private static final ModConfigSpec.IntValue TR_TRAIT_GLUTTON_MEAL_MORALE;
+    private static final ModConfigSpec.DoubleValue TR_TRAIT_FRUGAL_HUNGER;
+    private static final ModConfigSpec.IntValue TR_TRAIT_DEVOUT_MORALE;
+    private static final ModConfigSpec.IntValue TR_TRAIT_DEVOUT_RADIUS;
+    private static final ModConfigSpec.IntValue TR_TRAIT_NIGHT_OWL_SHIFT_TICKS;
+    private static final ModConfigSpec.IntValue TR_TRAIT_EARLY_RISER_SHIFT_TICKS;
+    private static final ModConfigSpec.DoubleValue TR_TRAIT_NIGHT_OWL_SPEED;
+    private static final ModConfigSpec.DoubleValue TR_TRAIT_NIGHT_OWL_WATCH_WEIGHT;
+    private static final ModConfigSpec.IntValue TR_TRAIT_SOCIABLE_MORALE;
+    private static final ModConfigSpec.IntValue TR_TRAIT_LONER_MORALE;
+    private static final ModConfigSpec.DoubleValue TR_TRAIT_QUICK_LEARNER_XP;
+    private static final ModConfigSpec.DoubleValue TR_TRAIT_CLUMSY_TOOL_CHANCE;
+    private static final ModConfigSpec.DoubleValue TR_TRAIT_CLUMSY_DROP_CHANCE;
+    private static final ModConfigSpec.IntValue TR_TRAIT_STRONG_POUCH_SLOTS;
+    private static final ModConfigSpec.DoubleValue TR_TRAIT_STRONG_DAMAGE;
+    private static final ModConfigSpec.DoubleValue TR_TRAIT_TOUGH_HEALTH;
+    private static final ModConfigSpec.DoubleValue TR_TRAIT_GREEN_THUMB_YIELD;
+    private static final ModConfigSpec.DoubleValue TR_TRAIT_KEEN_EYE_SPREAD;
+    private static final ModConfigSpec.DoubleValue TR_TRAIT_KEEN_EYE_FISHING;
+    private static final ModConfigSpec.IntValue BP_MAX_WIDTH;
+    private static final ModConfigSpec.IntValue BP_MAX_HEIGHT;
+    private static final ModConfigSpec.IntValue BP_MAX_PER_PLAYER;
+    private static final ModConfigSpec.IntValue PLOT_MIN_SIDE;
+    private static final ModConfigSpec.IntValue PLOT_MAX_SIDE;
+    private static final ModConfigSpec.IntValue PLOTS_MAX;
+    private static final ModConfigSpec.BooleanValue PLANNER_ENABLED;
+    private static final ModConfigSpec.IntValue PLANNER_INTERVAL;
+    private static final ModConfigSpec.BooleanValue AUTO_PLAN_DEFAULT;
+    private static final ModConfigSpec.BooleanValue AUTO_APPROVE_DEFAULT;
+    private static final ModConfigSpec.IntValue MAX_PENDING_BUILDS;
+    private static final ModConfigSpec.IntValue ACTIVE_BUILDS;
+    private static final ModConfigSpec.IntValue LEVEL_POP_STEP;
+    private static final ModConfigSpec.BooleanValue RESPECT_MINIMUMS;
+    private static final ModConfigSpec.IntValue TENT_BELOW_POP;
+    private static final ModConfigSpec.DoubleValue AFFORD_FRACTION;
+    private static final ModConfigSpec.DoubleValue UPGRADE_AFFORD_FRACTION;
+    private static final ModConfigSpec.DoubleValue STORAGE_FULL_FRACTION;
+    private static final ModConfigSpec.IntValue CHAPEL_POPULATION;
+    private static final ModConfigSpec.IntValue TERRAIN_MAX_FILL;
+    private static final ModConfigSpec.IntValue TERRAIN_MAX_CUT;
+    private static final ModConfigSpec.BooleanValue TERRAIN_FILL_COSTS;
+    private static final ModConfigSpec.IntValue BUILDING_GAP;
+    private static final ModConfigSpec.BooleanValue PLANKS_ANY;
+    private static final ModConfigSpec.IntValue BUILDERS_PER_JOB;
+    private static final ModConfigSpec.IntValue BUILDER_PLACE_TICKS;
+    private static final ModConfigSpec.IntValue BUILDER_BREAK_TICKS;
+    private static final ModConfigSpec.BooleanValue BUILDER_SCAFFOLDING;
+    private static final ModConfigSpec.BooleanValue BUILDER_SCAFFOLD_COSTS;
+    private static final ModConfigSpec.IntValue BUILDER_MAX_SCAFFOLD;
+    private static final ModConfigSpec.IntValue BUILDER_WAIT_RELEASE;
+    private static final ModConfigSpec.IntValue SKILL_XP_BUILD;
+    private static final ModConfigSpec.BooleanValue FAM_ENABLED;
+    private static final ModConfigSpec.IntValue FAM_YEAR_DAYS;
+    private static final ModConfigSpec.DoubleValue FAM_YEARS_TO_ADULT;
+    private static final ModConfigSpec.IntValue FAM_COUPLE_MIN_POP;
+    private static final ModConfigSpec.IntValue FAM_COUPLE_MIN_MORALE;
+    private static final ModConfigSpec.IntValue FAM_BOND_SECONDS;
+    private static final ModConfigSpec.DoubleValue FAM_CHANCE;
+    private static final ModConfigSpec.IntValue FAM_SOCIAL_RADIUS;
+    private static final ModConfigSpec.DoubleValue FAM_SOCIABLE_BONUS;
+    private static final ModConfigSpec.DoubleValue FAM_LONER_FACTOR;
+    private static final ModConfigSpec.BooleanValue FAM_SHARE_SURNAME;
+    private static final ModConfigSpec.IntValue FAM_WIDOW_DAYS;
+    private static final ModConfigSpec.IntValue FAM_GRIEF_DAYS;
+    private static final ModConfigSpec.IntValue FAM_GRIEF_MORALE;
+    private static final ModConfigSpec.IntValue FAM_PARTNER_MORALE;
+    private static final ModConfigSpec.IntValue FAM_PARTNER_NEAR_MORALE;
+    private static final ModConfigSpec.IntValue FAM_PARTNER_NEAR_RADIUS;
+    private static final ModConfigSpec.IntValue FAM_HOME_MORALE;
+    private static final ModConfigSpec.IntValue FAM_CHILDREN_MORALE;
+    private static final ModConfigSpec.IntValue FAM_CHILDREN_RADIUS;
+    private static final ModConfigSpec.IntValue FAM_CHILD_MIN_MORALE;
+    private static final ModConfigSpec.DoubleValue FAM_CHILD_FOOD_DAYS;
+    private static final ModConfigSpec.IntValue FAM_MAX_CHILDREN;
+    private static final ModConfigSpec.IntValue FAM_BIRTH_COOLDOWN;
+    private static final ModConfigSpec.DoubleValue FAM_BIRTH_CHANCE;
+    private static final ModConfigSpec.DoubleValue FAM_CHILD_HUNGER;
+    private static final ModConfigSpec.IntValue FAM_CHILD_SKILL_XP;
+    private static final ModConfigSpec.DoubleValue FAM_CHILD_SCALE;
+    private static final ModConfigSpec.IntValue FAM_CHILD_PLAY_RADIUS;
+    private static final ModConfigSpec.DoubleValue FAM_DEBUG_GROWTH;
     public static final ModConfigSpec SPEC;
 
     static {
@@ -348,6 +768,22 @@ public final class SettlementConfig {
         MAX_PATH_RANGE = builder.comment("Default = 64", "Path range (blocks) of settlement NPCs. Trips further than this go in hops through intermediate waypoints.")
                 .defineInRange("max_path_range", 64, 16, 256);
         builder.pop();
+        builder.comment("Settlement demand: what the settlement is short of, and the production that works toward it (server side)").push("demand");
+        DEMAND_ENABLED = builder.comment("Default = true", "If false, the settlement keeps no needs list: production sites do not react to it and the hall shows no needs.")
+                .define("demand_enabled", true);
+        DEMAND_INTERVAL = builder.comment("Default = 200 (10 seconds)", "Ticks between two counts of the needs of a settlement.")
+                .defineInRange("demand_interval_ticks", 200, 20, 24000);
+        DEMAND_FOOD_DAYS = builder.comment("Default = 3", "The settlement is short of food when its storages hold less than this many NPC-days of food for each member (0 = never).")
+                .defineInRange("demand_food_days", 3, 0, 100);
+        DEMAND_RESERVE_PLANKS = builder.comment("Default = 64", "Planks the settlement keeps in stock for the builders of the settlement expansion; fewer is a need (0 = none kept).")
+                .defineInRange("demand_reserve_planks", 64, 0, 4096);
+        DEMAND_RESERVE_STONE = builder.comment("Default = 64", "Cobblestone or stone kept in stock for the builders; fewer is a need (0 = none kept).")
+                .defineInRange("demand_reserve_stone", 64, 0, 4096);
+        DEMAND_RESERVE_GLASS = builder.comment("Default = 16", "Glass kept in stock for the builders; fewer is a need (0 = none kept).")
+                .defineInRange("demand_reserve_glass", 16, 0, 4096);
+        DEMAND_ARMOUR = builder.comment("Default = true", "If true, an empty armour slot of a loaded soldier counts as a need for that armour piece (soldiers do not fetch it themselves).")
+                .define("demand_armour", true);
+        builder.pop();
         builder.comment("Trade prices and reputation (market stalls and faction traders, server side)").push("trade");
         FRIENDLY_DISCOUNT = builder.comment("Default = 0.9", "Price factor for a FRIENDLY buyer. A NEUTRAL buyer pays the full price and a HOSTILE one is refused.")
                 .defineInRange("friendly_discount", 0.9, 0.1, 2.0);
@@ -387,6 +823,99 @@ public final class SettlementConfig {
                 "If true, a player-owned trader that follows a trade route with a hitched wagon loads and unloads the wagon at the linked storages of the settlements it stops at (using the deposit and withdraw lists of its trade order).")
                 .define("trade_route_loading", true);
         builder.pop();
+        builder.comment("Sea trade: trade routes of cargo ships between docks, and the trade ships of the factions (server side)").push("sea_trade");
+        SEA_TRADE_ENABLED = builder.comment("Default = true", "If false, owned traders do not sail sea routes (the sea route chart) and no faction trade ships come.")
+                .define("sea_trade_enabled", true);
+        SEA_TRADE_BIND_RANGE = builder.comment("Default = 32", "How far (blocks) from a trader that holds a sea route chart it looks for a cargo ship (a cog of its owner with a free helm) to take.")
+                .defineInRange("sea_trade_bind_range", 32, 4, 128);
+        SEA_TRADE_MOOR_RANGE = builder.comment("Default = 20", "The mooring place of a ship is looked for within 70% of this many blocks of the dock block (the water nearest to it where the hull fits). A ship that has stopped there counts as moored and trades.")
+                .defineInRange("sea_trade_moor_range", 20, 6, 64);
+        SEA_TRADE_MAX_LEG = builder.comment("Default = 256", "The longest leg (blocks, straight line between two docks) of a sea route. A longer leg is skipped and the owner is told.")
+                .defineInRange("sea_trade_max_leg", 256, 32, 400);
+        SEA_TRADE_LEG_TICKS = builder.comment("Default = 18000 (15 minutes)", "Ticks a ship may take for one leg before its helmsman plans it again; three failed tries give the stop up.")
+                .defineInRange("sea_trade_leg_ticks", 18000, 600, 240000);
+        SEA_TRADE_DOCK_WAIT_TICKS = builder.comment("Default = 12000 (10 minutes)", "Ticks a ship waits at the last point it can reach for a dock that is not loaded, before it goes on to the next stop.")
+                .defineInRange("sea_trade_dock_wait_ticks", 12000, 200, 240000);
+        SEA_TRADE_SETTLEMENT_STORAGE = builder.comment("Default = true",
+                "If true, a ship that moors at a dock inside a settlement of its owner also loads and unloads at the linked storages of that settlement (the inventory of the dock comes first).")
+                .define("sea_trade_settlement_storage", true);
+        SEA_CARAVANS_ENABLED = builder.comment("Default = true", "If false, no faction trade ships come to the docks of the settlements.")
+                .define("sea_caravans_enabled", true);
+        SEA_CARAVAN_INTERVAL_DAYS = builder.comment("Default = 3", "In-game days between two trade ship rolls (counted in game time and saved).")
+                .defineInRange("sea_caravan_interval_days", 3, 1, 1000);
+        SEA_CARAVAN_CHANCE = builder.comment("Default = 0.35",
+                "The chance, at each roll, that a trade ship goes to a settlement that has a dock with deep water access. Only factions whose relation to the settlement owner is NEUTRAL or better are drawn.")
+                .defineInRange("sea_caravan_chance", 0.35, 0.0, 1.0);
+        SEA_CARAVAN_MAX_PER_SETTLEMENT = builder.comment("Default = 1", "The most trade ships at the docks of one settlement at a time.")
+                .defineInRange("sea_caravan_max_per_settlement", 1, 1, 8);
+        SEA_CARAVAN_MAX_ACTIVE = builder.comment("Default = 3", "The most trade ships at sea at once in a world.")
+                .defineInRange("sea_caravan_max_active", 3, 1, 50);
+        SEA_CARAVAN_MIN_DEPTH = builder.comment("Default = 3", "A dock only gets trade ships if the water at its mooring is at least this many blocks deep (and a 5 x 5 block hull fits there).")
+                .defineInRange("sea_caravan_min_depth", 3, 2, 16);
+        SEA_CARAVAN_MIN_ROUTE = builder.comment("Default = 48", "A trade ship only appears where its route over the water to the dock is at least this many blocks long, so that it comes from beyond view.")
+                .defineInRange("sea_caravan_min_route", 48, 16, 300);
+        SEA_CARAVAN_STAY_TICKS = builder.comment("Default = 9000 (7.5 minutes)", "How long a trade ship stays moored at the dock and trades.")
+                .defineInRange("sea_caravan_stay_ticks", 9000, 200, 240000);
+        SEA_CARAVAN_ROWERS = builder.comment("Default = 2", "How many faction soldiers row a trade ship (each adds a tenth of the speed of the cog; it has four benches).")
+                .defineInRange("sea_caravan_rowers", 2, 0, 4);
+        SEA_CARAVAN_GUARDS = builder.comment("Default = 2", "How many more faction soldiers guard a trade ship (in the gunner and passenger seats).")
+                .defineInRange("sea_caravan_guards", 2, 0, 5);
+        SEA_CARAVAN_ORDER_RANGE = builder.comment("Default = 64", "A trade ship fills the buy orders of the market stalls within this many blocks of its trader (a ship cannot come as near as a wagon).")
+                .defineInRange("sea_caravan_order_range", 64, 8, 256);
+        builder.pop();
+        builder.comment("Naval combat: NPCs ramming, throwing grappling hooks and boarding (server side). Ramming, hooks and sinking cargo themselves are in the Vehicles module's config.").push("naval_combat");
+        NAVAL_NPC_GRAPPLE = builder.comment("Default = true",
+                "If true, soldiers aboard a ship throw grappling hooks at a hostile ship that is close. A ship of a player only does so when its owner set the aggressive stance (the toggle in the ship's screen).")
+                .define("naval_npc_grapple_enabled", true);
+        NAVAL_NPC_GRAPPLE_RANGE = builder.comment("Default = 14", "How far (blocks, from hull to hull) an NPC throws a grappling hook.")
+                .defineInRange("naval_npc_grapple_range", 14, 4, 64);
+        NAVAL_NPC_GRAPPLE_COOLDOWN = builder.comment("Default = 600 (30 seconds)", "Ticks a ship waits after one of its crew threw a hook before another throw.")
+                .defineInRange("naval_npc_grapple_cooldown_ticks", 600, 40, 24000);
+        NAVAL_FACTION_BOARDING = builder.comment("Default = true", "If true, the soldiers of NPC factions (on their trade ships) throw hooks and board ships that their faction is HOSTILE to, as the owned crews do with the aggressive stance.")
+                .define("naval_faction_boarding", true);
+        NAVAL_BOARDING = builder.comment("Default = true",
+                "If true, melee soldiers sitting on a ship that is grappled to a hostile ship cross to its deck and fight there, and the crew of a ship fights boarders on its own deck. If false, crews stay in their seats.")
+                .define("naval_boarding_enabled", true);
+        NAVAL_HELM_RAM = builder.comment("Default = true", "If true, an owned NPC helmsman of a ship with a ram and the aggressive stance steers to ram hostile ships.")
+                .define("naval_helm_ram_enabled", true);
+        NAVAL_HELM_RAM_RANGE = builder.comment("Default = 48", "How far (blocks) an aggressive helmsman looks for a hostile ship to ram.")
+                .defineInRange("naval_helm_ram_range", 48, 8, 128);
+        NAVAL_HELM_FLEE = builder.comment("Default = true", "If true, an owned helmsman whose ship was hurt in the last 5 seconds and has no aggressive stance sails for the nearest dock of its owner (within 256 blocks), if there is one; otherwise it keeps its course.")
+                .define("naval_helm_flee_home", true);
+        NAVAL_PRIZE = builder.comment("Default = true",
+                "If true, a player who uses a ship of an NPC faction that has no crew left alive aboard takes it as a prize (the ship becomes his and the reputation with the faction drops as for an attack).")
+                .define("naval_prize_enabled", true);
+        builder.pop();
+        builder.comment("Siege AI: soldiers and archers ordered at a wall (the command baton's attack mode aimed at a block) crew the towers, mantlets and battering rams of their owner (server side). The vehicles themselves are in the Vehicles module's config.").push("siege");
+        SIEGE_AI = builder.comment("Default = true", "If false, an attack order at a wall is the plain 'walk to the area' order and no NPC takes a siege role.")
+                .define("siege_ai_enabled", true);
+        SIEGE_SEARCH_RADIUS = builder.comment("Default = 48", "How far (blocks) around itself an NPC with an attack order at a wall looks for siege equipment (tower, mantlet, battering ram) of its owner.")
+                .defineInRange("siege_search_radius", 48, 8, 160);
+        SIEGE_WALL_MIN_HEIGHT = builder.comment("Default = 3", "A block that the baton's attack order aims at counts as a wall when this many solid blocks (the block itself and the ones above it) stand on top of each other. A gate (Ancient Warfare gate, door or fence gate) next to the target also counts.")
+                .defineInRange("siege_wall_min_height", 3, 2, 16);
+        SIEGE_MAX_TOWERS = builder.comment("Default = 2", "At most this many siege towers are crewed for one order.")
+                .defineInRange("siege_max_towers", 2, 1, 4);
+        SIEGE_MAX_MANTLETS = builder.comment("Default = 3", "At most this many mantlets are pushed for one order.")
+                .defineInRange("siege_max_mantlets", 3, 1, 6);
+        SIEGE_MAX_RAMS = builder.comment("Default = 2", "At most this many battering rams are crewed for one order at a gate.")
+                .defineInRange("siege_max_rams", 2, 1, 3);
+        SIEGE_MANTLET_COVER = builder.comment("Default = 3", "How many archers besides the pusher follow a mantlet and shoot from behind it.")
+                .defineInRange("siege_mantlet_cover_archers", 3, 0, 6);
+        SIEGE_MANTLET_STOP = builder.comment("Default = 28", "A mantlet stops this many blocks from the target (never farther than the archers' attack range) and the archers shoot from behind it.")
+                .defineInRange("siege_mantlet_stop_distance", 28, 8, 64);
+        SIEGE_PLAN_RANGE = builder.comment("Default = 128", "How far (blocks) from its start a pushed vehicle (tower, mantlet, ram) plans its way to the wall.")
+                .defineInRange("siege_plan_range", 128, 32, 256);
+        SIEGE_PLAN_NODES = builder.comment("Default = 6000", "How many search steps one plan of a pushed vehicle may take (the work is spread over ticks, 300 steps a tick).")
+                .defineInRange("siege_plan_nodes", 6000, 500, 40000);
+        SIEGE_STUCK_TICKS = builder.comment("Default = 160 (8 seconds)", "Ticks a pushed vehicle with a crew may make no headway before it plans its way again; after two new plans it gives up and the crew goes on with the plain order.")
+                .defineInRange("siege_stuck_ticks", 160, 40, 1200);
+        SIEGE_RAM = builder.comment("Default = true", "If true, soldiers crew battering rams and drive them at a gate (Ancient Warfare gate, door or fence gate) that is at the target of the order.")
+                .define("siege_ram_enabled", true);
+        SIEGE_COVER_MAX_TICKS = builder.comment("Default = 6000 (5 minutes)", "Ticks archers hold the cover behind a mantlet that has reached its place before the duty ends.")
+                .defineInRange("siege_cover_max_ticks", 6000, 600, 72000);
+        SIEGE_DOCK_WAIT_TICKS = builder.comment("Default = 1800 (90 seconds)", "Ticks a tower that has docked at the wall waits for soldiers still on their way to the ladder before the order is over for it.")
+                .defineInRange("siege_dock_wait_ticks", 1800, 200, 24000);
+        builder.pop();
         builder.comment("Settlement morale (server side)").push("morale");
         MORALE_ENABLED = builder.comment("Default = true", "If false, the morale of a settlement is not computed and does not change the work speed.")
                 .define("morale_enabled", true);
@@ -408,6 +937,8 @@ public final class SettlementConfig {
                 .defineInRange("morale_idle_ticks", 1200, 20, 240000);
         THOUGHT_REPEAT = builder.comment("Default = 600 (30 seconds)", "Ticks before the same event is written to the recent thoughts of an NPC again (the 'talk to NPC' screen).")
                 .defineInRange("thought_repeat_ticks", 600, 0, 240000);
+        CENSUS_REFRESH = builder.comment("Default = 40 (2 seconds)", "Ticks between two refreshes of the member list (Census tab) of the town hall screen. Only sent to players who have the tab open.")
+                .defineInRange("census_refresh_ticks", 40, 10, 1200);
         builder.pop();
         builder.comment("Inn and stable hand (server side)").push("inn_and_stable");
         INN_SERVE_RADIUS = builder.comment("Default = 6", "Blocks around the inn in which the innkeeper serves the members that gather there.")
@@ -429,6 +960,108 @@ public final class SettlementConfig {
         STABLE_TAME_TICKS = builder.comment("Default = 160", "Ticks a stable hand stays with a wild horse, donkey or mule before it is tame.")
                 .defineInRange("stable_tame_ticks", 160, 20, 6000);
         builder.pop();
+        builder.comment("Worker skills and ranks (server side)").push("skills");
+        SKILL_XP_MULT = builder.comment("Default = 1.0", "Multiplier on all skill experience the NPCs earn. 0 switches skills off.")
+                .defineInRange("skill_xp_multiplier", 1.0, 0.0, 100.0);
+        SKILL_XP_WORK = builder.comment("Default = 10", "Experience for a completed task at a staffed worksite (a block broken, a crop harvested, a fish caught, an animal tended).")
+                .defineInRange("skill_xp_work_task", 10, 0, 1000);
+        SKILL_XP_HIT = builder.comment("Default = 2", "Combat experience for a hit landed (melee or an arrow shot).")
+                .defineInRange("skill_xp_hit", 2, 0, 1000);
+        SKILL_XP_KILL = builder.comment("Default = 20", "Combat experience for a kill.")
+                .defineInRange("skill_xp_kill", 20, 0, 1000);
+        SKILL_XP_TRADE = builder.comment("Default = 8", "Trading experience for a trade a player makes with the trader (at most one gain per 5 seconds per NPC).")
+                .defineInRange("skill_xp_trade", 8, 0, 1000);
+        SKILL_XP_DELIVERY = builder.comment("Default = 6", "Hauling experience for one delivery, a stop where a courier moved items (at most one gain per 5 seconds per NPC).")
+                .defineInRange("skill_xp_delivery", 6, 0, 1000);
+        SKILL_XP_HEAL = builder.comment("Default = 5", "Medicine experience for one heal by a medic (a resurrection by a priest gives 5 times this).")
+                .defineInRange("skill_xp_heal", 5, 0, 1000);
+        SKILL_RANK_APPRENTICE = builder.comment("Default = 100", "Experience in a skill at which the rank Apprentice starts.")
+                .defineInRange("skill_rank_apprentice_xp", 100, 1, 1000000);
+        SKILL_RANK_JOURNEYMAN = builder.comment("Default = 500", "Experience at which Journeyman starts (raised to above Apprentice if lower).")
+                .defineInRange("skill_rank_journeyman_xp", 500, 1, 1000000);
+        SKILL_RANK_EXPERT = builder.comment("Default = 1500", "Experience at which Expert starts (raised to above Journeyman if lower).")
+                .defineInRange("skill_rank_expert_xp", 1500, 1, 1000000);
+        SKILL_RANK_MASTER = builder.comment("Default = 4000", "Experience at which Master starts (raised to above Expert if lower).")
+                .defineInRange("skill_rank_master_xp", 4000, 1, 1000000);
+        SKILL_SPEED_NOVICE = builder.comment("Default = 0.9", "Work speed factor of a Novice at the task of the skill (the ranks go in equal steps to the Master value).")
+                .defineInRange("skill_speed_novice", 0.9, 0.1, 5.0);
+        SKILL_SPEED_MASTER = builder.comment("Default = 1.4", "Work speed factor of a Master. The bite time of fishing shortens the same way.")
+                .defineInRange("skill_speed_master", 1.4, 0.1, 5.0);
+        SKILL_YIELD_MASTER = builder.comment("Default = 0.15", "Chance of one extra item from an ore, a harvested crop or a log at Master (0 at Novice, in equal steps).")
+                .defineInRange("skill_yield_chance_master", 0.15, 0.0, 1.0);
+        SKILL_DAMAGE_MASTER = builder.comment("Default = 0.3", "Extra damage dealt by a Master fighter (0.3 = 30% more; 0 at Novice).")
+                .defineInRange("skill_damage_bonus_master", 0.3, 0.0, 5.0);
+        SKILL_TAKEN_MASTER = builder.comment("Default = 0.2", "Damage a Master fighter takes less from creatures (0.2 = 20% less; 0 at Novice).")
+                .defineInRange("skill_damage_taken_reduction_master", 0.2, 0.0, 0.9);
+        SKILL_SPREAD_MASTER = builder.comment("Default = 0.5", "How much less the arrows of a Master archer spread (0.5 = half; 0 at Novice).")
+                .defineInRange("skill_arrow_spread_reduction_master", 0.5, 0.0, 1.0);
+        SKILL_HEAL_MASTER = builder.comment("Default = 0.5", "Extra healing per try of a Master medic (0.5 = 50% more; 0 at Novice).")
+                .defineInRange("skill_heal_bonus_master", 0.5, 0.0, 5.0);
+        SKILL_LEVELUP_MORALE = builder.comment("Default = 4", "Morale points an NPC gets for a while after it reaches a new rank.")
+                .defineInRange("skill_level_up_morale", 4, 0, 30);
+        SKILL_LEVELUP_MORALE_TICKS = builder.comment("Default = 12000 (half a day)", "How long the level-up morale lasts.")
+                .defineInRange("skill_level_up_morale_ticks", 12000, 20, 2400000);
+        SKILL_RANK_IN_NAME = builder.comment("Default = true", "If true, the rank of the main skill is part of the name (Apprentice Miner Bill). A name tag always replaces it.")
+                .define("skill_rank_in_name", true);
+        builder.pop();
+        builder.comment("NPC traits (server side)").push("traits");
+        TR_TRAITS_ENABLED = builder.comment("Default = true", "If false, NPCs get no traits and traits do nothing.")
+                .define("traits_enabled", true);
+        TR_TRAIT_SECOND_CHANCE = builder.comment("Default = 0.5", "Chance that a new NPC gets a second trait (every NPC gets at least one).")
+                .defineInRange("trait_second_chance", 0.5, 0.0, 1.0);
+        TR_TRAIT_INHERIT_NEW_CHANCE = builder.comment("Default = 0.2", "Chance that a trait a child would inherit is replaced by a newly rolled one (used by the families of phase 10).")
+                .defineInRange("trait_inherit_new_chance", 0.2, 0.0, 1.0);
+        TR_TRAIT_LAZY_SPEED = builder.comment("Default = 0.85", "Work speed factor of a lazy NPC.")
+                .defineInRange("trait_lazy_speed", 0.85, 0.1, 2.0);
+        TR_TRAIT_LAZY_PAUSE_CHANCE = builder.comment("Default = 0.3", "Chance that a lazy NPC idles for a few seconds before a task.")
+                .defineInRange("trait_lazy_pause_chance", 0.3, 0.0, 1.0);
+        TR_TRAIT_HARDWORKING_SPEED = builder.comment("Default = 1.15", "Work speed factor of a hardworking NPC.")
+                .defineInRange("trait_hardworking_speed", 1.15, 0.1, 3.0);
+        TR_TRAIT_HARDWORKING_IDLE_MORALE = builder.comment("Default = -3", "Morale points a hardworking NPC loses while it has no job.")
+                .defineInRange("trait_hardworking_idle_morale", -3, -30, 0);
+        TR_TRAIT_COWARDLY_FLEE_RANGE = builder.comment("Default = 1.5", "Factor on the distance at which a cowardly NPC notices a hostile and runs.")
+                .defineInRange("trait_cowardly_flee_range", 1.5, 1.0, 4.0);
+        TR_TRAIT_GLUTTON_HUNGER = builder.comment("Default = 1.3", "Factor on how fast a glutton uses up its food.")
+                .defineInRange("trait_glutton_hunger", 1.3, 1.0, 4.0);
+        TR_TRAIT_GLUTTON_MEAL_MORALE = builder.comment("Default = 3", "Extra morale points a glutton gets from a meal at the inn (and 2 while well fed).")
+                .defineInRange("trait_glutton_meal_morale", 3, 0, 30);
+        TR_TRAIT_FRUGAL_HUNGER = builder.comment("Default = 0.75", "Factor on how fast a frugal NPC uses up its food.")
+                .defineInRange("trait_frugal_hunger", 0.75, 0.1, 1.0);
+        TR_TRAIT_DEVOUT_MORALE = builder.comment("Default = 4", "Morale points a devout NPC gets near a priest of its settlement (or a chapel, phase 9).")
+                .defineInRange("trait_devout_morale", 4, 0, 30);
+        TR_TRAIT_DEVOUT_RADIUS = builder.comment("Default = 24", "Blocks within which a devout NPC feels near a priest.")
+                .defineInRange("trait_devout_radius", 24, 1, 128);
+        TR_TRAIT_NIGHT_OWL_SHIFT_TICKS = builder.comment("Default = 1500", "How many ticks later the day of a night owl runs (it works, socialises and sleeps later).")
+                .defineInRange("trait_night_owl_shift_ticks", 1500, 0, 6000);
+        TR_TRAIT_EARLY_RISER_SHIFT_TICKS = builder.comment("Default = 1000", "How many ticks earlier the day of an early riser runs.")
+                .defineInRange("trait_early_riser_shift_ticks", 1000, 0, 6000);
+        TR_TRAIT_NIGHT_OWL_SPEED = builder.comment("Default = 1.1", "Work speed factor of a night owl at night.")
+                .defineInRange("trait_night_owl_speed", 1.1, 1.0, 2.0);
+        TR_TRAIT_NIGHT_OWL_WATCH_WEIGHT = builder.comment("Default = 2.0", "How much more likely a night owl is picked for the night watch (an early riser is that much less likely).")
+                .defineInRange("trait_night_owl_watch_weight", 2.0, 1.0, 10.0);
+        TR_TRAIT_SOCIABLE_MORALE = builder.comment("Default = 3", "Morale points a sociable NPC gets from socialising; it loses 1 more than this when alone for a day.")
+                .defineInRange("trait_sociable_morale", 3, 0, 20);
+        TR_TRAIT_LONER_MORALE = builder.comment("Default = 3", "Morale points a loner gets from working away from the others; it gets 2 less from socialising.")
+                .defineInRange("trait_loner_morale", 3, 0, 20);
+        TR_TRAIT_QUICK_LEARNER_XP = builder.comment("Default = 1.5", "Factor on the skill experience of a quick learner.")
+                .defineInRange("trait_quick_learner_xp", 1.5, 1.0, 10.0);
+        TR_TRAIT_CLUMSY_TOOL_CHANCE = builder.comment("Default = 0.04", "Chance per task that a clumsy NPC wastes one more point of durability of its tool.")
+                .defineInRange("trait_clumsy_tool_chance", 0.04, 0.0, 1.0);
+        TR_TRAIT_CLUMSY_DROP_CHANCE = builder.comment("Default = 0.02", "Chance per task that a clumsy worker drops one carried item at the site.")
+                .defineInRange("trait_clumsy_drop_chance", 0.02, 0.0, 1.0);
+        TR_TRAIT_STRONG_POUCH_SLOTS = builder.comment("Default = 3", "Extra slots in the carry pouch of a strong worker (at most 3).")
+                .defineInRange("trait_strong_pouch_slots", 3, 0, 3);
+        TR_TRAIT_STRONG_DAMAGE = builder.comment("Default = 0.15", "Extra attack damage of a strong NPC (0.15 = 15% more).")
+                .defineInRange("trait_strong_damage", 0.15, 0.0, 5.0);
+        TR_TRAIT_TOUGH_HEALTH = builder.comment("Default = 0.25", "Extra health of a tough NPC (0.25 = 25% more).")
+                .defineInRange("trait_tough_health", 0.25, 0.0, 5.0);
+        TR_TRAIT_GREEN_THUMB_YIELD = builder.comment("Default = 0.15", "Extra chance of one more item from a harvested crop for a green thumb.")
+                .defineInRange("trait_green_thumb_yield", 0.15, 0.0, 1.0);
+        TR_TRAIT_KEEN_EYE_SPREAD = builder.comment("Default = 0.75", "Factor on the arrow spread of a keen-eyed NPC (smaller is more accurate).")
+                .defineInRange("trait_keen_eye_spread", 0.75, 0.0, 1.0);
+        TR_TRAIT_KEEN_EYE_FISHING = builder.comment("Default = 1.2", "Fishing speed factor of a keen-eyed NPC.")
+                .defineInRange("trait_keen_eye_fishing", 1.2, 1.0, 3.0);
+        builder.pop();
         builder.comment("Guard captain (server side)").push("guard_captain");
         CAPTAIN_BUFF_RADIUS = builder.comment("Default = 24", "Combat NPCs of the settlement within this many blocks of the captain get Strength I and Resistance I while the captain is in combat.")
                 .defineInRange("captain_buff_radius", 24, 4, 128);
@@ -438,6 +1071,139 @@ public final class SettlementConfig {
                 .defineInRange("captain_line_spacing", 2.0, 1.0, 8.0);
         CAPTAIN_LINE_DISTANCE = builder.comment("Default = 10", "How far from the hall, towards the threat, the line forms.")
                 .defineInRange("captain_line_distance", 10, 2, 64);
+        builder.pop();
+        builder.comment("Building designs and the blueprint scanner (server side)").push("building_designs");
+        BP_MAX_WIDTH = builder.comment("Default = 48",
+                "The longest side (blocks, east-west or north-south) of a blueprint scanned with the blueprint scanner. Hard limit 64.")
+                .defineInRange("blueprint_max_width", 48, 3, 64);
+        BP_MAX_HEIGHT = builder.comment("Default = 32", "The most layers (blocks, up) of a scanned blueprint. Hard limit 64.")
+                .defineInRange("blueprint_max_height", 32, 1, 64);
+        BP_MAX_PER_PLAYER = builder.comment("Default = 64", "How many blueprints one player may keep in this world.")
+                .defineInRange("blueprint_max_per_player", 64, 1, 1000);
+        builder.pop();
+        builder.comment("Building plots, the building planner and the build queue (server side)").push("building_planner");
+        PLOT_MIN_SIDE = builder.comment("Default = 5", "The shortest side (blocks) of a building plot marked with the plot marker.")
+                .defineInRange("plot_min_side", 5, 3, 64);
+        PLOT_MAX_SIDE = builder.comment("Default = 48", "The longest side (blocks) of a building plot.")
+                .defineInRange("plot_max_side", 48, 5, 128);
+        PLOTS_MAX = builder.comment("Default = 24", "The most building plots one settlement may have.")
+                .defineInRange("plots_max_per_settlement", 24, 1, 256);
+        PLANNER_ENABLED = builder.comment("Default = true", "If false, no settlement plans buildings by itself (the owner can still queue builds by hand on the Building tab).")
+                .define("planner_enabled", true);
+        PLANNER_INTERVAL = builder.comment("Default = 600", "Ticks between two planning runs of a settlement (600 = 30 seconds).")
+                .defineInRange("planner_interval_ticks", 600, 100, 72000);
+        AUTO_PLAN_DEFAULT = builder.comment("Default = true", "Whether a settlement plans buildings by itself until its owner switches it on the Building tab.")
+                .define("auto_plan_default", true);
+        AUTO_APPROVE_DEFAULT = builder.comment("Default = false", "If true, plans of the planner start at once. If false, the owner approves each plan on the Building tab.")
+                .define("auto_approve_default", false);
+        MAX_PENDING_BUILDS = builder.comment("Default = 3", "The planner makes no new plan while this many builds are planned, queued or under construction.")
+                .defineInRange("max_pending_builds", 3, 1, 32);
+        ACTIVE_BUILDS = builder.comment("Default = 2", "How many builds at the front of the queue ask for their materials at once (the settlement posts needs for them).")
+                .defineInRange("active_builds", 2, 1, 16);
+        LEVEL_POP_STEP = builder.comment("Default = 6", "Members per settlement level. A design with min_level N needs N times this many members (and its own min_population).")
+                .defineInRange("level_population_step", 6, 1, 200);
+        RESPECT_MINIMUMS = builder.comment("Default = true", "If true, the planner only picks designs whose min_level and min_population the settlement meets.")
+                .define("respect_design_minimums", true);
+        TENT_BELOW_POP = builder.comment("Default = 6", "Below this many members the planner builds tents for housing, from this many it builds houses (if the materials allow).")
+                .defineInRange("tent_below_population", 6, 0, 1000);
+        AFFORD_FRACTION = builder.comment("Default = 0.5", "The fraction of a house's materials that storage must already hold for the planner to choose a house over a tent.")
+                .defineInRange("afford_fraction", 0.5, 0.0, 1.0);
+        UPGRADE_AFFORD_FRACTION = builder.comment("Default = 1.0", "The fraction of the materials of the better building that storage must hold before the planner upgrades a tent or small house.")
+                .defineInRange("upgrade_afford_fraction", 1.0, 0.0, 1.0);
+        STORAGE_FULL_FRACTION = builder.comment("Default = 0.8", "The planner builds a storehouse when this fraction of the storage slots is used.")
+                .defineInRange("storage_full_fraction", 0.8, 0.1, 1.0);
+        CHAPEL_POPULATION = builder.comment("Default = 12", "From this many members the planner builds a chapel when the settlement has no priest and no chapel.")
+                .defineInRange("chapel_population", 12, 1, 1000);
+        TERRAIN_MAX_FILL = builder.comment("Default = 2", "How many blocks of earth the builders may fill under a building to level its ground.")
+                .defineInRange("terrain_max_fill", 2, 0, 8);
+        TERRAIN_MAX_CUT = builder.comment("Default = 3", "How many blocks of ground the builders may cut away on a building plot to level it.")
+                .defineInRange("terrain_max_cut", 3, 0, 8);
+        TERRAIN_FILL_COSTS = builder.comment("Default = false", "If true, filling ground takes dirt from the storage. If false, earthwork is free (the design's own blocks always come from storage).")
+                .define("terrain_fill_costs_material", false);
+        BUILDING_GAP = builder.comment("Default = 1", "Free blocks the planner keeps between two buildings.")
+                .defineInRange("building_gap", 1, 0, 8);
+        PLANKS_ANY = builder.comment("Default = true", "If true, a build that needs planks of one wood accepts planks of any wood from the storage (the design's blocks are placed as written).")
+                .define("planks_any_wood", true);
+        builder.pop();
+        builder.comment("The builder NPCs (rework phase 9, server side)").push("builders");
+        BUILDERS_PER_JOB = builder.comment("Default = 3", "How many builders may work on the same build at once (they never place the same block).")
+                .defineInRange("builders_per_job", 3, 1, 16);
+        BUILDER_PLACE_TICKS = builder.comment("Default = 12", "Ticks of work at speed 1 that a builder needs to place one block. Skills, traits, morale and the tool make it faster or slower.")
+                .defineInRange("builder_place_ticks", 12, 1, 400);
+        BUILDER_BREAK_TICKS = builder.comment("Default = 30", "Ticks of work at speed 1 per unit of hardness when a builder breaks a block (clearing the site, taking a building down); the tool speed counts on top.")
+                .defineInRange("builder_break_ticks_per_hardness", 30, 1, 400);
+        BUILDER_SCAFFOLDING = builder.comment("Default = true", "If true, a builder that cannot reach a high place builds a scaffolding column next to the building and takes it down again afterwards. If false, it only builds what it can reach on foot.")
+                .define("builder_scaffolding", true);
+        BUILDER_SCAFFOLD_COSTS = builder.comment("Default = false", "If true, the scaffolding blocks are taken from the settlement storage (and put back when the scaffolding is taken down). If false, builders bring their own scaffolding.")
+                .define("builder_scaffold_costs_material", false);
+        BUILDER_MAX_SCAFFOLD = builder.comment("Default = 24", "The highest (blocks above the ground) a builder builds a scaffolding column.")
+                .defineInRange("builder_max_scaffold_height", 24, 2, 64);
+        BUILDER_WAIT_RELEASE = builder.comment("Default = 600", "Ticks a builder waits for missing materials (with nothing else to place) before it gives the job up for a while and looks for another build.")
+                .defineInRange("builder_wait_release_ticks", 600, 20, 72000);
+        SKILL_XP_BUILD = builder.comment("Default = 3", "Experience of the building skill for each block a builder places or takes down (before skill_xp_multiplier).")
+                .defineInRange("skill_xp_build", 3, 0, 1000);
+        builder.pop();
+        builder.comment("Families: names, couples, homes and children (server side)").push("families");
+        FAM_ENABLED = builder.comment("Default = true", "If false, no couples form, no homes are claimed and families have no effect on morale (existing families are kept in the save).")
+                .define("families_enabled", true);
+        FAM_YEAR_DAYS = builder.comment("Default = 96", "Length of one in-game year in days, the unit the children grow up in. The default is the year of Serene Seasons.")
+                .defineInRange("year_length_days", 96, 1, 10000);
+        FAM_YEARS_TO_ADULT = builder.comment("Default = 2.0", "How many in-game years a child needs to grow up into a working adult (2 years of 96 days = 192 days by default).")
+                .defineInRange("years_to_adulthood", 2.0, 0.05, 50.0);
+        FAM_COUPLE_MIN_POP = builder.comment("Default = 4", "A settlement needs at least this many members before couples form.")
+                .defineInRange("couple_min_population", 4, 2, 1000);
+        FAM_COUPLE_MIN_MORALE = builder.comment("Default = 60", "Both members of a new couple need a personal morale of at least this.")
+                .defineInRange("couple_min_morale", 60, 0, 100);
+        FAM_BOND_SECONDS = builder.comment("Default = 240", "Seconds of shared social time (both at a gathering point, near each other) two members need before they can become partners.")
+                .defineInRange("couple_bond_seconds", 240, 1, 100000);
+        FAM_CHANCE = builder.comment("Default = 0.3", "Chance per in-game day that a pair of members that has enough shared social time becomes a couple (at most one new couple per settlement and day).")
+                .defineInRange("couple_chance_per_day", 0.3, 0.0, 1.0);
+        FAM_SOCIAL_RADIUS = builder.comment("Default = 8", "How close (blocks) two socialising members must be for their time to count as shared.")
+                .defineInRange("couple_social_radius", 8, 1, 64);
+        FAM_SOCIABLE_BONUS = builder.comment("Default = 0.5", "Extra shared social time per second for each sociable member of the pair.")
+                .defineInRange("couple_sociable_bonus", 0.5, 0.0, 5.0);
+        FAM_LONER_FACTOR = builder.comment("Default = 0.5", "Factor on the shared social time for each loner in the pair (1.0 = loners bond as fast as everyone).")
+                .defineInRange("couple_loner_factor", 0.5, 0.0, 1.0);
+        FAM_SHARE_SURNAME = builder.comment("Default = true", "If true, the member that joins a household takes the surname of the household (the children have it too).")
+                .define("partners_share_surname", true);
+        FAM_WIDOW_DAYS = builder.comment("Default = 6", "In-game days after the death of a partner before the survivor can become a partner again.")
+                .defineInRange("widow_repartner_days", 6, 0, 1000);
+        FAM_GRIEF_DAYS = builder.comment("Default = 3", "In-game days the grief for a dead partner or child lasts (full for the first half, then fading).")
+                .defineInRange("grief_days", 3, 0, 1000);
+        FAM_GRIEF_MORALE = builder.comment("Default = 25", "Morale points a grieving member loses at first (a positive number; it is subtracted).")
+                .defineInRange("grief_morale", 25, 0, 100);
+        FAM_PARTNER_MORALE = builder.comment("Default = 3", "Morale points of having a partner.")
+                .defineInRange("partner_morale", 3, 0, 30);
+        FAM_PARTNER_NEAR_MORALE = builder.comment("Default = 2", "Extra morale points while the partner is within 'partner_nearby_radius' blocks.")
+                .defineInRange("partner_nearby_morale", 2, 0, 30);
+        FAM_PARTNER_NEAR_RADIUS = builder.comment("Default = 10", "Blocks within which the partner counts as nearby.")
+                .defineInRange("partner_nearby_radius", 10, 1, 64);
+        FAM_HOME_MORALE = builder.comment("Default = 3", "Morale points for living together in the home of the household (sleeping in one of its beds).")
+                .defineInRange("family_home_morale", 3, 0, 30);
+        FAM_CHILDREN_MORALE = builder.comment("Default = 2", "Morale points a parent gets while one of its children is within 'children_near_radius' blocks.")
+                .defineInRange("children_near_morale", 2, 0, 30);
+        FAM_CHILDREN_RADIUS = builder.comment("Default = 12", "Blocks within which a child counts as being around its parent.")
+                .defineInRange("children_near_radius", 12, 1, 64);
+        FAM_CHILD_MIN_MORALE = builder.comment("Default = 55", "Both parents need a personal morale of at least this for the household to have a child.")
+                .defineInRange("child_min_morale", 55, 0, 100);
+        FAM_CHILD_FOOD_DAYS = builder.comment("Default = 3.0", "The settlement storage must hold food for at least this many days per member before the household can have a child.")
+                .defineInRange("child_min_food_days", 3.0, 0.0, 100.0);
+        FAM_MAX_CHILDREN = builder.comment("Default = 3", "The most children (not yet grown up) a household has at one time.")
+                .defineInRange("max_children_per_household", 3, 0, 20);
+        FAM_BIRTH_COOLDOWN = builder.comment("Default = 8", "In-game days between two births in the same household.")
+                .defineInRange("birth_cooldown_days", 8, 0, 1000);
+        FAM_BIRTH_CHANCE = builder.comment("Default = 0.25", "Chance per in-game day that a household that may have a child (see child_min_morale, child_min_food_days, max_children_per_household, birth_cooldown_days, and a free bed for it) has one.")
+                .defineInRange("birth_chance_per_day", 0.25, 0.0, 1.0);
+        FAM_CHILD_HUNGER = builder.comment("Default = 0.5", "How much a child eats compared with an adult: the food a child holds, how fast it runs out, and the weight of a child in the food of the settlement (food days per member, the food need and the food morale).")
+                .defineInRange("child_hunger_factor", 0.5, 0.05, 1.0);
+        FAM_CHILD_SKILL_XP = builder.comment("Default = 40", "Experience in one of the best skills of the parents that a newborn child starts with (100 is the rank Apprentice by default). 0 for no head start.")
+                .defineInRange("child_skill_head_start_xp", 40, 0, 100000);
+        FAM_CHILD_SCALE = builder.comment("Default = 0.5", "Size of a newborn child (1.0 is a grown NPC); it grows to full size with its age. Uses the scale attribute of the game.")
+                .defineInRange("child_scale_start", 0.5, 0.0625, 1.0);
+        FAM_CHILD_PLAY_RADIUS = builder.comment("Default = 12", "Blocks around the home (or the gathering point, or the hall) within which a child plays in the day.")
+                .defineInRange("child_play_radius", 12, 3, 64);
+        FAM_DEBUG_GROWTH = builder.comment("Default = 1.0", "Testing only: multiplier on how fast children age (10.0 = ten times as fast). The command /awsettlement (operators only) can also age a child or force a birth.")
+                .defineInRange("family_debug_fast_growth", 1.0, 0.0, 100000.0);
         builder.pop();
         SPEC = builder.build();
     }
@@ -467,6 +1233,13 @@ public final class SettlementConfig {
             foodLowNpcDays = FOOD_LOW_NPC_DAYS.get();
             foodSpareNpcDays = FOOD_SPARE_NPC_DAYS.get();
             maxPathRange = MAX_PATH_RANGE.get();
+            demandEnabled = DEMAND_ENABLED.get();
+            demandIntervalTicks = DEMAND_INTERVAL.get();
+            demandFoodDays = DEMAND_FOOD_DAYS.get();
+            demandReservePlanks = DEMAND_RESERVE_PLANKS.get();
+            demandReserveStone = DEMAND_RESERVE_STONE.get();
+            demandReserveGlass = DEMAND_RESERVE_GLASS.get();
+            demandArmour = DEMAND_ARMOUR.get();
             noToolWorkFactor = NO_TOOL_WORK.get();
             swingIntervalTicks = SWING_INTERVAL.get();
             workerToolSwitching = TOOL_SWITCHING.get();
@@ -504,6 +1277,47 @@ public final class SettlementConfig {
             caravanMaxActive = CARAVAN_MAX_ACTIVE.get();
             caravanTailorBuyOrders = CARAVAN_TAILOR.get();
             tradeRouteLoading = TRADE_ROUTE_LOADING.get();
+            seaTradeEnabled = SEA_TRADE_ENABLED.get();
+            seaTradeBindRange = SEA_TRADE_BIND_RANGE.get();
+            seaTradeMoorRange = SEA_TRADE_MOOR_RANGE.get();
+            seaTradeMaxLeg = SEA_TRADE_MAX_LEG.get();
+            seaTradeLegTicks = SEA_TRADE_LEG_TICKS.get();
+            seaTradeDockWaitTicks = SEA_TRADE_DOCK_WAIT_TICKS.get();
+            seaTradeSettlementStorage = SEA_TRADE_SETTLEMENT_STORAGE.get();
+            seaCaravansEnabled = SEA_CARAVANS_ENABLED.get();
+            seaCaravanIntervalDays = SEA_CARAVAN_INTERVAL_DAYS.get();
+            seaCaravanChance = SEA_CARAVAN_CHANCE.get();
+            seaCaravanMaxPerSettlement = SEA_CARAVAN_MAX_PER_SETTLEMENT.get();
+            seaCaravanMaxActive = SEA_CARAVAN_MAX_ACTIVE.get();
+            seaCaravanMinDepth = SEA_CARAVAN_MIN_DEPTH.get();
+            seaCaravanMinRoute = SEA_CARAVAN_MIN_ROUTE.get();
+            seaCaravanStayTicks = SEA_CARAVAN_STAY_TICKS.get();
+            seaCaravanRowers = SEA_CARAVAN_ROWERS.get();
+            seaCaravanGuards = SEA_CARAVAN_GUARDS.get();
+            seaCaravanOrderRange = SEA_CARAVAN_ORDER_RANGE.get();
+            navalNpcGrapple = NAVAL_NPC_GRAPPLE.get();
+            navalNpcGrappleRange = NAVAL_NPC_GRAPPLE_RANGE.get();
+            navalNpcGrappleCooldownTicks = NAVAL_NPC_GRAPPLE_COOLDOWN.get();
+            navalFactionBoarding = NAVAL_FACTION_BOARDING.get();
+            navalBoarding = NAVAL_BOARDING.get();
+            navalHelmRam = NAVAL_HELM_RAM.get();
+            navalHelmRamRange = NAVAL_HELM_RAM_RANGE.get();
+            navalHelmFlee = NAVAL_HELM_FLEE.get();
+            navalPrize = NAVAL_PRIZE.get();
+            siegeAi = SIEGE_AI.get();
+            siegeSearchRadius = SIEGE_SEARCH_RADIUS.get();
+            siegeWallMinHeight = SIEGE_WALL_MIN_HEIGHT.get();
+            siegeMaxTowers = SIEGE_MAX_TOWERS.get();
+            siegeMaxMantlets = SIEGE_MAX_MANTLETS.get();
+            siegeMaxRams = SIEGE_MAX_RAMS.get();
+            siegeMantletCover = SIEGE_MANTLET_COVER.get();
+            siegeMantletStopDistance = SIEGE_MANTLET_STOP.get();
+            siegePlanRange = SIEGE_PLAN_RANGE.get();
+            siegePlanNodes = SIEGE_PLAN_NODES.get();
+            siegeStuckTicks = SIEGE_STUCK_TICKS.get();
+            siegeRam = SIEGE_RAM.get();
+            siegeCoverMaxTicks = SIEGE_COVER_MAX_TICKS.get();
+            siegeDockWaitTicks = SIEGE_DOCK_WAIT_TICKS.get();
             moraleEnabled = MORALE_ENABLED.get();
             moraleIntervalTicks = MORALE_INTERVAL.get();
             moraleMinFactor = Math.min(MORALE_MIN_FACTOR.get(), MORALE_MAX_FACTOR.get());
@@ -514,6 +1328,7 @@ public final class SettlementConfig {
             moraleBardWindowTicks = MORALE_BARD_WINDOW.get();
             moraleIdleTicks = MORALE_IDLE.get();
             thoughtRepeatTicks = THOUGHT_REPEAT.get();
+            censusRefreshTicks = CENSUS_REFRESH.get();
             innServeRadius = INN_SERVE_RADIUS.get();
             innServeInterval = INN_SERVE_INTERVAL.get();
             innDrinkFood = INN_DRINK_FOOD.get();
@@ -527,6 +1342,118 @@ public final class SettlementConfig {
             captainBuffTicks = CAPTAIN_BUFF_TICKS.get();
             captainLineSpacing = CAPTAIN_LINE_SPACING.get();
             captainLineDistance = CAPTAIN_LINE_DISTANCE.get();
+            skillXpMultiplier = SKILL_XP_MULT.get();
+            skillXpWork = SKILL_XP_WORK.get();
+            skillXpHit = SKILL_XP_HIT.get();
+            skillXpKill = SKILL_XP_KILL.get();
+            skillXpTrade = SKILL_XP_TRADE.get();
+            skillXpDelivery = SKILL_XP_DELIVERY.get();
+            skillXpHeal = SKILL_XP_HEAL.get();
+            int apprentice = SKILL_RANK_APPRENTICE.get();
+            int journeyman = Math.max(apprentice + 1, SKILL_RANK_JOURNEYMAN.get());
+            int expert = Math.max(journeyman + 1, SKILL_RANK_EXPERT.get());
+            int master = Math.max(expert + 1, SKILL_RANK_MASTER.get());
+            skillRankXp = new int[]{apprentice, journeyman, expert, master};
+            skillSpeedNovice = SKILL_SPEED_NOVICE.get();
+            skillSpeedMaster = SKILL_SPEED_MASTER.get();
+            skillYieldChanceMaster = SKILL_YIELD_MASTER.get();
+            skillDamageBonusMaster = SKILL_DAMAGE_MASTER.get();
+            skillDamageTakenReductionMaster = SKILL_TAKEN_MASTER.get();
+            skillSpreadReductionMaster = SKILL_SPREAD_MASTER.get();
+            skillHealBonusMaster = SKILL_HEAL_MASTER.get();
+            skillLevelUpMorale = SKILL_LEVELUP_MORALE.get();
+            skillLevelUpMoraleTicks = SKILL_LEVELUP_MORALE_TICKS.get();
+            skillRankInName = SKILL_RANK_IN_NAME.get();
+            traitsEnabled = TR_TRAITS_ENABLED.get();
+            traitSecondChance = TR_TRAIT_SECOND_CHANCE.get();
+            traitInheritNewChance = TR_TRAIT_INHERIT_NEW_CHANCE.get();
+            traitLazySpeed = TR_TRAIT_LAZY_SPEED.get();
+            traitLazyPauseChance = TR_TRAIT_LAZY_PAUSE_CHANCE.get();
+            traitHardworkingSpeed = TR_TRAIT_HARDWORKING_SPEED.get();
+            traitHardworkingIdleMorale = TR_TRAIT_HARDWORKING_IDLE_MORALE.get();
+            traitCowardlyFleeRange = TR_TRAIT_COWARDLY_FLEE_RANGE.get();
+            traitGluttonHunger = TR_TRAIT_GLUTTON_HUNGER.get();
+            traitGluttonMealMorale = TR_TRAIT_GLUTTON_MEAL_MORALE.get();
+            traitFrugalHunger = TR_TRAIT_FRUGAL_HUNGER.get();
+            traitDevoutMorale = TR_TRAIT_DEVOUT_MORALE.get();
+            traitDevoutRadius = TR_TRAIT_DEVOUT_RADIUS.get();
+            traitNightOwlShift = TR_TRAIT_NIGHT_OWL_SHIFT_TICKS.get();
+            traitEarlyRiserShift = TR_TRAIT_EARLY_RISER_SHIFT_TICKS.get();
+            traitNightOwlSpeed = TR_TRAIT_NIGHT_OWL_SPEED.get();
+            traitNightOwlWatch = TR_TRAIT_NIGHT_OWL_WATCH_WEIGHT.get();
+            traitSociableMorale = TR_TRAIT_SOCIABLE_MORALE.get();
+            traitLonerMorale = TR_TRAIT_LONER_MORALE.get();
+            traitQuickLearnerXp = TR_TRAIT_QUICK_LEARNER_XP.get();
+            traitClumsyToolChance = TR_TRAIT_CLUMSY_TOOL_CHANCE.get();
+            traitClumsyDropChance = TR_TRAIT_CLUMSY_DROP_CHANCE.get();
+            traitStrongPouchSlots = TR_TRAIT_STRONG_POUCH_SLOTS.get();
+            traitStrongDamage = TR_TRAIT_STRONG_DAMAGE.get();
+            traitToughHealth = TR_TRAIT_TOUGH_HEALTH.get();
+            traitGreenThumbYield = TR_TRAIT_GREEN_THUMB_YIELD.get();
+            traitKeenEyeSpread = TR_TRAIT_KEEN_EYE_SPREAD.get();
+            traitKeenEyeFishing = TR_TRAIT_KEEN_EYE_FISHING.get();
+            blueprintMaxWidth = BP_MAX_WIDTH.get();
+            blueprintMaxHeight = BP_MAX_HEIGHT.get();
+            blueprintMaxPerPlayer = BP_MAX_PER_PLAYER.get();
+            plotMinSide = PLOT_MIN_SIDE.get();
+            plotMaxSide = PLOT_MAX_SIDE.get();
+            plotsMaxPerSettlement = PLOTS_MAX.get();
+            plannerEnabled = PLANNER_ENABLED.get();
+            plannerIntervalTicks = PLANNER_INTERVAL.get();
+            autoPlanDefault = AUTO_PLAN_DEFAULT.get();
+            autoApproveDefault = AUTO_APPROVE_DEFAULT.get();
+            maxPendingBuilds = MAX_PENDING_BUILDS.get();
+            activeBuilds = ACTIVE_BUILDS.get();
+            levelPopulationStep = LEVEL_POP_STEP.get();
+            respectDesignMinimums = RESPECT_MINIMUMS.get();
+            tentBelowPopulation = TENT_BELOW_POP.get();
+            affordFraction = AFFORD_FRACTION.get();
+            upgradeAffordFraction = UPGRADE_AFFORD_FRACTION.get();
+            storageFullFraction = STORAGE_FULL_FRACTION.get();
+            chapelPopulation = CHAPEL_POPULATION.get();
+            terrainMaxFill = TERRAIN_MAX_FILL.get();
+            terrainMaxCut = TERRAIN_MAX_CUT.get();
+            terrainFillCostsMaterial = TERRAIN_FILL_COSTS.get();
+            buildingGap = BUILDING_GAP.get();
+            planksAnyWood = PLANKS_ANY.get();
+            buildersPerJob = BUILDERS_PER_JOB.get();
+            builderPlaceTicks = BUILDER_PLACE_TICKS.get();
+            builderBreakTicksPerHardness = BUILDER_BREAK_TICKS.get();
+            builderScaffolding = BUILDER_SCAFFOLDING.get();
+            builderScaffoldCostsMaterial = BUILDER_SCAFFOLD_COSTS.get();
+            builderMaxScaffoldHeight = BUILDER_MAX_SCAFFOLD.get();
+            builderWaitReleaseTicks = BUILDER_WAIT_RELEASE.get();
+            skillXpBuild = SKILL_XP_BUILD.get();
+            familiesEnabled = FAM_ENABLED.get();
+            yearLengthDays = FAM_YEAR_DAYS.get();
+            yearsToAdulthood = FAM_YEARS_TO_ADULT.get();
+            coupleMinPopulation = FAM_COUPLE_MIN_POP.get();
+            coupleMinMorale = FAM_COUPLE_MIN_MORALE.get();
+            coupleBondSeconds = FAM_BOND_SECONDS.get();
+            coupleChancePerDay = FAM_CHANCE.get();
+            coupleSocialRadius = FAM_SOCIAL_RADIUS.get();
+            coupleSociableBonus = FAM_SOCIABLE_BONUS.get();
+            coupleLonerFactor = FAM_LONER_FACTOR.get();
+            partnersShareSurname = FAM_SHARE_SURNAME.get();
+            widowRepartnerDays = FAM_WIDOW_DAYS.get();
+            griefDays = FAM_GRIEF_DAYS.get();
+            griefMorale = FAM_GRIEF_MORALE.get();
+            partnerMorale = FAM_PARTNER_MORALE.get();
+            partnerNearbyMorale = FAM_PARTNER_NEAR_MORALE.get();
+            partnerNearbyRadius = FAM_PARTNER_NEAR_RADIUS.get();
+            familyHomeMorale = FAM_HOME_MORALE.get();
+            childrenNearMorale = FAM_CHILDREN_MORALE.get();
+            childrenNearRadius = FAM_CHILDREN_RADIUS.get();
+            childMinMorale = FAM_CHILD_MIN_MORALE.get();
+            childMinFoodDays = FAM_CHILD_FOOD_DAYS.get();
+            maxChildrenPerHousehold = FAM_MAX_CHILDREN.get();
+            birthCooldownDays = FAM_BIRTH_COOLDOWN.get();
+            birthChancePerDay = FAM_BIRTH_CHANCE.get();
+            childHungerFactor = FAM_CHILD_HUNGER.get();
+            childSkillHeadStart = FAM_CHILD_SKILL_XP.get();
+            childScaleStart = FAM_CHILD_SCALE.get();
+            childPlayRadius = FAM_CHILD_PLAY_RADIUS.get();
+            familyDebugFastGrowth = FAM_DEBUG_GROWTH.get();
         }
     }
 }

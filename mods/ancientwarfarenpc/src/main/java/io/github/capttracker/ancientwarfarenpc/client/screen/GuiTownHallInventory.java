@@ -30,10 +30,12 @@ import java.util.Locale;
 public class GuiTownHallInventory extends GuiContainerBase<TownHallMenu> {
     private enum Tab {
         OVERVIEW("guistrings.settlement.tab.overview"),
+        CENSUS("guistrings.settlement.tab.census"),
         MEMBERS("guistrings.settlement.tab.members"),
         STORAGE("guistrings.settlement.tab.storage"),
         DEATHS("guistrings.npc.death_list"),
         GUARD("guistrings.settlement.tab.guard"),
+        BUILDING("guistrings.settlement.tab.building"),
         INVENTORY("guistrings.settlement.tab.inventory");
 
         final String key;
@@ -49,6 +51,11 @@ public class GuiTownHallInventory extends GuiContainerBase<TownHallMenu> {
     private Tab built = null;
     private final Button[] tabButtons = new Button[Tab.values().length];
     private CompositeScrolled area;
+    private final CensusView census = new CensusView();
+    private boolean censusAsked = false;
+    private final BuildingTabView building = new BuildingTabView();
+    private boolean buildAsked = false;
+    private int previewTicks = 0;
     private boolean areaShown = false;
 
     // overview elements (made once per visit of the tab)
@@ -58,13 +65,14 @@ public class GuiTownHallInventory extends GuiContainerBase<TownHallMenu> {
     private Label membersLabel;
     private Label foodLabel;
     private final List<Label> jobLabels = new ArrayList<>();
+    private final List<Label> needLabels = new ArrayList<>();
     private Button alarmButton;
     private Label moraleLabel;
     private final List<Label> moraleLines = new ArrayList<>();
     private List<String> builtAlerts = new ArrayList<>();
 
     public GuiTownHallInventory(TownHallMenu menu) {
-        super(menu, 350, 3 * 18 + 4 * 18 + 8 + 8 + 4 + 8 + 16);
+        super(menu, 380, 3 * 18 + 4 * 18 + 8 + 8 + 4 + 8 + 16);
         menu.setInventoryVisible(false);
     }
 
@@ -88,6 +96,8 @@ public class GuiTownHallInventory extends GuiContainerBase<TownHallMenu> {
 
     private void select(Tab tab) {
         current = tab;
+        census.invalidate();
+        building.invalidate();
         getContainer().setInventoryVisible(tab == Tab.INVENTORY);
         refreshGui();
     }
@@ -98,6 +108,19 @@ public class GuiTownHallInventory extends GuiContainerBase<TownHallMenu> {
             tabButtons[tab.ordinal()].setEnabled(tab != current);
         }
         getContainer().setInventoryVisible(current == Tab.INVENTORY);
+        // the server only sends the member snapshot while the Census tab is open
+        if ((current == Tab.CENSUS) != censusAsked) {
+            censusAsked = current == Tab.CENSUS;
+            getContainer().setCensusOpen(censusAsked);
+        }
+        // the server only sends the building state while the Building tab is open; the ghost of a build only shows there
+        if ((current == Tab.BUILDING) != buildAsked) {
+            buildAsked = current == Tab.BUILDING;
+            getContainer().setBuildOpen(buildAsked);
+            if (!buildAsked) {
+                building.close();
+            }
+        }
         boolean wantArea = current != Tab.INVENTORY;
         if (wantArea && !areaShown) {
             addGuiElement(area);
@@ -114,13 +137,21 @@ public class GuiTownHallInventory extends GuiContainerBase<TownHallMenu> {
             updateOverview();
             return;
         }
+        if (current == Tab.CENSUS && built == Tab.CENSUS && !census.needsBuild(getContainer())) {
+            return;
+        }
+        if (current == Tab.BUILDING && built == Tab.BUILDING && !building.needsBuild(getContainer())) {
+            return;
+        }
         area.clearElements();
         switch (current) {
             case OVERVIEW -> buildOverview();
+            case CENSUS -> area.setAreaSize(census.build(area, getContainer(), this::refreshGui));
             case MEMBERS -> buildMembers();
             case STORAGE -> buildStorage();
             case DEATHS -> buildDeaths();
             case GUARD -> buildGuard();
+            case BUILDING -> area.setAreaSize(building.build(area, getContainer(), this::refreshGui));
             default -> {
             }
         }
@@ -185,6 +216,16 @@ public class GuiTownHallInventory extends GuiContainerBase<TownHallMenu> {
             y += 12;
         }
         y += 4;
+        area.addGuiElement(new Label(6, y, tr("guistrings.settlement.needs")));
+        y += 12;
+        needLabels.clear();
+        for (int i = 0; i < TownHallMenu.MAX_NEED_LINES; i++) {
+            Label label = new Label(12, y, "");
+            needLabels.add(label);
+            area.addGuiElement(label);
+            y += 10;
+        }
+        y += 6;
         area.addGuiElement(new Label(6, y, tr("guistrings.settlement.alerts")));
         y += 12;
         builtAlerts = new ArrayList<>(menu.getAlerts());
@@ -225,7 +266,31 @@ public class GuiTownHallInventory extends GuiContainerBase<TownHallMenu> {
             }
         }
         alarmButton.setText(menu.isAlarm() ? "guistrings.settlement.alarm_on" : "guistrings.settlement.alarm_off");
+        updateNeeds();
         updateMorale();
+    }
+
+    /** The Needs section: each line says what is short, how many, and which site makes it or what to build. */
+    private void updateNeeds() {
+        List<TownHallMenu.NeedView> needs = getContainer().getNeeds();
+        for (int i = 0; i < needLabels.size(); i++) {
+            Label label = needLabels.get(i);
+            if (i >= needs.size()) {
+                label.setText(i == 0 ? tr("guistrings.settlement.needs.none") : "");
+                label.setColor(0xFFAAAAAA);
+                continue;
+            }
+            TownHallMenu.NeedView need = needs.get(i);
+            String site = need.siteBlock().isEmpty() ? "" : tr(need.siteBlock());
+            String state = switch (need.status()) {
+                case 0 -> tr("guistrings.settlement.need.making", site);
+                case 1 -> tr("guistrings.settlement.need.queued", site);
+                case 2 -> tr("guistrings.settlement.need.off", site);
+                default -> tr("guistrings.settlement.need.none", need.hint().isEmpty() ? "" : tr(need.hint()));
+            };
+            label.setText(fit(tr("guistrings.settlement.need.line", tr(need.label()), need.count(), state), 330));
+            label.setColor(need.status() == 0 ? 0xFF55FF55 : need.status() == 3 ? 0xFFFF8855 : 0xFFFFFF55);
+        }
     }
 
     /** How many lines the morale breakdown has: one for each factor of {@code SettlementMorale}. */
@@ -265,9 +330,11 @@ public class GuiTownHallInventory extends GuiContainerBase<TownHallMenu> {
         }
         for (TownHallMenu.MemberView member : members) {
             String type = tr("entity.ancientwarfarenpc." + member.type() + ".name");
-            String title = member.name().isEmpty() ? io.github.capttracker.ancientwarfarenpc.entity.NpcNames.display(member.type(), member.given()).getString() : member.name() + " (" + type + ")";
+            String title = member.name().isEmpty() ? (member.child() ? io.github.capttracker.ancientwarfarenpc.entity.NpcNames.child(member.given()) : io.github.capttracker.ancientwarfarenpc.entity.NpcNames.display(member.type(), member.given())).getString() : member.name() + " (" + type + ")";
             area.addGuiElement(new Label(6, y + 2, fit(title, 74)));
-            if (member.type().startsWith("worker")) {
+            if (member.child()) {
+                area.addGuiElement(new Label(86, y + 2, fit(tr("guistrings.census.child"), 44)).setColor(0xFFAAAAAA));
+            } else if (member.type().startsWith("worker")) {
                 String role = member.type().length() > 7 ? member.type().substring(7) : "";
                 String roleText = role.isEmpty() ? tr("guistrings.settlement.role.none") : tr("guistrings.settlement.role." + role);
                 area.addGuiElement(new Button(82, y, 50, 12, fit(roleText, 44)) {
@@ -475,8 +542,24 @@ public class GuiTownHallInventory extends GuiContainerBase<TownHallMenu> {
     }
 
     @Override
+    protected void containerTick() {
+        super.containerTick();
+        if (current == Tab.BUILDING && ++previewTicks >= 5) {
+            previewTicks = 0;
+            building.tickPreview(getContainer());
+        }
+    }
+
+    @Override
+    public void removed() {
+        building.close();
+        super.removed();
+    }
+
+    @Override
     protected boolean onGuiCloseRequested() {
         getContainer().setInventoryVisible(true);
+        building.close();
         return super.onGuiCloseRequested();
     }
 }

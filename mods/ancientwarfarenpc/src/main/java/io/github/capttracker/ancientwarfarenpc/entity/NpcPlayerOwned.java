@@ -17,6 +17,7 @@ import io.github.capttracker.ancientwarfarenpc.settlement.SettlementApi;
 import io.github.capttracker.ancientwarfarenpc.settlement.SettlementData;
 import io.github.capttracker.ancientwarfarenpc.ai.owned.NpcAIPlayerOwnedRideHorse;
 import io.github.capttracker.ancientwarfarenpc.ai.vehicle.NpcAIShipCrew;
+import io.github.capttracker.ancientwarfarenpc.ai.vehicle.NpcAIShipHelm;
 import io.github.capttracker.ancientwarfarenpc.ai.vehicle.ShipCrew;
 import io.github.capttracker.ancientwarfarevehicle.entity.SeatRole;
 import io.github.capttracker.ancientwarfarevehicle.entity.VehicleBase;
@@ -100,47 +101,75 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
         Arrays.fill(handDropChances, 1.f);
         // every owned NPC can crew a ship: the duty goal runs while it sits in a seat of one (it holds the move flags, so the work goals leave it alone)
         goalSelector.addGoal(0, new NpcAIShipCrew(this));
+        goalSelector.addGoal(0, new NpcAIShipHelm(this));
     }
 
     // ---- ship crew (rowers, gunners, passengers of the Vehicles module's ships) ----
 
-    /** The seat roles this NPC takes on a ship, best first (the helm is never taken). Workers and the like row, soldiers man the guns first. */
-    public List<SeatRole> getShipSeatPreference() {
-        return List.of(SeatRole.ROWER, SeatRole.PASSENGER);
-    }
-
-    /** True if this NPC works a turret when it sits in a gunner seat. */
-    public boolean isShipGunner() {
-        return getShipSeatPreference().contains(SeatRole.GUNNER);
-    }
-
-    /** The ship this NPC crews: it rides it in a seat that is not the helm. Null if it rides nothing, or something else. */
+    /** The food this NPC carries and may eat aboard a ship (its own inventory), or null if it carries none. Workers: the carry pouch. */
     @Nullable
-    public VehicleBase getRidingShip() {
-        if (getVehicle() instanceof VehicleBase vehicle && vehicle.isShip()) {
-            int seat = vehicle.seatOf(this);
-            if (seat >= 0 && seat < vehicle.getSeatCount() && vehicle.getSeat(seat).role() != SeatRole.DRIVER) {
-                return vehicle;
-            }
-        }
+    public net.neoforged.neoforge.items.IItemHandler getCarriedFood() {
         return null;
     }
 
-    public boolean isShipCrew() {
-        return getRidingShip() != null;
+    // ---- sail orders (the NPC at the helm of a ship) ----
+
+    /** Where the helmsman sails to (the surface block of the water), or null. Saved. */
+    @Nullable
+    private BlockPos sailTarget;
+    /** The entity (a player in another vessel, a vessel) the helmsman follows, or null. Saved. */
+    @Nullable
+    private java.util.UUID sailFollow;
+
+    public void setSailOrder(@Nullable BlockPos target, @Nullable java.util.UUID follow) {
+        sailTarget = target;
+        sailFollow = follow;
     }
 
-    /** The ship this NPC was ordered off: idle soldiers do not auto-board it again while the owner stays aboard (not saved; forgotten on a reload). */
-    @Nullable
-    private java.util.UUID refusedShip;
-
-    @Nullable
-    public java.util.UUID getRefusedShip() {
-        return refusedShip;
+    public void clearSailOrder() {
+        sailTarget = null;
+        sailFollow = null;
+        sailRoute = List.of();
     }
 
-    public void setRefusedShip(@Nullable java.util.UUID ship) {
-        refusedShip = ship;
+    /** How the last sail order of the helmsman ended (rework phase 11: a trade route reads it). */
+    public enum SailResult { NONE, ARRIVED, STUCK }
+
+    private SailResult sailResult = SailResult.NONE;
+    /** The waypoints the helmsman steers through on the way to its sail target (planned by whoever gave the order); not saved. */
+    private List<Vec3> sailRoute = List.of();
+
+    /** Sail to {@code target} through the waypoints (water positions, the last one next to the target): the helmsman only passes them and stops at the target. */
+    public void setSailRouteOrder(BlockPos target, List<Vec3> route) {
+        sailTarget = target;
+        sailFollow = null;
+        sailRoute = route == null ? List.of() : List.copyOf(route);
+        sailResult = SailResult.NONE;
+    }
+
+    public List<Vec3> getSailRoute() {
+        return sailRoute;
+    }
+
+    public void setSailResult(SailResult result) {
+        sailResult = result;
+    }
+
+    /** The way the last sail order ended, and forgets it. */
+    public SailResult takeSailResult() {
+        SailResult result = sailResult;
+        sailResult = SailResult.NONE;
+        return result;
+    }
+
+    @Nullable
+    public BlockPos getSailTarget() {
+        return sailTarget;
+    }
+
+    @Nullable
+    public java.util.UUID getSailFollow() {
+        return sailFollow;
     }
 
     /** The entry of {@code owned_npc_defaults.json} for this NPC type. */
@@ -204,6 +233,40 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
     @Nullable
     public UUID getSettlementId() {
         return settlementId;
+    }
+
+    /** The UUID this NPC had before it was made from a spawner item again (a resurrection), or null. Server side; see {@link Settlement#addMember}. */
+    @Nullable
+    private UUID formerId;
+
+    @Nullable
+    public UUID getFormerId() {
+        return formerId;
+    }
+
+    public void clearFormerId() {
+        formerId = null;
+    }
+
+    /** Player-owned NPCs have a family name (rework phase 10). */
+    @Override
+    protected boolean supportsSurname() {
+        return true;
+    }
+
+    /** The item form keeps the UUID, so that a resurrected NPC (a new entity) can take its place in the family records of the settlement. */
+    @Override
+    public void writeAdditionalItemData(CompoundTag tag) {
+        super.writeAdditionalItemData(tag);
+        tag.putUUID("formerId", getUUID());
+    }
+
+    @Override
+    public void readAdditionalItemData(CompoundTag tag) {
+        super.readAdditionalItemData(tag);
+        if (tag.hasUUID("formerId")) {
+            formerId = tag.getUUID("formerId");
+        }
     }
 
     /** The settlement this NPC belongs to (server side only). */
@@ -274,6 +337,7 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
             } else {
                 Settlement settlement = current.get();
                 isAlarmed = settlement.isAlarmActive();
+                settlement.syncSurname(this);
                 if ((tickCount + getId()) % MEMBER_UPDATE_INTERVAL == 0) {
                     settlement.updateMember(this, computeStatus());
                 }
@@ -292,7 +356,7 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
 
     /** The part of the day this NPC is in. */
     public Activity getActivity() {
-        return Activity.of(level());
+        return Activity.of(level(), io.github.capttracker.ancientwarfarenpc.trait.TraitEffects.scheduleShift(this));
     }
 
     /** True while the NPC is busy (it has orders, or work); the rain shelter only takes NPCs that are not. */
@@ -314,6 +378,11 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
 
     /** True for an NPC that does not run to shelter when the alarm is on (it rallies, heals, or is fighting for its life). */
     public boolean ignoresAlarmShelter() {
+        return canFightAlarm();
+    }
+
+    /** True for an NPC that stays and fights in an alarm although it is not a soldier (a brave worker with a weapon in its hand). */
+    public boolean canFightAlarm() {
         return false;
     }
 
@@ -360,13 +429,34 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
 
     /** input path from command baton - default implementation for player-owned NPC is to set current command==input command and then let AI do the rest */
     public void handlePlayerCommand(Command cmd) {
-        VehicleBase crewShip = getRidingShip();
+        VehicleBase helmShip = getHelmShip();
+        if (helmShip != null && AWNPCStatics.shipHelmsmen) {
+            // the helmsman sails: a Move order at water is its destination, a Move order at another vessel is a follow order
+            if (cmd.type == CommandType.MOVE) {
+                BlockPos water = ShipCrew.waterSurface(level(), cmd.pos);
+                if (water != null) {
+                    setSailOrder(water, null);
+                    return;
+                }
+            } else if (cmd.type == CommandType.GUARD) {
+                Entity followed = cmd.getEntityTarget(level());
+                if (ShipCrew.vesselOf(followed, helmShip) != null) {
+                    setSailOrder(null, followed.getUUID());
+                    return;
+                }
+            }
+        }
+        if (cmd.type == CommandType.CLEAR_COMMAND || getHelmShip() == null) {
+            clearSailOrder();
+        }
+        VehicleBase crewShip = getRidingShip() != null ? getRidingShip() : helmShip;
         if (crewShip != null && (cmd.type == CommandType.MOVE || cmd.type == CommandType.GUARD || cmd.type == CommandType.ATTACK_AREA)) {
-            // ordered somewhere else, or ordered at its own ship again: it gets off (on dry land close by, if there is some)
+            // ordered somewhere else (on land), or ordered at its own ship again: it gets off (on dry land close by, if there is some)
+            clearSailOrder();
             Entity guarded = cmd.type == CommandType.GUARD ? cmd.getEntityTarget(level()) : null;
             Vec3 towards = cmd.type == CommandType.GUARD ? (guarded == null ? position() : guarded.position()) : Vec3.atBottomCenterOf(cmd.pos);
             ShipCrew.disembark(this, crewShip, towards);
-            refusedShip = crewShip.getUUID();
+            setRefusedShip(crewShip.getUUID());
             if (guarded != null && ShipCrew.shipOf(guarded) == crewShip) {
                 setPlayerCommand(Command.NONE);
                 return;
@@ -488,6 +578,8 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
     private long lastNearDeathAt = -1L;
     private long lastInnMealAt = -1L;
     private long lastSocialAt = -1L;
+    /** Game time of the last new skill rank (rework phase 7), -1 if never (saved). */
+    private long lastLevelUpAt = -1L;
     /** Ticks the NPC has been idle without a job in its work hours (not saved). */
     private int idleTicks = 0;
 
@@ -525,6 +617,27 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
 
     public long getLastSocialAt() {
         return lastSocialAt;
+    }
+
+    public long getLastLevelUpAt() {
+        return lastLevelUpAt;
+    }
+
+    @Override
+    public boolean supportsSkills() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsTraits() {
+        return true;
+    }
+
+    /** A new rank lifts the morale for a while: the morale is computed again at the next tick. */
+    @Override
+    protected void onRankUp(io.github.capttracker.ancientwarfarenpc.skill.Skill skill, int rank) {
+        lastLevelUpAt = level().getGameTime();
+        moraleNext = 0L;
     }
 
     public int getIdleTicks() {
@@ -767,9 +880,14 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
             settlementTick();
             hungerTick();
             moraleTick();
+            ensureTraits(); // a new NPC, or one from an older save, rolls its traits at its first tick
+            if (tickCount % 40 == 1) {
+                refreshSkillState(); // the main rank follows a role change; the combat bonus is applied after a load
+                refreshTraitState(); // the health and damage modifiers of the traits are applied after a load
+            }
         }
         if (foodValueRemaining > 0 && !isSleeping()) {
-            foodValueRemaining--;
+            foodValueRemaining = Math.max(0, foodValueRemaining - io.github.capttracker.ancientwarfarenpc.trait.TraitEffects.hungerDrain(this)); // glutton faster, frugal slower
         }
     }
 
@@ -794,15 +912,19 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
         lastNearDeathAt = tag.contains("lastNearDeathAt") ? tag.getLong("lastNearDeathAt") : -1L;
         lastInnMealAt = tag.contains("lastInnMealAt") ? tag.getLong("lastInnMealAt") : -1L;
         lastSocialAt = tag.contains("lastSocialAt") ? tag.getLong("lastSocialAt") : -1L;
+        lastLevelUpAt = tag.contains("lastLevelUpAt") ? tag.getLong("lastLevelUpAt") : -1L;
         starvingTicks = tag.getInt("starvingTicks");
         if (tag.contains(COMMAND_TAG)) {
             playerIssuedCommand = new Command(tag.getCompound(COMMAND_TAG));
         }
         settlementId = tag.hasUUID(SETTLEMENT_TAG) ? tag.getUUID(SETTLEMENT_TAG) : null;
         settlementDismissed = tag.getBoolean(DISMISSED_TAG);
+        formerId = tag.hasUUID("formerId") ? tag.getUUID("formerId") : null;
         if (tag.contains(UPKEEP_POS_TAG)) {
             upkeepAutoBlock = BlockPos.of(tag.getLong(UPKEEP_POS_TAG));
         }
+        sailTarget = tag.contains("sailTarget") ? BlockPos.of(tag.getLong("sailTarget")) : null;
+        sailFollow = tag.hasUUID("sailFollow") ? tag.getUUID("sailFollow") : null;
         onOrdersInventoryChanged();
     }
 
@@ -816,6 +938,7 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
         tag.putLong("lastNearDeathAt", lastNearDeathAt);
         tag.putLong("lastInnMealAt", lastInnMealAt);
         tag.putLong("lastSocialAt", lastSocialAt);
+        tag.putLong("lastLevelUpAt", lastLevelUpAt);
         tag.putInt("starvingTicks", starvingTicks);
         if (playerIssuedCommand != Command.NONE) {
             tag.put(COMMAND_TAG, playerIssuedCommand.writeToNBT(new CompoundTag()));
@@ -824,8 +947,17 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
             tag.putUUID(SETTLEMENT_TAG, settlementId);
         }
         tag.putBoolean(DISMISSED_TAG, settlementDismissed);
+        if (formerId != null) {
+            tag.putUUID("formerId", formerId);
+        }
         if (upkeepAutoBlock != null) {
             tag.putLong(UPKEEP_POS_TAG, upkeepAutoBlock.asLong());
+        }
+        if (sailTarget != null) {
+            tag.putLong("sailTarget", sailTarget.asLong());
+        }
+        if (sailFollow != null) {
+            tag.putUUID("sailFollow", sailFollow);
         }
     }
 

@@ -5,7 +5,11 @@
 package io.github.capttracker.ancientwarfarenpc.npccommand;
 
 import io.github.capttracker.ancientwarfarenpc.ai.vehicle.ShipCrew;
+import io.github.capttracker.ancientwarfarenpc.config.AWNPCStatics;
+import io.github.capttracker.ancientwarfarenpc.ai.siege.SiegeOps;
+import io.github.capttracker.ancientwarfarenpc.entity.NpcCombat;
 import io.github.capttracker.ancientwarfarenpc.entity.NpcPlayerOwned;
+import io.github.capttracker.ancientwarfarenpc.settlement.SettlementConfig;
 import io.github.capttracker.ancientwarfarevehicle.entity.SeatRole;
 import io.github.capttracker.ancientwarfarevehicle.entity.VehicleBase;
 import net.minecraft.network.chat.Component;
@@ -96,16 +100,30 @@ public final class NpcCommand {
         }
         Command cmd = block ? new Command(type, pos) : new Command(type, entityId);
         int ordered = 0;
+        java.util.List<NpcCombat> soldiers = new java.util.ArrayList<>();
         for (Entity entity : provider.getCommandedEntities(player)) {
             if (entity instanceof NpcPlayerOwned npc) {
                 if (ship != null && npc.getVehicle() != ship) {
                     ordered++;
                 }
                 npc.handlePlayerCommand(cmd.copy());
+                if (npc instanceof NpcCombat combat) {
+                    soldiers.add(combat);
+                }
+            }
+        }
+        if (block && type == CommandType.ATTACK_AREA && player.level() instanceof ServerLevel serverLevel) {
+            // rework phase 12: an attack order at a wall or gate gives the soldiers and archers roles on the siege equipment of their owner
+            SiegeOps.Summary siege = SiegeOps.order(serverLevel, pos, soldiers);
+            if (siege != null && siege.eligible() > 0) {
+                player.displayClientMessage(siege.npcs() > 0
+                        ? Component.translatable("message.ancientwarfarenpc.siege.assigned", siege.npcs(), siege.eligible(), siege.towers(), siege.mantlets(), siege.rams())
+                        : Component.translatable("message.ancientwarfarenpc.siege.none", SettlementConfig.siegeSearchRadius), true);
             }
         }
         if (ship != null && ordered > 0) {
-            int free = ShipCrew.freeSeats(ship, List.of(SeatRole.GUNNER, SeatRole.ROWER, SeatRole.PASSENGER));
+            int free = ShipCrew.freeSeats(ship, AWNPCStatics.shipHelmsmen ? List.of(SeatRole.DRIVER, SeatRole.GUNNER, SeatRole.ROWER, SeatRole.PASSENGER)
+                    : List.of(SeatRole.GUNNER, SeatRole.ROWER, SeatRole.PASSENGER));
             player.displayClientMessage(Component.translatable(ordered > free ? "message.ancientwarfarenpc.ship.not_enough_seats" : "message.ancientwarfarenpc.ship.boarding",
                     ordered, free), true);
         }

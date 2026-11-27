@@ -1,0 +1,34 @@
+{
+  "type": "ancientwarfare:shapeless_research_recipe",
+  "research": "ancientwarfare:siege_warfare",
+  "ingredients": [
+    {
+      "item": "ancientwarfarevehicle:rough_wood",
+      "count": 24
+    },
+    {
+      "item": "ancientwarfarevehicle:mobility_unit",
+      "count": 3
+    },
+    {
+      "tag": "c:strings",
+      "count": 16
+    },
+    {
+      "tag": "c:ingots/iron",
+      "count": 8
+    },
+    {
+      "item": "ancientwarfarevehicle:equipment_bay",
+      "count": 2
+    }
+  ],
+  "result": {
+    "id": "ancientwarfarevehicle:siege_tower_large_spawner",
+    "components": {
+      "ancientwarfarevehicle:vehicle_spawn_data": {
+        "level": 0
+      }
+    }
+  }
+}

@@ -30,6 +30,9 @@ public final class SettlementNetwork {
 
     public static void registerPayloads(PayloadRegistrar registrar) {
         registrar.playToClient(GeometryPayload.TYPE, GeometryPayload.CODEC, GeometryPayload::handle);
+        registrar.playToClient(Census.Payload.TYPE, Census.Payload.CODEC, Census.Payload::handle);
+        io.github.capttracker.ancientwarfarenpc.settlement.building.DesignNetwork.register(registrar);
+        io.github.capttracker.ancientwarfarenpc.settlement.building.BuildingNetwork.register(registrar);
     }
 
     /** What the client needs of one settlement: the hall, the markers, the radius used below 3 markers, and the colour of the border. */

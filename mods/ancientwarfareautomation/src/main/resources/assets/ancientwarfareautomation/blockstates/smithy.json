@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "active=false,facing=north": {
+      "model": "ancientwarfareautomation:block/smithy"
+    },
+    "active=false,facing=east": {
+      "model": "ancientwarfareautomation:block/smithy",
+      "y": 90
+    },
+    "active=false,facing=south": {
+      "model": "ancientwarfareautomation:block/smithy",
+      "y": 180
+    },
+    "active=false,facing=west": {
+      "model": "ancientwarfareautomation:block/smithy",
+      "y": 270
+    },
+    "active=true,facing=north": {
+      "model": "ancientwarfareautomation:block/smithy"
+    },
+    "active=true,facing=east": {
+      "model": "ancientwarfareautomation:block/smithy",
+      "y": 90
+    },
+    "active=true,facing=south": {
+      "model": "ancientwarfareautomation:block/smithy",
+      "y": 180
+    },
+    "active=true,facing=west": {
+      "model": "ancientwarfareautomation:block/smithy",
+      "y": 270
+    }
+  }
+}

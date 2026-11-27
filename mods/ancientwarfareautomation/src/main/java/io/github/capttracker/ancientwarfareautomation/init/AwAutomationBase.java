@@ -68,7 +68,11 @@ import io.github.capttracker.ancientwarfareautomation.block.entity.worksite.Fish
 import io.github.capttracker.ancientwarfareautomation.block.entity.worksite.InnBlockEntity;
 import io.github.capttracker.ancientwarfareautomation.block.entity.worksite.MarketStallBlockEntity;
 import io.github.capttracker.ancientwarfareautomation.block.entity.worksite.StableBlockEntity;
+import io.github.capttracker.ancientwarfareautomation.block.entity.worksite.BakeryBlockEntity;
+import io.github.capttracker.ancientwarfareautomation.block.entity.worksite.SawmillBlockEntity;
 import io.github.capttracker.ancientwarfareautomation.block.entity.worksite.SmelterBlockEntity;
+import io.github.capttracker.ancientwarfareautomation.block.entity.worksite.SmithyBlockEntity;
+import io.github.capttracker.ancientwarfareautomation.block.entity.worksite.TanneryBlockEntity;
 import io.github.capttracker.ancientwarfareautomation.block.entity.worksite.InventoryWorksiteBlockEntity;
 import io.github.capttracker.ancientwarfareautomation.block.entity.worksite.QuarryBlockEntity;
 import io.github.capttracker.ancientwarfareautomation.block.entity.worksite.WorksiteBlockEntity;
@@ -222,6 +226,18 @@ public final class AwAutomationBase {
     public static final DeferredBlock<WorksiteBlock> DOCK = worksite("dock", () -> AwAutomationBase.DOCK_BE.get());
     public static final DeferredBlock<WorksiteBlock> APIARY = worksite("apiary", () -> AwAutomationBase.APIARY_BE.get());
     public static final DeferredBlock<WorksiteBlock> SMELTER = worksite("smelter", () -> AwAutomationBase.SMELTER_BE.get());
+    /** Rework phase 8: the sawmill, staffed by a craftsman (no work area, plain owned block item). */
+    public static final DeferredBlock<WorksiteBlock> SAWMILL = block("sawmill",
+            props -> new WorksiteBlock(props, () -> AwAutomationBase.SAWMILL_BE.get()), wood(), OwnedBlockItem::new);
+    /** Rework phase 8: the bakery, staffed by a craftsman (no work area, plain owned block item). */
+    public static final DeferredBlock<WorksiteBlock> BAKERY = block("bakery",
+            props -> new WorksiteBlock(props, () -> AwAutomationBase.BAKERY_BE.get()), wood(), OwnedBlockItem::new);
+    /** Rework phase 8: the smithy, staffed by a smith (no work area, plain owned block item). */
+    public static final DeferredBlock<WorksiteBlock> SMITHY = block("smithy",
+            props -> new WorksiteBlock(props, () -> AwAutomationBase.SMITHY_BE.get()), rock(), OwnedBlockItem::new);
+    /** Rework phase 8: the tannery, staffed by a tanner (no work area, plain owned block item). */
+    public static final DeferredBlock<WorksiteBlock> TANNERY = block("tannery",
+            props -> new WorksiteBlock(props, () -> AwAutomationBase.TANNERY_BE.get()), wood(), OwnedBlockItem::new);
     /** Rework phase 5: the market stall, staffed by a trader NPC (no work area, so its item is a plain owned block item). */
     public static final DeferredBlock<WorksiteBlock> MARKET_STALL = block("market_stall",
             props -> new WorksiteBlock(props, () -> AwAutomationBase.MARKET_STALL_BE.get()), wood(), OwnedBlockItem::new);
@@ -385,6 +401,14 @@ public final class AwAutomationBase {
             REG.blockEntity("apiary", ApiaryBlockEntity::new, APIARY);
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SmelterBlockEntity>> SMELTER_BE =
             REG.blockEntity("smelter", SmelterBlockEntity::new, SMELTER);
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SawmillBlockEntity>> SAWMILL_BE =
+            REG.blockEntity("sawmill", SawmillBlockEntity::new, SAWMILL);
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BakeryBlockEntity>> BAKERY_BE =
+            REG.blockEntity("bakery", BakeryBlockEntity::new, BAKERY);
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SmithyBlockEntity>> SMITHY_BE =
+            REG.blockEntity("smithy", SmithyBlockEntity::new, SMITHY);
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TanneryBlockEntity>> TANNERY_BE =
+            REG.blockEntity("tannery", TanneryBlockEntity::new, TANNERY);
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MarketStallBlockEntity>> MARKET_STALL_BE =
             REG.blockEntity("market_stall", MarketStallBlockEntity::new, MARKET_STALL);
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<InnBlockEntity>> INN_BE =
@@ -509,6 +533,10 @@ public final class AwAutomationBase {
         registerWorksite(event, DOCK_BE);
         registerWorksite(event, APIARY_BE);
         registerWorksite(event, SMELTER_BE);
+        registerWorksite(event, SAWMILL_BE);
+        registerWorksite(event, BAKERY_BE);
+        registerWorksite(event, SMITHY_BE);
+        registerWorksite(event, TANNERY_BE);
         registerWorksite(event, MARKET_STALL_BE);
         registerWorksite(event, INN_BE);
         registerWorksite(event, STABLE_BE);
@@ -524,6 +552,10 @@ public final class AwAutomationBase {
         registerInventoryWorksite(event, DOCK_BE);
         registerInventoryWorksite(event, APIARY_BE);
         registerInventoryWorksite(event, SMELTER_BE);
+        registerInventoryWorksite(event, SAWMILL_BE);
+        registerInventoryWorksite(event, BAKERY_BE);
+        registerInventoryWorksite(event, SMITHY_BE);
+        registerInventoryWorksite(event, TANNERY_BE);
         registerInventoryWorksite(event, MARKET_STALL_BE);
         registerInventoryWorksite(event, INN_BE);
         registerInventoryWorksite(event, STABLE_BE);
@@ -565,7 +597,7 @@ public final class AwAutomationBase {
     private static void onCommonSetup(FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
             FireBlock fire = (FireBlock) Blocks.FIRE;
-            List<Supplier<? extends Block>> worksites = List.of(TREE_FARM, CROP_FARM, FRUIT_FARM, ANIMAL_FARM, FISH_FARM, DOCK, APIARY, SMELTER, MARKET_STALL, INN, STABLE, QUARRY,
+            List<Supplier<? extends Block>> worksites = List.of(TREE_FARM, CROP_FARM, FRUIT_FARM, ANIMAL_FARM, FISH_FARM, DOCK, APIARY, SMELTER, SAWMILL, BAKERY, SMITHY, TANNERY, MARKET_STALL, INN, STABLE, QUARRY,
                     AUTO_CRAFTING, WAREHOUSE_CONTROL);
             for (Supplier<? extends Block> block : worksites) {
                 fire.setFlammable(block.get(), 5, 20);

@@ -25,6 +25,9 @@ import io.github.capttracker.ancientwarfarevehicle.entity.types.VehicleTypeCatap
 import io.github.capttracker.ancientwarfarevehicle.entity.types.VehicleTypeCart;
 import io.github.capttracker.ancientwarfarevehicle.entity.types.VehicleTypeCog;
 import io.github.capttracker.ancientwarfarevehicle.entity.types.VehicleTypeFishingBoat;
+import io.github.capttracker.ancientwarfarevehicle.entity.types.VehicleTypeMantlet;
+import io.github.capttracker.ancientwarfarevehicle.entity.types.VehicleTypeSiegeTowerLarge;
+import io.github.capttracker.ancientwarfarevehicle.entity.types.VehicleTypeSiegeTowerMedium;
 import io.github.capttracker.ancientwarfarevehicle.entity.types.VehicleTypeWarGalley;
 import io.github.capttracker.ancientwarfarevehicle.entity.types.VehicleTypeChestCart;
 import io.github.capttracker.ancientwarfarevehicle.entity.types.VehicleTypeHwacha;
@@ -38,7 +41,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 /**
- * The 21 vehicle type descriptors (global indices 0 to 20, see {@link VehicleTypeIds}). They are plain data objects, not
+ * The 29 vehicle type descriptors (global indices 0 to 28, see {@link VehicleTypeIds}; 21 of the first generation, the carts, ships and siege works came later). They are plain data objects, not
  * items; the type constructors also enter themselves in {@code VehicleType.vehicleTypes}.
  *
  * <p>Creating them reads the common config (vehicle health, oversize ammo) and needs the ammo, armor and upgrade rule objects,
@@ -90,6 +93,10 @@ public class VehicleRegistry {
     public static final IVehicleType COG = new VehicleTypeCog(VehicleTypeIds.COG);
     public static final IVehicleType WAR_GALLEY = new VehicleTypeWarGalley(VehicleTypeIds.WAR_GALLEY);
 
+    public static final IVehicleType SIEGE_TOWER = new VehicleTypeSiegeTowerMedium(VehicleTypeIds.SIEGE_TOWER);
+    public static final IVehicleType SIEGE_TOWER_LARGE = new VehicleTypeSiegeTowerLarge(VehicleTypeIds.SIEGE_TOWER_LARGE);
+    public static final IVehicleType MANTLET = new VehicleTypeMantlet(VehicleTypeIds.MANTLET);
+
     /** All types, indexed by global type index. */
     private static final List<IVehicleType> BY_INDEX = List.of(
             CATAPULT_STAND_FIXED, CATAPULT_STAND_TURRET, CATAPULT_MOBILE_FIXED, CATAPULT_MOBILE_TURRET,
@@ -101,7 +108,8 @@ public class VehicleRegistry {
             CHEST_CART,
             BOAT_BALLISTA, BOAT_CATAPULT, BOAT_TRANSPORT,
             CART, WAGON,
-            FISHING_BOAT, COG, WAR_GALLEY);
+            FISHING_BOAT, COG, WAR_GALLEY,
+            SIEGE_TOWER, SIEGE_TOWER_LARGE, MANTLET);
 
     private VehicleRegistry() {}
 
@@ -111,7 +119,7 @@ public class VehicleRegistry {
         return globalTypeIndex >= 0 && globalTypeIndex < BY_INDEX.size() ? BY_INDEX.get(globalTypeIndex) : null;
     }
 
-    /** All 26 types in index order. */
+    /** All 29 types in index order. */
     public static List<IVehicleType> getAllVehicleTypes() {
         return BY_INDEX;
     }

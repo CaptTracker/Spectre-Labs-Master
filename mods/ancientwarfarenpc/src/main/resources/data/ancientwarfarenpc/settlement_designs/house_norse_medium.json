@@ -1,0 +1,141 @@
+{
+  "name": "Medium Norse House",
+  "category": "house",
+  "style": "norse",
+  "size": [9, 11, 7],
+  "front": "south",
+  "palette": {
+    "W": "minecraft:dark_oak_log[axis=y]",
+    "L": "minecraft:cobblestone",
+    "S": "minecraft:brown_bed[part=head,facing=north]",
+    "B": "minecraft:brown_bed[part=foot,facing=north]",
+    "C": "minecraft:spruce_stairs[facing=east,half=bottom,shape=straight]",
+    "D": "minecraft:spruce_fence",
+    "F": "minecraft:spruce_stairs[facing=west,half=bottom,shape=straight]",
+    "H": "minecraft:red_carpet",
+    "I": "minecraft:bookshelf",
+    "J": "minecraft:furnace[facing=west,lit=false]",
+    "K": "minecraft:crafting_table",
+    "M": "minecraft:spruce_door[facing=north,half=lower,hinge=left,open=false]",
+    "N": "minecraft:spruce_planks",
+    "O": "minecraft:glass_pane[east=true,west=true]",
+    "P": "minecraft:glass_pane[north=true,south=true]",
+    "Q": "minecraft:spruce_pressure_plate",
+    "R": "minecraft:wall_torch[facing=north]",
+    "T": "minecraft:spruce_door[facing=north,half=upper,hinge=left,open=false]",
+    "U": "minecraft:spruce_log[axis=x]",
+    "V": "minecraft:spruce_log[axis=z]",
+    "X": "minecraft:dark_oak_stairs[facing=north,half=bottom,shape=straight]",
+    "Y": "minecraft:lantern[hanging=true]",
+    "Z": "minecraft:dark_oak_stairs[facing=south,half=bottom,shape=straight]",
+    "a": "minecraft:dark_oak_planks",
+    "b": "minecraft:chain[axis=y]",
+    "c": "minecraft:dark_oak_slab[type=bottom]"
+  },
+  "layers": [
+    [
+      "WLLLLLLLW",
+      "LS.S.S.SL",
+      "LB.B.B.BL",
+      "LCDFHHHIL",
+      "L......JL",
+      "L......KL",
+      "WLLWMWLLW"
+    ],
+    [
+      "WNONNNONW",
+      "N.......N",
+      "N.......N",
+      "P.Q....IP",
+      "N.......N",
+      "N..R.R..N",
+      "WNOWTWONW"
+    ],
+    [
+      "WUUUUUUUW",
+      "V.......V",
+      "V.......V",
+      "V.......V",
+      "V.......V",
+      "V.......V",
+      "WUUWUWUUW"
+    ],
+    [
+      "XXXXXXXXX",
+      "N_______N",
+      "N_______N",
+      "N_Y___Y_N",
+      "N_______N",
+      "N_______N",
+      "ZZZZZZZZZ"
+    ],
+    [
+      "aaaaaaaaa",
+      "N_______N",
+      "N_______N",
+      "N_b___b_N",
+      "N_______N",
+      "N_______N",
+      "aaaaaaaaa"
+    ],
+    [
+      "_________",
+      "XXXXXXXXX",
+      "N_______N",
+      "N_b___b_N",
+      "N_______N",
+      "ZZZZZZZZZ",
+      "_________"
+    ],
+    [
+      "_________",
+      "aaaaaaaaa",
+      "N_______N",
+      "N_b___b_N",
+      "N_______N",
+      "aaaaaaaaa",
+      "_________"
+    ],
+    [
+      "_________",
+      "_________",
+      "XXXXXXXXX",
+      "N_b___b_N",
+      "ZZZZZZZZZ",
+      "_________",
+      "_________"
+    ],
+    [
+      "_________",
+      "_________",
+      "aaaaaaaaa",
+      "N_b___b_N",
+      "aaaaaaaaa",
+      "_________",
+      "_________"
+    ],
+    [
+      "_________",
+      "_________",
+      "_________",
+      "aaaaaaaaa",
+      "_________",
+      "_________",
+      "_________"
+    ],
+    [
+      "_________",
+      "_________",
+      "_________",
+      "ccccccccc",
+      "_________",
+      "_________",
+      "_________"
+    ]
+  ],
+  "beds": 4,
+  "storage": 0,
+  "min_level": 1,
+  "min_population": 4,
+  "tags": ["housing_capacity", "upgrade_of=ancientwarfarenpc:house_norse_small"]
+}

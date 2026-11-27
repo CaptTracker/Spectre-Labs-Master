@@ -3483,6 +3483,27 @@
    "po_worker_craftsman_4",
    "po_worker_craftsman_5"
   ],
+  "worker.smith": [
+   "po_worker_craftsman_1",
+   "po_worker_craftsman_2",
+   "po_worker_craftsman_3",
+   "po_worker_craftsman_4",
+   "po_worker_craftsman_5"
+  ],
+  "worker.tanner": [
+   "po_worker_craftsman_1",
+   "po_worker_craftsman_2",
+   "po_worker_craftsman_3",
+   "po_worker_craftsman_4",
+   "po_worker_craftsman_5"
+  ],
+  "worker.builder": [
+   "po_worker_craftsman_1",
+   "po_worker_craftsman_2",
+   "po_worker_craftsman_3",
+   "po_worker_craftsman_4",
+   "po_worker_craftsman_5"
+  ],
   "worker.farmer": [
    "po_worker_farmer_1",
    "po_worker_farmer_2",

@@ -10,6 +10,7 @@ import io.github.capttracker.ancientwarfarenpc.block.entity.TownHallBlockEntity;
 import io.github.capttracker.ancientwarfarenpc.init.AwNpcMenus;
 import io.github.capttracker.ancientwarfare.api.IWorkSite;
 import io.github.capttracker.ancientwarfarenpc.entity.NpcWorker;
+import io.github.capttracker.ancientwarfarenpc.settlement.Census;
 import io.github.capttracker.ancientwarfarenpc.settlement.JobBoard;
 import io.github.capttracker.ancientwarfarenpc.settlement.MemberStatus;
 import io.github.capttracker.ancientwarfarenpc.settlement.NpcDeathEntry;
@@ -17,6 +18,8 @@ import io.github.capttracker.ancientwarfarenpc.settlement.Settlement;
 import io.github.capttracker.ancientwarfarenpc.settlement.SettlementApi;
 import io.github.capttracker.ancientwarfarenpc.settlement.SettlementConfig;
 import io.github.capttracker.ancientwarfarenpc.settlement.SettlementMorale;
+import io.github.capttracker.ancientwarfarenpc.settlement.SettlementNeed;
+import io.github.capttracker.ancientwarfarenpc.settlement.SettlementNeeds;
 import io.github.capttracker.spectrefactions.api.ActorId;
 import io.github.capttracker.spectrefactions.api.FactionsApi;
 import net.minecraft.core.BlockPos;
@@ -38,6 +41,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.items.SlotItemHandler;
 
 import javax.annotation.Nullable;
@@ -48,7 +52,7 @@ import java.util.UUID;
 
 /**
  * The town hall menu (1.12.2: {@code GUI_NPC_TOWN_HALL}, 41), reworked for settlements: the 27 slot inventory plus a data channel for the tabs of the
- * screen (overview, members, storage, deaths). The server sends a state tag (name, owner, food, alarm, alerts, members, storages) when the menu
+ * screen (overview, census, members, storage, deaths). The server sends a state tag (name, owner, food, alarm, alerts, members, storages) when the menu
  * opens and again whenever it changes (checked once a second), and the death list whenever the settlement records a death ({@link ITownHallViewer}).
  * The client asks for: {@code rename}, {@code alarm}, {@code dismiss} (member UUID), {@code unlink} (storage position as long) and {@code clear}.
  * Every request is checked on the server: the player must be the owner of the hall or a member of the owning faction.
@@ -61,13 +65,19 @@ public class TownHallMenu extends BlockEntityMenu<TownHallBlockEntity> implement
     public static final int SLOT_X = 94;
 
     /** A member as the screen shows it. */
-    public record MemberView(UUID id, String name, String given, String type, MemberStatus status, int distance, boolean homeless, int morale) {}
+    public record MemberView(UUID id, String name, String given, String type, MemberStatus status, int distance, boolean homeless, int morale, boolean child) {}
 
     /** One role line of the Overview: free and taken worker slots of its jobs, and the members of the role that have no job. */
     public record RoleJobs(String role, int open, int filled, int idle) {}
 
     /** One line of the morale breakdown: the factor key, the points it gives and its maximum. */
     public record MoraleLine(String key, int points, int max) {}
+
+    /** One need of the Overview (rework phase 8): the name key, how many are missing, the producer status ordinal, the block key of the site and the hint key. */
+    public record NeedView(String label, int count, int status, String siteBlock, String hint) {}
+
+    /** How many needs are sent to the screen. */
+    public static final int MAX_NEED_LINES = 8;
 
     /** The guard settings of the settlement as the Guard tab shows them (the effective values, config defaults included). */
     public record GuardView(boolean patrol, int nightWatchPercent, boolean autoAlarm, int threshold, int clearSeconds, boolean overridden,
@@ -99,12 +109,24 @@ public class TownHallMenu extends BlockEntityMenu<TownHallBlockEntity> implement
     private int morale = 50;
     private double moraleFactor = 1.0D;
     private final List<MoraleLine> moraleLines = new ArrayList<>();
+    private final List<NeedView> needs = new ArrayList<>();
     private GuardView guard = GuardView.none();
+    private List<Census.Entry> census = new ArrayList<>();
 
     // server side
     @Nullable
     private CompoundTag lastState;
     private int stateTicks;
+    /** True while the viewer has the Census tab open: only then the snapshot is sent (rework phase 6). */
+    private boolean censusOpen;
+    private int censusTicks;
+    /** True while the viewer has the Building tab open: only then the building state is sent (rework phase 9). */
+    private boolean buildOpen;
+    private int buildTicks;
+    @Nullable
+    private CompoundTag lastBuild;
+    /** Client side: the building state as the server last sent it (see {@code BuildingMenuSupport}). */
+    private CompoundTag buildState = new CompoundTag();
 
     /** Slots that only take part while the inventory tab is shown. */
     private final class HallSlot extends SlotItemHandler {
@@ -223,8 +245,55 @@ public class TownHallMenu extends BlockEntityMenu<TownHallBlockEntity> implement
         return moraleLines;
     }
 
+    /** The top needs of the settlement, most urgent first (client side). */
+    public List<NeedView> getNeeds() {
+        return needs;
+    }
+
     public GuardView getGuard() {
         return guard;
+    }
+
+    /** The member list of the Census tab as the server last sent it (client side). */
+    public List<Census.Entry> getCensus() {
+        return census;
+    }
+
+    /** The position of the hall, the origin of the distances and directions of the census. */
+    public BlockPos getHallPos() {
+        return blockEntity.getBlockPos();
+    }
+
+    /** Client side: a snapshot arrived ({@link Census.Payload}). */
+    public void receiveCensus(List<Census.Entry> entries) {
+        census = entries;
+        refreshGui();
+    }
+
+    /** Client side: tells the server whether the Census tab is shown; the server then sends a snapshot now and every {@code census_refresh_ticks}. */
+    public void setCensusOpen(boolean open) {
+        CompoundTag tag = new CompoundTag();
+        tag.putBoolean("census", open);
+        sendDataToServer(tag);
+    }
+
+    /** The state of the Building tab as the server last sent it (client side); empty until the first answer. */
+    public CompoundTag getBuildState() {
+        return buildState;
+    }
+
+    /** Client side: tells the server whether the Building tab is shown; the server then sends the building state now and every second while it changes. */
+    public void setBuildOpen(boolean open) {
+        CompoundTag tag = new CompoundTag();
+        tag.putBoolean("buildOpen", open);
+        sendDataToServer(tag);
+    }
+
+    /** Client side: one request of the Building tab (see {@code BuildingMenuSupport.handle}); the server checks it and answers with the new state. */
+    public void sendBuildAction(CompoundTag action) {
+        CompoundTag tag = new CompoundTag();
+        tag.put("buildAct", action);
+        sendDataToServer(tag);
     }
 
     /** Client side: the screen turns the slots on for the inventory tab only. */
@@ -330,6 +399,14 @@ public class TownHallMenu extends BlockEntityMenu<TownHallBlockEntity> implement
                 stateTicks = 0;
                 sendState(false);
             }
+            if (censusOpen && ++censusTicks >= SettlementConfig.censusRefreshTicks) {
+                censusTicks = 0;
+                sendCensus();
+            }
+            if (buildOpen && ++buildTicks >= 20) {
+                buildTicks = 0;
+                sendBuild(false);
+            }
         }
         super.broadcastChanges();
     }
@@ -349,6 +426,33 @@ public class TownHallMenu extends BlockEntityMenu<TownHallBlockEntity> implement
         }
         CompoundTag tag = new CompoundTag();
         tag.put("deathList", list);
+        sendDataToClient(tag);
+    }
+
+    /** Sends the snapshot of all members to the viewer (server side; only while the Census tab is open and the player may still use the hall). */
+    private void sendCensus() {
+        if (!(player instanceof ServerPlayer serverPlayer) || !(player.level() instanceof ServerLevel level) || !mayUse(player)) {
+            return;
+        }
+        blockEntity.getSettlement().ifPresent(settlement -> PacketDistributor.sendToPlayer(serverPlayer, new Census.Payload(Census.snapshot(level, settlement))));
+    }
+
+    /** Sends the state of the Building tab (server side; only while the tab is open and the player may still use the hall). */
+    private void sendBuild(boolean force) {
+        if (!(player.level() instanceof ServerLevel level) || !mayUse(player)) {
+            return;
+        }
+        Optional<Settlement> found = blockEntity.getSettlement();
+        if (found.isEmpty()) {
+            return;
+        }
+        CompoundTag build = io.github.capttracker.ancientwarfarenpc.settlement.building.BuildingMenuSupport.toTag(level, found.get());
+        if (!force && build.equals(lastBuild)) {
+            return;
+        }
+        lastBuild = build;
+        CompoundTag tag = new CompoundTag();
+        tag.put("build", build);
         sendDataToClient(tag);
     }
 
@@ -405,6 +509,7 @@ public class TownHallMenu extends BlockEntityMenu<TownHallBlockEntity> implement
             m.putInt("dist", (int) Math.round(Math.sqrt(member.pos.distSqr(hall))));
             m.putBoolean("homeless", settlement.isHomeless(member.id));
             m.putInt("morale", member.morale);
+            m.putBoolean("child", member.child); // a child has no role to cycle (rework phase 10)
             memberTags.add(m);
         }
         state.put("members", memberTags);
@@ -461,6 +566,20 @@ public class TownHallMenu extends BlockEntityMenu<TownHallBlockEntity> implement
             moraleTags.add(f);
         }
         state.put("moraleLines", moraleTags);
+        ListTag needTags = new ListTag();
+        for (SettlementNeed need : SettlementNeeds.get(settlement)) {
+            if (needTags.size() >= MAX_NEED_LINES) {
+                break;
+            }
+            CompoundTag n = new CompoundTag();
+            n.putString("label", need.label);
+            n.putInt("count", need.count);
+            n.putInt("status", need.status.ordinal());
+            n.putString("site", need.producerBlock);
+            n.putString("hint", need.hint);
+            needTags.add(n);
+        }
+        state.put("needs", needTags);
         CompoundTag g = new CompoundTag();
         g.putBoolean("patrol", settlement.isPatrolEnabled());
         g.putInt("nightWatch", (int) Math.round(settlement.getNightWatchFraction() * 100.0D));
@@ -485,7 +604,7 @@ public class TownHallMenu extends BlockEntityMenu<TownHallBlockEntity> implement
         for (int i = 0; i < memberList.size(); i++) {
             CompoundTag m = memberList.getCompound(i);
             members.add(new MemberView(m.getUUID("id"), m.getString("name"), m.getString("given"), m.getString("type"), MemberStatus.byOrdinal(m.getInt("status")), m.getInt("dist"),
-                    m.getBoolean("homeless"), m.contains("morale") ? m.getInt("morale") : -1));
+                    m.getBoolean("homeless"), m.contains("morale") ? m.getInt("morale") : -1, m.getBoolean("child")));
         }
         storages.clear();
         ListTag storageList = state.getList("storages", Tag.TAG_COMPOUND);
@@ -507,6 +626,12 @@ public class TownHallMenu extends BlockEntityMenu<TownHallBlockEntity> implement
         for (int i = 0; i < moraleList.size(); i++) {
             CompoundTag f = moraleList.getCompound(i);
             moraleLines.add(new MoraleLine(f.getString("key"), f.getInt("points"), f.getInt("max")));
+        }
+        needs.clear();
+        ListTag needList = state.getList("needs", Tag.TAG_COMPOUND);
+        for (int i = 0; i < needList.size(); i++) {
+            CompoundTag n = needList.getCompound(i);
+            needs.add(new NeedView(n.getString("label"), n.getInt("count"), n.getInt("status"), n.getString("site"), n.getString("hint")));
         }
         if (state.contains("guard", Tag.TAG_COMPOUND)) {
             CompoundTag g = state.getCompound("guard");
@@ -533,6 +658,9 @@ public class TownHallMenu extends BlockEntityMenu<TownHallBlockEntity> implement
             if (tag.contains("state", Tag.TAG_COMPOUND)) {
                 readState(tag.getCompound("state"));
             }
+            if (tag.contains("build", Tag.TAG_COMPOUND)) {
+                buildState = tag.getCompound("build");
+            }
             refreshGui();
             return;
         }
@@ -545,6 +673,33 @@ public class TownHallMenu extends BlockEntityMenu<TownHallBlockEntity> implement
             return;
         }
         Settlement settlement = found.get();
+        if (tag.contains("census", Tag.TAG_BYTE)) {
+            censusOpen = tag.getBoolean("census");
+            censusTicks = 0;
+            if (censusOpen) {
+                sendCensus();
+            }
+            if (tag.size() == 1) {
+                return;
+            }
+        }
+        if (tag.contains("buildOpen", Tag.TAG_BYTE)) {
+            buildOpen = tag.getBoolean("buildOpen");
+            buildTicks = 0;
+            lastBuild = null;
+            if (buildOpen) {
+                sendBuild(true);
+            }
+            if (tag.size() == 1) {
+                return;
+            }
+        }
+        if (tag.contains("buildAct", Tag.TAG_COMPOUND) && player instanceof ServerPlayer serverPlayer) {
+            io.github.capttracker.ancientwarfarenpc.settlement.building.BuildingMenuSupport.handle(level, settlement, serverPlayer, tag.getCompound("buildAct"));
+            settlement.markDirty();
+            sendBuild(true);
+            return;
+        }
         if (tag.contains("clear")) {
             blockEntity.clearDeathNotices();
         }

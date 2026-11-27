@@ -4,11 +4,13 @@
  */
 package io.github.capttracker.ancientwarfarenpc.caravan;
 
+import io.github.capttracker.ancientwarfarenpc.ai.vehicle.ShipSteering;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
+import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -53,6 +55,23 @@ public final class CaravanState {
      * {@link CaravanLogic}), so the cargo holds only what the caravan earned. False for a caravan saved before that change (its wagon may hold unpaid goods).
      */
     public boolean virtualCargo = true;
+    /**
+     * True for a trade ship (rework phase 11): {@link #wagon} is the ship (a cog), {@link #target} the mooring at the dock, {@link #exit} the place at sea it came
+     * from, {@link #guards} the crew (rowers and guards), {@link #helmsman} the NPC at the helm and {@link #dock} the dock block it comes to.
+     */
+    public boolean ship = false;
+    @Nullable
+    public BlockPos dock;
+    @Nullable
+    public UUID helmsman;
+    /** The steering of the ship and the route it sails (not saved: the leader plans it again after a load). */
+    public final ShipSteering steering = new ShipSteering();
+    public List<Vec3> route = List.of();
+    @Nullable
+    public BlockPos routeGoal;
+    /** Game time before which the route is not planned again, and the failed tries of the phase. */
+    public long nextPlan = 0L;
+    public int planFailures = 0;
     /** Registry ids of the items this caravan can supply to a buy order (outputs of its trades, and of its faction and land lists if tailoring is on). */
     public final Set<String> supply = new HashSet<>();
     /** Registry id to the number of items already supplied to buy orders on this visit (capped per item). */
@@ -88,6 +107,15 @@ public final class CaravanState {
             tag.putUUID("wagon", wagon);
         }
         tag.putBoolean("virtualCargo", virtualCargo);
+        if (ship) {
+            tag.putBoolean("ship", true);
+            if (dock != null) {
+                tag.put("dock", NbtUtils.writeBlockPos(dock));
+            }
+            if (helmsman != null) {
+                tag.putUUID("helmsman", helmsman);
+            }
+        }
         ListTag supplyTag = new ListTag();
         for (String id : supply) {
             supplyTag.add(net.minecraft.nbt.StringTag.valueOf(id));
@@ -124,6 +152,9 @@ public final class CaravanState {
             state.wagon = tag.getUUID("wagon");
         }
         state.virtualCargo = tag.getBoolean("virtualCargo"); // absent in a caravan from before the change: false
+        state.ship = tag.getBoolean("ship");
+        state.dock = tag.contains("dock") ? NbtUtils.readBlockPos(tag, "dock").orElse(null) : null;
+        state.helmsman = tag.hasUUID("helmsman") ? tag.getUUID("helmsman") : null;
         ListTag supplyTag = tag.getList("supply", Tag.TAG_STRING);
         for (int i = 0; i < supplyTag.size(); i++) {
             state.supply.add(supplyTag.getString(i));

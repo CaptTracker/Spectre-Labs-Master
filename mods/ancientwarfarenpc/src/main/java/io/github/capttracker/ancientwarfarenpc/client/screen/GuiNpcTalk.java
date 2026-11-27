@@ -7,6 +7,7 @@ package io.github.capttracker.ancientwarfarenpc.client.screen;
 import io.github.capttracker.ancientwarfare.client.gui.elements.Button;
 import io.github.capttracker.ancientwarfare.client.gui.elements.CompositeScrolled;
 import io.github.capttracker.ancientwarfare.client.gui.elements.Label;
+import io.github.capttracker.ancientwarfare.client.gui.elements.ProgressBar;
 import io.github.capttracker.ancientwarfarenpc.menu.NpcMenuPayloads;
 import io.github.capttracker.ancientwarfarenpc.menu.NpcTalkMenu;
 import io.github.capttracker.ancientwarfarenpc.settlement.NpcMorale;
@@ -29,6 +30,7 @@ public class GuiNpcTalk extends GuiNpcBase<NpcTalkMenu> {
 
     private Button talkTab;
     private Button moraleTab;
+    private Button skillsTab;
     private Button inventoryTab;
     private CompositeScrolled area;
 
@@ -50,7 +52,13 @@ public class GuiNpcTalk extends GuiNpcBase<NpcTalkMenu> {
                 getContainer().setTab(NpcTalkMenu.TAB_MORALE);
             }
         };
-        inventoryTab = new Button(110, 8, 58, 12, "guistrings.npc.talk.tab.inventory") {
+        skillsTab = new Button(110, 8, 50, 12, "guistrings.npc.talk.tab.skills") {
+            @Override
+            protected void onPressed() {
+                getContainer().setTab(NpcTalkMenu.TAB_SKILLS);
+            }
+        };
+        inventoryTab = new Button(162, 8, 58, 12, "guistrings.npc.talk.tab.inventory") {
             @Override
             protected void onPressed() {
                 requestOpen(NpcMenuPayloads.Request.INVENTORY);
@@ -67,14 +75,19 @@ public class GuiNpcTalk extends GuiNpcBase<NpcTalkMenu> {
         if (menu.hasMorale) {
             addGuiElement(moraleTab);
         }
+        if (menu.hasSkills) {
+            addGuiElement(skillsTab);
+        }
         if (menu.canEdit) {
             addGuiElement(inventoryTab);
         }
         talkTab.setEnabled(menu.tab != NpcTalkMenu.TAB_TALK);
         moraleTab.setEnabled(menu.tab != NpcTalkMenu.TAB_MORALE);
+        skillsTab.setEnabled(menu.tab != NpcTalkMenu.TAB_SKILLS);
         addGuiElement(area);
         area.clearElements();
-        int y = menu.tab == NpcTalkMenu.TAB_MORALE && menu.hasMorale ? buildMorale(menu) : buildTalk(menu);
+        int y = menu.tab == NpcTalkMenu.TAB_MORALE && menu.hasMorale ? buildMorale(menu)
+                : menu.tab == NpcTalkMenu.TAB_SKILLS && menu.hasSkills ? buildSkills(menu) : buildTalk(menu);
         area.setAreaSize(y + 4);
         area.updateGuiPosition(guiLeft, guiTop);
     }
@@ -96,6 +109,28 @@ public class GuiNpcTalk extends GuiNpcBase<NpcTalkMenu> {
         y += 2;
         if (menu.greeting != null) {
             y = addWrapped(y, "\"" + menu.greeting.component().getString() + "\"", 0xFFDDDDDD, 0);
+        }
+        if (!menu.traits.isEmpty()) {
+            y += 6;
+            area.addGuiElement(new Label(TEXT_X, y, Component.translatable("guistrings.npc.talk.traits").getString()).setColor(0xFF9FD0FF));
+            y += 12;
+            for (String id : menu.traits) {
+                io.github.capttracker.ancientwarfarenpc.trait.Trait trait = io.github.capttracker.ancientwarfarenpc.trait.Trait.byId(id);
+                if (trait != null) {
+                    y = addWrapped(y, Component.translatable("guistrings.npc.talk.trait_line", Component.translatable(trait.langKey()),
+                            Component.translatable(trait.descriptionKey())).getString(), 0xFFFFE9B0, 0);
+                    y += 2;
+                }
+            }
+        }
+        if (!menu.family.isEmpty()) {
+            y += 6;
+            area.addGuiElement(new Label(TEXT_X, y, Component.translatable("guistrings.npc.talk.family").getString()).setColor(0xFF9FD0FF));
+            y += 12;
+            for (var line : menu.family) {
+                y = addWrapped(y, "- " + line.component().getString(), 0xFFFFC9D9, 0);
+                y += 2;
+            }
         }
         y += 6;
         area.addGuiElement(new Label(TEXT_X, y, Component.translatable("guistrings.npc.talk.thinking").getString()).setColor(0xFF9FD0FF));
@@ -142,6 +177,29 @@ public class GuiNpcTalk extends GuiNpcBase<NpcTalkMenu> {
             y += 11;
         }
         return y;
+    }
+
+    /** Every skill with its rank, a progress bar to the next rank and the experience; the main skill (the title of the NPC) first in gold. */
+    private int buildSkills(NpcTalkMenu menu) {
+        int y = 6;
+        area.addGuiElement(new Label(TEXT_X, y, Component.translatable("guistrings.npc.skills.title").getString()).setColor(0xFF9FD0FF));
+        y += 13;
+        for (NpcTalkMenu.SkillRow row : menu.skills) {
+            String name = Component.translatable("npc.skill." + row.id()).getString();
+            String rank = Component.translatable("npc.skill.rank." + io.github.capttracker.ancientwarfarenpc.skill.Rank.byIndex(row.rank()).id()).getString();
+            area.addGuiElement(new Label(TEXT_X, y, name + (row.main() ? " *" : "")).setColor(row.main() ? 0xFFFFD27F : 0xFFFFFFFF));
+            area.addGuiElement(new Label(TEXT_X + 84, y, rank).setColor(row.rank() > 0 ? 0xFF55FF55 : 0xFFAAAAAA));
+            ProgressBar bar = new ProgressBar(TEXT_X + 142, y - 1, 70, 10);
+            bar.setProgress(row.percent() / 100.0F);
+            area.addGuiElement(bar);
+            y += 12;
+            String detail = row.next() > 0 ? Component.translatable("guistrings.npc.skills.xp_next", row.xp(), row.next()).getString()
+                    : Component.translatable("guistrings.npc.skills.xp_max", row.xp()).getString();
+            area.addGuiElement(new Label(TEXT_X + 6, y, detail).setColor(0xFF999999));
+            y += 12;
+        }
+        y += 4;
+        return addWrapped(y, Component.translatable("guistrings.npc.skills.hint").getString(), 0xFFAAAAAA, 0);
     }
 
     private static int moodColor(int morale) {

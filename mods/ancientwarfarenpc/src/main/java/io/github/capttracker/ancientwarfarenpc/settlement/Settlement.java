@@ -93,6 +93,16 @@ public class Settlement {
     private int alarmClearOverride = 0;
     /** The patrol route set with the command baton through the guard captain: used instead of the border markers when it has at least two points (saved). */
     private final List<BlockPos> patrolWaypoints = new ArrayList<>();
+    // ---- settlement demand (rework phase 8; not saved, recounted every few seconds)
+    private List<SettlementNeed> needs = new ArrayList<>();
+    private long needsNext = 0L;
+    private final Map<String, SettlementNeeds.Posted> postedNeeds = new LinkedHashMap<>();
+    /** The plots, the build queue and the planner settings (rework phase 9). Saved. */
+    private final io.github.capttracker.ancientwarfarenpc.settlement.building.SettlementBuilding building =
+            new io.github.capttracker.ancientwarfarenpc.settlement.building.SettlementBuilding(this);
+    /** The family registry: households, partners, children, grief, homes (rework phase 10). Saved. */
+    private final io.github.capttracker.ancientwarfarenpc.settlement.family.SettlementFamilies families =
+            new io.github.capttracker.ancientwarfarenpc.settlement.family.SettlementFamilies(this);
     @Nullable
     private SettlementData data;
 
@@ -115,8 +125,22 @@ public class Settlement {
         public String type = "";
         public String name = "";        /** The generated first name (shown with the template of the type when there is no custom name). */
         public String given = "";
+        /** The family name (rework phase 10); empty until the NPC has rolled one. Kept by the settlement (see {@link Settlement#syncSurname}), not copied from the NPC on each update. */
+        public String surname = "";
         /** The personal morale at the last update, or -1 if the NPC has not computed one yet. */
         public int morale = -1;
+        /** The census problem flags ({@link Census}{@code .FLAG_*}) at the last update; the bed flag is not kept here, the beds say it. */
+        public int flags = 0;
+        /** The short task key at the last update (see {@code NpcThinking.census}), or empty. */
+        public String task = "";
+        /** The rank (0 to 4) of the main skill at the last update, -1 for none (rework phase 7). */
+        public int rank = -1;
+        /** The bit mask of the traits at the last update (rework phase 7). */
+        public int traits = 0;
+        /** True while the member is a child that has not grown up (rework phase 10), its age in ticks at {@link #ageAt} (game time) at the last update. */
+        public boolean child = false;
+        public long age = 0L;
+        public long ageAt = 0L;
 
         Member(UUID id, BlockPos pos) {
             this.id = id;
@@ -132,6 +156,21 @@ public class Settlement {
         if (data != null) {
             data.setDirty();
         }
+    }
+
+    /** Marks the record as changed so it is saved (for the parts of the record that live in other classes, such as the building state). */
+    public void markDirty() {
+        dirty();
+    }
+
+    /** The plots, the build queue and the planner settings of the settlement (rework phase 9). */
+    public io.github.capttracker.ancientwarfarenpc.settlement.building.SettlementBuilding getBuilding() {
+        return building;
+    }
+
+    /** The households, partners, children, grief and homes of the settlement (rework phase 10). */
+    public io.github.capttracker.ancientwarfarenpc.settlement.family.SettlementFamilies getFamilies() {
+        return families;
     }
 
     // ---------------------------------------------------------------- identity
@@ -239,9 +278,91 @@ public class Settlement {
     }
 
     public void addMember(NpcPlayerOwned npc) {
-        Member member = members.computeIfAbsent(npc.getUUID(), uuid -> new Member(uuid, npc.blockPosition()));
+        Member member = members.get(npc.getUUID());
+        boolean fresh = member == null;
+        if (fresh) {
+            member = new Member(npc.getUUID(), npc.blockPosition());
+            member.surname = npc.getSurname();
+            members.put(member.id, member);
+        }
         refresh(npc, member);
+        // a resurrected NPC has a new UUID and remembers the old one: it takes its place in the family records again
+        families.onMemberJoined(npc.level() instanceof net.minecraft.server.level.ServerLevel serverLevel ? serverLevel : null, npc.getUUID(), npc.getFormerId());
+        npc.clearFormerId();
         dirty();
+    }
+
+    /**
+     * Brings the surname of a member NPC and the settlement record into line (every second or so, from the NPC): a child of a household has the surname of
+     * the household, else the record wins when it has one (a partner took the name of the household), else the NPC's own name goes into the record.
+     */
+    public void syncSurname(NpcPlayerOwned npc) {
+        Member member = members.get(npc.getUUID());
+        if (member == null) {
+            return;
+        }
+        String expected = families.expectedSurname(npc.getUUID());
+        String target = expected != null ? expected : !member.surname.isEmpty() ? member.surname : npc.getSurname();
+        if (target.isEmpty()) {
+            return;
+        }
+        if (!target.equals(npc.getSurname())) {
+            npc.setSurname(target);
+        }
+        if (!target.equals(member.surname)) {
+            member.surname = target;
+            dirty();
+        }
+    }
+
+    /** The surname of a member from the record; empty if it has none or is not a member. */
+    public String surnameOf(UUID member) {
+        Member record = members.get(member);
+        return record == null ? "" : record.surname;
+    }
+
+    /** The first name of a member from the record; empty if it is not a member. */
+    public String nameOf(UUID member) {
+        Member record = members.get(member);
+        return record == null ? "" : record.given;
+    }
+
+    /**
+     * The number of members as far as food is concerned (rework phase 10): a grown member counts 1, a child {@code child_hunger_factor}. The food days per
+     * member, the food need and the food morale divide by this.
+     */
+    public double foodMembers() {
+        double count = 0.0D;
+        for (Member member : members.values()) {
+            count += member.child ? SettlementConfig.childHungerFactor : 1.0D;
+        }
+        return count;
+    }
+
+    /** The number of members that are children that have not grown up. */
+    public int childCount() {
+        int count = 0;
+        for (Member member : members.values()) {
+            if (member.child) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    /** The age in ticks of a member that is a child at the game time (its age at the last update plus the time since), or -1 if it is not a child. */
+    public long childAgeOf(UUID member, long now) {
+        Member record = members.get(member);
+        return record == null || !record.child ? -1L : record.age + Math.max(0L, now - record.ageAt);
+    }
+
+    /** Sets the surname of a member in the record (the NPC takes it over at its next update, see {@link #syncSurname}); a member that is not known is ignored. */
+    public void setMemberSurname(UUID member, String surname) {
+        Member record = members.get(member);
+        if (record != null && !record.surname.equals(surname)) {
+            record.surname = surname;
+            dirty();
+        }
     }
 
     /** Refreshes the last known position, type, name and status of a member NPC. */
@@ -254,19 +375,28 @@ public class Settlement {
         }
     }
 
-    private static void refresh(NpcPlayerOwned npc, Member member) {
+    private void refresh(NpcPlayerOwned npc, Member member) {
         member.pos = npc.blockPosition();
         member.type = npc.getNpcFullType();
         Component custom = npc.getCustomName();
         member.name = custom == null ? "" : custom.getString();
         member.given = npc.getGivenName();
         member.morale = npc.getPersonalMorale();
+        io.github.capttracker.ancientwarfarenpc.entity.NpcThinking.CensusInfo info = io.github.capttracker.ancientwarfarenpc.entity.NpcThinking.census(npc, this);
+        member.flags = info.flags();
+        member.task = info.task();
+        member.rank = npc.getMainRank();
+        member.traits = npc.getTraitMask();
+        member.child = npc.isChild();
+        member.age = npc.getChildAgeTicks();
+        member.ageAt = npc.level().getGameTime();
     }
 
     public boolean removeMember(UUID npc) {
         boolean removed = members.remove(npc) != null;
         if (removed) {
             freeBedOf(npc);
+            families.onMemberLeft(npc); // left or dismissed: out of the family records, no grief
             dirty();
         }
         return removed;
@@ -395,6 +525,8 @@ public class Settlement {
         members.remove(npc.getUUID());
         freeBedOf(npc.getUUID());
         lastDeathTime = npc.level().getGameTime();
+        families.onMemberDied(npc.level() instanceof net.minecraft.server.level.ServerLevel level ? level : null, npc.getUUID(), npc.getGivenName(),
+                lastDeathTime, npc.getFullName());
         if (npc.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
             for (UUID memberId : members.keySet()) {
                 if (serverLevel.getEntity(memberId) instanceof NpcPlayerOwned friend) {
@@ -408,6 +540,7 @@ public class Settlement {
 
     public void clearDeathList() {
         deathList.clear();
+        families.clearTombs(); // nobody on the list can be resurrected any more
         dirty();
         informViewers();
     }
@@ -452,6 +585,29 @@ public class Settlement {
             dirty();
         }
         this.moraleFactors = List.copyOf(factors);
+    }
+
+    // ---------------------------------------------------------------- needs (rework phase 8)
+
+    /** The needs of the last count, most urgent first (the list is live; read it on the server thread). */
+    List<SettlementNeed> getNeeds() {
+        return needs;
+    }
+
+    void setNeeds(List<SettlementNeed> list) {
+        needs = list;
+    }
+
+    long getNeedsNext() {
+        return needsNext;
+    }
+
+    void setNeedsNext(long time) {
+        needsNext = time;
+    }
+
+    Map<String, SettlementNeeds.Posted> getPostedNeeds() {
+        return postedNeeds;
     }
 
     long getMoraleNext() {
@@ -685,7 +841,17 @@ public class Settlement {
             memberTag.putString("type", member.type);
             memberTag.putString("name", member.name);
             memberTag.putString("given", member.given);
+            memberTag.putString("surname", member.surname);
             memberTag.putInt("morale", member.morale);
+            memberTag.putInt("flags", member.flags);
+            memberTag.putString("task", member.task);
+            memberTag.putInt("rank", member.rank);
+            memberTag.putInt("traits", member.traits);
+            if (member.child) {
+                memberTag.putBoolean("child", true);
+                memberTag.putLong("age", member.age);
+                memberTag.putLong("ageAt", member.ageAt);
+            }
             memberList.add(memberTag);
         }
         tag.put("members", memberList);
@@ -728,6 +894,8 @@ public class Settlement {
         CompoundTag alertTag = new CompoundTag();
         alerts.forEach(alertTag::putLong);
         tag.put("alerts", alertTag);
+        tag.put("building", building.save());
+        tag.put("families", families.save());
         return tag;
     }
 
@@ -763,7 +931,15 @@ public class Settlement {
             member.type = memberTag.getString("type");
             member.name = memberTag.getString("name");
             member.given = memberTag.getString("given");
+            member.surname = memberTag.getString("surname"); // an older save has none: empty until the NPC is loaded
             member.morale = memberTag.contains("morale") ? memberTag.getInt("morale") : -1;
+            member.flags = memberTag.getInt("flags");
+            member.task = memberTag.getString("task");
+            member.rank = memberTag.contains("rank") ? memberTag.getInt("rank") : -1;
+            member.traits = memberTag.getInt("traits");
+            member.child = memberTag.getBoolean("child"); // an older save has no children
+            member.age = memberTag.getLong("age");
+            member.ageAt = memberTag.getLong("ageAt");
             settlement.members.put(member.id, member);
         }
         ListTag bedList = tag.getList("beds", Tag.TAG_COMPOUND);
@@ -797,6 +973,12 @@ public class Settlement {
         CompoundTag alertTag = tag.getCompound("alerts");
         for (String key : alertTag.getAllKeys()) {
             settlement.alerts.put(key, alertTag.getLong(key));
+        }
+        if (tag.contains("building", Tag.TAG_COMPOUND)) {
+            settlement.building.load(tag.getCompound("building"));
+        }
+        if (tag.contains("families", Tag.TAG_COMPOUND)) {
+            settlement.families.load(tag.getCompound("families")); // an older save has none: no families yet
         }
         return settlement;
     }

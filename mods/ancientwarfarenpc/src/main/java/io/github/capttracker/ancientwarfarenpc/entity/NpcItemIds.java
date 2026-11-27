@@ -16,6 +16,7 @@ public final class NpcItemIds {
     public static final String COMBAT_ORDER = "combat_order";
     public static final String ROUTING_ORDER = "routing_order";
     public static final String TRADE_ORDER = "trade_order";
+    public static final String SEA_ROUTE = "sea_route";
 
     private NpcItemIds() {}
 

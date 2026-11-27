@@ -13,6 +13,7 @@ This one file holds all five Ancient Warfare modules: **Core, Vehicles, Automati
 - Spectre Factions (required)
 - Spectre Lib (required)
 - JEI (optional)
+- Jade or WTHIT (optional, for look-at tooltips on NPCs and worksites)
 
 ## Settlements
 - Mark out your land with **boundary markers**, with no town hall range limit.
@@ -22,6 +23,10 @@ This one file holds all five Ancient Warfare modules: **Core, Vehicles, Automati
 - **Defence:** an alarm sounds and bells ring when hostiles enter your land. Guards rally and patrol the border, and a guard captain leads them.
 - **Logistics:** couriers haul goods between storages on their own.
 - **Morale:** settlement morale and each NPC's own mood speed up or slow down their work.
+- **Census tab:** the town hall lists every member with its role, mood, location, task and problems (hungry, no bed, no tool and more). Sort, filter, and click a row to make that NPC glow and see where it is.
+- **Build your own village:** mark **building zones** with the Building Zone Tool and the settlement plans houses, storehouses, workshops and a chapel on its own, with 22 built-in designs in timber, stone, desert and Norse styles. Tents grow into houses as the settlement grows.
+- **Builder NPCs** put each building up block by block, with materials taken from your settlement storage (nothing is free). The hall's **Building** tab shows the queue, what is missing and lets you approve, reorder or queue builds by hand.
+- **Blueprint Scanner:** save any build of yours as a blueprint the settlement can use.
 
 ## Workers who really work
 - Workers walk to the job, swing their tools, break blocks and carry the drops home. They use ladders to get around.
@@ -30,13 +35,18 @@ This one file holds all five Ancient Warfare modules: **Core, Vehicles, Automati
 - **Mining:** quarries in four styles (open pit, shaft, branch and strip), with miners who climb ladders down and back out.
 - **Fishing:** shore fishers, and boat fishers who sail out from a fishing dock.
 - **Worksites:** Apiary, Smelter, Market Stall, Inn, Stable and a staffed animal farm.
+- **Production chains:** Sawmill, Bakery, Smithy and Tannery, with a recipe screen ("keep N in storage"), smith and tanner workers, and a settlement needs list that tells them what to make.
 
 ## NPCs with personality
 - Every NPC has a name, like "Guard Captain Rory" or "Bill the Miner".
 - **Talk to them** to see what they're doing and what's on their mind.
 - **Each NPC has its own morale:** food, a bed, sleep, injuries, friends and fear all count.
 - Workers switch to the right tool for each block.
+- **Skills and ranks:** NPCs learn mining, woodcutting, farming, fishing, husbandry, crafting, trading, hauling, combat and medicine by doing the work. They rise from Novice to Master, work faster and fight better, and the rank shows in their name, like "Apprentice Miner Bill".
+- **Traits:** every NPC has one or two quirks, like lazy, hardworking, brave, cowardly, glutton, night owl, quick learner, clumsy or tough. They change how an NPC works, eats, fights and feels, and the talk screen lists them.
+- **Families:** NPCs have surnames, fall in love (any two adults can pair up), share a home, have children and grieve when a loved one dies. Children play around the settlement, grow up in 2 in-game years (192 days by default, set in the config) and become workers.
 - **New NPC types:** trader, innkeeper, stable hand and guard captain.
+- **Jade and WTHIT (optional):** look at an NPC to see its role, mood, task and health, or at a worksite to see its workers, status and settlement.
 
 ## Factions and trade
 - NPC teams run on **Spectre Factions**. Faction relations are hostile, neutral, friendly or allied, and NPCs help their friends in a fight.
@@ -49,11 +59,15 @@ This one file holds all five Ancient Warfare modules: **Core, Vehicles, Automati
 - Siege engines with **mouse steering** and a chase camera.
 - Horse-drawn carts and wagons.
 - **Ships with walkable decks:** a fishing boat, a cog and a war galley, driven by wind and rowers and armed with mounted turrets.
-- **NPC ship crews:** send your NPCs aboard with the command baton. They row, ride as passengers, and soldiers fire the turrets at your enemies.
+- **NPC ship crews:** send your NPCs aboard with the command baton, even out in open water: they swim out to the ship. They row, ride as passengers, eat from the ship's stores, and soldiers fire the turrets at your enemies. Allied faction soldiers join a friend's ship too.
+- **NPC helmsmen:** an NPC can take the helm and sail to a spot you point at over the water, or follow another vessel. You can take the helm back at any time.
+- **Siege towers and mantlets:** push a tower to a wall, climb its ladder and lower the drop bridge onto the wall top; hide archers behind a mantlet that stops arrows from the front. Soldiers and archers you send at a wall crew your siege engines on their own.
 - Hitched horses are roped to their cart, and riders keep their seats after a reload.
+- **Sea trade:** put a **Sea Route Chart** in a trader's orders slot and they sail your cog from dock to dock, unloading and loading cargo at each stop. Factions send their own trade ships to your docks.
+- **Naval combat:** the war galley (and, weakly, the cog) ram other ships, **grappling hooks** pull two ships together so crews can fight across the decks, a stance toggle makes your helmsman ram or flee, and a sunk ship's cargo floats up in crates. A faction trade ship left with no crew can be taken as a prize.
 
 ## Structures
-Only the craftable building pieces are included: 7 gate types, coin stacks, fire pits and totems. The original structure templates, builder and world generation are **not** included.
+Only the craftable gates are included: 7 gate types. There are no coin stacks, fire pits or totems, and the original structure templates, builder and world generation are **not** included.
 
 ## Good to know
 - Back up your worlds. This is a first release.

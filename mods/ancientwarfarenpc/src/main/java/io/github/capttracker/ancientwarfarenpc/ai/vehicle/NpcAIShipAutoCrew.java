@@ -12,7 +12,6 @@ import io.github.capttracker.ancientwarfarenpc.orders.CombatOrder;
 import io.github.capttracker.ancientwarfarevehicle.entity.SeatRole;
 import io.github.capttracker.ancientwarfarevehicle.entity.VehicleBase;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -20,16 +19,16 @@ import java.util.List;
 /**
  * An idle player-owned soldier (no order, no attack target, no patrol orders, not alarmed, not riding anything) whose owner sits aboard a ship walks to the ship
  * if it is within {@code ship_auto_crew_range} blocks of the hull and takes a free gunner seat, or else a rower seat. It stays aboard until it is ordered off with
- * the command baton or the ship sinks. It gives up after 30 seconds of walking and then waits a minute before it tries again.
+ * the command baton or the ship sinks. It walks (or swims out, see {@link ShipApproach}) and gives up when it cannot get there, then waits a minute before it tries again.
  */
 public class NpcAIShipAutoCrew extends NpcAI<NpcCombat> {
     private static final List<SeatRole> ROLES = List.of(SeatRole.GUNNER, SeatRole.ROWER);
-    private static final int GIVE_UP_TICKS = 600;
     private static final int COOLDOWN_TICKS = 1200;
 
     @Nullable
     private VehicleBase ship;
-    private int walking = 0;
+    private final ShipApproach approach = new ShipApproach();
+    private boolean finished = false;
     private int cooldownUntil = 0;
 
     public NpcAIShipAutoCrew(NpcCombat npc) {
@@ -48,14 +47,14 @@ public class NpcAIShipAutoCrew extends NpcAI<NpcCombat> {
             return false;
         }
         ship = found;
-        walking = 0;
+        approach.reset();
+        finished = false;
         return true;
     }
 
     @Override
     public boolean canContinueToUse() {
-        return ship != null && ShipCrew.shipOf(ship) != null && isIdle() && !npc.isPassenger() && walking < GIVE_UP_TICKS
-                && ShipCrew.firstFreeRole(ship, ROLES) != null;
+        return ship != null && !finished && ShipCrew.shipOf(ship) != null && isIdle() && !npc.isPassenger() && ShipCrew.firstFreeRole(ship, ROLES) != null;
     }
 
     @Override
@@ -63,14 +62,12 @@ public class NpcAIShipAutoCrew extends NpcAI<NpcCombat> {
         if (ship == null) {
             return;
         }
-        ShipCrew.Result result = ShipCrew.tryBoard(npc, ship, ROLES);
-        if (result == ShipCrew.Result.TOO_FAR) {
-            Vec3 at = ShipCrew.nearestHullPoint(ship, npc.getX(), npc.getZ());
-            moveToPosition(at.x, at.y, at.z, npc.distanceToSqr(at));
+        // walks, or swims out to a ship in open water, and boards (see ShipApproach)
+        ShipApproach.Status status = approach.tick(npc, ship, ROLES, AWNPCStatics.shipAutoCrewRange + 4);
+        if (status == ShipApproach.Status.MOVING) {
             npc.addAITask(TASK_MOVE);
-            walking++;
         } else {
-            walking = result == ShipCrew.Result.BOARDED ? 0 : GIVE_UP_TICKS;
+            finished = true;
         }
     }
 

@@ -1,0 +1,103 @@
+{
+  "name": "Bakery",
+  "category": "business",
+  "style": "timber",
+  "size": [9, 7, 7],
+  "front": "south",
+  "palette": {
+    "W": "minecraft:oak_log[axis=y]",
+    "L": "minecraft:cobblestone",
+    "S": "minecraft:smoker[facing=south,lit=false]",
+    "B": "ancientwarfareautomation:bakery[facing=south]",
+    "C": "minecraft:furnace[facing=south,lit=false]",
+    "D": "minecraft:barrel[facing=up]",
+    "F": "minecraft:crafting_table",
+    "H": "minecraft:hay_block[axis=y]",
+    "I": "minecraft:spruce_slab[type=top]",
+    "J": "minecraft:composter[level=0]",
+    "K": "minecraft:oak_door[facing=north,half=lower,hinge=left,open=false]",
+    "M": "minecraft:white_terracotta",
+    "N": "minecraft:glass_pane[east=true,west=true]",
+    "O": "minecraft:glass_pane[north=true,south=true]",
+    "P": "minecraft:flower_pot",
+    "Q": "minecraft:brown_carpet",
+    "R": "minecraft:wall_torch[facing=north]",
+    "T": "minecraft:oak_door[facing=north,half=upper,hinge=left,open=false]",
+    "U": "minecraft:oak_log[axis=x]",
+    "V": "minecraft:oak_log[axis=z]",
+    "X": "minecraft:spruce_stairs[facing=north,half=bottom,shape=straight]",
+    "Y": "minecraft:lantern[hanging=true]",
+    "Z": "minecraft:spruce_stairs[facing=south,half=bottom,shape=straight]",
+    "a": "minecraft:chain[axis=y]",
+    "b": "minecraft:spruce_slab[type=bottom]"
+  },
+  "layers": [
+    [
+      "WLLLLLLLW",
+      "L.SBCDFHL",
+      "L......HL",
+      "L.......L",
+      "L.II.IIJL",
+      "L.......L",
+      "WLLWKWLLW"
+    ],
+    [
+      "WMNMMMNMW",
+      "M.......M",
+      "M.......M",
+      "O.......O",
+      "M.P...Q.M",
+      "M..R.R..M",
+      "WMNWTWNMW"
+    ],
+    [
+      "WUUUUUUUW",
+      "V.......V",
+      "V.......V",
+      "V.......V",
+      "V.......V",
+      "V.......V",
+      "WUUWUWUUW"
+    ],
+    [
+      "XXXXXXXXX",
+      "M_______M",
+      "M_______M",
+      "M__Y_Y__M",
+      "M_______M",
+      "M_______M",
+      "ZZZZZZZZZ"
+    ],
+    [
+      "_________",
+      "XXXXXXXXX",
+      "M_______M",
+      "M__a_a__M",
+      "M_______M",
+      "ZZZZZZZZZ",
+      "_________"
+    ],
+    [
+      "_________",
+      "_________",
+      "XXXXXXXXX",
+      "M__a_a__M",
+      "ZZZZZZZZZ",
+      "_________",
+      "_________"
+    ],
+    [
+      "_________",
+      "_________",
+      "_________",
+      "bbbbbbbbb",
+      "_________",
+      "_________",
+      "_________"
+    ]
+  ],
+  "worksite": {"block": "ancientwarfareautomation:bakery", "pos": [3, 0, 1]},
+  "min_level": 1,
+  "min_population": 4,
+  "tags": ["business", "bakery"]
+}

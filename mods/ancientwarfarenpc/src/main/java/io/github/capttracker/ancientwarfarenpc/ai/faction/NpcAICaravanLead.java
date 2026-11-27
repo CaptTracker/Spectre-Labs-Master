@@ -56,6 +56,15 @@ public class NpcAICaravanLead extends NpcAI<NpcFactionTrader> {
         if (state == null || !(npc.level() instanceof ServerLevel level)) {
             return;
         }
+        if (state.ship) {
+            // a trade ship: the leader sits aboard (its helmsman sails, see SeaCaravanLogic) and looks at the nearest player while it trades
+            npc.getNavigation().stop();
+            var player = level.getNearestPlayer(npc, 8.0D);
+            if (player != null) {
+                npc.getLookControl().setLookAt(player, 10.0F, (float) npc.getMaxHeadXRot());
+            }
+            return;
+        }
         BlockPos goal = switch (state.phase) {
             case APPROACH -> state.target;
             case LEAVING -> state.exit;

@@ -58,7 +58,7 @@ public final class ShipSpec {
     public float accel = 0.003f;
     public float decel = 0.004f;
     public float turnAccel = 0.06f;
-    /** The bow ram: damage at full speed, 0 for no ram; how far in front of the bow it reaches. */
+    /** The bow ram (rework phase 11: the war galley's is strong, the cog's weak, the fishing boat has none): damage at full speed, 0 for no ram; how far in front of the bow it reaches. */
     public float ramDamage = 0.f;
     public float ramReach = 1.2f;
     /** The height of the masts' collision box over the deck. */
@@ -101,6 +101,11 @@ public final class ShipSpec {
         this.decel = decel;
         this.turnAccel = turnAccel;
         return this;
+    }
+
+    /** True if the bow of this ship hurts what it rams. */
+    public boolean hasRam() {
+        return ramDamage > 0.F;
     }
 
     public ShipSpec ram(float damage, float reach) {
