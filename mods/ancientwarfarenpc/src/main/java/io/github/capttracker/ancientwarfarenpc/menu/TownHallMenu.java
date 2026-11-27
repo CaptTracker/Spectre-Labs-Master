@@ -65,7 +65,7 @@ public class TownHallMenu extends BlockEntityMenu<TownHallBlockEntity> implement
     public static final int SLOT_X = 94;
 
     /** A member as the screen shows it. */
-    public record MemberView(UUID id, String name, String given, String type, MemberStatus status, int distance, boolean homeless, int morale) {}
+    public record MemberView(UUID id, String name, String given, String type, MemberStatus status, int distance, boolean homeless, int morale, boolean child) {}
 
     /** One role line of the Overview: free and taken worker slots of its jobs, and the members of the role that have no job. */
     public record RoleJobs(String role, int open, int filled, int idle) {}
@@ -509,6 +509,7 @@ public class TownHallMenu extends BlockEntityMenu<TownHallBlockEntity> implement
             m.putInt("dist", (int) Math.round(Math.sqrt(member.pos.distSqr(hall))));
             m.putBoolean("homeless", settlement.isHomeless(member.id));
             m.putInt("morale", member.morale);
+            m.putBoolean("child", member.child); // a child has no role to cycle (rework phase 10)
             memberTags.add(m);
         }
         state.put("members", memberTags);
@@ -603,7 +604,7 @@ public class TownHallMenu extends BlockEntityMenu<TownHallBlockEntity> implement
         for (int i = 0; i < memberList.size(); i++) {
             CompoundTag m = memberList.getCompound(i);
             members.add(new MemberView(m.getUUID("id"), m.getString("name"), m.getString("given"), m.getString("type"), MemberStatus.byOrdinal(m.getInt("status")), m.getInt("dist"),
-                    m.getBoolean("homeless"), m.contains("morale") ? m.getInt("morale") : -1));
+                    m.getBoolean("homeless"), m.contains("morale") ? m.getInt("morale") : -1, m.getBoolean("child")));
         }
         storages.clear();
         ListTag storageList = state.getList("storages", Tag.TAG_COMPOUND);

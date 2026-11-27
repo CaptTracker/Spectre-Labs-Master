@@ -123,6 +123,15 @@ public class GuiNpcTalk extends GuiNpcBase<NpcTalkMenu> {
                 }
             }
         }
+        if (!menu.family.isEmpty()) {
+            y += 6;
+            area.addGuiElement(new Label(TEXT_X, y, Component.translatable("guistrings.npc.talk.family").getString()).setColor(0xFF9FD0FF));
+            y += 12;
+            for (var line : menu.family) {
+                y = addWrapped(y, "- " + line.component().getString(), 0xFFFFC9D9, 0);
+                y += 2;
+            }
+        }
         y += 6;
         area.addGuiElement(new Label(TEXT_X, y, Component.translatable("guistrings.npc.talk.thinking").getString()).setColor(0xFF9FD0FF));
         y += 12;

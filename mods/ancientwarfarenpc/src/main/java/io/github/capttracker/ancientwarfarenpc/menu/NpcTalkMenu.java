@@ -56,6 +56,8 @@ public class NpcTalkMenu extends NpcMenuBase<NpcBase> {
     @Nullable
     public Line greeting;
     public final List<Line> lines = new ArrayList<>();
+    /** The family lines (partner, children, home, grief) of a player-owned NPC. */
+    public final List<Line> family = new ArrayList<>();
     public final List<Event> events = new ArrayList<>();
     public boolean canEdit = false;
     public boolean hasMorale = false;
@@ -113,13 +115,25 @@ public class NpcTalkMenu extends NpcMenuBase<NpcBase> {
         }
         var registries = registries();
         CompoundTag state = new CompoundTag();
-        state.putString("name", Component.Serializer.toJson(npc.getName(), registries));
+        Component title = npc.isChild() && npc.getCustomName() == null
+                ? Component.translatable("tooltip.ancientwarfarenpc.npc.child", npc.getFullName(), io.github.capttracker.ancientwarfarenpc.settlement.family.FamilyAge.text(npc.getChildAgeTicks()))
+                : npc.getFullName(); // "Bill Carter", or the name tag; a child "Tom Carter, child, 1 year 40 days" (rework phase 10)
+        state.putString("name", Component.Serializer.toJson(title, registries));
         state.put("greeting", NpcThinking.greeting(npc, player).save(registries));
         ListTag lineList = new ListTag();
         for (Line line : NpcThinking.describe(npc)) {
             lineList.add(line.save(registries));
         }
         state.put("lines", lineList);
+        if (npc instanceof NpcPlayerOwned member) {
+            ListTag familyList = new ListTag();
+            member.getSettlement().ifPresent(settlement -> {
+                for (Line line : io.github.capttracker.ancientwarfarenpc.settlement.family.FamilyApi.describe(settlement, member.getUUID(), level.getGameTime())) {
+                    familyList.add(line.save(registries));
+                }
+            });
+            state.put("family", familyList);
+        }
         ListTag eventList = new ListTag();
         List<NpcMind.Thought> thoughts = npc.getMind().thoughts();
         for (int i = thoughts.size() - 1; i >= 0; i--) {
@@ -220,6 +234,11 @@ public class NpcTalkMenu extends NpcMenuBase<NpcBase> {
         ListTag lineList = state.getList("lines", Tag.TAG_COMPOUND);
         for (int i = 0; i < lineList.size(); i++) {
             lines.add(Line.load(lineList.getCompound(i), registries));
+        }
+        family.clear();
+        ListTag familyList = state.getList("family", Tag.TAG_COMPOUND);
+        for (int i = 0; i < familyList.size(); i++) {
+            family.add(Line.load(familyList.getCompound(i), registries));
         }
         events.clear();
         ListTag eventList = state.getList("events", Tag.TAG_COMPOUND);

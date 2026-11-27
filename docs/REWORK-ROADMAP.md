@@ -484,4 +484,4 @@ New staffed worksites. Each one turns inputs from storage into outputs, with cou
 - **NPC siege AI.** Soldiers ordered to attack a walled target use towers.
 
 ## Open questions for the owner (second round)
-- **Q5.** How long is an in-game year for children growing up? Default proposal: 96 days, so adulthood takes 192 days, about 64 hours of real play. Shorter alternatives: 1 year = 30 days (60 days in total) or 1 year = 8 days (16 days in total).
+- **Q5.** How long is an in-game year for children growing up? Default proposal: 96 days, so adulthood takes 192 days, about 64 hours of real play. Shorter alternatives: 1 year = 30 days (60 days in total) or 1 year = 8 days (16 days in total). **Answered (2026-11-25): 96 days (Serene Seasons' default year), so adulthood takes 192 days. Built in phase 10 as the config values `year_length_days` = 96 and `years_to_adulthood` = 2.**

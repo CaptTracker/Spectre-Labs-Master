@@ -325,6 +325,46 @@ public abstract class NpcBase extends PathfinderMob implements IEntityWithComple
         entityData.set(GIVEN_NAME, name == null ? "" : name);
     }
 
+    // ---- surname (rework phase 10) ----
+
+    /** The family name of the NPC; empty for the NPCs that have none (only the player-owned NPCs get one). Server side; not synched to the clients. */
+    private String surname = "";
+
+    public String getSurname() {
+        return surname;
+    }
+
+    public void setSurname(String name) {
+        surname = name == null ? "" : name;
+    }
+
+    /** Whether this kind of NPC has a surname. */
+    protected boolean supportsSurname() {
+        return false;
+    }
+
+    /**
+     * The full name ("Bill Carter"): a custom name (name tag) first, else the first name with the surname, else the plain display name. This is the name of
+     * the talk screen, the census and the look-at tooltip; the nameplate keeps {@link #getName()} ("Apprentice Miner Bill").
+     */
+    public Component getFullName() {
+        Component customName = getCustomName();
+        if (customName != null) {
+            return customName;
+        }
+        if (surname.isEmpty() || getGivenName().isEmpty()) {
+            return getName();
+        }
+        return NpcNames.full(getGivenName(), surname);
+    }
+
+    /** Server side: gives an NPC that has a first name but no surname one (new NPCs and NPCs saved before families existed). */
+    private void ensureSurname() {
+        if (surname.isEmpty() && supportsSurname() && !getGivenName().isEmpty()) {
+            surname = NpcNames.pickSurname(getRandom(), getNamePoolFaction(), getGivenName());
+        }
+    }
+
     /** The faction whose name pool the first name comes from; empty for the player-owned NPCs. */
     protected String getNamePoolFaction() {
         return "";
@@ -1176,7 +1216,20 @@ public abstract class NpcBase extends PathfinderMob implements IEntityWithComple
         if (customName != null) {
             return customName;
         }
+        if (isChild()) {
+            return NpcNames.child(getGivenName()); // "Child Tom" (rework phase 10)
+        }
         return NpcNames.display(getNpcFullType(), getGivenName(), entityData.get(MAIN_RANK));
+    }
+
+    /** True for a child that has not grown up yet (rework phase 10). Only the worker has a child state; every other NPC is always grown up. Synced to the clients. */
+    public boolean isChild() {
+        return false;
+    }
+
+    /** The age of a child in ticks (rework phase 10; 0 for an NPC that is not a child). Server side. */
+    public long getChildAgeTicks() {
+        return 0L;
     }
 
     public final NpcLevelingStats getLevelingStats() {
@@ -1216,6 +1269,7 @@ public abstract class NpcBase extends PathfinderMob implements IEntityWithComple
         if (!level().isClientSide) {
             if (tickCount % 10 == 1) {
                 ensureGivenName();
+                ensureSurname();
             }
             if (getShieldDisabledTick() > 0) {
                 decrementShieldDisabledTick();
@@ -1654,6 +1708,9 @@ public abstract class NpcBase extends PathfinderMob implements IEntityWithComple
         if (tag.contains("givenName")) {
             setGivenName(tag.getString("givenName"));
         }
+        if (tag.contains("surname")) {
+            setSurname(tag.getString("surname")); // an older save has none: the NPC rolls one at its first tick (ensureSurname)
+        }
         if (tag.contains("food")) {
             setFoodRemaining(tag.getInt("food"));
         }
@@ -1698,6 +1755,9 @@ public abstract class NpcBase extends PathfinderMob implements IEntityWithComple
         }
         if (!getGivenName().isEmpty()) {
             tag.putString("givenName", getGivenName());
+        }
+        if (!surname.isEmpty()) {
+            tag.putString("surname", surname);
         }
         tag.putInt("food", getFoodRemaining());
         tag.putInt(ATTACK_DAMAGE_OVERRIDE_TAG, attackDamage);

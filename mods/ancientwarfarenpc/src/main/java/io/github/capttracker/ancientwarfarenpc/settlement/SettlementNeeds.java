@@ -240,7 +240,7 @@ public final class SettlementNeeds {
         // food
         int members = settlement.getMembers().size();
         if (members > 0 && SettlementConfig.demandFoodDays > 0) {
-            long want = (long) members * SettlementConfig.demandFoodDays * Math.max(1, SettlementConfig.npcDayFoodTicks);
+            long want = (long) Math.ceil(settlement.foodMembers() * SettlementConfig.demandFoodDays * Math.max(1, SettlementConfig.npcDayFoodTicks)); // children count less (phase 10)
             long have = stock.food();
             if (have < want) {
                 int bread = Math.max(1, AWNPCStatics.getFoodValue(new ItemStack(Items.BREAD)));

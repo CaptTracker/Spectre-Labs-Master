@@ -45,6 +45,7 @@ public final class SettlementLife {
             scanLoadedChunks(level, settlement);
         }
         validateBeds(level, settlement);
+        io.github.capttracker.ancientwarfarenpc.settlement.family.FamilyLife.claimHomes(level, settlement); // the homes of the families come before the free beds are handed out
         assignBeds(settlement);
         rebuildGatherPoints(level, settlement);
     }
@@ -126,9 +127,11 @@ public final class SettlementLife {
                 settlement.freeBedOf(owner);
             }
         }
+        // the beds a household claimed as its home are not given to others (rework phase 10)
+        Set<BlockPos> claimed = SettlementConfig.familiesEnabled ? settlement.getFamilies().claimedBeds() : Set.of();
         List<BlockPos> free = new ArrayList<>();
         for (BlockPos bed : settlement.getBeds()) {
-            if (settlement.getBedOwner(bed) == null) {
+            if (settlement.getBedOwner(bed) == null && !claimed.contains(bed)) {
                 free.add(bed);
             }
         }

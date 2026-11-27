@@ -8,6 +8,7 @@ import io.github.capttracker.ancientwarfarenpc.AncientWarfareNPC;
 import io.github.capttracker.ancientwarfarenpc.entity.NpcPlayerOwned;
 import io.github.capttracker.ancientwarfarenpc.entity.NpcThinking;
 import io.github.capttracker.ancientwarfarenpc.menu.TownHallMenu;
+import io.github.capttracker.ancientwarfarenpc.settlement.family.FamilyAge;
 import io.github.capttracker.lib.registry.Ids;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -51,10 +52,14 @@ public final class Census {
     private Census() {}
 
     /**
-     * One member. {@code name} is the custom name (may be empty), {@code given} the generated first name, {@code type} the full type such as
-     * {@code worker.farmer}; {@code morale} is -1 when unknown; {@code rank} is the rank (0 to 4) of the main skill for the name, -1 for none; {@code traits} is the bit mask of the traits ({@code Trait#bit}); {@code loaded} is true when the data was read from the live NPC.
+     * One member. {@code name} is the custom name (may be empty), {@code given} the generated first name, {@code surname} the family name (empty for none), {@code type} the full type such as
+     * {@code worker.farmer}; {@code morale} is -1 when unknown; {@code rank} is the rank (0 to 4) of the main skill for the name, -1 for none; {@code traits} is the bit mask of the traits ({@code Trait#bit}); {@code childYears} and {@code childDays} are the age of a child that has not grown up (rework phase 10), -1 for a grown member; {@code loaded} is true when the data was read from the live NPC.
      */
-    public record Entry(UUID id, String name, String given, String type, int morale, BlockPos pos, boolean loaded, int flags, String task, int rank, int traits) {
+    public record Entry(UUID id, String name, String given, String surname, String type, int morale, BlockPos pos, boolean loaded, int flags, String task, int rank, int traits, int childYears, int childDays) {
+        public boolean isChild() {
+            return childYears >= 0;
+        }
+
         public boolean hasProblem() {
             return flags != 0;
         }
@@ -76,11 +81,14 @@ public final class Census {
             if (found instanceof NpcPlayerOwned npc && npc.isAlive()) {
                 NpcThinking.CensusInfo info = NpcThinking.census(npc, settlement);
                 Component custom = npc.getCustomName();
-                entries.add(new Entry(member.id, custom == null ? "" : custom.getString(), npc.getGivenName(), npc.getNpcFullType(), npc.getPersonalMorale(),
-                        npc.blockPosition(), true, info.flags() | bed, info.task(), npc.getMainRank(), npc.getTraitMask()));
+                entries.add(new Entry(member.id, custom == null ? "" : custom.getString(), npc.getGivenName(), npc.getSurname(), npc.getNpcFullType(), npc.getPersonalMorale(),
+                        npc.blockPosition(), true, info.flags() | bed, info.task(), npc.getMainRank(), npc.getTraitMask(),
+                        npc.isChild() ? FamilyAge.years(npc.getChildAgeTicks()) : -1, npc.isChild() ? FamilyAge.days(npc.getChildAgeTicks()) : -1));
             } else {
-                entries.add(new Entry(member.id, member.name, member.given, member.type, member.morale, member.pos, false, (member.flags & ~FLAG_NO_BED) | bed,
-                        member.task.isEmpty() ? "idle" : member.task, member.rank, member.traits));
+                entries.add(new Entry(member.id, member.name, member.given, member.surname, member.type, member.morale, member.pos, false, (member.flags & ~FLAG_NO_BED) | bed,
+                        member.task.isEmpty() ? "idle" : member.task, member.rank, member.traits,
+                        member.child ? FamilyAge.years(settlement.childAgeOf(member.id, level.getGameTime())) : -1,
+                        member.child ? FamilyAge.days(settlement.childAgeOf(member.id, level.getGameTime())) : -1));
             }
         }
         return entries;
@@ -104,6 +112,7 @@ public final class Census {
                         buf.writeUUID(e.id);
                         buf.writeUtf(clip(e.name), MAX_STRING);
                         buf.writeUtf(clip(e.given), MAX_STRING);
+                        buf.writeUtf(clip(e.surname), MAX_STRING);
                         buf.writeUtf(clip(e.type), MAX_STRING);
                         buf.writeVarInt(e.morale + 1);
                         buf.writeBlockPos(e.pos);
@@ -112,14 +121,17 @@ public final class Census {
                         buf.writeUtf(clip(e.task), MAX_STRING);
                         buf.writeVarInt(e.rank + 1);
                         buf.writeVarInt(e.traits);
+                        buf.writeVarInt(e.childYears + 1);
+                        buf.writeVarInt(e.childDays + 1);
                     }
                 },
                 buf -> {
                     int count = Math.min(buf.readVarInt(), MAX_ENTRIES);
                     List<Entry> list = new ArrayList<>(count);
                     for (int i = 0; i < count; i++) {
-                        list.add(new Entry(buf.readUUID(), buf.readUtf(MAX_STRING), buf.readUtf(MAX_STRING), buf.readUtf(MAX_STRING), buf.readVarInt() - 1,
-                                buf.readBlockPos(), buf.readBoolean(), buf.readVarInt(), buf.readUtf(MAX_STRING), buf.readVarInt() - 1, buf.readVarInt()));
+                        list.add(new Entry(buf.readUUID(), buf.readUtf(MAX_STRING), buf.readUtf(MAX_STRING), buf.readUtf(MAX_STRING), buf.readUtf(MAX_STRING), buf.readVarInt() - 1,
+                                buf.readBlockPos(), buf.readBoolean(), buf.readVarInt(), buf.readUtf(MAX_STRING), buf.readVarInt() - 1, buf.readVarInt(),
+                                buf.readVarInt() - 1, buf.readVarInt() - 1));
                     }
                     return new Payload(list);
                 });

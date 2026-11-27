@@ -16,6 +16,7 @@ import io.github.capttracker.ancientwarfare.client.gui.elements.Tooltip;
 import io.github.capttracker.ancientwarfarenpc.entity.NpcNames;
 import io.github.capttracker.ancientwarfarenpc.menu.TownHallMenu;
 import io.github.capttracker.ancientwarfarenpc.settlement.Census;
+import io.github.capttracker.ancientwarfarenpc.settlement.family.FamilyAge;
 import io.github.capttracker.ancientwarfarenpc.settlement.NpcMorale;
 import io.github.capttracker.ancientwarfarenpc.settlement.client.CensusHighlight;
 import net.minecraft.client.gui.GuiGraphics;
@@ -178,6 +179,12 @@ final class CensusView {
         if (!entry.name().isEmpty()) {
             return entry.name();
         }
+        if (!entry.surname().isEmpty() && !entry.given().isEmpty()) {
+            return NpcNames.full(entry.given(), entry.surname()).getString(); // the full name "Bill Carter" (rework phase 10)
+        }
+        if (entry.isChild()) {
+            return NpcNames.child(entry.given()).getString(); // a child has no title (rework phase 10)
+        }
         return NpcNames.display(entry.type(), entry.given(), entry.rank()).getString();
     }
 
@@ -275,7 +282,7 @@ final class CensusView {
             this.entry = entry;
             this.hall = hall;
             this.name = fit(displayName(entry), COL_ROLE - COL_NAME - 3);
-            this.role = fit(roleName(entry.type()), COL_MOOD - COL_ROLE - 3);
+            this.role = fit(entry.isChild() ? tr("guistrings.census.child_short", entry.childYears(), entry.childDays()) : roleName(entry.type()), COL_MOOD - COL_ROLE - 3);
             this.mood = entry.morale() < 0 ? "-" : fit(moodWord(entry.morale()) + " " + entry.morale(), COL_WHERE - COL_MOOD - 3);
             this.moodColor = moodColor(entry.morale());
             String place = !entry.loaded() ? tr("guistrings.census.unloaded") : distance(entry.pos(), hall) < 4 ? tr("guistrings.census.here")
@@ -342,7 +349,7 @@ final class CensusView {
             }
             if (col < COL_ROLE) {
                 String traitLine = traitsText(entry.traits());
-                return displayName(entry) + " (" + roleName(entry.type()) + ")" + (traitLine.isEmpty() ? "" : "\n" + tr("guistrings.census.traits", traitLine))
+                return displayName(entry) + (entry.isChild() ? ", " + tr("guistrings.census.child") + ", " + FamilyAge.text(entry.childYears(), entry.childDays()).getString() : " (" + roleName(entry.type()) + ")") + (traitLine.isEmpty() ? "" : "\n" + tr("guistrings.census.traits", traitLine))
                         + "\n" + tr("guistrings.census.click_hint");
             }
             return null;

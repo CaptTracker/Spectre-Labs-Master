@@ -178,6 +178,7 @@ public class SettlementData extends SavedData {
                 settlement.getJobBoard().refresh(level, settlement);
                 SettlementThreat.tick(level, settlement);
                 SettlementLife.tick(level, settlement, server.getTickCount() % SettlementLife.SCAN_INTERVAL == 0);
+                io.github.capttracker.ancientwarfarenpc.settlement.family.FamilyLife.tick(level, settlement);
                 SettlementMorale.tick(level, settlement);
                 SettlementNeeds.tick(level, settlement);
                 io.github.capttracker.ancientwarfarenpc.settlement.building.BuildingPlanner.tick(level, settlement);

@@ -666,6 +666,7 @@ public final class AwNpcs {
     private static void onRegisterCommands(RegisterCommandsEvent event) {
         CommandDebugAI.register(event.getDispatcher());
         io.github.capttracker.ancientwarfarenpc.command.CommandCaravan.register(event.getDispatcher());
+        io.github.capttracker.ancientwarfarenpc.command.CommandSettlement.register(event.getDispatcher()); // rework phase 10: test the families
     }
 
     private static void onCommonSetup(FMLCommonSetupEvent event) {

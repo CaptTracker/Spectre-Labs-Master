@@ -62,6 +62,17 @@ Your settlement can now plan and build its own houses and workshops. (This is a 
 - Finished buildings count straight away: beds and chests join the settlement, the worksite block belongs to you, and a chapel makes devout NPCs happier. Builders earn Building skill experience, and skill, traits, morale and hunger change their speed.
 - **Config:** the sections `building_designs`, `building_planner` and `builders` of `ancientwarfarenpc-settlements.toml`.
 
+## Families and children
+- **Surnames:** every NPC you own now has a family name from its culture, like "Bill Carter". The full name shows on the talk screen, the census and the Jade/WTHIT tooltip. The nameplate keeps its style, and a name tag still wins.
+- **Couples:** two adult members who spend time together at the gathering point can become partners, with a thought, a message to you and hearts. There is no gender rule: any two adults can pair up. Sociable NPCs bond faster and loners slower. Partners share a surname and gather at the same spot. When one dies, the survivor grieves and may find a new partner after a few days.
+- **Homes:** a couple claims two beds, a free house first, then a tent, then two loose beds. If none is free, the planner builds a house for them. Home life, a partner nearby and children around add morale, and grief takes it away for 3 days.
+- **Children:** a couple with a home, good morale, a free bed and enough food in storage may have a child. A child is half size, takes the family surname, gets traits from both parents and a small head start in a parent's best skill. Children have no role and take no orders. They play near home, follow their parents or other children, run from hostiles, sleep in the family bed and eat half as much as an adult.
+- **Growing up:** a child becomes a working adult after **2 in-game years. A year is 96 days by default (the Serene Seasons year), so 192 days to adulthood.** It keeps its name, traits, skills and bed, and can later become a partner. The talk screen, the census and the Jade/WTHIT tooltip show its age in years and days.
+- **Population:** children count toward population, need beds and food (half a member's share), and losing a family member hurts morale.
+- **Config:** the `families` section of `ancientwarfarenpc-settlements.toml`: `families_enabled`, `year_length_days` (96), `years_to_adulthood` (2.0), `couple_min_population`, `couple_min_morale`, `couple_bond_seconds`, `couple_chance_per_day`, `couple_social_radius`, `couple_sociable_bonus`, `couple_loner_factor`, `partners_share_surname`, `widow_repartner_days`, `grief_days`, `grief_morale`, `partner_morale`, `partner_nearby_morale`, `partner_nearby_radius`, `family_home_morale`, `children_near_morale`, `children_near_radius`, `child_min_morale`, `child_min_food_days`, `max_children_per_household` (3), `birth_cooldown_days` (8), `birth_chance_per_day` (0.25), `child_hunger_factor` (0.5), `child_skill_head_start_xp`, `child_scale_start` (0.5), `child_play_radius`, `family_debug_fast_growth`.
+- **Operators:** `/awsettlement birth`, `age`, `growup` and `families` (permission level 2) force a birth, age a child, let it grow up now and list the households.
+- Families only work while the daily schedule is on (`schedule_enabled`).
+
 ## Vehicles
 - Mouse steering with a chase camera, and smoother controls.
 - Multiple seats with roles; switch seats with the number keys. Riders keep their seats when the world reloads.
@@ -106,6 +117,7 @@ Your settlement can now plan and build its own houses and workshops. (This is a 
 - **Jade and WTHIT support (optional):** look at an NPC to see its role, owner or faction, mood, current task and health. Look at a worksite (farm, quarry, tree farm, fishing, apiary, smelter, dock, market stall, inn, stable) to see workers out of slots, its status (working, idle, waiting for workers, tools or ladders, storage full, needs a bed and a table) and the settlement it belongs to. Each tooltip can be switched off in the Jade or WTHIT config screen.
 
 ## Known issues
+- Not yet play-tested in a running game: couples, homes, births, children, growing up and the family morale factors (compiled and read only).
 - Not yet play-tested in a running game: NPC skills, ranks and traits (the effects, the Skills tab and the rank in names).
 - Not yet play-tested in a running game: the settlement planner, the Building tab, the Blueprint Scanner and builders (scaffolding, fetching from storage and taking down a building were compiled and checked by reading only).
 - Not yet play-tested in a running game: NPC helmsmen, swimming out to a ship, and the cog's oars.

@@ -261,7 +261,15 @@ public class NpcAIScheduleGoal extends NpcAI<NpcPlayerOwned> {
             return s.getHallPos();
         }
         long day = npc.level().getDayTime() / 24000L;
-        int index = (int) Math.floorMod(npc.getUUID().hashCode() + day, (long) points.size());
+        // the two partners of a couple go to the same place (rework phase 10)
+        java.util.UUID key = npc.getUUID();
+        if (SettlementConfig.familiesEnabled) {
+            java.util.Optional<java.util.UUID> partner = io.github.capttracker.ancientwarfarenpc.settlement.family.FamilyApi.getPartner(s, key);
+            if (partner.isPresent() && partner.get().compareTo(key) < 0) {
+                key = partner.get();
+            }
+        }
+        int index = (int) Math.floorMod(key.hashCode() + day, (long) points.size());
         return points.get(index);
     }
 
