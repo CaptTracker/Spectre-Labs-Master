@@ -369,7 +369,6 @@
   "message.ancientwarfarevehicle.bridge.moving": "Stop the tower first",
   "message.ancientwarfarevehicle.bridge.occupied": "Somebody is on the bridge",
   "message.ancientwarfarevehicle.bridge.locked": "The bridge is down: raise it to move the tower",
-  "message.ancientwarfarevehicle.bridge.roof_busy": "Somebody stands on the platform: the tower will not move",
   "ancientwarfarevehicle.overlay.pushers": "Pushers: %s",
   "ancientwarfarevehicle.overlay.bridge_up": "Bridge: raised",
   "ancientwarfarevehicle.overlay.bridge_moving": "Bridge: moving",

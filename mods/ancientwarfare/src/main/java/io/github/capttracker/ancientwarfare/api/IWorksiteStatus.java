@@ -20,6 +20,8 @@ public interface IWorksiteStatus {
     String NO_RECIPE = "no_recipe";
     /** A tannery waits for water (a water source next to it, or a water cauldron). */
     String WATER = "needs_water";
+    /** A farm has seeds but none that may be sown in the current season (Serene Seasons): it still harvests and tills, but does not plant. */
+    String OUT_OF_SEASON = "out_of_season";
 
     /** @return a short key for the missing thing (for example {@link #LADDERS}), or null if the site waits for nothing */
     @Nullable

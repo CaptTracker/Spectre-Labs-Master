@@ -143,6 +143,9 @@ public class SettlementData extends SavedData {
         }
         setDirty();
         SettlementLife.forget(settlement.getId());
+        StormWarnings.forget(settlement.getId());
+        io.github.capttracker.ancientwarfarenpc.settlement.building.ChapelSites.forget(settlement.getId());
+        io.github.capttracker.ancientwarfarenpc.settlement.building.KitchenSites.forget(settlement.getId());
         ServerLevel level = server.getLevel(settlement.getDimension());
         if (level == null) {
             return;
@@ -177,6 +180,9 @@ public class SettlementData extends SavedData {
             if (level != null) {
                 settlement.getJobBoard().refresh(level, settlement);
                 SettlementThreat.tick(level, settlement);
+                StormWarnings.tick(level, settlement);
+                Seasons.tick(level, settlement); // the length of the family year follows Serene Seasons
+                io.github.capttracker.ancientwarfarenpc.settlement.building.KitchenSites.refresh(level, settlement); // the rooms the cook works in (Farmer's Delight)
                 SettlementLife.tick(level, settlement, server.getTickCount() % SettlementLife.SCAN_INTERVAL == 0);
                 io.github.capttracker.ancientwarfarenpc.settlement.family.FamilyLife.tick(level, settlement);
                 SettlementMorale.tick(level, settlement);

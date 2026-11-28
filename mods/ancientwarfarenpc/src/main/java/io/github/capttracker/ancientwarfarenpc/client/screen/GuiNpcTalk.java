@@ -107,6 +107,15 @@ public class GuiNpcTalk extends GuiNpcBase<NpcTalkMenu> {
         int y = 6;
         y = addWrapped(y, menu.npcName.getString(), 0xFFFFD27F, 0);
         y += 2;
+        if (menu.npc != null && io.github.capttracker.ancientwarfarenpc.client.MapShare.enabled()) {
+            area.addGuiElement(new Button(TEXT_X, y, 100, 12, "guistrings.share.button") {
+                @Override
+                protected void onPressed() {
+                    io.github.capttracker.ancientwarfarenpc.client.MapShare.share(menu.npcName.getString(), menu.npc.blockPosition());
+                }
+            });
+            y += 16;
+        }
         if (menu.greeting != null) {
             y = addWrapped(y, "\"" + menu.greeting.component().getString() + "\"", 0xFFDDDDDD, 0);
         }

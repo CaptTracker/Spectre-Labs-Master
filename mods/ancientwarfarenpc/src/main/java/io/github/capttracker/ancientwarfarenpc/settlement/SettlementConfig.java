@@ -10,12 +10,81 @@ import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
+import java.util.List;
+
 /**
  * The server options of the settlements ({@code ancientwarfarenpc-settlements.toml} in the world's serverconfig folder). The values are
  * copied into the public static fields when the config loads or reloads; until then they hold the defaults.
  */
 public final class SettlementConfig {
     public static final String FILE_NAME = "ancientwarfarenpc-settlements.toml";
+
+    // ---- optional mod integrations (third round) ----
+    /** Ice and Fire: Community Edition: if false, its creatures are not threats of the settlements. */
+    public static boolean iceAndFireEnabled = true;
+    /** Entity ids of Ice and Fire that count as threats (no namespace means iceandfire; a trailing * matches a prefix). */
+    public static List<String> iceAndFireMonsterIds = List.of("deathworm", "death_worm", "cyclops", "hydra", "troll", "gorgon", "siren", "sea_serpent", "cockatrice", "dread_*", "stymphalian_bird");
+    /** Entity ids that count as dragons besides the entity type tags {@code iceandfire:fire_dragon}, {@code ice_dragon} and {@code lightning_dragon}. */
+    public static List<String> iceAndFireDragonIds = List.of("fire_dragon", "ice_dragon", "lightning_dragon");
+    /** Blocks beyond the border of the land from which a dragon is a threat (it raises the alarm and the bells). */
+    public static int iceAndFireDragonAlarmRange = 96;
+    /** If true, one dragon raises the automatic alarm alone, whatever the threshold. */
+    public static boolean iceAndFireDragonAlarmAlone = true;
+    /** Blocks from a dragon within which civilians run. */
+    public static int iceAndFireDragonFleeRange = 48;
+    /** Blocks that a soldier with a melee weapon (and no brave trait) keeps from a dragon. */
+    public static int iceAndFireMeleeKeepAway = 24;
+    /** If true, archers and crews of siege weapons and ship guns take dragons before nearer targets. */
+    public static boolean iceAndFireRangedPrefersDragons = true;
+
+    /** Weather2: if false, settlements do not sense its storms. */
+    public static boolean weather2Enabled = true;
+    /** Blocks (horizontally) from the hall within which the edge of a severe storm, a tornado or a sandstorm gives a storm warning. */
+    public static int weather2WarningDistance = 160;
+    /** The Weather2 intensity stage from which a storm is severe (0 normal, 1 thunder, 2 high wind, 3 hail, 4 tornado forming, 5 to 9 the stages of a tornado). */
+    public static int weather2MinStage = 3;
+    /** If true, sandstorms count too. */
+    public static boolean weather2Sandstorms = true;
+    /** The intensity (0 to 1) a sandstorm needs to count. */
+    public static double weather2SandstormMinIntensity = 0.3D;
+    /** Seconds between two weather scans of a settlement. */
+    public static int weather2ScanSeconds = 3;
+    /** Seconds the warning lasts after the storm is gone from the sensing range. */
+    public static int weather2CalmSeconds = 15;
+    /** If true, the NPCs go indoors while there is a storm warning. */
+    public static boolean weather2Shelter = true;
+    /** If true, outdoor work of workers pauses while there is a storm warning. */
+    public static boolean weather2PauseWork = true;
+    /** If true, NPC helmsmen sail for the nearest dock of their owner (or hold the ship) in a storm. */
+    public static boolean weather2ShipsDock = true;
+    /** If true, the founder gets one chat message for each storm. */
+    public static boolean weather2Announce = true;
+
+    /** Serene Seasons: if false, the settlements ignore the seasons (no season on the hall, no winter needs). */
+    public static boolean sereneEnabled = true;
+    /** If true (and Serene Seasons is installed), the family year ({@code year_length_days}) is the length of the Serene Seasons year. */
+    public static boolean sereneUseYear = true;
+    /** Percent of extra food the members use up in winter (hunger and the food the settlement wants in stock). */
+    public static int sereneWinterFoodPercent = 15;
+    /** Morale points lost in winter by an NPC without a home (a bed). */
+    public static int sereneColdMorale = 6;
+    /** The days of the Serene Seasons year as of the last check (0 until the first check, or without Serene Seasons). Not a config value. */
+    public static volatile int seasonYearDays = 0;
+
+    /** Farmer's Delight: if false, none of its integration is active (knives, hearty meals, the cook). */
+    public static boolean fdEnabled = true;
+    /** If true, a knife counts as a tool for the work on the blocks a knife is meant for (rice panicles, straw) and as a tool for the tool morale. */
+    public static boolean fdKnives = true;
+    /** Effect ids that make a food a hearty meal (the NPC gets the effects and a morale lift). */
+    public static List<String> fdHeartyEffects = List.of("farmersdelight:nourishment", "farmersdelight:comfort");
+    /** Morale points a hearty meal in the last day adds. */
+    public static int fdHeartyMorale = 4;
+    /** If true, an innkeeper cooks in a kitchen of the settlement (a room with a heated cooking pot or a cutting board). */
+    public static boolean fdCook = true;
+    /** Meals the cook keeps in stock for each member of the settlement. */
+    public static double fdMealStockPerMember = 2.0D;
+    /** If true, the cook also uses a cutting board of the kitchen for the cutting recipes that give food. */
+    public static boolean fdCookCutting = true;
 
     /** Longest horizontal side of a scanned blueprint. */
     public static int blueprintMaxWidth = 48;
@@ -117,7 +186,13 @@ public final class SettlementConfig {
     public static double familyDebugFastGrowth = 1.0;
     /** Ticks a child needs to grow up: {@code years_to_adulthood} years of {@code year_length_days} days. */
     public static long adulthoodTicks() {
-        return Math.max(1L, Math.round(yearsToAdulthood * yearLengthDays * 24000.0D));
+        return Math.max(1L, Math.round(yearsToAdulthood * effectiveYearLengthDays() * 24000.0D));
+    }
+
+    /** The days of the family year: the Serene Seasons year when that is installed and {@code use_serene_seasons_year} is on, else {@code year_length_days}. */
+    public static int effectiveYearLengthDays() {
+        int seasons = seasonYearDays;
+        return sereneEnabled && sereneUseYear && seasons > 0 ? seasons : Math.max(1, yearLengthDays);
     }
 
     /** How far (blocks, horizontal) a boundary marker may be from the hall it links to. */
@@ -193,6 +268,14 @@ public final class SettlementConfig {
     public static int demandReserveGlass = 16;
     /** If true, loaded soldiers with an empty armour slot are a need for armour. */
     public static boolean demandArmour = true;
+    /** If true, loaded soldiers fetch a better weapon or armour from the settlement storage and put it on themselves. */
+    public static boolean soldiersEquipFromStorage = true;
+    /** If true, an enclosed room with a door that holds two free beds counts as a family house even when it was not built by the planner. */
+    public static boolean handBuiltHouses = true;
+    /** If true, an enclosed room with a door, a bell and a lectern counts as a chapel (devout trait, planner). */
+    public static boolean handBuiltChapels = true;
+    /** The most open cells a hand-built room may have (rooms of both kinds): bigger enclosed spaces, and anything open to the sky, are not rooms. */
+    public static int handBuiltRoomMaxCells = 600;
 
     // ---- threat response (rework phase 2) ----
     /** If true, the settlement raises the alarm by itself when hostile entities are inside its land. */
@@ -542,6 +625,10 @@ public final class SettlementConfig {
     private static final ModConfigSpec.IntValue DEMAND_RESERVE_STONE;
     private static final ModConfigSpec.IntValue DEMAND_RESERVE_GLASS;
     private static final ModConfigSpec.BooleanValue DEMAND_ARMOUR;
+    private static final ModConfigSpec.BooleanValue SOLDIERS_EQUIP;
+    private static final ModConfigSpec.BooleanValue HAND_BUILT_HOUSES;
+    private static final ModConfigSpec.BooleanValue HAND_BUILT_CHAPELS;
+    private static final ModConfigSpec.IntValue HAND_BUILT_MAX_CELLS;
     private static final ModConfigSpec.BooleanValue SCHEDULE_ENABLED;
     private static final ModConfigSpec.IntValue WAKE_END;
     private static final ModConfigSpec.IntValue WORK_END;
@@ -678,6 +765,36 @@ public final class SettlementConfig {
     private static final ModConfigSpec.DoubleValue FAM_CHILD_SCALE;
     private static final ModConfigSpec.IntValue FAM_CHILD_PLAY_RADIUS;
     private static final ModConfigSpec.DoubleValue FAM_DEBUG_GROWTH;
+    private static final ModConfigSpec.BooleanValue IAF_ENABLED;
+    private static final ModConfigSpec.ConfigValue<List<? extends String>> IAF_MONSTER_IDS;
+    private static final ModConfigSpec.ConfigValue<List<? extends String>> IAF_DRAGON_IDS;
+    private static final ModConfigSpec.IntValue IAF_DRAGON_ALARM_RANGE;
+    private static final ModConfigSpec.BooleanValue IAF_DRAGON_ALARM_ALONE;
+    private static final ModConfigSpec.IntValue IAF_DRAGON_FLEE_RANGE;
+    private static final ModConfigSpec.IntValue IAF_MELEE_KEEP_AWAY;
+    private static final ModConfigSpec.BooleanValue IAF_RANGED_PREFERS;
+    private static final ModConfigSpec.BooleanValue W2_ENABLED;
+    private static final ModConfigSpec.IntValue W2_DISTANCE;
+    private static final ModConfigSpec.IntValue W2_MIN_STAGE;
+    private static final ModConfigSpec.BooleanValue W2_SANDSTORMS;
+    private static final ModConfigSpec.DoubleValue W2_SAND_INTENSITY;
+    private static final ModConfigSpec.IntValue W2_SCAN_SECONDS;
+    private static final ModConfigSpec.IntValue W2_CALM_SECONDS;
+    private static final ModConfigSpec.BooleanValue W2_SHELTER;
+    private static final ModConfigSpec.BooleanValue W2_PAUSE_WORK;
+    private static final ModConfigSpec.BooleanValue W2_SHIPS_DOCK;
+    private static final ModConfigSpec.BooleanValue W2_ANNOUNCE;
+    private static final ModConfigSpec.BooleanValue SS_ENABLED;
+    private static final ModConfigSpec.BooleanValue SS_USE_YEAR;
+    private static final ModConfigSpec.IntValue SS_WINTER_FOOD;
+    private static final ModConfigSpec.IntValue SS_COLD_MORALE;
+    private static final ModConfigSpec.BooleanValue FD_ENABLED;
+    private static final ModConfigSpec.BooleanValue FD_KNIVES;
+    private static final ModConfigSpec.ConfigValue<List<? extends String>> FD_HEARTY_EFFECTS;
+    private static final ModConfigSpec.IntValue FD_HEARTY_MORALE;
+    private static final ModConfigSpec.BooleanValue FD_COOK;
+    private static final ModConfigSpec.DoubleValue FD_MEAL_STOCK;
+    private static final ModConfigSpec.BooleanValue FD_COOK_CUTTING;
     public static final ModConfigSpec SPEC;
 
     static {
@@ -781,8 +898,16 @@ public final class SettlementConfig {
                 .defineInRange("demand_reserve_stone", 64, 0, 4096);
         DEMAND_RESERVE_GLASS = builder.comment("Default = 16", "Glass kept in stock for the builders; fewer is a need (0 = none kept).")
                 .defineInRange("demand_reserve_glass", 16, 0, 4096);
-        DEMAND_ARMOUR = builder.comment("Default = true", "If true, an empty armour slot of a loaded soldier counts as a need for that armour piece (soldiers do not fetch it themselves).")
+        DEMAND_ARMOUR = builder.comment("Default = true", "If true, an empty armour slot of a loaded soldier counts as a need for that armour piece (a piece that is already in storage is put on by the soldier itself, see soldiers_equip_from_storage).")
                 .define("demand_armour", true);
+        SOLDIERS_EQUIP = builder.comment("Default = true", "If true, a soldier (or archer) of the settlement that has no weapon, or worse armour than the settlement storage holds, walks to the storage and puts on the better sword, axe or bow and the better armour pieces; the item it wore goes back into the storage. A soldier keeps the kind of weapon it carries (sword, axe or bow).")
+                .define("soldiers_equip_from_storage", true);
+        HAND_BUILT_HOUSES = builder.comment("Default = true", "If true, an enclosed room with a roof and a door that holds two beds that nobody else owns counts as a family house, even when it was built by hand and not by the planner. Needs families_enabled.")
+                .define("hand_built_family_houses", true);
+        HAND_BUILT_CHAPELS = builder.comment("Default = true", "If true, an enclosed room with a roof and a door that holds a bell and a lectern counts as a chapel inside the settlement: it lifts the morale of devout members and stops the planner from planning a chapel.")
+                .define("hand_built_chapels", true);
+        HAND_BUILT_MAX_CELLS = builder.comment("Default = 600", "The most open cells (blocks of air inside) a hand-built room may have to count as a house or a chapel. Larger spaces, or anything open to the sky, are not rooms.")
+                .defineInRange("hand_built_room_max_cells", 600, 20, 5000);
         builder.pop();
         builder.comment("Trade prices and reputation (market stalls and faction traders, server side)").push("trade");
         FRIENDLY_DISCOUNT = builder.comment("Default = 0.9", "Price factor for a FRIENDLY buyer. A NEUTRAL buyer pays the full price and a HOSTILE one is refused.")
@@ -1205,6 +1330,79 @@ public final class SettlementConfig {
         FAM_DEBUG_GROWTH = builder.comment("Default = 1.0", "Testing only: multiplier on how fast children age (10.0 = ten times as fast). The command /awsettlement (operators only) can also age a child or force a birth.")
                 .defineInRange("family_debug_fast_growth", 1.0, 0.0, 100000.0);
         builder.pop();
+        builder.comment("Ice and Fire: Community Edition (optional integration, server side). Nothing here has an effect without the mod.").push("ice_and_fire");
+        IAF_ENABLED = builder.comment("Default = true", "If false, the creatures of Ice and Fire are not treated as threats by the settlements and their NPCs.")
+                .define("enabled", true);
+        IAF_MONSTER_IDS = builder.comment("Default = deathworm, death_worm, cyclops, hydra, troll, gorgon, siren, sea_serpent, cockatrice, dread_*, stymphalian_bird",
+                "Entity ids of Ice and Fire that count as threats. An id without a namespace is an iceandfire id, and an id that ends with * matches every id that starts the same (dread_* is all the dread mobs).")
+                .defineListAllowEmpty("monster_ids", List.of("deathworm", "death_worm", "cyclops", "hydra", "troll", "gorgon", "siren", "sea_serpent", "cockatrice", "dread_*", "stymphalian_bird"),
+                        () -> "", o -> o instanceof String);
+        IAF_DRAGON_IDS = builder.comment("Default = fire_dragon, ice_dragon, lightning_dragon",
+                "Entity ids that count as dragons (major threats). The entity type tags iceandfire:fire_dragon, iceandfire:ice_dragon and iceandfire:lightning_dragon count as well.")
+                .defineListAllowEmpty("dragon_ids", List.of("fire_dragon", "ice_dragon", "lightning_dragon"), () -> "", o -> o instanceof String);
+        IAF_DRAGON_ALARM_RANGE = builder.comment("Default = 96", "A dragon within this many blocks outside the border of the land is a threat of the settlement (the other creatures only count inside the land). 0 for the land only.")
+                .defineInRange("dragon_alarm_range", 96, 0, 512);
+        IAF_DRAGON_ALARM_ALONE = builder.comment("Default = true", "If true, one dragon raises the automatic alarm and the bells alone, whatever the alarm threshold of the settlement.")
+                .define("dragon_alarm_alone", true);
+        IAF_DRAGON_FLEE_RANGE = builder.comment("Default = 48", "Civilians (workers, traders, bards) run for shelter when a dragon is within this many blocks and in sight.")
+                .defineInRange("dragon_flee_range", 48, 8, 256);
+        IAF_MELEE_KEEP_AWAY = builder.comment("Default = 24", "Soldiers with a melee weapon stay at least this many blocks from a dragon, out of reach of its breath, unless they are brave or have orders. 0 for no limit.")
+                .defineInRange("melee_keep_away_distance", 24, 0, 128);
+        IAF_RANGED_PREFERS = builder.comment("Default = true", "If true, archers and the crews of siege weapons and ship guns pick a dragon as their target before nearer creatures.")
+                .define("ranged_prefer_dragons", true);
+        builder.pop();
+        builder.comment("Weather2 (optional integration, server side). Nothing here has an effect without Weather2 and CoroUtil.").push("weather2");
+        W2_ENABLED = builder.comment("Default = true", "If false, the settlements do not sense the storms of Weather2.")
+                .define("enabled", true);
+        W2_DISTANCE = builder.comment("Default = 160", "A severe storm, a tornado or a sandstorm whose edge comes within this many blocks of the town hall gives the settlement a storm warning.")
+                .defineInRange("warning_distance", 160, 16, 2000);
+        W2_MIN_STAGE = builder.comment("Default = 3", "The Weather2 intensity stage from which a storm is severe: 1 thunder, 2 high wind, 3 hail, 4 a tornado forming. A tornado always counts.")
+                .defineInRange("min_storm_stage", 3, 1, 9);
+        W2_SANDSTORMS = builder.comment("Default = true", "If true, sandstorms give a storm warning too.")
+                .define("sandstorms", true);
+        W2_SAND_INTENSITY = builder.comment("Default = 0.3", "The intensity (0 to 1) a sandstorm needs before it counts.")
+                .defineInRange("sandstorm_min_intensity", 0.3, 0.0, 1.0);
+        W2_SCAN_SECONDS = builder.comment("Default = 3", "Seconds between two weather scans of a settlement.")
+                .defineInRange("scan_seconds", 3, 1, 60);
+        W2_CALM_SECONDS = builder.comment("Default = 15", "Seconds the storm warning lasts after the storm has moved out of range, so that the NPCs do not run in and out.")
+                .defineInRange("calm_seconds", 15, 0, 600);
+        W2_SHELTER = builder.comment("Default = true", "If true, the NPCs of a settlement with a storm warning go indoors (their bed, a roofed spot or the hall). NPCs with orders or a target, and NPCs in an alarm, are left alone.")
+                .define("shelter", true);
+        W2_PAUSE_WORK = builder.comment("Default = true", "If true, workers do not start outdoor work (and stop it) while there is a storm warning.")
+                .define("pause_outdoor_work", true);
+        W2_SHIPS_DOCK = builder.comment("Default = true", "If true, an NPC at the helm of a ship sails for the nearest dock of its owner while there is a storm near the ship, and holds the ship when there is none.")
+                .define("ships_seek_dock", true);
+        W2_ANNOUNCE = builder.comment("Default = true", "If true, the founder of the settlement gets one chat message for each storm.")
+                .define("announce_to_founder", true);
+        builder.pop();
+        builder.comment("Serene Seasons (optional integration, server side). Nothing here has an effect without the mod. The farms have their own switch in the automation worksites config.").push("serene_seasons");
+        SS_ENABLED = builder.comment("Default = true", "If false, the settlements ignore the seasons: no season on the town hall, no winter needs, and the family year is year_length_days.")
+                .define("enabled", true);
+        SS_USE_YEAR = builder.comment("Default = true", "If true, the family year (year_length_days, used for the age of children) is the length of the Serene Seasons year in days. If false, year_length_days is used.")
+                .define("use_serene_seasons_year", true);
+        SS_WINTER_FOOD = builder.comment("Default = 15", "Percent of extra food the members use in winter: they get hungry that much faster, and the settlement wants that much more food in stock. 0 for none.")
+                .defineInRange("winter_extra_food_percent", 15, 0, 200);
+        SS_COLD_MORALE = builder.comment("Default = 6", "Morale points an NPC without a home (a bed) loses in winter (the factor \"cold\"). 0 for none.")
+                .defineInRange("winter_cold_morale", 6, 0, 30);
+        builder.pop();
+        builder.comment("Farmer's Delight (optional integration, server side). Nothing here has an effect without the mod. The farms have their own switch in the automation worksites config.").push("farmers_delight");
+        FD_ENABLED = builder.comment("Default = true", "If false, none of the Farmer's Delight integration of the settlements is active: knives as tools, hearty meals and the cook.")
+                .define("enabled", true);
+        FD_KNIVES = builder.comment("Default = true", "If true, a knife (the tags c:tools/knife and farmersdelight:tools/knives) counts as a tool for the blocks a knife is made for, such as rice panicles and straw.")
+                .define("knives_as_tools", true);
+        FD_HEARTY_EFFECTS = builder.comment("Default = farmersdelight:nourishment, farmersdelight:comfort",
+                "A food with one of these effects is a hearty meal: an NPC that eats it gets the effects, and a morale lift for a day.")
+                .defineListAllowEmpty("hearty_meal_effects", List.of("farmersdelight:nourishment", "farmersdelight:comfort"), () -> "", o -> o instanceof String);
+        FD_HEARTY_MORALE = builder.comment("Default = 4", "Morale points a hearty meal eaten in the last day adds (the factor \"hearty_meal\"). 0 for none.")
+                .defineInRange("hearty_meal_morale", 4, 0, 20);
+        FD_COOK = builder.comment("Default = true", "If true, an innkeeper cooks in a kitchen of the settlement: an enclosed room (see hand_built_room_max_cells) with a Farmer's Delight cooking pot over a heat source, or a cutting board.",
+                "The cook takes the ingredients from the storage of the settlement, puts the meals into the storage and serves them at the inn. There is no extra block to place.")
+                .define("cook_enabled", true);
+        FD_MEAL_STOCK = builder.comment("Default = 2.0", "The meals the cook keeps in stock for each member of the settlement (in storage and in the pantry of the inn). The cook cooks while there are fewer, or while the settlement is short of food.")
+                .defineInRange("cook_meal_stock_per_member", 2.0, 0.0, 20.0);
+        FD_COOK_CUTTING = builder.comment("Default = true", "If true, the cook also uses a cutting board of the kitchen, with a knife from the storage, for the cutting recipes whose results are food (such as pie slices).")
+                .define("cook_use_cutting_board", true);
+        builder.pop();
         SPEC = builder.build();
     }
 
@@ -1240,6 +1438,10 @@ public final class SettlementConfig {
             demandReserveStone = DEMAND_RESERVE_STONE.get();
             demandReserveGlass = DEMAND_RESERVE_GLASS.get();
             demandArmour = DEMAND_ARMOUR.get();
+            soldiersEquipFromStorage = SOLDIERS_EQUIP.get();
+            handBuiltHouses = HAND_BUILT_HOUSES.get();
+            handBuiltChapels = HAND_BUILT_CHAPELS.get();
+            handBuiltRoomMaxCells = HAND_BUILT_MAX_CELLS.get();
             noToolWorkFactor = NO_TOOL_WORK.get();
             swingIntervalTicks = SWING_INTERVAL.get();
             workerToolSwitching = TOOL_SWITCHING.get();
@@ -1454,6 +1656,36 @@ public final class SettlementConfig {
             childScaleStart = FAM_CHILD_SCALE.get();
             childPlayRadius = FAM_CHILD_PLAY_RADIUS.get();
             familyDebugFastGrowth = FAM_DEBUG_GROWTH.get();
+            iceAndFireEnabled = IAF_ENABLED.get();
+            iceAndFireMonsterIds = List.copyOf(IAF_MONSTER_IDS.get());
+            iceAndFireDragonIds = List.copyOf(IAF_DRAGON_IDS.get());
+            iceAndFireDragonAlarmRange = IAF_DRAGON_ALARM_RANGE.get();
+            iceAndFireDragonAlarmAlone = IAF_DRAGON_ALARM_ALONE.get();
+            iceAndFireDragonFleeRange = IAF_DRAGON_FLEE_RANGE.get();
+            iceAndFireMeleeKeepAway = IAF_MELEE_KEEP_AWAY.get();
+            iceAndFireRangedPrefersDragons = IAF_RANGED_PREFERS.get();
+            weather2Enabled = W2_ENABLED.get();
+            weather2WarningDistance = W2_DISTANCE.get();
+            weather2MinStage = W2_MIN_STAGE.get();
+            weather2Sandstorms = W2_SANDSTORMS.get();
+            weather2SandstormMinIntensity = W2_SAND_INTENSITY.get();
+            weather2ScanSeconds = W2_SCAN_SECONDS.get();
+            weather2CalmSeconds = W2_CALM_SECONDS.get();
+            weather2Shelter = W2_SHELTER.get();
+            weather2PauseWork = W2_PAUSE_WORK.get();
+            weather2ShipsDock = W2_SHIPS_DOCK.get();
+            weather2Announce = W2_ANNOUNCE.get();
+            sereneEnabled = SS_ENABLED.get();
+            sereneUseYear = SS_USE_YEAR.get();
+            sereneWinterFoodPercent = SS_WINTER_FOOD.get();
+            sereneColdMorale = SS_COLD_MORALE.get();
+            fdEnabled = FD_ENABLED.get();
+            fdKnives = FD_KNIVES.get();
+            fdHeartyEffects = List.copyOf(FD_HEARTY_EFFECTS.get());
+            fdHeartyMorale = FD_HEARTY_MORALE.get();
+            fdCook = FD_COOK.get();
+            fdMealStockPerMember = FD_MEAL_STOCK.get();
+            fdCookCutting = FD_COOK_CUTTING.get();
         }
     }
 }

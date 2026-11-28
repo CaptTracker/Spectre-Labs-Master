@@ -9,15 +9,20 @@ import io.github.capttracker.ancientwarfarevehicle.entity.SeatRole;
 import io.github.capttracker.ancientwarfarevehicle.entity.VehicleBase;
 import io.github.capttracker.ancientwarfarevehicle.entity.VehicleSettings;
 import io.github.capttracker.ancientwarfarevehicle.entity.ship.ShipHelper;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 import java.util.List;
 import java.util.Locale;
@@ -25,11 +30,11 @@ import java.util.Locale;
 /**
  * The part of a siege tower that is not an ordinary vehicle: the drop bridge, the ladder and the rule that it stands still while its bridge is down.
  *
- * <p><b>Bridge.</b> Nine part entities ({@link BridgePart}, 3 wide and up to 3 long, in front of the tower's front face at the height of its top platform) carry the same kind of walkable
+ * <p><b>Bridge.</b> Nine part entities ({@link BridgePart}, 3 wide and up to 3 long, in front of the tower's front face; level with its top platform, or stepping down or up to a wall top in front, see {@link #planBridge}) carry the same kind of walkable
  * box as a ship's deck. They exist from the entity's constructor (the siege tower has an entity type of its own for that, see {@code AwVehicles.SIEGE_TOWER}, as the ship has) and are
  * solid only while the bridge is fully lowered. The bridge's wish (lowered or raised) is a synced flag of the vehicle; both sides move the lowering progress towards it at the same pace
  * (24 ticks), so the model's swing and the moment the planks turn solid agree to within the latency. The tower is held still while the bridge is down or moving and while somebody who is
- * not aboard stands on its roof, so nothing that stands on the planks is ever carried away from under, and the bridge cannot be raised with somebody on it.
+ * not aboard stands on its roof, so nothing that stands on the planks is ever carried away from under, and the bridge cannot be raised with somebody on it. What stands on the roof of a tower that moves is carried along with it ({@link #carryRoof}).
  *
  * <p><b>Ladder.</b> A rider in a {@link SeatRole#LADDER} seat is lifted along the ladder column: his height over the foot of the ladder is {@code lift} (a synced list of floats, one per seat),
  * moved by the climb keys of the player ({@code SiegeCommand}) or by itself for an NPC. At the top he is moved on to a free {@link SeatRole#PLATFORM} seat. Walkable parts inside the tower
@@ -59,7 +64,13 @@ public final class SiegeHelper {
     private boolean progressKnown = false;
     private int cooldown = 0;
     private int blockedTicks = 0;
-    private boolean roofBusy = false;
+    private boolean roofOccupied = false;
+    /** The tower's position and yaw at the end of the last tick: what stands on the roof or the bridge is carried by the difference. */
+    private double prevX;
+    private double prevY;
+    private double prevZ;
+    private float prevYaw;
+    private boolean havePrev = false;
     private int lockMessageCooldown = 0;
     /** The height of the rider of each seat over the foot of the ladder (only ladder seats are not 0); the server moves it, the client reads it from the synced string. */
     private float[] lift = new float[0];
@@ -114,14 +125,14 @@ public final class SiegeHelper {
         return progress >= 0.999F;
     }
 
-    /** True while the tower must stand still: its bridge is down or moving, or somebody who is not aboard stands on its roof. */
+    /** True while the tower must stand still: its bridge is down or moving. What stands on the roof does not hold it: it is carried along ({@link #carryRoof}). */
     public boolean isLocked() {
-        return tower.isBridgeDown() || progress > 0.001F || roofBusy;
+        return tower.isBridgeDown() || progress > 0.001F;
     }
 
     /** The key of the message that says why the tower does not move (see {@link #isLocked}). */
     public String lockMessageKey() {
-        return roofBusy && !tower.isBridgeDown() && progress <= 0.001F ? "message.ancientwarfarevehicle.bridge.roof_busy" : "message.ancientwarfarevehicle.bridge.locked";
+        return "message.ancientwarfarevehicle.bridge.locked";
     }
 
     /** SERVER: the driver asked to move while the tower is held; tells him now and then. */
@@ -175,6 +186,7 @@ public final class SiegeHelper {
         if (Math.abs(tower.moveHelper.forwardMotion) > 0.02F) {
             return Result.MOVING;
         }
+        planBridge();
         tower.setBridgeDown(true);
         cooldown = COOLDOWN_TICKS;
         tower.playSound(SoundEvents.CHAIN_PLACE, 1.5F, 0.7F);
@@ -207,7 +219,8 @@ public final class SiegeHelper {
     private boolean isOnBridge(Entity entity) {
         double rel = heightOverTop(entity);
         double forward = localForward(entity);
-        return rel > -0.6D && rel < 2.5D && forward >= HALF_DEPTH - 0.2D && forward <= HALF_DEPTH + bridgeLength() + 0.3D && Math.abs(localHorizontal(entity)) <= 1.7D;
+        float delta = tower.getBridgeDelta();
+        return rel > Math.min(0.0F, delta) - 0.6D && rel < Math.max(0.0F, delta) + 2.5D && forward >= HALF_DEPTH - 0.2D && forward <= HALF_DEPTH + bridgeLength() + 0.3D && Math.abs(localHorizontal(entity)) <= 1.7D;
     }
 
     /** What stands over the tower's roof or bridge and is not aboard: living things (players, NPCs and mobs). */
@@ -217,7 +230,9 @@ public final class SiegeHelper {
         double cx = tower.getX() - forward * Math.sin(yaw);
         double cz = tower.getZ() - forward * Math.cos(yaw);
         double radius = (bridge ? bridgeLength() / 2.0D : 0.0D) + 2.4D;
-        AABB box = new AABB(cx - radius, tower.getY() + top() - 0.6D, cz - radius, cx + radius, tower.getY() + top() + 2.5D, cz + radius);
+        double low = bridge ? Math.min(0.0F, tower.getBridgeDelta()) : 0.0D;
+        double high = bridge ? Math.max(0.0F, tower.getBridgeDelta()) : 0.0D;
+        AABB box = new AABB(cx - radius, tower.getY() + top() + low - 0.6D, cz - radius, cx + radius, tower.getY() + top() + high + 2.5D, cz + radius);
         return tower.level().getEntitiesOfClass(LivingEntity.class, box,
                 e -> e.isAlive() && !e.isSpectator() && e.getVehicle() != tower && (bridge ? isOnBridge(e) : isOnRoof(e)));
     }
@@ -241,7 +256,7 @@ public final class SiegeHelper {
             if (down && row < length) {
                 double forward = HALF_DEPTH + 0.5D + row;
                 part.setActive(true);
-                part.setPos(tower.getX() - forward * s + col * c, tower.getY() + t - BridgePart.THICKNESS, tower.getZ() - forward * c - col * s);
+                part.setPos(tower.getX() - forward * s + col * c, tower.getY() + t + rowOffset(row) - BridgePart.THICKNESS, tower.getZ() - forward * c - col * s);
             } else {
                 part.setActive(false);
                 part.setPos(tower.getX(), tower.getY(), tower.getZ());
@@ -266,9 +281,174 @@ public final class SiegeHelper {
             progress = Math.max(target, progress - 1.F / BRIDGE_TICKS);
         }
         updateParts();
+        if (havePrev) {
+            carryRoof();
+        }
         if (!tower.level().isClientSide) {
             serverTick();
         }
+        prevX = tower.getX();
+        prevY = tower.getY();
+        prevZ = tower.getZ();
+        prevYaw = tower.getYRot();
+        havePrev = true;
+    }
+
+    // ---- carrying ----
+
+    private boolean canCarry(Entity entity) {
+        if (entity instanceof BridgePart || entity instanceof VehicleBase || entity.isRemoved() || entity.isSpectator() || entity.noPhysics || entity.isPassenger()) {
+            return false;
+        }
+        if (tower.level().isClientSide) {
+            return entity instanceof Player player && player.isLocalPlayer();
+        }
+        return entity instanceof LivingEntity || entity instanceof ItemEntity;
+    }
+
+    /** The height of the walking surface over the top platform at a place the given distance in front of the middle of the tower: 0 on the roof, the plank's step on the bridge. */
+    private double deckOffset(double forward) {
+        return forward <= HALF_DEPTH ? 0.0D : rowOffset(Math.min(bridgeLength() - 1, (int) (forward - HALF_DEPTH)));
+    }
+
+    /**
+     * Moves what stands on the roof (and on the bridge while it is down) with the tower, round its middle if it turned, like the deck of a ship. Only blocks stop the tower, so what
+     * stands on top just rides along; an entity whose new place would be inside a block stays where it is.
+     */
+    private void carryRoof() {
+        double dx = tower.getX() - prevX;
+        double dy = tower.getY() - prevY;
+        double dz = tower.getZ() - prevZ;
+        float dyaw = tower.getYRot() - prevYaw;
+        boolean moved = Math.abs(dx) + Math.abs(dy) + Math.abs(dz) > 1.0E-6D || Math.abs(dyaw) > 1.0E-4F;
+        if (!moved || Math.abs(dx) + Math.abs(dz) > 6.0D) {
+            return; // standing still, or a jump (teleport) that nothing is carried over
+        }
+        double reach = HALF_DEPTH + bridgeLength() + 1.0D;
+        float delta = tower.getBridgeDelta();
+        AABB box = new AABB(prevX - reach, prevY + top() + Math.min(0.0F, delta) - 0.6D, prevZ - reach, prevX + reach, prevY + top() + Math.max(0.0F, delta) + 3.0D, prevZ + reach);
+        List<Entity> found = tower.level().getEntities(tower, box, this::canCarry);
+        if (found.isEmpty()) {
+            return;
+        }
+        double oldRad = Math.toRadians(prevYaw);
+        double os = Math.sin(oldRad);
+        double oc = Math.cos(oldRad);
+        double newRad = Math.toRadians(tower.getYRot());
+        double ns = Math.sin(newRad);
+        double nc = Math.cos(newRad);
+        boolean bridge = progress > 0.99F;
+        for (Entity entity : found) {
+            double rx = entity.getX() - prevX;
+            double rz = entity.getZ() - prevZ;
+            double lf = -(rx * os + rz * oc);
+            double lh = rx * oc - rz * os;
+            boolean onRoof = Math.abs(lf) <= 1.7D && Math.abs(lh) <= 1.7D;
+            boolean onBridge = bridge && lf > HALF_DEPTH - 0.2D && lf <= HALF_DEPTH + bridgeLength() + 0.3D && Math.abs(lh) <= 1.7D;
+            if (!onRoof && !onBridge) {
+                continue;
+            }
+            double rel = entity.getY() - prevY - top() - deckOffset(lf);
+            if (rel < -0.35D || rel > 1.3D) {
+                continue;
+            }
+            if (entity instanceof ServerPlayer) {
+                continue; // a player's position is his client's, which carries him; the floating check is reset in serverTick
+            }
+            double nx = tower.getX() - lf * ns + lh * nc;
+            double nz = tower.getZ() - lf * nc - lh * ns;
+            double ox = entity.getX();
+            double oy = entity.getY();
+            double oz = entity.getZ();
+            entity.setPos(nx, oy + dy, nz);
+            if (entity.level().getBlockCollisions(entity, entity.getBoundingBox()).iterator().hasNext()) {
+                entity.setPos(ox, oy, oz); // the move would put it into a block (under a bridge, against a cliff): it stays
+                continue;
+            }
+            entity.fallDistance = 0.F;
+            if (entity instanceof LivingEntity living && !(entity instanceof Player)) {
+                living.setYRot(living.getYRot() - dyaw);
+                living.setYHeadRot(living.getYHeadRot() - dyaw);
+                living.setYBodyRot(living.yBodyRot - dyaw);
+            }
+        }
+    }
+
+    // ---- bridge shape ----
+
+    /** How far over the top platform plank row {@code row} (0 is next to the tower) lies: the planks step from the platform to where the far end rests on the wall top. */
+    private double rowOffset(int row) {
+        float delta = tower.getBridgeDelta();
+        if (delta == 0.0F) {
+            return 0.0D;
+        }
+        int support = Mth.clamp(tower.getBridgeSupport(), 0, Math.max(0, bridgeLength() - 1));
+        return row >= support ? delta : delta * (row + 1) / (support + 1.0D);
+    }
+
+    /**
+     * SERVER: looks at what is in front of the tower and shapes the bridge to it. If the top of what is under the far planks lies within 3 blocks below to 1 block above the platform
+     * (and a person can stand on it: two free blocks over it) the bridge ends level with it: the planks step down or up to it, row by row; otherwise it stays level with the platform. The
+     * first plank row whose place is on that surface lies at its height, the rows before it step towards it. The tower's own height is kept.
+     */
+    public void planBridge() {
+        float best = 0.0F;
+        int support = 0;
+        double platform = tower.getY() + top();
+        int length = bridgeLength();
+        double endForward = HALF_DEPTH + length - 0.5D;
+        double surface = Double.NaN;
+        for (int col : new int[] {0, -1, 1}) {
+            surface = surfaceAt(endForward, col, platform);
+            if (!Double.isNaN(surface)) {
+                break;
+            }
+        }
+        if (!Double.isNaN(surface) && Math.abs(surface - platform) >= 0.05D) {
+            best = (float) (surface - platform);
+            support = length - 1;
+            for (int row = 0; row < length - 1; row++) {
+                boolean on = false;
+                for (int col = -1; col <= 1 && !on; col++) {
+                    double here = surfaceAt(HALF_DEPTH + 0.5D + row, col, platform);
+                    on = !Double.isNaN(here) && Math.abs(here - surface) < 0.05D;
+                }
+                if (on) {
+                    support = row;
+                    break;
+                }
+            }
+        }
+        tower.setBridgeShape(best, support);
+    }
+
+    /** The height of the highest place to stand under the point (forward, horizontal of the tower) within 3 blocks below to 1 above the platform, or NaN if there is none. */
+    private double surfaceAt(double forward, double horizontal, double platform) {
+        Vec3 at = toWorld((float) forward, (float) horizontal, 0.0F);
+        Level level = tower.level();
+        int x = Mth.floor(at.x);
+        int z = Mth.floor(at.z);
+        int topY = Mth.floor(platform + 1.0D + 1.0E-3D);
+        int bottomY = Mth.floor(platform - 3.0D - 1.0E-3D);
+        for (int y = topY; y >= bottomY; y--) {
+            BlockPos pos = new BlockPos(x, y, z);
+            if (!level.isLoaded(pos)) {
+                return Double.NaN;
+            }
+            VoxelShape shape = level.getBlockState(pos).getCollisionShape(level, pos);
+            if (shape.isEmpty()) {
+                continue;
+            }
+            double height = y + shape.max(Direction.Axis.Y);
+            if (height > platform + 1.0D + 0.01D) {
+                continue; // taller than the bridge can reach: the blocks under it are not free
+            }
+            if (!level.getBlockState(pos.above()).getCollisionShape(level, pos.above()).isEmpty() || !level.getBlockState(pos.above(2)).getCollisionShape(level, pos.above(2)).isEmpty()) {
+                return Double.NaN; // no room to stand
+            }
+            return height >= platform - 3.0D - 0.01D ? height : Double.NaN;
+        }
+        return Double.NaN;
     }
 
     private void serverTick() {
@@ -284,10 +464,10 @@ public final class SiegeHelper {
             blockedTicks--;
         }
         if (tower.tickCount % 5 == 0) {
-            roofBusy = !onPlatform(false).isEmpty();
+            roofOccupied = !onPlatform(false).isEmpty();
         }
         // a player's position is his client's: the server only has to know that the roof and the planks are under him (or its floating check would kick him after 4 seconds)
-        if (tower.tickCount % 10 == 0 && (progress > 0.99F || roofBusy)) {
+        if (tower.tickCount % 10 == 0 && (progress > 0.99F || roofOccupied)) {
             for (LivingEntity living : onPlatform(false)) {
                 if (living instanceof ServerPlayer player) {
                     ShipHelper.FlyCheck.reset(player);
@@ -310,6 +490,7 @@ public final class SiegeHelper {
         }
         if (npcCrew && VehicleSettings.siegeAutoBridge && !tower.isBridgeDown() && blockedTicks >= WALL_TICKS && cooldown == 0) {
             // an NPC crew pushed the tower against a wall: down goes the bridge
+            planBridge();
             tower.setBridgeDown(true);
             cooldown = COOLDOWN_TICKS;
             tower.playSound(SoundEvents.CHAIN_PLACE, 1.5F, 0.7F);
@@ -421,7 +602,8 @@ public final class SiegeHelper {
         SeatRole role = valid ? tower.getSeat(seat).role() : SeatRole.DRIVER;
         boolean high = role == SeatRole.PLATFORM || (role == SeatRole.LADDER && liftAtExit > t - 0.4F);
         if (high && tower.isBridgeDown() && isBridgeFullyDown()) {
-            return toWorld(HALF_DEPTH + bridgeLength() * 0.5F, 0.F, t + 0.05F);
+            int row = Math.min(1, bridgeLength() - 1);
+            return toWorld(HALF_DEPTH + 0.5F + row, 0.F, t + (float) rowOffset(row) + 0.05F);
         }
         float horizontal = valid ? tower.getSeat(seat).horizontal() : 0.F;
         float forward = role == SeatRole.LADDER || role == SeatRole.PLATFORM ? -2.8F : (valid ? tower.getSeat(seat).forward() - 0.9F : -3.0F);

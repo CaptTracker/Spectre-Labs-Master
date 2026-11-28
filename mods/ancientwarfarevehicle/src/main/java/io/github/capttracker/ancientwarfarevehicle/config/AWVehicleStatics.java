@@ -182,6 +182,7 @@ public final class AWVehicleStatics {
     private static final ModConfigSpec.IntValue GRAPPLE_MAX_LINES;
     private static final ModConfigSpec.IntValue GRAPPLE_TIMEOUT_TICKS;
     private static final ModConfigSpec.IntValue GRAPPLE_SNAP_DISTANCE;
+    private static final ModConfigSpec.IntValue GRAPPLE_REATTACH_TICKS;
     private static final ModConfigSpec.DoubleValue SINKING_CARGO_FRACTION;
     private static final ModConfigSpec.IntValue SINKING_CRATE_TICKS;
     private static final ModConfigSpec.IntValue SINKING_CRATE_MAX;
@@ -292,6 +293,8 @@ public final class AWVehicleStatics {
                 .defineInRange("grapple_timeout_ticks", 6000, 0, 1_000_000);
         GRAPPLE_SNAP_DISTANCE = common.comment("Default = 40", "A grappling line snaps when the hooks are this many blocks apart (a ship sailing away drags the other, slowly, until then).")
                 .defineInRange("grapple_snap_distance", 40, 10, 128);
+        GRAPPLE_REATTACH_TICKS = common.comment("Default = 1200 (1 minute)", "A grappling line is saved with both ships. After a reload the line is made again as soon as both ships are loaded; it is dropped if the other ship has not come back after this many ticks.")
+                .defineInRange("grapple_reattach_ticks", 1200, 20, 100_000);
         SINKING_CARGO_FRACTION = common.comment("Default = 0.5", "The fraction of the cargo hold of a ship that floats up from the wreck as floating crates when it sinks. The rest is lost.")
                 .defineInRange("sinking_cargo_fraction", 0.5D, 0.0D, 1.0D);
         SINKING_CRATE_TICKS = common.comment("Default = 6000 (5 minutes)", "How long a floating crate bobs on the water before it is lost.")
@@ -445,6 +448,7 @@ public final class AWVehicleStatics {
         VehicleSettings.grappleMaxLines = GRAPPLE_MAX_LINES.get();
         VehicleSettings.grappleTimeoutTicks = GRAPPLE_TIMEOUT_TICKS.get();
         VehicleSettings.grappleSnapDistance = GRAPPLE_SNAP_DISTANCE.get();
+        VehicleSettings.grappleReattachTicks = GRAPPLE_REATTACH_TICKS.get();
         VehicleSettings.sinkingCargoFraction = SINKING_CARGO_FRACTION.get();
         VehicleSettings.sinkingCrateTicks = SINKING_CRATE_TICKS.get();
         VehicleSettings.sinkingCrateMax = SINKING_CRATE_MAX.get();

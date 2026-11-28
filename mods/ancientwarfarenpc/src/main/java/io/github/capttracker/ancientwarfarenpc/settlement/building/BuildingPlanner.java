@@ -42,7 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *   <li>a storehouse, when the storage is nearly full;</li>
  *   <li>a business, when a need says that no site can make it (no smithy: a smithy design with that tag), or when a member has a worker role whose
  *       worksite does not exist (the design whose worksite block has the work type of the role);</li>
- *   <li>a chapel, from {@code chapel_population} members when there is no priest and no chapel;</li>
+ *   <li>a chapel, from {@code chapel_population} members when there is no priest and no chapel (a hand-built one counts, see {@link ChapelSites});</li>
  *   <li>an upgrade: a finished tent (or small house) with a better design that lists it in {@code upgrade_of}, when the settlement is big enough and the
  *       storage holds the materials. The better building is built first; then the old one is taken down and its blocks go back to the storage.</li>
  * </ol>
@@ -62,6 +62,7 @@ public final class BuildingPlanner {
         if (now >= building.maintenanceNext) {
             building.maintenanceNext = now + MAINTENANCE_INTERVAL;
             BuildJobs.maintain(level, settlement);
+            ChapelSites.refresh(level, settlement);
         }
         if (SettlementConfig.plannerEnabled && building.isAutoPlan() && now >= building.plannerNext) {
             building.plannerNext = now + SettlementConfig.plannerIntervalTicks;
@@ -371,8 +372,8 @@ public final class BuildingPlanner {
                 return false;
             }
         }
-        if (hasProject(settlement, d -> d.getCategory() == DesignCategory.CHAPEL)) {
-            return false;
+        if (hasProject(settlement, d -> d.getCategory() == DesignCategory.CHAPEL) || ChapelSites.hasHandBuilt(settlement)) {
+            return false; // a chapel the player built by hand counts too
         }
         return make(level, settlement, pool(settlement, d -> d.getCategory() == DesignCategory.CHAPEL), "chapel", null);
     }

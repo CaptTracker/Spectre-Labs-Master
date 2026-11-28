@@ -6,6 +6,7 @@ package io.github.capttracker.ancientwarfareautomation.block.entity.worksite.cro
 
 import io.github.capttracker.ancientwarfare.util.BlockTools;
 import io.github.capttracker.ancientwarfare.util.InventoryTools;
+import io.github.capttracker.ancientwarfareautomation.block.entity.worksite.FarmSeasons;
 import io.github.capttracker.ancientwarfareautomation.block.entity.worksite.WorksiteTools;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -99,10 +100,16 @@ public class CropDefault implements ICrop {
         }
         NonNullList<ItemStack> stacks = InventoryTools.toNonNullList(drops);
         ItemStack plantable = InventoryTools.removeItem(stacks, CropDefault::isPlantableItem, 1);
-        if (!plantable.isEmpty() && !BlockTools.placeItemBlock(plantable, level, pos, Direction.UP)) {
+        // out of season (Serene Seasons) the crop is not replanted either: the seed stays among the drops
+        if (!plantable.isEmpty() && !(replantsDrops() && FarmSeasons.mayPlant(level, pos, plantable) && BlockTools.placeItemBlock(plantable, level, pos, Direction.UP))) {
             stacks.add(plantable); // could not be replanted, keep it
         }
         InventoryTools.insertOrDropItems(inventory, stacks, level, pos);
+        return true;
+    }
+
+    /** Whether a drop that can be planted is put back into the ground where the crop stood (the rice panicles say no: the rice plant under them stays). */
+    protected boolean replantsDrops() {
         return true;
     }
 

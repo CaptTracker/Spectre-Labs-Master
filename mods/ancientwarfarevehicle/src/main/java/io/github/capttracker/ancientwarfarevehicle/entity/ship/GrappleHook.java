@@ -44,7 +44,11 @@ import java.util.UUID;
  *       hulls are kept from running into each other. The crews can step across (the decks are side by side).</li>
  * </ul>
  * The line is lost (the entity goes) when it is cut (a blow on the hook, shears or a blade used on it), when the holder (the thrower) is dead or gone, when the
- * configured time has run out, when either ship sinks or goes, or when the hooks are too far apart. Lines are not saved: a line does not survive an unloaded ship or a restart.
+ * configured time has run out, when either ship sinks or goes, or when the hooks are too far apart.
+ *
+ * <p>The hook entity itself is not saved. A line survives an unloaded ship or a restart because both ships write it into their own save data ({@link SavedLine},
+ * {@link ShipHelper#save}); when the ships load again, {@link ShipHelper} makes a new hook for it as soon as both are loaded, and drops the line if the other
+ * ship does not come back within {@code grapple_reattach_ticks}.
  */
 public class GrappleHook extends Entity {
     /** Phase of the line. */
@@ -52,6 +56,41 @@ public class GrappleHook extends Entity {
 
     /** What a throw came to. */
     public enum Result { OK, DISABLED, UNAVAILABLE, TOO_FAR, MAX_LINES, ALREADY }
+
+    /** A line as the ships save it: both ships, the holder, the anchor cells, the phase and the timers. */
+    public record SavedLine(UUID source, UUID target, @Nullable UUID holder, float srcForward, float srcSide, float dstForward, float dstSide, int phase,
+                            int heldTicks, double restLength) {
+        public CompoundTag save() {
+            CompoundTag tag = new CompoundTag();
+            tag.putUUID("src", source);
+            tag.putUUID("dst", target);
+            if (holder != null) {
+                tag.putUUID("holder", holder);
+            }
+            tag.putFloat("sf", srcForward);
+            tag.putFloat("ss", srcSide);
+            tag.putFloat("df", dstForward);
+            tag.putFloat("ds", dstSide);
+            tag.putInt("phase", phase);
+            tag.putInt("held", heldTicks);
+            tag.putDouble("rest", restLength);
+            return tag;
+        }
+
+        @Nullable
+        public static SavedLine load(CompoundTag tag) {
+            if (!tag.hasUUID("src") || !tag.hasUUID("dst")) {
+                return null;
+            }
+            return new SavedLine(tag.getUUID("src"), tag.getUUID("dst"), tag.hasUUID("holder") ? tag.getUUID("holder") : null, tag.getFloat("sf"),
+                    tag.getFloat("ss"), tag.getFloat("df"), tag.getFloat("ds"), tag.getInt("phase"), tag.getInt("held"), tag.getDouble("rest"));
+        }
+
+        /** The ship at the other end from the one with this id. */
+        public UUID otherThan(UUID ship) {
+            return ship.equals(source) ? target : source;
+        }
+    }
 
     private static final EntityDataAccessor<Integer> SOURCE_ID = SynchedEntityData.defineId(GrappleHook.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> TARGET_ID = SynchedEntityData.defineId(GrappleHook.class, EntityDataSerializers.INT);
@@ -85,6 +124,8 @@ public class GrappleHook extends Entity {
     private int heldTicks = 0;
     private double restLength = 0.0D;
     private Phase phase = Phase.FLYING;
+    /** Ticks after a reload in which a missing holder does not let the line go (the holder loads with its own chunk). */
+    private int holderGrace = 0;
 
     public GrappleHook(EntityType<? extends GrappleHook> type, Level level) {
         super(type, level);
@@ -146,6 +187,51 @@ public class GrappleHook extends Entity {
         level.addFreshEntity(hook);
         level.playSound(null, start.x, start.y, start.z, SoundEvents.FISHING_BOBBER_THROW, SoundSource.NEUTRAL, 1.0F, 0.7F);
         return Result.OK;
+    }
+
+    /** SERVER: what the ships save of this line, or null if it has no ships to speak of. */
+    @Nullable
+    public SavedLine snapshot() {
+        if (sourceUuid == null || targetUuid == null || isRemoved()) {
+            return null;
+        }
+        return new SavedLine(sourceUuid, targetUuid, holderUuid, sourceForward(), sourceSide(), targetForward(), targetSide(), phase.ordinal(), heldTicks, restLength);
+    }
+
+    /**
+     * SERVER: makes the hook of a saved line again, once both ships are loaded. A line that was still flying goes on pulling. Returns false if it could not be
+     * made (a ship cannot take a line, the lines are disabled).
+     */
+    public static boolean restore(VehicleBase source, VehicleBase target, SavedLine saved) {
+        if (!(source.level() instanceof ServerLevel level) || source.level() != target.level() || !VehicleSettings.grappleEnabled
+                || source == target || !usable(source) || !usable(target)) {
+            return false;
+        }
+        if (source.ship.lineCount() >= VehicleSettings.grappleMaxLines || target.ship.lineCount() >= VehicleSettings.grappleMaxLines || source.ship.isLinkedTo(target)) {
+            return false;
+        }
+        GrappleHook hook = new GrappleHook(AwVehicles.GRAPPLE_HOOK.get(), level);
+        hook.sourceUuid = source.getUUID();
+        hook.targetUuid = target.getUUID();
+        hook.sourceRef = source;
+        hook.targetRef = target;
+        hook.holderUuid = saved.holder();
+        hook.holderGrace = 200;
+        hook.age = FLY_TICKS;
+        hook.heldTicks = saved.heldTicks();
+        hook.restLength = saved.restLength();
+        hook.entityData.set(SOURCE_ID, source.getId());
+        hook.entityData.set(TARGET_ID, target.getId());
+        hook.entityData.set(SRC_FORWARD, saved.srcForward());
+        hook.entityData.set(SRC_SIDE, saved.srcSide());
+        hook.entityData.set(DST_FORWARD, saved.dstForward());
+        hook.entityData.set(DST_SIDE, saved.dstSide());
+        hook.setPhase(saved.phase() == Phase.HELD.ordinal() ? Phase.HELD : Phase.PULLING);
+        hook.setPos(hook.anchor(target, saved.dstForward(), saved.dstSide()));
+        source.ship.addLine(hook);
+        target.ship.addLine(hook);
+        level.addFreshEntity(hook);
+        return true;
     }
 
     /** {forward and side of the source's cell, forward and side of the target's cell, distance} of the nearest pair of hull cells. */
@@ -261,7 +347,10 @@ public class GrappleHook extends Entity {
             source.ship.addLine(this);
             target.ship.addLine(this);
         }
-        if (holderUuid != null) {
+        if (holderGrace > 0) {
+            holderGrace--;
+        }
+        if (holderUuid != null && holderGrace == 0) {
             Entity holder = level.getEntity(holderUuid);
             if (holder == null || !holder.isAlive() || holder.level() != level || holder.distanceToSqr(source) > 96.0D * 96.0D) {
                 release(false); // the holder is dead or gone: the line is let go

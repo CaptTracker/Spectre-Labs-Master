@@ -4,6 +4,7 @@
  */
 package io.github.capttracker.ancientwarfarenpc.ai.owned;
 
+import io.github.capttracker.ancientwarfarenpc.ai.MonsterRules;
 import io.github.capttracker.ancientwarfarenpc.ai.NpcAI;
 import io.github.capttracker.ancientwarfarenpc.entity.NpcGuardCaptain;
 import io.github.capttracker.ancientwarfarenpc.entity.NpcPlayerOwned;
@@ -49,7 +50,7 @@ public class NpcAIPlayerOwnedRally extends NpcAI<NpcPlayerOwned> {
         double bestDist = Double.MAX_VALUE;
         for (UUID id : settlement.getThreatIds()) {
             Entity e = level.getEntity(id);
-            if (e instanceof LivingEntity living && living.isAlive()) {
+            if (e instanceof LivingEntity living && living.isAlive() && !MonsterRules.keepsAwayFrom(npc, living)) { // a melee soldier does not rally to a dragon
                 double d = npc.distanceToSqr(living);
                 if (d < bestDist) {
                     bestDist = d;

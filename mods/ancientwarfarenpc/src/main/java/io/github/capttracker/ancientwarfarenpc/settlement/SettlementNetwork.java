@@ -30,6 +30,7 @@ public final class SettlementNetwork {
 
     public static void registerPayloads(PayloadRegistrar registrar) {
         registrar.playToClient(GeometryPayload.TYPE, GeometryPayload.CODEC, GeometryPayload::handle);
+        SettlementMapSync.registerPayloads(registrar);
         registrar.playToClient(Census.Payload.TYPE, Census.Payload.CODEC, Census.Payload::handle);
         io.github.capttracker.ancientwarfarenpc.settlement.building.DesignNetwork.register(registrar);
         io.github.capttracker.ancientwarfarenpc.settlement.building.BuildingNetwork.register(registrar);

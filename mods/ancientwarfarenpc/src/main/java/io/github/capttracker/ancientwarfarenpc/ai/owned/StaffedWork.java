@@ -152,7 +152,7 @@ public final class StaffedWork {
                     trip().returning = true; // nothing more to fish: home
                     return State.WORKING;
                 }
-                waitAtSite(sitePos);
+                waitAtSite(sitePos, site);
                 return State.IDLE;
             }
             task = claimed.get();
@@ -602,8 +602,11 @@ public final class StaffedWork {
         return empty;
     }
 
-    private void waitAtSite(BlockPos sitePos) {
-        npc.setDoing("work.wait", sitePos, npc.level().getBlockState(sitePos).getBlock().getName());
+    private void waitAtSite(BlockPos sitePos, IWorksiteTasks site) {
+        // a farm with seeds that may not be sown in this season (Serene Seasons) says so
+        boolean outOfSeason = site instanceof io.github.capttracker.ancientwarfare.api.IWorksiteStatus status
+                && io.github.capttracker.ancientwarfare.api.IWorksiteStatus.OUT_OF_SEASON.equals(status.getWaitingFor());
+        npc.setDoing(outOfSeason ? "work.out_of_season" : "work.wait", sitePos, npc.level().getBlockState(sitePos).getBlock().getName());
         double distance = npc.distanceToSqr(sitePos.getX() + 0.5D, sitePos.getY(), sitePos.getZ() + 0.5D);
         if (distance > npc.getWorkRangeSq()) {
             goToSite(sitePos, distance);

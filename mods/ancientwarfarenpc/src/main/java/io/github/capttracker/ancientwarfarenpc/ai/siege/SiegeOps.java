@@ -13,6 +13,7 @@ import io.github.capttracker.ancientwarfarevehicle.entity.SeatRole;
 import io.github.capttracker.ancientwarfarevehicle.entity.VehicleBase;
 import io.github.capttracker.ancientwarfarevehicle.entity.types.VehicleTypeBatteringRam;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
@@ -34,12 +35,12 @@ import java.util.WeakHashMap;
  * of the order look for the towers, mantlets and battering rams of their owner within {@code siege_search_radius} blocks of themselves and take roles on them:
  * <ul>
  *   <li><b>Rams</b> (only at a gate, {@code siege_ram_enabled}): one melee soldier drives the nearest ram at the gate and swings it.</li>
- *   <li><b>Towers</b> whose top platform is level with the wall top (from one block below to two above): melee soldiers push (as many as the tower needs for its full speed; archers help
+ *   <li><b>Towers</b> whose top platform is within 1 block below to 3 above the wall top (the bridge ramps down or up to it): melee soldiers push (as many as the tower needs for its full speed; archers help
  *       only when there is no mantlet to push) and climb (as many as its ladder and platform seats hold).</li>
  *   <li><b>Mantlets</b>: one archer pushes each, a few more follow it and shoot from behind it.</li>
  * </ul>
  * Equipment is crewed nearest first, at most {@code siege_max_*} pieces of each kind. The jobs are kept in memory per level, one for each piece of equipment; a new order at another target
- * replaces the job of a piece, an order at the same target joins it. An NPC with an attack order at a wall and no duty (after a load, or a replacement) asks for one by itself ({@link #claim}).
+ * replaces the job of a piece, an order at the same target joins it. The state of a job is saved with its crew (NPC NBT {@code SiegeDuty}) and brought back by {@link #restore}. An NPC with an attack order at a wall and no duty (after a load, or a replacement) asks for one by itself ({@link #claim}).
  */
 public final class SiegeOps {
     private static final Map<ServerLevel, Map<UUID, SiegeJob>> JOBS = new WeakHashMap<>();
@@ -154,8 +155,8 @@ public final class SiegeOps {
                 continue;
             }
             int diff = Math.round(approach.groundY() + tower.vehicleType.getSiegeTopHeight() - wall.topY());
-            if (diff < -1 || diff > 2) {
-                continue; // the bridge would be too far below or above the wall top
+            if (diff < -1 || diff > 3) {
+                continue; // the bridge reaches a wall top from 3 blocks below to 1 above the platform
             }
             SiegeJob job = jobFor(level, tower, SiegeKind.TOWER, wall, approach, wallCenter, SiegeRole.PUSHER);
             boolean any = fill(level, job, tower, SiegeRole.PUSHER, tower.vehicleType.getPushersForFullSpeed(), melee, used, radius);
@@ -198,6 +199,65 @@ public final class SiegeOps {
         }
         npc.setSiegeNextClaim(now + 200L);
         order(level, cmd.pos, List.of(npc));
+    }
+
+    // ---- saving ----
+
+    /** The duty of an NPC as NBT: its role and stage, and a copy of the state of its job (see {@link SiegeJob#save}). */
+    public static CompoundTag saveDuty(SiegeDuty duty, long now) {
+        CompoundTag tag = new CompoundTag();
+        tag.put("Job", duty.job.save(now));
+        tag.putString("Role", duty.role.name());
+        tag.putString("Stage", duty.stage.name());
+        tag.putInt("Slot", duty.slot);
+        tag.putInt("Wait", duty.waitTicks);
+        tag.putInt("Cover", duty.coverTicks);
+        return tag;
+    }
+
+    /**
+     * Brings the saved duty of an NPC back after a load. It only counts while the NPC still has the attack order at the job's target; the job is taken from the registry if another
+     * NPC of the crew already brought it back, else rebuilt from the saved state. Returns true if the NPC has a duty again.
+     */
+    public static boolean restore(NpcCombat npc, CompoundTag tag) {
+        if (!(npc.level() instanceof ServerLevel level) || !SettlementConfig.siegeAi) {
+            return false;
+        }
+        Command cmd = npc.getCurrentCommand();
+        if (cmd.type != CommandType.ATTACK_AREA || !cmd.isBlockTarget()) {
+            return false;
+        }
+        SiegeJob saved = SiegeJob.load(tag.getCompound("Job"), level.getGameTime());
+        if (saved == null || !saved.target().equals(cmd.pos)) {
+            return false;
+        }
+        SiegeRole role;
+        SiegeDuty.Stage stage;
+        try {
+            role = SiegeRole.valueOf(tag.getString("Role"));
+            stage = SiegeDuty.Stage.valueOf(tag.getString("Stage"));
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+        Map<UUID, SiegeJob> jobs = jobs(level);
+        SiegeJob job = jobs.get(saved.vehicleId);
+        if (job == null || job.isCancelled() || job.kind != saved.kind || !job.target().equals(saved.target())
+                || job.phase == SiegeJob.Phase.DONE || job.phase == SiegeJob.Phase.FAILED) {
+            if (job != null) {
+                job.cancel();
+            }
+            job = saved;
+            jobs.put(saved.vehicleId, job);
+        }
+        SiegeDuty duty = new SiegeDuty(job, role);
+        duty.stage = stage;
+        duty.slot = tag.getInt("Slot");
+        duty.waitTicks = tag.getInt("Wait");
+        duty.coverTicks = tag.getInt("Cover");
+        duty.restored = true;
+        job.crew.put(npc.getUUID(), role);
+        npc.setSiegeDuty(duty);
+        return true;
     }
 
     // ---- equipment ----

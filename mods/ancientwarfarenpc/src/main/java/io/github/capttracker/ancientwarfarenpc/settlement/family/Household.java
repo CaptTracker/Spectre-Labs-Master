@@ -28,6 +28,8 @@ public final class Household {
     final List<BlockPos> homeBeds = new ArrayList<>(4);
     @Nullable
     UUID homeBuilding;
+    /** True when the home is a room the player built by hand (an enclosed room with a door), not a build of the planner. Saved as {@code handBuilt}. */
+    boolean homeHandBuilt;
     String surname = "";
     /** Game time of the last birth in this household, -1 if none. */
     long lastBirth = -1L;
@@ -65,6 +67,11 @@ public final class Household {
     @Nullable
     public UUID getHomeBuilding() {
         return homeBuilding;
+    }
+
+    /** Whether the home is a hand-built house (an enclosed, roofed room with a door that holds the beds). */
+    public boolean isHomeHandBuilt() {
+        return homeHandBuilt;
     }
 
     /** The family name of the household (the children are given it); empty if there is none yet. */
@@ -128,6 +135,9 @@ public final class Household {
         if (homeBuilding != null) {
             tag.putUUID("building", homeBuilding);
         }
+        if (homeHandBuilt) {
+            tag.putBoolean("handBuilt", true);
+        }
         tag.putString("surname", surname);
         tag.putLong("lastBirth", lastBirth);
         return tag;
@@ -148,6 +158,7 @@ public final class Household {
             household.homeBeds.add(BlockPos.of(bed));
         }
         household.homeBuilding = tag.hasUUID("building") ? tag.getUUID("building") : null;
+        household.homeHandBuilt = tag.contains("handBuilt") && tag.getBoolean("handBuilt");
         household.surname = tag.getString("surname");
         household.lastBirth = tag.contains("lastBirth") ? tag.getLong("lastBirth") : -1L;
         return household;

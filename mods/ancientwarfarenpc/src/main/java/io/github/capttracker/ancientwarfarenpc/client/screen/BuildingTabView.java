@@ -4,9 +4,11 @@
  */
 package io.github.capttracker.ancientwarfarenpc.client.screen;
 
+import io.github.capttracker.ancientwarfare.client.gui.IWidgetSelection;
 import io.github.capttracker.ancientwarfare.client.gui.elements.Button;
 import io.github.capttracker.ancientwarfare.client.gui.elements.CompositeScrolled;
 import io.github.capttracker.ancientwarfare.client.gui.elements.Label;
+import io.github.capttracker.ancientwarfare.client.gui.elements.Text;
 import io.github.capttracker.ancientwarfarenpc.menu.TownHallMenu;
 import io.github.capttracker.ancientwarfarenpc.settlement.building.BuildingDesign;
 import io.github.capttracker.ancientwarfarenpc.settlement.building.BuildProject;
@@ -64,6 +66,11 @@ final class BuildingTabView {
     private int dx;
     private int dz;
     private boolean previewOn = true;
+    // the rename box and the delete confirmation of the blueprint row
+    @Nullable
+    private ResourceLocation renameFor;
+    private String renameText = "";
+    private boolean confirmDelete;
     @Nullable
     private UUID shownProject;
 
@@ -107,6 +114,8 @@ final class BuildingTabView {
 
     @Nullable
     private TownHallMenu menu;
+    @Nullable
+    private IWidgetSelection selector;
     private Runnable changed = () -> {};
 
     private void local() {
@@ -157,8 +166,9 @@ final class BuildingTabView {
     // ---------------------------------------------------------------- build
 
     /** Fills the area. @return the height of the content */
-    int build(CompositeScrolled area, TownHallMenu hall, Runnable refresh) {
+    int build(CompositeScrolled area, TownHallMenu hall, Runnable refresh, IWidgetSelection selector) {
         this.menu = hall;
+        this.selector = selector;
         this.changed = refresh;
         CompoundTag state = hall.getBuildState();
         builtFrom = state;
@@ -203,6 +213,10 @@ final class BuildingTabView {
             }
         });
         y += 16;
+        if (state.getBoolean("noBuilder")) {
+            area.addGuiElement(new Label(6, y, fit(tr(P + "no_builder"), 360)).setColor(ORANGE));
+            y += 12;
+        }
         String note = state.getString("note");
         if (!note.isEmpty() && auto) {
             String arg = state.getString("noteArg");
@@ -439,6 +453,9 @@ final class BuildingTabView {
                     tr(meta.category().translationKey())), 330)).setColor(GREY));
             y += 12;
         }
+        if (meta != null && !meta.builtIn() && selector != null) {
+            y = addBlueprintRow(area, meta, y);
+        }
         String plotText = plot == null ? tr(P + "no_plots_short") : tr(P + "plot", plot.number());
         area.addGuiElement(new Button(12, y, 80, 12, plotText) {
             @Override
@@ -526,6 +543,55 @@ final class BuildingTabView {
         area.addGuiElement(new Label(126, y + 2, tr(P + "offset_hint")).setColor(GREY));
         y += 16;
         return y;
+    }
+
+    /**
+     * The row of a blueprint of the player (not a built-in design): a name box with Rename, and Delete (it asks once more). The server checks that the
+     * blueprint is the player's and not used by a build that is not finished. The typed name is kept while the tab is rebuilt.
+     */
+    private int addBlueprintRow(CompositeScrolled area, DesignMeta meta, int y) {
+        if (!meta.id().equals(renameFor)) {
+            renameFor = meta.id();
+            renameText = meta.name();
+            confirmDelete = false;
+        }
+        Text input = new Text(18, y, 130, renameText, selector) {
+            @Override
+            public void onTextUpdated(String oldText, String newText) {
+                renameText = newText;
+            }
+        };
+        area.addGuiElement(input);
+        area.addGuiElement(new Button(152, y, 50, 12, tr(P + "rename")) {
+            @Override
+            protected void onPressed() {
+                String name = renameText.trim();
+                if (name.isEmpty() || name.equals(meta.name())) {
+                    return;
+                }
+                CompoundTag form = new CompoundTag();
+                form.putString("id", meta.id().toString());
+                form.putString("name", name);
+                CompoundTag action = new CompoundTag();
+                action.put("renameBlueprint", form);
+                send(action);
+            }
+        });
+        area.addGuiElement(new Button(206, y, 88, 12, tr(P + (confirmDelete ? "delete_confirm" : "delete"))) {
+            @Override
+            protected void onPressed() {
+                if (!confirmDelete) {
+                    confirmDelete = true;
+                    local();
+                    return;
+                }
+                confirmDelete = false;
+                CompoundTag action = new CompoundTag();
+                action.putString("deleteBlueprint", meta.id().toString());
+                send(action);
+            }
+        });
+        return y + 15;
     }
 
     // ---------------------------------------------------------------- the ghost

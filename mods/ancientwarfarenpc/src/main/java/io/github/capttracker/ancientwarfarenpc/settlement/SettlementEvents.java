@@ -67,6 +67,9 @@ public final class SettlementEvents {
         if (tick % GEOMETRY_INTERVAL == 0) {
             sendGeometry(server);
         }
+        if (tick % SettlementMapSync.INTERVAL == 0) {
+            SettlementMapSync.tick(server);
+        }
     }
 
     private static void sendGeometry(MinecraftServer server) {

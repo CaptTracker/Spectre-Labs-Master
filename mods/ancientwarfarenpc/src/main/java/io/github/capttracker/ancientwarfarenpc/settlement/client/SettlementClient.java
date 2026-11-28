@@ -57,6 +57,11 @@ public final class SettlementClient {
         private GameBus() {}
 
         @SubscribeEvent
+        public static void onLoggingOut(net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent.LoggingOut event) {
+            io.github.capttracker.ancientwarfarenpc.settlement.ClientSettlementMap.clear();
+        }
+
+        @SubscribeEvent
         public static void onClientTick(ClientTickEvent.Post event) {
             Minecraft mc = Minecraft.getInstance();
             LocalPlayer player = mc.player;

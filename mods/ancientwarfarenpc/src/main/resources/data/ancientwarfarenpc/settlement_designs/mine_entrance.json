@@ -1,0 +1,51 @@
+{
+  "name": "Mine Entrance",
+  "category": "business",
+  "style": "stone",
+  "size": [9, 3, 9],
+  "front": "south",
+  "palette": {
+    "W": "minecraft:stone_bricks",
+    "L": "ancientwarfareautomation:quarry[facing=south]",
+    "S": "minecraft:wall_torch[facing=north]",
+    "B": "minecraft:lantern[hanging=false]"
+  },
+  "layers": [
+    [
+      "WWWWWWWWW",
+      "W___L___W",
+      "W_______W",
+      "W_______W",
+      "W_______W",
+      "W_______W",
+      "W_______W",
+      "W_______W",
+      "WWW...WWW"
+    ],
+    [
+      "WWWWWWWWW",
+      "W_______W",
+      "W_______W",
+      "W_______W",
+      "W_______W",
+      "W_______W",
+      "W_______W",
+      "W_S___S_W",
+      "WWW...WWW"
+    ],
+    [
+      "B_______B",
+      "_________",
+      "_________",
+      "_________",
+      "_________",
+      "_________",
+      "_________",
+      "_________",
+      "B_______B"
+    ]
+  ],
+  "worksite": {"block": "ancientwarfareautomation:quarry", "pos": [4, 0, 1], "area": {"min": [1, 0, 1], "max": [7, 0, 7]}},
+  "min_population": 3,
+  "tags": ["business", "mine_entrance"]
+}

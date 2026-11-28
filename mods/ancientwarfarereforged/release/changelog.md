@@ -1,3 +1,41 @@
+# Ancient Warfare Reforged 1.2.0 (NeoForge 1.21.1)
+
+**Requires:** Spectre Factions 1.1.0+ and Spectre Lib 1.1.0+.
+
+**Optional:** JEI, Jade or WTHIT, Ice and Fire: Community Edition, Weather2, Serene Seasons, Farmer's Delight, Xaero's Minimap, JourneyMap. None of them is needed.
+
+Fixes and optional mod support after the 1.1.0 release. Existing worlds keep loading, and every new setting has a default. **Update both the server and every client:** 1.2.0 adds a network message, so 1.1.0 clients can't join a 1.2.0 server.
+
+**Settlements**
+- **Soldiers equip themselves:** a soldier without a weapon, or with worse gear than the storage holds, walks to the nearest storage, takes the best sword, axe or bow (it keeps its kind of weapon) and better armour pieces, and puts the old ones back. It does this only when it is calm: not alarmed, fighting, riding, hungry or following an order (`soldiers_equip_from_storage`).
+- **Families without the schedule:** homes are claimed and couples form even when `schedule_enabled` is off.
+- **Hand-built houses:** an enclosed room with a door and two free beds that you built yourself now counts as a family house (`hand_built_family_houses`, `hand_built_room_max_cells`).
+- **Hand-built chapels:** an enclosed room with a door, a bell and a lectern is a chapel for devout NPCs, and the planner no longer plans one (`hand_built_chapels`).
+- **Working farmhouse:** the farmhouse comes with a crop farm block and its garden as the work area. New lumber camp and mine entrance designs do the same with a tree farm and a quarry. A shortage of farmers, lumberjacks or miners can now plan one of them.
+- **Blueprints:** rename and delete your own blueprints on the Building tab. Delete is refused while an unfinished build uses the blueprint.
+- **Builder notice:** when builds are waiting and nobody has the Builder role, the Building tab and the hall Overview say so.
+
+**Ships**
+- **Helmsman routes:** a Move order at water now plans a water route to the spot (the same planner as sea trade) and sails it, steering round islands and bays. With no route it looks ahead as before and tells you.
+- **Shallow water:** an order at water shallower than 2 blocks now tells you why and leaves the crew aboard.
+- **Grappling lines survive a reload:** both ships save the line and join it again when both are loaded (`grapple_reattach_ticks`).
+
+**Sieges**
+- **Drop bridge height:** the bridge now steps down or up to a wall top from 3 blocks below to 1 above the platform, and the model tilts with it.
+- **Siege jobs survive a reload:** crews carry on where they were.
+- **Roof riders:** mobs, NPCs and items on a tower's roof or lowered bridge ride along instead of holding the tower still.
+- **Mantlet:** the shield now collides with blocks, slides along walls and no longer pokes through them.
+- NPC siege planning accepts towers whose platform is 1 block below to 3 blocks above the wall top.
+
+**Optional mod support** (none of these mods is needed; each part only works when the other mod is installed, and each has an `enabled` switch in the config)
+- **Ice and Fire:** dragons, death worms, cyclops, hydras, trolls, gorgons, sirens, sea serpents, cockatrices and the other monsters of the mod count as threats to your settlement (`ice_and_fire` section of `ancientwarfarenpc-settlements.toml`). Dragons are major threats: they are seen from far beyond the border, sound the alarm and the bells, and civilians run from them. Archers and the crews of siege weapons, vehicles and ship guns shoot a dragon before nearer targets. Melee soldiers that are not brave and have no orders keep their distance and shelter. Dragonbone and dragonsteel swords and axes work as soldier gear.
+- **Weather2:** settlements sense severe storms, tornadoes and sandstorms near the hall. NPCs go indoors, sleepers stay in bed, outdoor work pauses, helmsmen sail for a dock or hold the ship, and the hall overview, census and talk screen show the warning (`weather2` section). Needs CoroUtil, as Weather2 does.
+- **Serene Seasons:** crop and fruit farms only sow what is fertile in the current season, and still harvest and till out of season (`serene_seasons` section in both config files). In winter NPCs eat about 15% more and NPCs without a home lose morale. The hall overview shows the season, and the family year can follow the Serene Seasons year (`use_serene_seasons_year`).
+- **Farmer's Delight:** farms plant tomatoes, cabbages and onions, plant rice in shallow water inside the farm and harvest it with a knife. Knives count as tools for the blocks they are made for. NPCs that eat a hearty meal get its effects and a morale lift. The innkeeper cooks in any enclosed room with a cooking pot over a heat source or a cutting board, with no new block (`farmers_delight` section in both config files).
+- **Xaero's Minimap:** a "Share waypoint" button on the town hall, the NPC talk screen and the census rows posts a clickable waypoint to your own chat (client config `xeros_minimap`). Without the mod it posts plain coordinates.
+- **JourneyMap:** shows a waypoint and the border of each settlement you own or belong to (client config `journeymap`). The server now sends your settlements to your client for this.
+- **Mo' Bends and Dynamic Surroundings:** no change needed; NPCs use the normal humanoid model and normal sound events.
+
 # Ancient Warfare Reforged 1.1.0 (NeoForge 1.21.1)
 
 First release of Ancient Warfare 2, rebuilt for Minecraft 1.21.1 on NeoForge. All five modules come in one file: Core, Vehicles, Automation, NPCs and Structures.
@@ -71,7 +109,7 @@ Your settlement can now plan and build its own houses and workshops. (This is a 
 - **Population:** children count toward population, need beds and food (half a member's share), and losing a family member hurts morale.
 - **Config:** the `families` section of `ancientwarfarenpc-settlements.toml`: `families_enabled`, `year_length_days` (96), `years_to_adulthood` (2.0), `couple_min_population`, `couple_min_morale`, `couple_bond_seconds`, `couple_chance_per_day`, `couple_social_radius`, `couple_sociable_bonus`, `couple_loner_factor`, `partners_share_surname`, `widow_repartner_days`, `grief_days`, `grief_morale`, `partner_morale`, `partner_nearby_morale`, `partner_nearby_radius`, `family_home_morale`, `children_near_morale`, `children_near_radius`, `child_min_morale`, `child_min_food_days`, `max_children_per_household` (3), `birth_cooldown_days` (8), `birth_chance_per_day` (0.25), `child_hunger_factor` (0.5), `child_skill_head_start_xp`, `child_scale_start` (0.5), `child_play_radius`, `family_debug_fast_growth`.
 - **Operators:** `/awsettlement birth`, `age`, `growup` and `families` (permission level 2) force a birth, age a child, let it grow up now and list the households.
-- Families only work while the daily schedule is on (`schedule_enabled`).
+- Families no longer need the daily schedule: with `schedule_enabled` off, calm members near each other still count as spending time together.
 
 ## Vehicles
 - Mouse steering with a chase camera, and smoother controls.
@@ -189,27 +227,25 @@ All keys can be rebound in **Options > Controls**. Vehicle keys only act while y
 
 ## Known issues
 **Settlements and production**
-- Soldiers don't put on new weapons or armour by themselves. Gear the smithy makes for them is delivered to the storage nearest to them.
 - A recipe switched off is still made when the settlement needs it. Set `demand_enables_recipes = false` for a hard off.
 - Nothing makes copper gear, netherite upgrades, saddles or bundles.
-- Families only work while the daily schedule is on (`schedule_enabled`). A house you built by hand counts as loose beds, not a family house. There are no schools.
+- Archers don't take arrows from storage: NPC archers shoot without using up arrows, so only bows are handed out.
+- A hand-built house or chapel is found by its walls: an enclosed room with a door (a roof is implied by the size limit, `hand_built_room_max_cells`). Open or very large buildings are not recognised. There are no schools.
 
 **Building**
-- The farmhouse's garden is decoration, not a working crop farm. A shortage of farmers, miners or lumberjacks doesn't plan a building.
-- A chapel you build yourself isn't recognised as a chapel.
-- Blueprints can't be deleted or renamed in game yet.
-- Without a builder in the settlement, queued builds wait and nothing tells you why.
+- The farmhouse, the lumber camp and the mine entrance need their worksite block (crop farm, tree farm, quarry) in the storage, like the sawmill and the smithy. A planned build waits for it. The farmhouse garden has no water source, and the quarry of the mine entrance follows the normal quarry rules (ladders, digs down).
+- Deleting a blueprint leaves the finished builds of it in the settlement record without a design.
 
 **Ships**
-- A helmsman only looks ahead over the water; an island or bay in the way is steered round only as far as it can see, and it gives up if it makes no headway. The spot you click needs water at least 2 blocks deep.
+- A helmsman plans a water route only over loaded chunks and legs the route planner covers; with no route it looks ahead as before and tells you. The spot you click needs water at least 2 blocks deep.
 - Faction NPCs can't take the helm, and they only crew a ship whose helm is held by an ally.
-- Grappling lines don't survive a reload. NPCs cross between grappled decks with a short leap. Gunners and archers don't board.
+- NPCs cross between grappled decks with a short leap. Gunners and archers don't board.
 - Sea routes and trade ships only run near a player (in loaded chunks), and legs longer than 256 blocks aren't planned.
 
 **Sieges**
-- The drop bridge always lowers at the platform height, so a lower wall top needs a short drop or jump. After a siege the bridge stays down.
-- NPC siege crews plan routes over open ground only and don't open gates. Siege jobs don't survive a reload (NPCs plan again from where the equipment stands).
-- Anything standing on a tower's roof holds it still. A mantlet's shield can poke through the edge of a wall.
+- The drop bridge is a staircase of flat planks: it reaches a wall top from 3 blocks below to 1 above the platform, and stepping up 1 block needs a jump. After a siege the bridge stays down.
+- NPC siege crews plan routes over open ground only and don't open gates.
+- A mantlet's shield only blocks other entities by being in the way of the mantlet itself; it does not push them.
 - Faction NPCs don't use siege engines yet (there are no faction raids).
 
 **Art**

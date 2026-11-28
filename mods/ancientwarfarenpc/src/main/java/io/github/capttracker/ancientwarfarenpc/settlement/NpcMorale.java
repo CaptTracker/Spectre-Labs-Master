@@ -125,7 +125,11 @@ public final class NpcMorale {
             factors.add(new Factor("hunger", hunger));
         }
         if (settlement.isPresent()) {
-            factors.add(new Factor("bed", settlement.get().isHomeless(npc.getUUID()) ? -8 : 5));
+            boolean homeless = settlement.get().isHomeless(npc.getUUID());
+            factors.add(new Factor("bed", homeless ? -8 : 5));
+            if (homeless && SettlementConfig.sereneColdMorale > 0 && Seasons.isWinter(level, npc.blockPosition())) {
+                factors.add(new Factor("cold", -SettlementConfig.sereneColdMorale)); // no home in winter (Serene Seasons)
+            }
         }
         factors.add(new Factor("sleep", now - npc.getLastSleptAt() <= DAY ? 4 : -6));
 
@@ -142,6 +146,9 @@ public final class NpcMorale {
 
         if (!child && npc.getLastInnMealAt() >= 0 && now - npc.getLastInnMealAt() <= DAY) {
             factors.add(new Factor("inn", 6));
+        }
+        if (!child && SettlementConfig.fdEnabled && SettlementConfig.fdHeartyMorale > 0 && npc.getLastHeartyMealAt() >= 0 && now - npc.getLastHeartyMealAt() <= DAY) {
+            factors.add(new Factor("hearty_meal", SettlementConfig.fdHeartyMorale)); // a nourishing meal in the last day (Farmer's Delight)
         }
         factors.add(new Factor("social", npc.getLastSocialAt() >= 0 && now - npc.getLastSocialAt() <= DAY ? 4 : 0));
 

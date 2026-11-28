@@ -4,7 +4,9 @@
  */
 package io.github.capttracker.ancientwarfarenpc.ai;
 
+import io.github.capttracker.ancientwarfarenpc.compat.ModCompat;
 import io.github.capttracker.ancientwarfarenpc.entity.NpcBase;
+import io.github.capttracker.ancientwarfarenpc.settlement.SettlementConfig;
 import io.github.capttracker.spectrefactions.api.GuardMode;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.LivingEntity;
@@ -42,6 +44,19 @@ public class NpcAIAttackNearest extends NearestAttackableTargetGoal<LivingEntity
         return ret;
     }
 
+    /** An archer or a crew of a siege weapon or ship gun that is busy with a nearer target looks for a dragon once a second (Ice and Fire integration) and switches to it. */
+    @Override
+    public boolean canContinueToUse() {
+        if (ModCompat.MONSTERS.isActive() && mob.tickCount % 20 == 0 && SettlementConfig.iceAndFireRangedPrefersDragons
+                && MonsterRules.fightsFromDistance((NpcBase) mob) && !MonsterRules.isMajor(mob.getTarget())) {
+            findTarget();
+            if (target != null && MonsterRules.isMajor(target)) {
+                mob.setTarget(target);
+            }
+        }
+        return super.canContinueToUse();
+    }
+
     @Override
     protected boolean canAttack(@Nullable LivingEntity potentialTarget, TargetingConditions targetPredicate) {
         return AIHelper.isTarget((NpcBase) mob, potentialTarget, mustSee);
@@ -67,6 +82,8 @@ public class NpcAIAttackNearest extends NearestAttackableTargetGoal<LivingEntity
         double followDistance = getFollowDistance();
         LivingEntity nearest = null;
         double nearestDistSq = Double.MAX_VALUE;
+        LivingEntity dragon = null; // archers and crews of siege weapons and ship guns take a dragon first (Ice and Fire integration)
+        double dragonDistSq = Double.MAX_VALUE;
         for (LivingEntity candidate : mob.level().getEntitiesOfClass(LivingEntity.class, getTargetSearchArea(followDistance), EntitySelector.NO_SPECTATORS)) {
             if (targetSelector != null && !targetSelector.test(candidate)) {
                 continue;
@@ -86,14 +103,21 @@ public class NpcAIAttackNearest extends NearestAttackableTargetGoal<LivingEntity
                 maxDistance *= 0.7F * cover;
             }
             double distSq = mob.distanceToSqr(candidate);
-            if (distSq > maxDistance * maxDistance || distSq >= nearestDistSq) {
+            boolean preferred = MonsterRules.rangedPrefers((NpcBase) mob, candidate) && distSq < dragonDistSq;
+            if (distSq > maxDistance * maxDistance || distSq >= nearestDistSq && !preferred) {
                 continue;
             }
             if (canAttack(candidate, targetConditions)) {
-                nearest = candidate;
-                nearestDistSq = distSq;
+                if (distSq < nearestDistSq) {
+                    nearest = candidate;
+                    nearestDistSq = distSq;
+                }
+                if (preferred) {
+                    dragon = candidate;
+                    dragonDistSq = distSq;
+                }
             }
         }
-        target = nearest;
+        target = dragon != null ? dragon : nearest;
     }
 }

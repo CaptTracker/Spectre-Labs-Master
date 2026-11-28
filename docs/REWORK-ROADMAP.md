@@ -486,3 +486,47 @@ New staffed worksites. Each one turns inputs from storage into outputs, with cou
 
 ## Open questions for the owner (second round)
 - **Q5.** How long is an in-game year for children growing up? Default proposal: 96 days, so adulthood takes 192 days, about 64 hours of real play. Shorter alternatives: 1 year = 30 days (60 days in total) or 1 year = 8 days (16 days in total). **Answered (2026-11-25): 96 days (Serene Seasons' default year), so adulthood takes 192 days. Built in phase 10 as the config values `year_length_days` = 96 and `years_to_adulthood` = 2.**
+
+## Third round: mod integrations (owner picks, 2026-11-27)
+
+Every integration is optional: the other mod is a compile-only dependency and nothing is loaded without it.
+Research notes (versions, mavens, hooks) are summarised per item below.
+
+### Owner decisions (2026-11-27)
+- **Maps:** clickable Xaero's Minimap waypoints shared in chat (Xaero has no API), plus a JourneyMap plugin through its real API.
+- **Mo' Bends and Dynamic Surroundings:** compatibility only, with no code dependency. NPCs keep the vanilla humanoid model, and all sounds are normal sound events.
+- **Farmer's Delight:** no new worksite block. A cook at an inn or diner uses the Farmer's Delight cooking pot and cutting board placed in that building.
+- **Direction for later work:** move away from dedicated worksite blocks toward work areas that NPCs detect from room contents and that the settlement builds dynamically. Existing worksite blocks stay because worlds use them. A replacement needs its own phase with a migration plan.
+- **Later:** Create (replace the torque system with Create rotation) and Simple Voice Chat (talk to NPCs).
+
+### Integration 1: Ice and Fire (Community Edition, mod id `iceandfire`)
+- **Detection:** monsters are recognised by registry id and entity tags, with no class dependency. The dragon tags are `iceandfire:fire_dragon`, `ice_dragon` and `lightning_dragon`. Other monsters include the death worm, cyclops, hydra, troll, gorgon, siren, sea serpent and the dread mobs.
+- **Threats:** these monsters count as threats. They raise the settlement alarm, civilians flee and shelter, and guards engage. Dragons are a major threat: archers and siege weapons target them, and melee NPCs hold back from fire breath range unless they are brave.
+- **Multipart hitboxes:** targets resolve to the parent entity.
+- **Gear:** soldiers pick up and equip dragonbone and dragonsteel weapons and dragon scale armour like any other gear, so the gear logic must treat them as normal sword and armour items.
+
+### Integration 2: Weather2 (mod id `weather2`, needs CoroUtil)
+- **Storm sensing:** a settlement senses storms, tornadoes and sandstorms near its land. Calls are guarded because Weather2 has no stable API.
+- **Sheltering:**
+  - NPCs shelter indoors (rain shelter, homes or the hall) when a severe storm or tornado is near.
+  - Workers pause outdoor work.
+  - Ships head for a dock or stop.
+  - A "storm warning" shows on the hall, census and talk screens and as a thought.
+
+### Integration 3: Serene Seasons (mod id `sereneseasons`, needs GlitchCore)
+- **Farms:** farms plant only crops that are fertile in the current season, using the Serene Seasons fertility API, and idle or prepare the soil otherwise.
+- **Year length:** the family `year_length_days` follows the Serene Seasons year length when it is installed (a config option, on by default).
+- **Season effects:** winter raises food need slightly and adds a small morale factor for cold without a home. Season names show on the hall.
+
+### Integration 4: Farmer's Delight (mod id `farmersdelight`)
+- **Farms:** farms plant FD crops (tomatoes, cabbages, onions, and rice in water).
+- **Tools:** knives count as tools.
+- **Food:** FD foods feed NPCs with their nourishment and comfort effects.
+- **Cooks:** a cook works at an inn or diner using the FD cooking pot over a heat source and the cutting board placed inside that building. Recipes are read from FD's recipe types, and the settlement needs list drives the meals.
+
+### Integration 5: Maps
+- **Xaero's Minimap:** buttons on the hall, census and talk screens post a clickable Xaero waypoint in chat for the settlement, an NPC or a ship.
+- **JourneyMap plugin (API 2.0 for 1.21.1):** settlement waypoints and border overlays, plus markers for owned NPCs, ships and caravans.
+
+### Integration 6: Mo' Bends and Dynamic Surroundings
+- **Compatibility only:** confirm that both load next to ours and that NPCs and our sounds behave normally.

@@ -18,12 +18,12 @@ public final class FamilyAge {
 
     /** The whole years of an age in ticks. */
     public static int years(long ticks) {
-        return (int) Math.max(0L, ticks / (DAY * Math.max(1, SettlementConfig.yearLengthDays)));
+        return (int) Math.max(0L, ticks / (DAY * SettlementConfig.effectiveYearLengthDays()));
     }
 
     /** The days after the whole years of an age in ticks. */
     public static int days(long ticks) {
-        long perYear = DAY * Math.max(1, SettlementConfig.yearLengthDays);
+        long perYear = DAY * SettlementConfig.effectiveYearLengthDays();
         return (int) Math.max(0L, (ticks % perYear) / DAY);
     }
 

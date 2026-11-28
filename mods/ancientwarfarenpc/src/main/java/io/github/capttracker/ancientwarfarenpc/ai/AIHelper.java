@@ -27,12 +27,13 @@ public final class AIHelper {
 
     /**
      * True if the target is alive, is not the NPC, may be targeted by the NPC, is not an invulnerable (creative or spectator) player and,
-     * if asked, is in line of sight of the NPC (1.12.2: {@code capabilities.disableDamage}, {@code getEntitySenses().canSee}).
+     * if asked, is in line of sight of the NPC (1.12.2: {@code capabilities.disableDamage}, {@code getEntitySenses().canSee}). A melee soldier does not pick a dragon (Ice and Fire integration, see {@link MonsterRules}).
      */
     public static boolean isTarget(NpcBase npc, @Nullable LivingEntity target, boolean checkSight) {
         return target != null && !(target == npc || !target.isAlive() || !npc.canTarget(target)
                 || target instanceof Player player && player.getAbilities().invulnerable
-                || checkSight && !npc.getSensing().hasLineOfSight(target));
+                || checkSight && !npc.getSensing().hasLineOfSight(target)
+                || MonsterRules.keepsAwayFrom(npc, target));
     }
 
     public static boolean isWithinFollowRange(Mob entity, LivingEntity target) {

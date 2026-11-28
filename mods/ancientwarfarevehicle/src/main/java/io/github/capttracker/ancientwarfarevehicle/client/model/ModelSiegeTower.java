@@ -43,7 +43,7 @@ public final class ModelSiegeTower extends AwPartModel {
             wheels[i] = root.getChild("wheel" + i);
         }
         this.bridge = root.getChild("bridge");
-        setBridge(0.f);
+        setBridge(0.f, 0.f);
     }
 
     public static LayerDefinition createMediumLayer() {
@@ -168,8 +168,9 @@ public final class ModelSiegeTower extends AwPartModel {
         }
     }
 
-    /** Swings the bridge: 0 stands against the front of the tower, 1 lies out horizontally in front of it. */
-    public void setBridge(float progress) {
-        this.bridge.xRot = -(1.0f - Math.max(0.0f, Math.min(1.0f, progress))) * ((float) Math.PI / 2.0f);
+    /** Swings the bridge: 0 stands against the front of the tower, 1 lies out in front of it, level or, for a tilt other than 0, sloping down (positive degrees of the tilt) or up (negative). */
+    public void setBridge(float progress, float tilt) {
+        float p = Math.max(0.0f, Math.min(1.0f, progress));
+        this.bridge.xRot = -(1.0f - p) * ((float) Math.PI / 2.0f) + p * tilt;
     }
 }

@@ -67,10 +67,12 @@ public class NpcCombat extends NpcPlayerOwned implements RangedAttackMob {
 
     // ---- siege duty (rework phase 12) ----
 
-    /** The part this NPC plays in a siege order (crewing a tower, mantlet or ram), or null. Not saved: the attack order is, and it brings the duty back. */
+    /** The part this NPC plays in a siege order (crewing a tower, mantlet or ram), or null. It is saved (NBT {@code SiegeDuty}); a saved duty waits in {@code pendingSiegeDuty} until the goal brings it back. */
     @Nullable
     private io.github.capttracker.ancientwarfarenpc.ai.siege.SiegeDuty siegeDuty;
     private long siegeNextClaim = 0L;
+    @Nullable
+    private CompoundTag pendingSiegeDuty;
     @Nullable
     private net.minecraft.core.BlockPos lastServedTarget;
     private long lastServedAt = -100000L;
@@ -101,6 +103,14 @@ public class NpcCombat extends NpcPlayerOwned implements RangedAttackMob {
         if (getVehicle() instanceof io.github.capttracker.ancientwarfarevehicle.entity.VehicleBase v && v.getUUID().equals(duty.job.vehicleId)) {
             stopRiding();
         }
+    }
+
+    /** The saved duty read from NBT that has not been brought back yet (one try, then it is dropped). */
+    @Nullable
+    public CompoundTag takePendingSiegeDuty() {
+        CompoundTag tag = pendingSiegeDuty;
+        pendingSiegeDuty = null;
+        return tag;
     }
 
     public long getSiegeNextClaim() {
@@ -153,6 +163,7 @@ public class NpcCombat extends NpcPlayerOwned implements RangedAttackMob {
         goalSelector.addGoal(0, horseAI);
         goalSelector.addGoal(0, new io.github.capttracker.ancientwarfarenpc.ai.siege.NpcAISiegeDuty(this)); // siege roles on towers, mantlets and rams (rework phase 12)
         goalSelector.addGoal(1, new NpcAIPlayerOwnedFollowCommand(this));
+        goalSelector.addGoal(2, new io.github.capttracker.ancientwarfarenpc.ai.owned.NpcAIKeepClearOfDragons(this)); // melee soldiers stay out of a dragon's breath (Ice and Fire integration)
         goalSelector.addGoal(1, new io.github.capttracker.ancientwarfarenpc.ai.vehicle.NpcAIShipBoard(this)); // boarding and defending decks (rework phase 11)
         goalSelector.addGoal(2, new NpcAIPlayerOwnedGetFood(this));
 
@@ -163,6 +174,7 @@ public class NpcCombat extends NpcPlayerOwned implements RangedAttackMob {
         goalSelector.addGoal(6, new io.github.capttracker.ancientwarfarenpc.ai.owned.NpcAIPlayerOwnedRally(this));
 
         //6--empty....
+        goalSelector.addGoal(7, new io.github.capttracker.ancientwarfarenpc.ai.owned.NpcAIPlayerOwnedEquipGear(this)); // gear from the storage (known-issue fixes)
         //7==combat task, inserted from onweaponinventoryupdated
         goalSelector.addGoal(8, new NpcAIMedicBase<NpcCombat>(this));
         goalSelector.addGoal(8, new NpcAIDistressResponse(this));
@@ -253,7 +265,8 @@ public class NpcCombat extends NpcPlayerOwned implements RangedAttackMob {
         if (mode == io.github.capttracker.spectrefactions.api.GuardMode.PASSIVE || mode == io.github.capttracker.spectrefactions.api.GuardMode.DEFEND) {
             return false;
         }
-        return getSettlement().filter(s -> s.getDimension().equals(level().dimension())).map(s -> s.getThreatCount() > 0).orElse(false);
+        return getSettlement().filter(s -> s.getDimension().equals(level().dimension()))
+                .map(s -> s.getThreatCount() > 0 && io.github.capttracker.ancientwarfarenpc.ai.MonsterRules.hasEngageableThreat(this, s)).orElse(false);
     }
 
     @Override
@@ -337,6 +350,7 @@ public class NpcCombat extends NpcPlayerOwned implements RangedAttackMob {
         super.readAdditionalSaveData(tag);
         onWeaponInventoryChanged();
         onOffhandInventoryChanged();
+        pendingSiegeDuty = tag.contains("SiegeDuty") ? tag.getCompound("SiegeDuty") : null;
         if (tag.contains(PATROL_AI_TAG) && patrolAI != null) {
             patrolAI.readFromNBT(tag.getCompound(PATROL_AI_TAG));
         }
@@ -345,6 +359,11 @@ public class NpcCombat extends NpcPlayerOwned implements RangedAttackMob {
     @Override
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
+        if (siegeDuty != null) {
+            tag.put("SiegeDuty", io.github.capttracker.ancientwarfarenpc.ai.siege.SiegeOps.saveDuty(siegeDuty, level().getGameTime()));
+        } else if (pendingSiegeDuty != null) {
+            tag.put("SiegeDuty", pendingSiegeDuty);
+        }
         if (patrolAI != null) {
             tag.put(PATROL_AI_TAG, patrolAI.writeToNBT(new CompoundTag()));
         }

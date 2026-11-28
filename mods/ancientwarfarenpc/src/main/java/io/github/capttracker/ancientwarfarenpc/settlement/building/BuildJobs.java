@@ -5,6 +5,7 @@
 package io.github.capttracker.ancientwarfarenpc.settlement.building;
 
 import com.mojang.logging.LogUtils;
+import io.github.capttracker.ancientwarfare.api.IBoundedSite;
 import io.github.capttracker.ancientwarfare.owner.IOwnable;
 import io.github.capttracker.ancientwarfarenpc.settlement.Settlement;
 import io.github.capttracker.ancientwarfarenpc.settlement.SettlementApi;
@@ -430,6 +431,7 @@ public final class BuildJobs {
         SettlementBuilding building = settlement.getBuilding();
         if (project.getKind() == BuildProject.Kind.BUILD) {
             register(settlement, project, design);
+            applyWorkArea(level, project, design);
             UUID target = project.getTarget();
             if (target != null) {
                 BuildProject old = building.project(target).orElse(null);
@@ -457,6 +459,27 @@ public final class BuildJobs {
             }
         }
         return false;
+    }
+
+    /**
+     * A design whose worksite has a work area (a farmhouse with its garden, a lumber camp with its plot, a mine entrance) gets that area set on the worksite
+     * block when the build is finished: the area is turned with the design and the block entity is told like the bounds screen does. A worksite block that is
+     * not in the world (broken, chunk not loaded) is left alone: the owner can still set the area by hand.
+     */
+    private static void applyWorkArea(ServerLevel level, BuildProject project, BuildingDesign design) {
+        BlockPos[] area = design.workArea(project.getOrigin(), project.getFacing());
+        BlockPos site = design.worksitePos(project.getOrigin(), project.getFacing());
+        if (area == null || site == null || !level.isLoaded(site)) {
+            return;
+        }
+        if (level.getBlockEntity(site) instanceof IBoundedSite bounded) {
+            bounded.setBounds(area[0], area[1]);
+            bounded.onBoundsAdjusted();
+            bounded.onPostBoundsAdjusted();
+            LOGGER.debug("Work area {} to {} set on the worksite at {}", area[0], area[1], site);
+        } else {
+            LOGGER.warn("The worksite of {} at {} has no work area to set (no bounded worksite block there)", design.getId(), site);
+        }
     }
 
     /** The beds and containers of the new building join the settlement at once (worksites are picked up by the job board). */

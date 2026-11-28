@@ -109,6 +109,10 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
 
     /** A siege tower's drop bridge: true if its wish is lowered (rework phase 12); the lowering itself is {@link SiegeHelper}'s progress on each side. */
     private static final EntityDataAccessor<Boolean> BRIDGE_DOWN_DATA = SynchedEntityData.defineId(VehicleBase.class, EntityDataSerializers.BOOLEAN);
+    /** Where the far end of the lowered bridge rests relative to the top platform, in blocks (negative: lower), see {@link SiegeHelper#planBridge}. */
+    private static final EntityDataAccessor<Float> BRIDGE_DELTA_DATA = SynchedEntityData.defineId(VehicleBase.class, EntityDataSerializers.FLOAT);
+    /** The first plank row of the bridge that lies at the far height (the rows before it step towards it). */
+    private static final EntityDataAccessor<Integer> BRIDGE_SUPPORT_DATA = SynchedEntityData.defineId(VehicleBase.class, EntityDataSerializers.INT);
     /** The height of the rider of each seat of a siege tower over the foot of its ladder, "0.00,3.50" (rework phase 12). */
     private static final EntityDataAccessor<String> LIFT_DATA = SynchedEntityData.defineId(VehicleBase.class, EntityDataSerializers.STRING);
 
@@ -328,6 +332,8 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
         builder.define(HITCH_DATA, "");
         builder.define(AGGRESSIVE_DATA, false);
         builder.define(BRIDGE_DOWN_DATA, false);
+        builder.define(BRIDGE_DELTA_DATA, 0.0F);
+        builder.define(BRIDGE_SUPPORT_DATA, 0);
         builder.define(LIFT_DATA, "");
     }
 
@@ -340,12 +346,26 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
         entityData.set(BRIDGE_DOWN_DATA, down);
     }
 
+    /** How far the far end of the lowered bridge is above (positive) or below (negative) the top platform; 0 for a level bridge. */
+    public float getBridgeDelta() {
+        return entityData.get(BRIDGE_DELTA_DATA);
+    }
+
+    public int getBridgeSupport() {
+        return entityData.get(BRIDGE_SUPPORT_DATA);
+    }
+
+    public void setBridgeShape(float delta, int support) {
+        entityData.set(BRIDGE_DELTA_DATA, delta);
+        entityData.set(BRIDGE_SUPPORT_DATA, support);
+    }
+
     /** SERVER: {@link SiegeHelper} publishes the heights of the riders on the ladder. */
     public void setLiftData(String data) {
         entityData.set(LIFT_DATA, data);
     }
 
-    /** True while the vehicle must stand still: a siege tower with its bridge down (or a rider standing on its roof). */
+    /** True while the vehicle must stand still: a siege tower with its bridge down or moving. */
     public boolean isMovementLocked() {
         return siege != null && siege.isLocked();
     }
@@ -1571,6 +1591,7 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
         }
         this.hitch.load(tag.getList("hitch", Tag.TAG_COMPOUND));
         this.setBridgeDown(tag.getBoolean("bridgeDown"));
+        this.setBridgeShape(tag.getFloat("bridgeDelta"), tag.getInt("bridgeSupport"));
         // the riders attach after the vehicle has loaded: remember who sat where and give the seats back as they arrive
         this.pendingSeats.clear();
         for (Tag entry : tag.getList("seats", Tag.TAG_COMPOUND)) {
@@ -1637,6 +1658,10 @@ public class VehicleBase extends Entity implements IEntityWithComplexSpawn, IMis
         }
         if (siege != null && isBridgeDown()) {
             tag.putBoolean("bridgeDown", true);
+            if (getBridgeDelta() != 0.0F) {
+                tag.putFloat("bridgeDelta", getBridgeDelta());
+                tag.putInt("bridgeSupport", getBridgeSupport());
+            }
         }
         if (ship != null) {
             ship.save(tag);

@@ -12,6 +12,10 @@ import io.github.capttracker.ancientwarfarevehicle.entity.VehicleBase;
 import io.github.capttracker.ancientwarfarevehicle.entity.VehicleSettings;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.DoubleTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -22,6 +26,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,8 +34,8 @@ import java.util.UUID;
 
 /**
  * One piece of siege equipment (tower, mantlet or ram) at work on one order (a wall or gate), with the NPCs that crew it and the brain that moves it. The brain is run by the NPCs of
- * the crew, once a tick whoever comes first ({@link #tick}); it holds no entity references, only the vehicle's UUID, so it can be kept across unloads and thrown away at will. It is not saved:
- * after a load the NPCs' attack orders (which are) make new jobs.
+ * the crew, once a tick whoever comes first ({@link #tick}); it holds no entity references, only the vehicle's UUID, so it can be kept across unloads and thrown away at will. Its state is saved with the NPCs of its crew ({@link #save}):
+ * the first crew member to load brings it back and the others join it (SiegeOps.restore).
  *
  * <p>Phases: {@code PLAN} (a {@link SiegePlanner} finds the way, spread over ticks), {@code ADVANCE} (the driver steers along the waypoints; no headway for
  * {@code siege_stuck_ticks} means a new plan, twice, then {@code FAILED}), then at the end of the route a tower and a ram go to {@code DOCK} (straight at the wall or gate), a mantlet to {@code HOLD}.
@@ -101,6 +106,109 @@ public final class SiegeJob {
             }
         }
         this.stage = stage;
+    }
+
+    /** A job rebuilt from its saved state ({@link #load}). */
+    private SiegeJob(UUID vehicleId, SiegeKind kind, WallInfo wall, Direction normal, int groundY, Vec3 anchor, Vec3 stage) {
+        this.vehicleId = vehicleId;
+        this.kind = kind;
+        this.wall = wall;
+        this.normal = normal;
+        this.groundY = groundY;
+        this.anchor = anchor;
+        this.landing = new Vec3(wall.pos().getX() + 0.5D, wall.topY(), wall.pos().getZ() + 0.5D);
+        this.stage = stage;
+    }
+
+    // ---- saving ----
+
+    /** The state of the job as NBT (every crew member keeps a copy, the first one to load brings the job back, see {@link SiegeOps#restore}). */
+    public CompoundTag save(long now) {
+        CompoundTag tag = new CompoundTag();
+        tag.putUUID("Vehicle", vehicleId);
+        tag.putString("Kind", kind.name());
+        tag.putLong("Target", wall.pos().asLong());
+        tag.putInt("TopY", wall.topY());
+        if (wall.gateEntity() != null) {
+            tag.putUUID("GateEntity", wall.gateEntity());
+        }
+        if (wall.gateBlock() != null) {
+            tag.putLong("GateBlock", wall.gateBlock().asLong());
+        }
+        tag.putString("Normal", normal.getName());
+        tag.putInt("GroundY", groundY);
+        tag.putDouble("AnchorX", anchor.x);
+        tag.putDouble("AnchorY", anchor.y);
+        tag.putDouble("AnchorZ", anchor.z);
+        tag.putDouble("StageX", stage.x);
+        tag.putDouble("StageY", stage.y);
+        tag.putDouble("StageZ", stage.z);
+        tag.putString("Phase", phase.name());
+        tag.putInt("ClimbSeats", climbSeats);
+        tag.putInt("PhaseTicks", phaseTicks);
+        tag.putInt("Replans", replans);
+        tag.putInt("Idle", idleTicks);
+        tag.putInt("Swings", swings);
+        tag.putBoolean("Reported", reported);
+        tag.putLong("DockedFor", dockedAt < 0L ? -1L : Math.max(0L, now - dockedAt));
+        ListTag points = new ListTag();
+        for (Vec3 point : route) {
+            points.add(DoubleTag.valueOf(point.x));
+            points.add(DoubleTag.valueOf(point.y));
+            points.add(DoubleTag.valueOf(point.z));
+        }
+        tag.put("Route", points);
+        tag.putInt("RouteIndex", routeIndex);
+        return tag;
+    }
+
+    /**
+     * Rebuilds a job from its saved state, or returns null if the tag is not (or no longer) a job that can go on: a job that was over, or one with a kind, direction or phase that is
+     * not known. A job that was planning plans again from where its vehicle stands; one that was on its way goes on along the saved route; the timeouts go on from where they were.
+     */
+    @Nullable
+    public static SiegeJob load(CompoundTag tag, long now) {
+        try {
+            if (!tag.hasUUID("Vehicle") || !tag.contains("Target")) {
+                return null;
+            }
+            Phase phase = Phase.valueOf(tag.getString("Phase"));
+            if (phase == Phase.DONE || phase == Phase.FAILED) {
+                return null;
+            }
+            SiegeKind kind = SiegeKind.valueOf(tag.getString("Kind"));
+            Direction normal = Direction.byName(tag.getString("Normal"));
+            if (normal == null || normal.getAxis().isVertical()) {
+                return null;
+            }
+            WallInfo wall = new WallInfo(BlockPos.of(tag.getLong("Target")), tag.getInt("TopY"), tag.hasUUID("GateEntity") ? tag.getUUID("GateEntity") : null,
+                    tag.contains("GateBlock") ? BlockPos.of(tag.getLong("GateBlock")) : null);
+            Vec3 anchor = new Vec3(tag.getDouble("AnchorX"), tag.getDouble("AnchorY"), tag.getDouble("AnchorZ"));
+            Vec3 stage = new Vec3(tag.getDouble("StageX"), tag.getDouble("StageY"), tag.getDouble("StageZ"));
+            SiegeJob job = new SiegeJob(tag.getUUID("Vehicle"), kind, wall, normal, tag.getInt("GroundY"), anchor, stage);
+            job.phase = phase;
+            job.climbSeats = tag.getInt("ClimbSeats");
+            job.phaseTicks = tag.getInt("PhaseTicks");
+            job.replans = tag.getInt("Replans");
+            job.idleTicks = tag.getInt("Idle");
+            job.swings = tag.getInt("Swings");
+            job.reported = tag.getBoolean("Reported");
+            long docked = tag.contains("DockedFor") ? tag.getLong("DockedFor") : -1L;
+            job.dockedAt = docked < 0L ? -1L : now - docked;
+            ListTag points = tag.getList("Route", Tag.TAG_DOUBLE);
+            List<Vec3> route = new ArrayList<>();
+            for (int i = 0; i + 2 < points.size(); i += 3) {
+                route.add(new Vec3(points.getDouble(i), points.getDouble(i + 1), points.getDouble(i + 2)));
+            }
+            job.route = route;
+            job.routeIndex = Mth.clamp(tag.getInt("RouteIndex"), 0, route.size());
+            if (phase == Phase.ADVANCE && route.isEmpty()) {
+                job.phase = Phase.PLAN;
+            }
+            return job;
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     // ---- bookkeeping ----

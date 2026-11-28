@@ -153,6 +153,34 @@ public final class BlueprintStore {
         return design;
     }
 
+    /**
+     * Gives a blueprint of a player a new display name. The id and the file name stay as they are, so builds and plans that use the blueprint keep working.
+     * Throws when the blueprint does not exist or the file cannot be written.
+     */
+    public static BuildingDesign rename(MinecraftServer server, UUID owner, ResourceLocation id, String name) throws DesignException {
+        Map<ResourceLocation, BuildingDesign> map = BY_OWNER.get(owner);
+        BuildingDesign old = map == null ? null : map.get(id);
+        if (old == null) {
+            throw new DesignException("that blueprint does not exist");
+        }
+        JsonObject json = old.toJson();
+        json.addProperty("name", name);
+        BuildingDesign design = BuildingDesign.parse(id, json, owner);
+        String path = id.getPath();
+        String slug = path.substring(path.lastIndexOf('/') + 1);
+        Path file = root(server).resolve(owner.toString()).resolve(slug + ".json");
+        try {
+            Files.createDirectories(file.getParent());
+            try (Writer writer = Files.newBufferedWriter(file, StandardCharsets.UTF_8)) {
+                GSON.toJson(design.toJson(), writer);
+            }
+        } catch (IOException e) {
+            throw new DesignException("could not write the blueprint file: " + e.getMessage());
+        }
+        map.put(id, design);
+        return design;
+    }
+
     /** Deletes a blueprint of a player. Returns whether it existed. */
     public static boolean delete(MinecraftServer server, UUID owner, ResourceLocation id) {
         Map<ResourceLocation, BuildingDesign> map = BY_OWNER.get(owner);

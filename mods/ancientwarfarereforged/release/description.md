@@ -14,6 +14,7 @@ This one file holds all five Ancient Warfare modules: **Core, Vehicles, Automati
 - Spectre Lib (required)
 - JEI (optional)
 - Jade or WTHIT (optional, for look-at tooltips on NPCs and worksites)
+- Ice and Fire, Weather2 (with CoroUtil), Serene Seasons (with GlitchCore), Farmer's Delight, JourneyMap and Xaero's Minimap (all optional, see Optional mod support)
 
 ## Settlements
 - Mark out your land with **boundary markers**, with no town hall range limit.
@@ -68,6 +69,16 @@ This one file holds all five Ancient Warfare modules: **Core, Vehicles, Automati
 
 ## Structures
 Only the craftable gates are included: 7 gate types. There are no coin stacks, fire pits or totems, and the original structure templates, builder and world generation are **not** included.
+
+## Optional mod support
+Nothing below is needed. Each part only works when the other mod is installed, and each has an `enabled` switch in the config.
+- **Ice and Fire:** its dragons and monsters count as threats. Dragons raise the alarm from far away, civilians run from them, archers and siege crews shoot them first, and unbrave melee soldiers keep their distance. Dragonbone and dragonsteel gear works for soldiers.
+- **Weather2:** settlements warn of severe storms, tornadoes and sandstorms. NPCs go indoors, outdoor work pauses and ship helmsmen head for a dock.
+- **Serene Seasons:** farms only sow what is fertile in the current season, winter makes NPCs eat more and the cold hurts the morale of NPCs without a home, and the hall shows the season.
+- **Farmer's Delight:** farms plant its crops and rice, knives count as tools, hearty meals give NPCs their effects and the innkeeper cooks in a kitchen room you build.
+- **Xaero's Minimap:** a Share waypoint button posts a clickable waypoint to your own chat.
+- **JourneyMap:** your settlements show on the map with a waypoint and their border.
+- **Mo' Bends and Dynamic Surroundings:** NPCs work with them as with vanilla mobs; nothing to set up.
 
 ## Good to know
 - Back up your worlds. This is a first release.

@@ -13,6 +13,7 @@ import io.github.capttracker.ancientwarfarenpc.settlement.Activity;
 import io.github.capttracker.ancientwarfarenpc.settlement.Settlement;
 import io.github.capttracker.ancientwarfarenpc.settlement.SettlementConfig;
 import io.github.capttracker.ancientwarfarenpc.settlement.SettlementLife;
+import io.github.capttracker.ancientwarfarenpc.settlement.StormWarnings;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.BedBlock;
@@ -58,6 +59,8 @@ public class NpcAIScheduleGoal extends NpcAI<NpcPlayerOwned> {
     private int patrolIndex;
     private int pauseTicks;
     private long shelterRetry;
+    /** True while the shelter plan is for a storm warning and not for the rain. */
+    private boolean stormPlan;
 
     public NpcAIScheduleGoal(NpcPlayerOwned npc) {
         super(npc);
@@ -75,6 +78,18 @@ public class NpcAIScheduleGoal extends NpcAI<NpcPlayerOwned> {
             return Plan.NONE;
         }
         settlement = found.get();
+        stormPlan = false;
+        if (StormWarnings.isShelterWarned(npc)) {
+            // a storm warning (Weather2 integration): everyone who is not asleep goes indoors; a worker that is already indoors with indoor work keeps at it
+            Activity now = npc.getActivity();
+            if (now != Activity.SLEEP || npc.isOnNightWatch()) {
+                if (now == Activity.WORK && StormWarnings.isSettled(npc)) {
+                    return Plan.NONE;
+                }
+                stormPlan = true;
+                return Plan.SHELTER;
+            }
+        }
         boolean raining = SettlementConfig.rainShelter && level.isRaining();
         switch (npc.getActivity()) {
             case SLEEP:
@@ -331,12 +346,15 @@ public class NpcAIScheduleGoal extends NpcAI<NpcPlayerOwned> {
 
     private void tickShelter(ServerLevel level, Settlement s) {
         npc.addAITask(TASK_RAIN);
-        npc.think("rain");
+        npc.think(stormPlan ? "storm" : "rain");
+        if (stormPlan) {
+            npc.setDoing("storm_shelter", spot, net.minecraft.network.chat.Component.empty());
+        }
         if (spot == null) {
             if (level.getGameTime() < shelterRetry) {
                 return;
             }
-            spot = findShelter(level, s);
+            spot = stormPlan ? findStormShelter(level, s) : findShelter(level, s);
             spotTicks = 0;
             if (spot == null) {
                 shelterRetry = level.getGameTime() + 100;
@@ -350,6 +368,19 @@ public class NpcAIScheduleGoal extends NpcAI<NpcPlayerOwned> {
             spot = null; // unreachable
             shelterRetry = level.getGameTime() + 200;
         }
+    }
+
+    /** In a storm: where the NPC is if it is under a roof inside the land, else its own bed (home) when that is near, else the nearest roofed spot or the hall. */
+    private BlockPos findStormShelter(ServerLevel level, Settlement s) {
+        BlockPos here = npc.blockPosition();
+        if (s.contains(here) && StormWarnings.isRoofed(level, here)) {
+            return here;
+        }
+        Optional<BlockPos> bed = s.getBedOf(npc.getUUID());
+        if (bed.isPresent() && level.isLoaded(bed.get()) && level.getBlockState(bed.get()).getBlock() instanceof BedBlock && bed.get().closerThan(here, 96.0D)) {
+            return bed.get();
+        }
+        return findShelter(level, s);
     }
 
     private BlockPos findShelter(ServerLevel level, Settlement s) {

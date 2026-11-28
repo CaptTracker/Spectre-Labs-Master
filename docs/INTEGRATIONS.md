@@ -1,0 +1,157 @@
+# Optional mod integrations
+
+Notes on the integrations of the third round (see "Third round: mod integrations" in `REWORK-ROADMAP.md`). Every integration is optional: the other mod is a `compileOnly` dependency of the module that needs it (never of the shared conventions, never shaded or jar-in-jar), it is declared `type="optional"` in the module's `neoforge.mods.toml`, and no class of it is loaded unless the mod is installed.
+
+## The shared pattern (`mods/ancientwarfarenpc`, package `compat`)
+
+- `ModCompat` is the registry. Each integration is a `ModCompat.Slot<T>`: an interface of the `compat` package (what the rest of the mod may ask), a no-op default on that interface, and a factory for the real implementation in `compat/<modid>`.
+- `ModCompat.init()` runs once in common setup (`AwNpcs.onCommonSetup`). For every slot whose mod is loaded (`ModList.get().isLoaded(modId)`) it swaps the no-op for the real implementation. A factory that throws is logged and the slot stays on its no-op. A slot can switch itself off later with `slot.disable()` (Weather2 does this on its first error).
+- The rest of the mod calls `ModCompat.MONSTERS.get()` or `ModCompat.WEATHER.get()` and `slot.isActive()`. It never names a class of the other mod.
+- Prefer registry ids and tags over class references. An implementation with no reference to the other mod at all is fine (Ice and Fire).
+- To add an integration: write the interface with its no-op, write the implementation in `compat/<modid>`, add a slot field and nothing else in `ModCompat`, put its options in a section of `SettlementConfig` with an `enabled` switch, text in `en_us.json`, a `compileOnly` line in the module's `build.gradle` (only if classes are referenced), and an optional dependency in `src/main/templates/META-INF/neoforge.mods.toml`.
+- The older `ICompat`/`CompatLoader` of the core module (Twilight Forest, Epic Siege) is left as it is; new integrations use `ModCompat`.
+
+The existing optional compats for Jade and WTHIT are untouched (they load through the annotation scanning of those mods).
+
+## Ice and Fire: Community Edition (`iceandfire`)
+
+Dependencies used: `maven.modrinth:iceandfire-ce:2.0` from the Modrinth maven (`https://api.modrinth.com/maven`). It needs Uranus (`[2.3.2,)`), Jupiter (`[2.3,)`) and GeckoLib at runtime. There is no compile dependency in the build: the integration has no class reference. Optional dependency in the toml: `iceandfire` `[2.0,)`.
+
+What it does
+- Detection by registry id and tags, no classes: the dragons are the entity types in the tags `iceandfire:fire_dragon`, `iceandfire:ice_dragon` and `iceandfire:lightning_dragon` (and the ids of `dragon_ids`). The other monsters are the ids of `monster_ids` (default: deathworm, death_worm, cyclops, hydra, troll, gorgon, siren, sea_serpent, cockatrice, `dread_*`, stymphalian_bird). An id without a namespace is an `iceandfire` id, a trailing `*` matches a prefix.
+- Threats: a wild monster (one without an owner actor) counts for `SettlementThreat` inside the land. A tamed one has its owner's actor and follows the faction relation as before. Owned NPCs treat the monsters as hostile (`NpcPlayerOwned.isHostileTowards`), so civilians flee, guards and soldiers target them by their guard mode (`NpcAIAttackNearest`), and brave workers fight them.
+- Dragons are major threats: they count from `dragon_alarm_range` blocks beyond the border of the land (96 by default), one dragon raises the automatic alarm alone (`dragon_alarm_alone`), and the bells ring with the alarm as for any alarm. Civilians flee a dragon from `dragon_flee_range` blocks (48), also from above.
+- Ranged fighters: archers, and crews of siege weapons, land vehicles and ship guns pick a dragon before nearer targets (`ranged_prefer_dragons`): in the target goal (also switching from a nearer target once a second) and in the ship gunner's target choice.
+- Melee soldiers that are not brave and have no orders keep `melee_keep_away_distance` blocks (24) from a dragon: they do not pick it as a target (`AIHelper.isTarget`), walk away from it (`NpcAIKeepClearOfDragons`, new goal), do not rally to it, and shelter in the alarm when dragons are the only threats. Brave NPCs, archers and crews, and NPCs with orders are not affected.
+- Multipart hitboxes: a vanilla/NeoForge `PartEntity` counts as its parent (`SettlementThreat`, `MonsterRules.wholeOf`). The parts of the Ice and Fire creatures are no `PartEntity`: they are entities of their own (types `dragon_multipart`, `multipart`, `cylcops_multipart`, `hydra_multipart`) with a public `getParent()`, which is called by reflection (cached, failing quietly). The command baton resolves a part it is aimed at to the creature before the order is sent. The creatures themselves are living entities and are found by the normal scans, so a part is never counted as a second threat.
+- Gear: the soldier gear logic compares attack damage and armour attributes and has no namespace filter. The weapon kinds now also accept any `SwordItem` or `AxeItem` that is not in the item tags (`NpcAIPlayerOwnedEquipGear`, `SettlementNeeds` sword need, `TraitEffects.isArmed`), so dragonbone and dragonsteel weapons are normal swords and axes; armour is any `ArmorItem`; bows are any `BowItem`.
+
+Turn it off: `ice_and_fire.enabled = false` in `ancientwarfarenpc-settlements.toml`, or do not install the mod.
+
+Files: `compat/MonsterCompat.java`, `compat/iceandfire/IceAndFireMonsters.java`, `ai/MonsterRules.java`, `ai/owned/NpcAIKeepClearOfDragons.java`, and changes in `settlement/SettlementThreat.java`, `entity/NpcPlayerOwned.java` (`isHostileTowards`), `entity/NpcCombat.java` (new goal, `shouldRally`), `ai/AIHelper.java`, `ai/NpcAIAttackNearest.java`, `ai/NpcAIFleeHostiles.java`, `ai/owned/NpcAIPlayerOwnedRally.java`, `ai/vehicle/NpcAIShipCrew.java`, `npccommand/NpcCommand.java`.
+
+Config (`ice_and_fire`): `enabled`, `monster_ids`, `dragon_ids`, `dragon_alarm_range`, `dragon_alarm_alone`, `dragon_flee_range`, `melee_keep_away_distance`, `ranged_prefer_dragons`.
+
+Deviations
+- No `compileOnly` line for Ice and Fire, as the integration needs no class of the mod. The coordinates above were checked to resolve.
+- The death worm has the id `deathworm` in this version (the roadmap says `death_worm`), so both are in the default list.
+- Dragons that sleep are not told apart (that would need a class of the mod); a sleeping dragon inside the land counts as a threat.
+
+## Weather2 (`weather2`, needs CoroUtil)
+
+Dependencies used: `maven.modrinth:weather-storms-tornadoes:1.21.0-2.8.7` and `maven.modrinth:coroutil:1.21.0-1.3.8`, both `compileOnly` in `mods/ancientwarfarenpc/build.gradle` (Modrinth maven). Optional dependencies in the toml: `weather2` `[1.21.0-2.8.7,)`, `coroutil` `[1.21.0-1.3.7,)`. Weather2 is All Rights Reserved: nothing of it is copied, shipped or bundled.
+
+How it reads the weather: `compat/weather2/Weather2Storms` uses `ServerTickHandler.getWeatherManagerFor(level)` and `WeatherManager.getStormObjects()`: `StormObject` clouds (public `levelCurIntensityStage`, `isTornadoFormingOrGreater()`, `isCycloneFormingOrGreater()`, `size`, `pos`) and `WeatherObjectParticleStorm` sandstorms (`getType()`, `getIntensity()`, `getSize()`). A tornado counts from its centre, a storm cloud from half its size, a sandstorm from half its area, and the distance to the hall is measured to that edge. Every call is in `try/catch (Throwable)`: the first error logs one warning and switches the integration off for the session (`ModCompat.WEATHER.disable()`).
+
+What it does
+- Every `scan_seconds` (3) `StormWarnings.tick` senses the worst severe weather within `warning_distance` (160) blocks of each hall: a storm of stage `min_storm_stage` or more (3 = hail), any tornado (or waterspout), or a sandstorm of at least `sandstorm_min_intensity`. The warning ends `calm_seconds` (15) after the storm is gone. It is not saved.
+- Shelter (`shelter`): the NPCs of the settlement go indoors through the schedule goal's shelter plan (same behaviour as the rain shelter): their own bed when near, else a roofed spot inside the land, else the hall. Sleeping NPCs stay in bed. A worker that is already under a roof with an indoor work site keeps working. NPCs with orders or a target, and NPCs in an alarm, are left to their own goals. Children shelter like everyone.
+- Outdoor work pauses (`pause_outdoor_work`): `NpcBase.shouldBeAtHome()` (which every work goal asks, and wandering too) is true while the NPC is outside or works at an outdoor site.
+- Ships (`ships_seek_dock`): a helmsman with a storm within the warning distance of the ship sails for the nearest dock of its owner (within 256 blocks, loaded) and holds the ship there; with no dock in reach it holds the ship where it is. The sail order waits and goes on when the storm is gone (`ShipCombat.stormTick`).
+- Warnings: the town hall overview lists "Storm warning: a tornado / severe storm / sandstorm is near" with the alerts (not saved, added when the hall state is built), the census and talk screen show the task "Sheltering from the storm" (or "Sailing to dock (storm)" / "Holding ship (storm)"), the NPCs think "storm" and "storm_ship" thoughts, and the founder gets one chat message for each storm (`announce_to_founder`, once for each Weather2 storm id).
+
+Turn it off: `weather2.enabled = false`, or the single switches above, or do not install the mod.
+
+Files: `compat/WeatherCompat.java`, `compat/weather2/Weather2Storms.java`, `settlement/StormWarnings.java`, and changes in `settlement/SettlementData.java`, `ai/owned/NpcAIScheduleGoal.java`, `entity/NpcBase.java` and `entity/NpcPlayerOwned.java` / `NpcTrader.java` (`pausedByStorm`), `ai/vehicle/ShipCombat.java`, `menu/TownHallMenu.java`.
+
+Config (`weather2`): `enabled`, `warning_distance`, `min_storm_stage`, `sandstorms`, `sandstorm_min_intensity`, `scan_seconds`, `calm_seconds`, `shelter`, `pause_outdoor_work`, `ships_seek_dock`, `announce_to_founder`.
+
+Deviations
+- Snowstorms (the third particle storm type) are not treated as severe; only storms, tornadoes and sandstorms are.
+- The warning is not drawn on the talk screen header; the talk screen and census show it through the NPC's own task and thoughts.
+- The outdoor test is "no roof two or more blocks above" at the NPC or at its work block, not a check of the room (`RoomScanner`); a settlement has no new worksite blocks for this.
+
+## Serene Seasons (`sereneseasons`, needs GlitchCore)
+
+Dependencies used: `maven.modrinth:serene-seasons:pHEgQQUE` (Serene Seasons 10.1.0.9, NeoForge 1.21.1) and `maven.modrinth:glitchcore:S2TfWrZR` (GlitchCore 2.1.0.2, NeoForge 1.21.1), both `compileOnly` in `mods/ancientwarfare/build.gradle`. The Modrinth maven needs the version id here: the version number `10.1.0.9` is shared by the Forge, Fabric and NeoForge files, and the maven hands out the Forge one for it. Optional dependency in the tomls of the core, automation and NPC modules: `sereneseasons` `[10.1.0.0,)`. At run time Serene Seasons needs GlitchCore `[2.1.0.0,)`.
+
+Where the code is: the farms (automation module) and the settlements (NPC module) both need the seasons, and neither depends on the other, so the one adapter is in the core module that both use: `compat/season/SeasonCompat` (interface, no-op default `NONE`, holder `SeasonCompat.get()`), `compat/sereneseasons/SereneSeasonsCompat` (the entry, an `ICompat` of the existing `CompatLoader`, called in common setup only when the mod is loaded) and `compat/sereneseasons/SereneSeasonsAdapter` (the only class that names Serene Seasons). A failing call logs one warning and puts the no-op back.
+
+What it does
+- Fertility: `SeasonCompat.isFertile` asks `ModFertility.isCropFertile` (the check Serene Seasons uses for growth: the season tags of the crops, infertile and tropical biomes, the underground level) and also accepts greenhouse glass within 16 blocks above, as the mod does. A crop that no season tag lists is fertile all year, so crops of other mods are only restricted when a pack tags them (`sereneseasons:spring_crops` and the others).
+- Farms: the crop farm sows an item only where the check says yes (`FarmSeasons`, `CropFarmBlockEntity.canSow`); the machine loop, the task list of the staffed workers and the replanting after a harvest (`CropDefault`) all use it. The fruit farm does the same for its plantables. Out of season they still harvest, fertilise and till. The status of the farm is `out_of_season` (`IWorksiteStatus.OUT_OF_SEASON`, "Out of season, not planting" in the Jade and WTHIT tooltip); a worker that waits at such a farm says so in its thoughts and in the census ("Waiting for the season", key `work.out_of_season`).
+- Year length: with `use_serene_seasons_year` on, `SettlementConfig.effectiveYearLengthDays()` is the length of the Serene Seasons cycle in days of 24000 ticks (`Seasons.tick` refreshes it once a second) instead of `year_length_days`. It is used for the age of children and the time to adulthood. Nothing is saved.
+- Winter (not in tropical biomes): NPCs use `winter_extra_food_percent` percent more food (extra hunger in `NpcPlayerOwned.aiStep`, and the food the settlement wants in stock for the "food" need and the food points of the settlement morale), and an NPC without a home (a bed) gets the morale factor `cold` (`winter_cold_morale` points).
+- The hall overview shows the season at the hall ("Season: Early winter"), next to the food line.
+
+Turn it off: `serene_seasons.enabled = false` in `ancientwarfarenpc-settlements.toml` (hall, year, winter) and `serene_seasons.enabled = false` in `ancientwarfareautomation-worksites.toml` (farms), or do not install the mod.
+
+Files: core `compat/season/SeasonCompat.java`, `compat/sereneseasons/*`, `api/IWorksiteStatus.java`, `init/AwCoreMisc.java`; automation `block/entity/worksite/FarmSeasons.java`, `FarmWorksiteBlockEntity.java` (status), `cropfarm/CropFarmBlockEntity.java`, `cropfarm/CropDefault.java`, `fruitfarm/FruitFarmBlockEntity.java`, `config/AWAutomationStatics.java`; NPC `settlement/Seasons.java`, `settlement/SettlementConfig.java`, `settlement/SettlementData.java`, `settlement/NpcMorale.java`, `settlement/SettlementNeeds.java`, `settlement/SettlementMorale.java`, `settlement/family/FamilyAge.java`, `entity/NpcPlayerOwned.java`, `menu/TownHallMenu.java`, `client/screen/GuiTownHallInventory.java`, `ai/owned/StaffedWork.java`.
+
+Config: NPC `serene_seasons`: `enabled`, `use_serene_seasons_year`, `winter_extra_food_percent` (15), `winter_cold_morale` (6). Automation `serene_seasons`: `enabled`.
+
+Deviations
+- The GlitchCore build is 2.1.0.2 (2.1.0.0 is a NeoForge 1.21.1 build too; the newest one is used).
+- The adapter is in the core module, not in the automation or NPC module, because both need it. The core `build.gradle` gets the Modrinth maven and the two `compileOnly` lines.
+- The farms follow the seasons through their own switch in the automation config, as the settlement parts have theirs in the settlement config (two modules, two config files).
+- The season is read at the hall for the overview and for the winter food factor, and at the NPC for hunger and cold; the farms read it at the plant position.
+- Crops of other mods that no season tag lists (Farmer's Delight tomatoes and cabbages, for example) are never out of season: nothing in this change tags them.
+
+## Farmer's Delight (`farmersdelight`)
+
+Dependencies used: `maven.modrinth:farmers-delight:1.21.1-1.3.4` (version id `XTVZDOol`, the only loader of that version number is NeoForge), `compileOnly` in `mods/ancientwarfarenpc/build.gradle`, for the kitchen only. The automation module and the food and tool parts of the NPC module use registry ids and tags and no class of the mod. Optional dependency in the tomls of the automation and NPC modules: `farmersdelight` `[1.3.0,)`.
+
+What it does
+- Farms: tomatoes, cabbages and onions are crop blocks (`CropBlock`) with seed items that are block items, so the crop farm already plants, harvests and replants them like wheat. Rice grows in water, so the crop farm has paddies (`compat/farmersdelight/RiceFields`): a column whose top is a source block of water with air above and soil under it is a place to plant, but only for the items of `paddy_crop_items` (default `farmersdelight:rice`) and only where the rice block can stand (its own `canSurvive`); no other seed goes into water, and rice goes nowhere else. The rice plant stays in the water and grows panicles above it; `RicePanicles` (an `ICrop` registered through the core `CompatLoader` when the mod is loaded) harvests ripe panicles with a virtual iron knife (flint knife as fallback), so they give rice as the loot table does for a knife, and does not replant.
+- Knives as tools: `WorkTool.KNIFE`, recognised by the item tags `c:tools/knife` and `farmersdelight:tools/knives` and the item ability `knife_dig`, wanted by the blocks of `c:mineable/knife`, `farmersdelight:mineable/knife` and the rice panicles. A knife is the second choice where another tool fits (pumpkins: the axe), the only one where none does. It counts as a tool in the tool-switching of the staffed workers and the builders. It is not a weapon category and not the role tool of any role.
+- Food: NPCs eat the foods as any other food (their food value comes from the food component). A food with an effect of `hearty_meal_effects` (default `farmersdelight:nourishment` and `farmersdelight:comfort`, which the meals carry) is a hearty meal: the NPC gets the harmless effects of the food (each with its chance) and the morale factor `hearty_meal` (`hearty_meal_morale`, 4) for a day (`compat/HeartyMeals`; new optional NBT `lastHeartyMealAt` on the NPC). It works when an NPC takes food from storage, when a player hands it food and when the innkeeper serves it.
+- The cook: no new block and no new role. An enclosed room (roofed, with a door, up to `hand_built_room_max_cells` cells, see `RoomScanner`) of the settlement that holds a cooking pot over a heat source, or a cutting board, is a kitchen (`settlement/building/KitchenSites`, found every 20 seconds and not saved, like the hand-built chapels). Any building can be one, also an inn; the innkeeper cooks (`ai/owned/NpcAICook`, a goal of `NpcInnkeeper` above the inn work, in the work hours). It looks every 5 seconds whether the settlement wants meals (fewer than `cook_meal_stock_per_member` meals per member in the storages and the inn pantries, or a food need in the needs list of the hall), picks the cooking recipe whose ingredients the storages hold that gives the most food (less where that meal is already stocked; with a food need simply the most), takes the ingredients and the container from the storage, puts them into a free heated pot, waits while the pot cooks by itself, takes the meal and puts it into a storage that has room. The inn then serves the meals from the pantry and from the storages as it does any food. Without a food shortage and with a cutting board, it also cuts a food that stays as much food (a pie into slices) with a knife from the storage (`cook_use_cutting_board`). Each finished dish and cut gives crafting experience. A recipe that needs something the storages lack is skipped.
+- Recipes come from the recipe manager by the types `farmersdelight:cooking` and `farmersdelight:cutting`; the cook goal sees only `Ingredient` and `ItemStack`. `compat/KitchenCompat` (interface, no-op `NONE`) and the slot `ModCompat.KITCHEN` are the guarded entry point; `compat/farmersdelight/FarmersDelightKitchen` is the only class of the NPC module that names Farmer's Delight (the pot and board block entities, the two recipe classes).
+
+Turn it off: `farmers_delight.enabled = false` in `ancientwarfarenpc-settlements.toml` (knives, hearty meals, the cook; `cook_enabled`, `knives_as_tools` switch single parts) and `farmers_delight.enabled = false` in `ancientwarfareautomation-worksites.toml` (rice paddies and the knife harvest), or do not install the mod.
+
+Files: automation `compat/farmersdelight/{RiceFields,RicePanicles,FarmersDelightFarmCompat}.java`, `cropfarm/CropFarmBlockEntity.java`, `cropfarm/CropDefault.java`, `init/AwAutomationBase.java`, `config/AWAutomationStatics.java`; NPC `compat/{KitchenCompat,HeartyMeals,ModCompat}.java`, `compat/farmersdelight/FarmersDelightKitchen.java`, `settlement/building/KitchenSites.java`, `ai/owned/{NpcAICook,WorkTool}.java`, `entity/{NpcInnkeeper,NpcPlayerOwned}.java`, `inn/InnApi.java`, `settlement/{NpcMorale,SettlementConfig,SettlementData}.java`.
+
+Config: NPC `farmers_delight`: `enabled`, `knives_as_tools`, `hearty_meal_effects`, `hearty_meal_morale`, `cook_enabled`, `cook_meal_stock_per_member` (2.0), `cook_use_cutting_board`. Automation `farmers_delight`: `enabled`, `paddy_crop_items`.
+
+Deviations
+- The knife tag is `c:tools/knife` (singular) in this version of the mod, not `c:tools/knives` as the plan says; `farmersdelight:tools/knives` is the second tag.
+- The cook is the innkeeper, not a new role: a new role would need its own entity type, spawn egg, skin, translations and job board entry, and the owner asked for no new blocks and no extra machinery.
+- The cook works in the work hours only, so an inn is closed for the minutes the keeper is in the kitchen; meals are served in the social hours as before.
+- A pot makes one batch of one dish at a time and the cook uses one pot per round (the other pots of the kitchen are only used for a meal that is waiting in them).
+- The kitchen rooms need a heat source under the pot when they are found: an unlit stove makes the pot no kitchen until it is lit and the next scan (20 seconds) has run. The cook never lights or refuels a stove.
+- Farmer's Delight crops are not given Serene Seasons tags (see above); straw is not harvested by the farms.
+- The rice plant is found by id (`paddy_crop_items`), so another mod's water crop can be added to the list, but only the rice panicle block of Farmer's Delight has a special harvest handler.
+- Not run in a game: the full build and the compile against both mods were checked; no game or server was started, so the behaviour with the mods installed was read from their code, not played. Runtime dependencies for a test server: Serene Seasons 10.1.0.9 (NeoForge) with GlitchCore 2.1.0.2 (NeoForge), and Farmer's Delight 1.21.1-1.3.4, from the Modrinth maven (`https://api.modrinth.com/maven`).
+
+## Maps: Xaero's Minimap and JourneyMap (client side)
+
+Dependencies used: Xaero's Minimap needs none (it is a chat message format). JourneyMap: `info.journeymap:journeymap-api-neoforge:2.0.0-1.21.1`, `compileOnly` in `mods/ancientwarfarenpc/build.gradle`, from `https://maven.blamejared.com` (group restricted to `info.journeymap`). The JourneyMap licence forbids redistribution: nothing of it is copied or bundled. Optional dependencies in the toml (side CLIENT): `journeymap` `[1,)` and `xaerominimap` `[1,)`.
+
+### Share waypoint (Xaero's Minimap)
+- `client/MapShare` posts a line to the local chat only (`Gui.getChat().addMessage`, never sent to the server). With Xaero's Minimap (`xaerominimap` or `xaerominimapfair`, checked with `ModList`) the line is `xaero-waypoint:<name>:<initials>:<x>:<y>:<z>:<colour 0-15>:false:0:<set>`, which Xaero turns into a clickable "add waypoint" line. The set is `Internal-overworld-waypoints`, `Internal-the-nether-waypoints`, `Internal-the-end-waypoints`, or `Internal-dim%<namespace>$<path>-waypoints`. Colons in names are replaced by spaces. Without Xaero the line is plain text "Name: x y z (dimension)" whose click copies the coordinates (no command runs).
+- Buttons: "Share waypoint" on the town hall Overview (the hall), on the NPC talk screen (the NPC where it stands now), and right click on a census row (the member).
+- Turn it off: client config `ancientwarfarenpc-client.toml`, `xaeros_minimap.enabled = false`.
+
+### JourneyMap plugin
+- `compat/journeymap/client/SettlementMapPlugin` is annotated `@JourneyMapPlugin` (API 2.0.0) and is only found and loaded by JourneyMap, so a game without JourneyMap never loads it. It shows a waypoint (non-persistent) at the hall of each settlement the player owns, founded, or belongs to through its faction, and the border as a polygon overlay (the marker polygon, or a circle of the default radius with fewer than three markers), in the colour of the owner. It rebuilds when the list changes or the config changes; a failure logs one warning and stops the display for the session.
+- Data: new server-to-client payload `settlement_map` (`settlement/SettlementMapSync`, stored on the client in `ClientSettlementMap`): name, dimension, hall, markers, radius, colour of each such settlement, in all dimensions. It is sent at login and when the list changes (checked every 5 seconds). Nothing is saved. The older geometry payload (only while holding a marker or the ledger) is unchanged.
+- Turn it off: client config `journeymap.enabled = false` (or only `journeymap.waypoints` / `journeymap.borders`), or do not install JourneyMap.
+
+Files: `client/MapShare.java`, `compat/journeymap/client/SettlementMapPlugin.java`, `settlement/SettlementMapSync.java`, `settlement/ClientSettlementMap.java`, and changes in `settlement/SettlementNetwork.java`, `settlement/SettlementEvents.java`, `settlement/client/SettlementClient.java`, `config/AWNPCStatics.java`, `client/screen/{GuiTownHallInventory,GuiNpcTalk,CensusView}.java`.
+
+Deviations
+- The Xaero jar was not downloaded or read. The share format is written from memory of the mod's behaviour and third-party mods that parse it; the short form (set name last, no rotation fields) is used because newer versions accept it. It was not tested in a game: if a Xaero version rejects the line, change `MapShare.xaeroString` only.
+- No share button for ships (the task listed the hall, the census and the talk screen).
+- No markers for ships and caravans in JourneyMap: the client does not know which vehicles are the player's, so it would need another sync. Not done.
+- The new payload is registered with the same version string as the other settlement payloads; an older client without it cannot join a server with it (same as every new payload).
+- JourneyMap's `@JourneyMapPlugin` in the `common` package is used (the one in the `client` package is deprecated for removal). Not run with JourneyMap installed, only compiled.
+
+## Mo' Bends and Dynamic Surroundings (compatibility only)
+
+No dependency, no code. What was checked:
+- NPC rendering: `NpcRenderer` extends the vanilla `HumanoidMobRenderer` and `NpcModel` extends `PlayerModel` (baked from `ModelLayers.PLAYER` and `PLAYER_SLIM`); armour uses `HumanoidArmorLayer` with the vanilla armour layers and held items the vanilla item layer. `NpcModel` only adds `updateArmPoses`; it does not replace `setupAnim`, so animation mods that hook the humanoid model or the player/humanoid renderers can apply to the NPCs. Skins are normal player skin textures.
+- Sounds: every sound we add is a `SoundEvent` registered through `ModRegistrar.sound` (`SoundEvent.createVariableRangeEvent`, i.e. normal distance attenuation), listed in each module's `sounds.json`. NPCs, vehicles and worksites play them (and vanilla events) with `Entity.playSound` / `Level.playSound`; the bard plays registered tunes with `SoundSource.NEUTRAL`. The only direct use of the sound manager is the GUI click (`SimpleSoundInstance.forUI`). There is no custom audio engine, so sound-physics and ambience mods work on them as on vanilla sounds.
+- For players: nothing to configure. If an animation mod changes the player model, NPCs follow it only where that mod applies to humanoid mobs; held-item poses of NPCs are set in `NpcModel.updateArmPoses` and a mod that rewrites arm poses may override them. Not tested in a game with either mod.
+
+## Final check
+
+What was checked after all the integrations were in, and what it found.
+
+- **No class of an optional mod outside `compat/<modid>`.** All imports and fully qualified names of `iceandfire`, `weather2`/`coroutil`, `sereneseasons`/`glitchcore`, `farmersdelight`, `journeymap` and `xaero` were searched for in the five modules: they are only in `compat/sereneseasons` (core), `compat/weather2`, `compat/farmersdelight` and `compat/journeymap/client` (NPC module). The Ice and Fire code and the farms of the automation module use no class of the other mods at all. There are no mixins. Each real implementation is created from a lambda or from `ICompat.init()` only after `ModList.get().isLoaded(modId)`. The JourneyMap plugin class is only found and loaded by JourneyMap. Xaero's Minimap is not used by code at all: the share line is a chat string.
+- **Dependency declarations.** Every entry in a `neoforge.mods.toml` for these mods is `type="optional"`. A version range that does not match the installed version is a load error even for an optional dependency, so the ranges are loose: Farmer's Delight reports its mod version as `1.3.4` (not `1.21.1-1.3.4`), and the original range `[1.21.1-1.3.0,)` crashed the server at start with the mod installed; it is now `[1.3.0,)`. JourneyMap and Xaero's Minimap (client only, not run here) use `[1,)`, because their exact version strings were not checked.
+- **Without any of the mods:** `./gradlew :ancientwarfarereforged:runServer` starts, reaches `Done (`, no error in the log of the mod.
+- **With the server side mods:** one run with Ice and Fire, Weather2 with CoroUtil, Serene Seasons with GlitchCore and Farmer's Delight present: all load, `Optional integration with iceandfire / weather2 / farmersdelight is on` is logged, and the server reaches `Done (`. The only errors in the log are Jupiter and Ice and Fire saying their own config file does not exist yet on the first start. Nothing was played, so none of the behaviour was tried in game. JourneyMap and Xaero's Minimap are client only and were not run.
+- **Test dependencies used** (temporary `runtimeOnly` lines in `mods/ancientwarfarereforged/build.gradle` plus the Modrinth maven, removed again): `maven.modrinth:iceandfire-ce:soR168tk` (2.0), `maven.modrinth:jupiter:Jpcw76rq` (2.3.7), `maven.modrinth:uranus:1YdU56pR` (2.4.1), `maven.modrinth:geckolib:fTQxFFMT` (4.9.5), `maven.modrinth:weather-storms-tornadoes:1.21.0-2.8.7`, `maven.modrinth:coroutil:1.21.0-1.3.8`, `maven.modrinth:serene-seasons:pHEgQQUE` (10.1.0.9), `maven.modrinth:glitchcore:S2TfWrZR` (2.1.0.2), `maven.modrinth:farmers-delight:1.21.1-1.3.4`. Repository: `https://api.modrinth.com/maven` (group `maven.modrinth`). `localRuntime` does not exist in this build, `runtimeOnly` works.
+- **Old worlds.** The new saved fields are optional with defaults (`lastHeartyMealAt`; the storm warning, kitchens and winter flag are not saved). One thing to know: with Serene Seasons installed and `serene_seasons.use_serene_seasons_year` on (the default), the family year becomes the Serene Seasons year, so children of an existing world grow up on that scale from then on. Set it to false to keep `year_length_days`.
+- **Costs.** Weather2 is read once per `scan_seconds` for each settlement; the winter check of an NPC runs every 100 ticks; the kitchen search runs every 20 seconds for each settlement, scans at most 16 stations and is skipped when the integration is off.

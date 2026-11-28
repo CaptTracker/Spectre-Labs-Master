@@ -47,6 +47,7 @@ public final class AwCoreMisc {
         modBus.addListener(AwCoreMisc::onCommonSetup);
 
         CompatLoader.registerCompat(new FTBCompat());
+        CompatLoader.registerCompat(new io.github.capttracker.ancientwarfare.compat.sereneseasons.SereneSeasonsCompat()); // Serene Seasons (optional, see compat.season)
 
         NeoForge.EVENT_BUS.addListener(AwCoreMisc::onAddReloadListeners);
         NeoForge.EVENT_BUS.addListener(AwCoreMisc::onRegisterCommands);

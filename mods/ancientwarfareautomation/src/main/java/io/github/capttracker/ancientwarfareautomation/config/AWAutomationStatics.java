@@ -114,6 +114,14 @@ public final class AWAutomationStatics {
     public static int taskFailCooldownTicks = 600;
     /** Ticks a worksite keeps its task list before it scans again (it also rebuilds on a block change in its area). */
     public static int taskRescanTicks = 40;
+
+    // ---- optional mod integrations (third round) ----
+    /** Serene Seasons: if false, the farms plant whatever they have whatever the season. */
+    public static boolean sereneSeasonsEnabled = true;
+    /** Farmer's Delight: if false, the farms treat its crops like any other (no rice paddies, no knife for the rice harvest). */
+    public static boolean farmersDelightEnabled = true;
+    /** Items that a crop farm plants in a flooded cell (one block of water above soil, nothing but air above the water). The default is the rice of Farmer's Delight. */
+    public static java.util.List<String> paddyCropItems = java.util.List.of("farmersdelight:rice");
     /** The longest side branch of the quarry's branch mine mode. */
     public static int branchLength = 16;
     /** The farthest a fishing dock's boat sails from the dock (blocks). */
@@ -215,6 +223,9 @@ public final class AWAutomationStatics {
     private static final ModConfigSpec.IntValue TASK_CLAIM_TICKS;
     private static final ModConfigSpec.IntValue TASK_FAIL_COOLDOWN_TICKS;
     private static final ModConfigSpec.IntValue TASK_RESCAN_TICKS;
+    private static final ModConfigSpec.BooleanValue SERENE_ENABLED;
+    private static final ModConfigSpec.BooleanValue FD_ENABLED;
+    private static final ModConfigSpec.ConfigValue<List<? extends String>> FD_PADDY_ITEMS;
     private static final ModConfigSpec.IntValue BRANCH_LENGTH;
     private static final ModConfigSpec.IntValue DOCK_RANGE;
     private static final ModConfigSpec.IntValue DOCK_TRIP_CATCHES;
@@ -367,6 +378,18 @@ public final class AWAutomationStatics {
                 "If false, a switched-off recipe is never made. Either way, what the settlement needs is made before what is merely below its \"keep N\" target.")
                 .define("demand_enables_recipes", true);
         server.pop();
+        server.comment("Serene Seasons (optional integration, server side). Nothing here has an effect without the mod.").push("serene_seasons");
+        SERENE_ENABLED = server.comment("Default = true", "If true, the crop farm and the fruit farm only plant what is fertile in the current season at that position (the check Serene Seasons uses for growth).",
+                "Out of season they keep harvesting and tilling, and say \"out of season\" in their status. If false, they plant whatever they have.")
+                .define("enabled", true);
+        server.pop();
+        server.comment("Farmer's Delight (optional integration, server side). Nothing here has an effect without the mod.").push("farmers_delight");
+        FD_ENABLED = server.comment("Default = true", "If true, crop farms plant rice in flooded cells and harvest its panicles with a knife. Tomatoes, cabbages and onions need no switch: they are plain crops.")
+                .define("enabled", true);
+        FD_PADDY_ITEMS = server.comment("Items a crop farm plants in a cell with one block of water above soil (an id without a namespace is a minecraft id).",
+                "The cell must be open to the air above the water. Everything else a crop farm plants is never put into water.")
+                .defineListAllowEmpty("paddy_crop_items", List.of("farmersdelight:rice"), () -> "farmersdelight:rice", o -> o instanceof String);
+        server.pop();
         SERVER_SPEC = server.build();
     }
 
@@ -505,6 +528,9 @@ public final class AWAutomationStatics {
         tanneryNeedsWater = TANNERY_NEEDS_WATER.get();
         demandEnablesRecipes = DEMAND_ENABLES_RECIPES.get();
         taskRescanTicks = TASK_RESCAN_TICKS.get();
+        sereneSeasonsEnabled = SERENE_ENABLED.get();
+        farmersDelightEnabled = FD_ENABLED.get();
+        paddyCropItems = List.copyOf(FD_PADDY_ITEMS.get().stream().map(String::valueOf).toList());
     }
 
     /** Copies the client spec's current values into the static fields. */

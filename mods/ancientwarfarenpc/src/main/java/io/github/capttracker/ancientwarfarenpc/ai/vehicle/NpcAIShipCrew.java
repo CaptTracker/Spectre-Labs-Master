@@ -5,6 +5,7 @@
 package io.github.capttracker.ancientwarfarenpc.ai.vehicle;
 
 import io.github.capttracker.ancientwarfarenpc.ai.AIHelper;
+import io.github.capttracker.ancientwarfarenpc.ai.MonsterRules;
 import io.github.capttracker.ancientwarfarenpc.ai.NpcAI;
 import io.github.capttracker.ancientwarfarenpc.config.AWNPCStatics;
 import io.github.capttracker.ancientwarfarenpc.entity.NpcBase;
@@ -158,12 +159,13 @@ public class NpcAIShipCrew extends NpcAI<NpcBase> {
         }
         List<LivingEntity> near = npc.level().getEntitiesOfClass(LivingEntity.class, ship.getBoundingBox().inflate(range), EntitySelector.NO_SPECTATORS);
         near.removeIf(e -> e == npc || e == own || !e.isAlive() || ship.hasPassenger(e) || e.isPassengerOfSameVehicle(npc) || !npc.isHostileTowards(e));
-        near.sort(Comparator.comparingDouble(e -> e.distanceToSqr(npc)));
+        near.sort(Comparator.comparingInt((LivingEntity e) -> MonsterRules.rangedPrefers(npc, e) ? 0 : 1).thenComparingDouble(e -> e.distanceToSqr(npc))); // dragons first (Ice and Fire integration)
         for (LivingEntity candidate : near.subList(0, Math.min(MAX_CANDIDATES, near.size()))) {
             if (AIHelper.isTarget(npc, candidate, true)) {
                 candidates.add(candidate);
             }
         }
+        candidates.sort(Comparator.comparingInt(e -> MonsterRules.rangedPrefers(npc, e) ? 0 : 1)); // stable: the rest keeps its order
         for (LivingEntity candidate : candidates) {
             if (helper.solveHardpoint(mount, aimPoint(helper, mount, candidate), range) != null) {
                 return candidate;

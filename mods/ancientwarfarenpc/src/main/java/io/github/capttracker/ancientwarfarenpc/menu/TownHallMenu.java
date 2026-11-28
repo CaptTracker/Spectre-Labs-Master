@@ -78,6 +78,8 @@ public class TownHallMenu extends BlockEntityMenu<TownHallBlockEntity> implement
 
     /** How many needs are sent to the screen. */
     public static final int MAX_NEED_LINES = 8;
+    /** The status of a need line that is a notice and not a need (the "no builder" notice): the screen shows its label as it is. */
+    public static final int NOTICE_STATUS = 4;
 
     /** The guard settings of the settlement as the Guard tab shows them (the effective values, config defaults included). */
     public record GuardView(boolean patrol, int nightWatchPercent, boolean autoAlarm, int threshold, int clearSeconds, boolean overridden,
@@ -101,6 +103,8 @@ public class TownHallMenu extends BlockEntityMenu<TownHallBlockEntity> implement
     private boolean ownerIsFaction;
     private boolean alarm;
     private long foodTicks;
+    /** The sub season at the hall ({@code early_spring} and so on), empty when there are no seasons. */
+    private String season = "";
     private final List<MemberView> members = new ArrayList<>();
     private final List<StorageView> storages = new ArrayList<>();
     private final List<String> alerts = new ArrayList<>();
@@ -206,6 +210,10 @@ public class TownHallMenu extends BlockEntityMenu<TownHallBlockEntity> implement
 
     public boolean isAlarm() {
         return alarm;
+    }
+
+    public String getSeason() {
+        return season;
     }
 
     public long getFoodTicks() {
@@ -497,6 +505,7 @@ public class TownHallMenu extends BlockEntityMenu<TownHallBlockEntity> implement
             food += ref.foodTicks();
         }
         state.putLong("food", food);
+        state.putString("season", io.github.capttracker.ancientwarfarenpc.settlement.Seasons.hallKey(level, settlement)); // Serene Seasons: the sub season at the hall, empty for none
         BlockPos hall = settlement.getHallPos();
         ListTag memberTags = new ListTag();
         for (Settlement.Member member : settlement.getMembers().values()) {
@@ -535,6 +544,10 @@ public class TownHallMenu extends BlockEntityMenu<TownHallBlockEntity> implement
         for (String key : settlement.getAlerts().keySet()) {
             alertTags.add(StringTag.valueOf(key));
         }
+        String storm = io.github.capttracker.ancientwarfarenpc.settlement.StormWarnings.alertKey(settlement); // the storm warning of the Weather2 integration (not saved)
+        if (storm != null) {
+            alertTags.add(StringTag.valueOf(storm));
+        }
         state.put("alerts", alertTags);
         ListTag jobTags = new ListTag();
         JobBoard board = settlement.getJobBoard();
@@ -567,6 +580,16 @@ public class TownHallMenu extends BlockEntityMenu<TownHallBlockEntity> implement
         }
         state.put("moraleLines", moraleTags);
         ListTag needTags = new ListTag();
+        if (io.github.capttracker.ancientwarfarenpc.settlement.building.BuildingMenuSupport.noBuilder(settlement)) {
+            // builds are approved but nobody can build them: a notice as the first line of the needs (status 4 = notice)
+            CompoundTag notice = new CompoundTag();
+            notice.putString("label", "guistrings.settlement.build.no_builder");
+            notice.putInt("count", 0);
+            notice.putInt("status", NOTICE_STATUS);
+            notice.putString("site", "");
+            notice.putString("hint", "");
+            needTags.add(notice);
+        }
         for (SettlementNeed need : SettlementNeeds.get(settlement)) {
             if (needTags.size() >= MAX_NEED_LINES) {
                 break;
@@ -599,6 +622,7 @@ public class TownHallMenu extends BlockEntityMenu<TownHallBlockEntity> implement
         ownerIsFaction = state.getBoolean("faction");
         alarm = state.getBoolean("alarm");
         foodTicks = state.getLong("food");
+        season = state.getString("season");
         members.clear();
         ListTag memberList = state.getList("members", Tag.TAG_COMPOUND);
         for (int i = 0; i < memberList.size(); i++) {

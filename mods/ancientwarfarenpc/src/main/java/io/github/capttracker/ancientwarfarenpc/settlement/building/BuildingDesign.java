@@ -51,8 +51,14 @@ public final class BuildingDesign {
     /** Palette character: leave whatever is there (the space counts as this too). */
     public static final char KEEP = '_';
 
-    /** The worksite block inside a design and where it stands (authored frame). */
-    public record Worksite(ResourceLocation block, int x, int y, int z) {}
+    /**
+     * The work area of a worksite block, as two corners (inclusive) in the authored frame, relative to the design origin (the lowest north-west corner).
+     * The corners are inside the design box and sorted (min first).
+     */
+    public record Area(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {}
+
+    /** The worksite block inside a design and where it stands (authored frame), and optionally the work area to set on it when the build is finished. */
+    public record Worksite(ResourceLocation block, int x, int y, int z, @Nullable Area area) {}
 
     /** One block of a placed design. {@code state} is air for a cell that must be cleared. */
     public record Placement(BlockPos pos, BlockState state) {}
@@ -266,6 +272,23 @@ public final class BuildingDesign {
         return worksite == null ? null : origin.offset(rotateLocal(worksite.x(), worksite.y(), worksite.z(), quarterTurns(facing)));
     }
 
+    /**
+     * The work area of the worksite when the design is placed: {@code {min, max}} (inclusive block positions, sorted), turned with the design; or
+     * {@code null} when the design has no worksite or the worksite has no area.
+     */
+    @Nullable
+    public BlockPos[] workArea(BlockPos origin, Direction facing) {
+        if (worksite == null || worksite.area() == null) {
+            return null;
+        }
+        Area a = worksite.area();
+        int turns = quarterTurns(facing);
+        BlockPos p = origin.offset(rotateLocal(a.minX(), a.minY(), a.minZ(), turns));
+        BlockPos q = origin.offset(rotateLocal(a.maxX(), a.maxY(), a.maxZ(), turns));
+        return new BlockPos[]{new BlockPos(Math.min(p.getX(), q.getX()), Math.min(p.getY(), q.getY()), Math.min(p.getZ(), q.getZ())),
+                new BlockPos(Math.max(p.getX(), q.getX()), Math.max(p.getY(), q.getY()), Math.max(p.getZ(), q.getZ()))};
+    }
+
     /** The ground level block just outside the middle of the front face of the placed design. */
     public BlockPos entranceOutside(BlockPos origin, Direction facing) {
         int[] size = rotatedSize(facing);
@@ -452,7 +475,24 @@ public final class BuildingDesign {
             if (at == null || !BuiltInRegistries.BLOCK.getKey(at.getBlock()).equals(block)) {
                 warnings.add("the cell at the worksite position is not the block " + block);
             }
-            worksite = new Worksite(block, wx, wy, wz);
+            Area area = null;
+            if (ws.has("area") && !ws.get("area").isJsonNull()) {
+                if (!ws.get("area").isJsonObject()) {
+                    throw new DesignException("\"worksite\".\"area\" must be an object {\"min\": [x, y, z], \"max\": [x, y, z]}");
+                }
+                JsonObject areaJson = ws.getAsJsonObject("area");
+                int[] lo = triple(areaJson.get("min"), "\"worksite\".\"area\".\"min\"");
+                int[] hi = triple(areaJson.get("max"), "\"worksite\".\"area\".\"max\"");
+                int[] limit = {sx, sy, sz};
+                for (int i = 0; i < 3; i++) {
+                    if (lo[i] < 0 || hi[i] < 0 || lo[i] >= limit[i] || hi[i] >= limit[i]) {
+                        throw new DesignException("\"worksite\".\"area\" is outside the design " + sx + "x" + sy + "x" + sz);
+                    }
+                }
+                area = new Area(Math.min(lo[0], hi[0]), Math.min(lo[1], hi[1]), Math.min(lo[2], hi[2]), Math.max(lo[0], hi[0]), Math.max(lo[1], hi[1]),
+                        Math.max(lo[2], hi[2]));
+            }
+            worksite = new Worksite(block, wx, wy, wz, area);
         }
 
         // tags and minimums
@@ -508,6 +548,21 @@ public final class BuildingDesign {
             pos.add(worksite.y());
             pos.add(worksite.z());
             ws.add("pos", pos);
+            if (worksite.area() != null) {
+                Area a = worksite.area();
+                JsonObject areaJson = new JsonObject();
+                JsonArray lo = new JsonArray();
+                lo.add(a.minX());
+                lo.add(a.minY());
+                lo.add(a.minZ());
+                JsonArray hi = new JsonArray();
+                hi.add(a.maxX());
+                hi.add(a.maxY());
+                hi.add(a.maxZ());
+                areaJson.add("min", lo);
+                areaJson.add("max", hi);
+                ws.add("area", areaJson);
+            }
             json.add("worksite", ws);
         }
         JsonArray tagArray = new JsonArray();
@@ -520,6 +575,17 @@ public final class BuildingDesign {
             json.addProperty("min_population", minPopulation);
         }
         return json;
+    }
+
+    private static int[] triple(@Nullable JsonElement element, String what) throws DesignException {
+        if (element == null || !element.isJsonArray() || element.getAsJsonArray().size() != 3) {
+            throw new DesignException(what + " must be an array [x, y, z]");
+        }
+        int[] result = new int[3];
+        for (int i = 0; i < 3; i++) {
+            result[i] = intOf(element.getAsJsonArray().get(i), -1);
+        }
+        return result;
     }
 
     private static String string(JsonObject json, String key) {

@@ -144,6 +144,6 @@ public final class TraitEffects {
     /** True if the NPC holds a sword or an axe in its hand (the brave fight with those). */
     public static boolean isArmed(NpcBase npc) {
         ItemStack held = npc.getMainHandItem();
-        return !held.isEmpty() && (held.is(ItemTags.SWORDS) || held.is(ItemTags.AXES));
+        return !held.isEmpty() && (held.is(ItemTags.SWORDS) || held.is(ItemTags.AXES) || held.getItem() instanceof net.minecraft.world.item.SwordItem || held.getItem() instanceof net.minecraft.world.item.AxeItem);
     }
 }

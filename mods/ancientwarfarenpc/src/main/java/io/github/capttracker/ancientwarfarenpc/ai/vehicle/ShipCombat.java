@@ -7,6 +7,7 @@ package io.github.capttracker.ancientwarfarenpc.ai.vehicle;
 import io.github.capttracker.ancientwarfare.api.ISeaDock;
 import io.github.capttracker.ancientwarfare.api.WorksiteRegistry;
 import io.github.capttracker.ancientwarfare.owner.Owner;
+import io.github.capttracker.ancientwarfarenpc.compat.ModCompat;
 import io.github.capttracker.ancientwarfarenpc.entity.NpcBase;
 import io.github.capttracker.ancientwarfarenpc.entity.NpcPlayerOwned;
 import io.github.capttracker.ancientwarfarenpc.entity.faction.NpcFaction;
@@ -271,6 +272,9 @@ public final class ShipCombat {
         if (helper == null || helper.spec() == null || !(npc.level() instanceof ServerLevel level)) {
             return false;
         }
+        if (stormTick(npc, ship, level, fleeSteering)) {
+            return true; // a storm is near: to a dock, or the ship is held (Weather2 integration)
+        }
         if (ship.isAggressive()) {
             if (!SettlementConfig.navalHelmRam || !helper.spec().hasRam() || !helper.alongside().isEmpty()) {
                 return false;
@@ -308,6 +312,61 @@ public final class ShipCombat {
         ShipSteering.Result result = fleeSteering.tick(ship, target, null, 4.0D, false, 10);
         npc.setDoing("ship.flee", home, net.minecraft.network.chat.Component.empty());
         return result == ShipSteering.Result.SAILING;
+    }
+
+    // ---- storms (Weather2 integration) ----
+
+    /** Per helmsman: {game time of the next look at the weather, 1 while a storm is near the ship, game time of the next choice of the dock}. */
+    private static final Map<NpcBase, long[]> STORM_STATE = new WeakHashMap<>();
+    private static final Map<NpcBase, BlockPos> STORM_DOCKS = new WeakHashMap<>();
+    private static final int STORM_LOOK_TICKS = 40;
+    private static final int STORM_DOCK_TICKS = 200;
+
+    /**
+     * While a severe storm, a tornado or a sandstorm is within the warning distance of the ship, the helmsman sails for the nearest dock of its owner and holds
+     * the ship there, or holds it where it is when there is no dock in reach. The sail order waits. Returns true if it steered this tick.
+     */
+    private static boolean stormTick(NpcPlayerOwned npc, VehicleBase ship, ServerLevel level, ShipSteering steering) {
+        if (!SettlementConfig.weather2ShipsDock || !ModCompat.WEATHER.isActive()) {
+            return false;
+        }
+        long now = level.getGameTime();
+        long[] state = STORM_STATE.computeIfAbsent(npc, k -> new long[3]);
+        if (now >= state[0] || now < state[0] - STORM_LOOK_TICKS) {
+            state[0] = now + STORM_LOOK_TICKS;
+            boolean near = ModCompat.WEATHER.get().sense(level, ship.blockPosition(), SettlementConfig.weather2WarningDistance) != null;
+            if (!near) {
+                state[1] = 0;
+                STORM_DOCKS.remove(npc);
+            } else {
+                if (state[1] == 0) {
+                    npc.think("storm_ship");
+                }
+                state[1] = 1;
+                if (now >= state[2] || now < state[2] - STORM_DOCK_TICKS) {
+                    state[2] = now + STORM_DOCK_TICKS;
+                    BlockPos dock = nearestDockMooring(level, npc, ship);
+                    STORM_DOCKS.put(npc, dock == null ? BlockPos.ZERO : dock);
+                }
+            }
+        }
+        if (state[1] == 0) {
+            return false;
+        }
+        ShipHelper helper = ship.ship;
+        BlockPos dock = STORM_DOCKS.get(npc);
+        if (dock == null || dock.equals(BlockPos.ZERO)) {
+            helper.setPilot(ship.position(), 1.0D, true); // no dock: hold the ship
+            npc.setDoing("ship.storm_hold", ship.blockPosition(), net.minecraft.network.chat.Component.empty());
+            return true;
+        }
+        Vec3 target = new Vec3(dock.getX() + 0.5D, ship.getY(), dock.getZ() + 0.5D);
+        ShipSteering.Result result = steering.tick(ship, target, null, 4.0D, false, 10);
+        if (result == ShipSteering.Result.STUCK) {
+            helper.setPilot(ship.position(), 1.0D, true);
+        }
+        npc.setDoing("ship.storm_dock", dock, net.minecraft.network.chat.Component.empty());
+        return true;
     }
 
     /** The nearest ship within range that the helmsman is hostile to (not one that is grappled to the helmsman's own ship, nor one that is sinking). */

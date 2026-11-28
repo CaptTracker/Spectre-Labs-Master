@@ -64,6 +64,7 @@ public class GuiTownHallInventory extends GuiContainerBase<TownHallMenu> {
     private Label ownerLabel;
     private Label membersLabel;
     private Label foodLabel;
+    private Label seasonLabel;
     private final List<Label> jobLabels = new ArrayList<>();
     private final List<Label> needLabels = new ArrayList<>();
     private Button alarmButton;
@@ -151,7 +152,7 @@ public class GuiTownHallInventory extends GuiContainerBase<TownHallMenu> {
             case STORAGE -> buildStorage();
             case DEATHS -> buildDeaths();
             case GUARD -> buildGuard();
-            case BUILDING -> area.setAreaSize(building.build(area, getContainer(), this::refreshGui));
+            case BUILDING -> area.setAreaSize(building.build(area, getContainer(), this::refreshGui, this));
             default -> {
             }
         }
@@ -185,9 +186,11 @@ public class GuiTownHallInventory extends GuiContainerBase<TownHallMenu> {
         ownerLabel = new Label(6, 24, "");
         membersLabel = new Label(6, 38, "");
         foodLabel = new Label(6, 52, "");
+        seasonLabel = new Label(200, 52, "");
         area.addGuiElement(ownerLabel);
         area.addGuiElement(membersLabel);
         area.addGuiElement(foodLabel);
+        area.addGuiElement(seasonLabel);
         alarmButton = new Button(6, 66, 110, 12, "guistrings.settlement.alarm_off") {
             @Override
             protected void onPressed() {
@@ -195,6 +198,15 @@ public class GuiTownHallInventory extends GuiContainerBase<TownHallMenu> {
             }
         };
         area.addGuiElement(alarmButton);
+        if (io.github.capttracker.ancientwarfarenpc.client.MapShare.enabled()) {
+            area.addGuiElement(new Button(122, 66, 100, 12, "guistrings.share.button") {
+                @Override
+                protected void onPressed() {
+                    TownHallMenu hall = getContainer();
+                    io.github.capttracker.ancientwarfarenpc.client.MapShare.share(hall.getTownName(), hall.getHallPos());
+                }
+            });
+        }
         moraleLabel = new Label(6, 82, "");
         area.addGuiElement(moraleLabel);
         moraleLines.clear();
@@ -258,6 +270,8 @@ public class GuiTownHallInventory extends GuiContainerBase<TownHallMenu> {
                 : tr("guistrings.settlement.member_count", menu.getMembers().size()));
         double days = (double) menu.getFoodTicks() / Math.max(1, SettlementConfig.npcDayFoodTicks);
         foodLabel.setText(tr("guistrings.settlement.food", String.format(Locale.ROOT, "%.1f", days)));
+        String season = menu.getSeason();
+        seasonLabel.setText(season.isEmpty() ? "" : tr("guistrings.settlement.season", tr("guistrings.settlement.season." + season))); // Serene Seasons
         List<TownHallMenu.RoleJobs> jobs = menu.getRoleJobs();
         for (int i = 0; i < jobLabels.size(); i++) {
             if (i < jobs.size()) {
@@ -281,6 +295,11 @@ public class GuiTownHallInventory extends GuiContainerBase<TownHallMenu> {
                 continue;
             }
             TownHallMenu.NeedView need = needs.get(i);
+            if (need.status() == TownHallMenu.NOTICE_STATUS) {
+                label.setText(fit(tr(need.label()), 330));
+                label.setColor(0xFFFF8855);
+                continue;
+            }
             String site = need.siteBlock().isEmpty() ? "" : tr(need.siteBlock());
             String state = switch (need.status()) {
                 case 0 -> tr("guistrings.settlement.need.making", site);

@@ -281,12 +281,12 @@ public final class VehicleModels {
         // the siege works (rework phase 12): the wheels turn with the speed, the bridge of a tower swings with its lowering progress
         delegates[VehicleTypeIds.SIEGE_TOWER] = (veh, yaw, tick, ps, vc, light, overlay, color) -> {
             siegeTower.setWheelRotation(wheelAngle(veh, tick));
-            siegeTower.setBridge(veh.siege != null ? veh.siege.bridgeProgress(tick) : 0.f);
+            siegeTower.setBridge(veh.siege != null ? veh.siege.bridgeProgress(tick) : 0.f, bridgeTilt(veh));
             siegeTower.renderToBuffer(ps, vc, light, overlay, color);
         };
         delegates[VehicleTypeIds.SIEGE_TOWER_LARGE] = (veh, yaw, tick, ps, vc, light, overlay, color) -> {
             siegeTowerLarge.setWheelRotation(wheelAngle(veh, tick));
-            siegeTowerLarge.setBridge(veh.siege != null ? veh.siege.bridgeProgress(tick) : 0.f);
+            siegeTowerLarge.setBridge(veh.siege != null ? veh.siege.bridgeProgress(tick) : 0.f, bridgeTilt(veh));
             siegeTowerLarge.renderToBuffer(ps, vc, light, overlay, color);
         };
         delegates[VehicleTypeIds.MANTLET] = (veh, yaw, tick, ps, vc, light, overlay, color) -> {
@@ -315,6 +315,11 @@ public final class VehicleModels {
     private static float sailAngle(VehicleBase vehicle) {
         float relative = Mth.wrapDegrees(vehicle.getYRot() - Wind.direction(vehicle.level()));
         return Mth.clamp(relative * 0.45f, -50.f, 50.f);
+    }
+
+    /** The angle (radians, positive downwards) the lowered bridge of a siege tower slopes at: the far end rests on a wall top above or below the platform. */
+    private static float bridgeTilt(VehicleBase vehicle) {
+        return (float) Math.atan2(-vehicle.getBridgeDelta(), 3.0D);
     }
 
     /** The wheel angle in degrees, extrapolated by the partial tick (the same value for all wheels). */

@@ -7,10 +7,12 @@ package io.github.capttracker.ancientwarfareautomation.block.entity.worksite.cro
 import io.github.capttracker.ancientwarfare.api.WorkAction;
 import io.github.capttracker.ancientwarfare.api.WorkTask;
 import io.github.capttracker.ancientwarfare.util.BlockTools;
+import io.github.capttracker.ancientwarfareautomation.block.entity.worksite.FarmSeasons;
 import io.github.capttracker.ancientwarfareautomation.block.entity.worksite.FarmWorksiteBlockEntity;
 import io.github.capttracker.ancientwarfareautomation.block.entity.worksite.IWorksiteAction;
 import io.github.capttracker.ancientwarfareautomation.block.entity.worksite.WorksiteActions;
 import io.github.capttracker.ancientwarfareautomation.block.entity.worksite.WorksiteMenus;
+import io.github.capttracker.ancientwarfareautomation.compat.farmersdelight.RiceFields;
 import io.github.capttracker.ancientwarfareautomation.init.AwAutomationBase;
 import io.github.capttracker.ancientwarfareautomation.registry.CropFarmRegistry;
 import net.minecraft.core.BlockPos;
@@ -100,9 +102,24 @@ public class CropFarmBlockEntity extends FarmWorksiteBlockEntity {
         return state.isAir() || (state.canBeReplaced() && !state.blocksMotion() && state.getFluidState().isEmpty());
     }
 
+    /** The surface of the column, or (Farmer's Delight rice) the flooded cell, the rice plant or its panicles of a paddy column. */
+    @Override
+    @Nullable
+    protected BlockPos columnScanPos(int x, int z) {
+        BlockPos surface = findSurface(x, z);
+        if (surface != null || !RiceFields.enabled()) {
+            return surface;
+        }
+        return RiceFields.findPaddy(level, x, z, getScanMinY(), getScanMaxY());
+    }
+
     @Override
     protected void scanBlockPosition(BlockPos position) {
         BlockState state = level.getBlockState(position);
+        if (RiceFields.enabled() && RiceFields.isPaddyCell(level, position)) {
+            blocksToPlant.add(position); // a flooded cell: only the rice item is planted here (see canSow)
+            return;
+        }
         if (state.canBeReplaced() && state.getFluidState().isEmpty()) {
             BlockState stateDown = level.getBlockState(position.below());
             if (CropFarmRegistry.isTillable(stateDown)) {
@@ -138,7 +155,73 @@ public class CropFarmBlockEntity extends FarmWorksiteBlockEntity {
     }
 
     private boolean hasToPlant() {
-        return plantableCount > 0 && !blocksToPlant.isEmpty();
+        refreshSowing();
+        return sowableNow;
+    }
+
+    // ---- what may be sown where (Serene Seasons, rice paddies) ----
+
+    private static final int SOW_CHECK_TICKS = 20;
+    private long sowCheckedAt = Long.MIN_VALUE / 2;
+    private boolean sowableNow;
+    private boolean blockedBySeason;
+
+    /**
+     * Whether the item may be sown at the position: it is plantable, a flooded cell takes only the paddy items (and a paddy item only goes into a flooded cell
+     * where it can stand), any other cell takes what the plain rule allows, and, when {@code withSeason}, the season must suit the plant.
+     */
+    private boolean canSow(BlockPos pos, ItemStack stack, boolean withSeason) {
+        if (stack.isEmpty() || !isPlantable(stack)) {
+            return false;
+        }
+        if (RiceFields.isPaddyItem(stack)) {
+            if (!RiceFields.isPaddyCell(level, pos) || !RiceFields.canPlantPaddy(level, pos, stack)) {
+                return false;
+            }
+        } else if (!canPlantInto(pos)) {
+            return false;
+        }
+        return !withSeason || FarmSeasons.mayPlant(level, pos, stack);
+    }
+
+    private boolean sowableAt(BlockPos pos, boolean withSeason) {
+        for (int slot = 0; slot < plantableInventory.getSlots(); slot++) {
+            if (canSow(pos, plantableInventory.getStackInSlot(slot), withSeason)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Recounts (at most once a second) whether anything can be sown now, and whether only the season stops it. */
+    private void refreshSowing() {
+        long now = level == null ? 0L : level.getGameTime();
+        if (now - sowCheckedAt < SOW_CHECK_TICKS) {
+            return;
+        }
+        sowCheckedAt = now;
+        boolean sowable = false;
+        boolean wouldSow = false;
+        if (level != null && plantableCount > 0) {
+            for (BlockPos pos : blocksToPlant) {
+                if (sowableAt(pos, true)) {
+                    sowable = true;
+                    break;
+                }
+                if (!wouldSow && sowableAt(pos, false)) {
+                    wouldSow = true;
+                }
+            }
+        }
+        sowableNow = sowable;
+        blockedBySeason = !sowable && wouldSow && FarmSeasons.active();
+    }
+
+    /** Seeds in the farm that could be sown if it were another season: the status says "out of season". */
+    @Override
+    protected boolean isOutOfSeason() {
+        refreshSowing();
+        return blockedBySeason;
     }
 
     private boolean hasToFertilize() {
@@ -197,7 +280,13 @@ public class CropFarmBlockEntity extends FarmWorksiteBlockEntity {
             addTasks(tasks, blocksToFertilize, WorkAction.FERTILIZE, Math.min(MAX_LISTED_PER_ACTION, bonemealCount));
         }
         if (hasToPlant()) {
-            addTasks(tasks, blocksToPlant, WorkAction.PLANT, Math.min(MAX_LISTED_PER_ACTION, plantableCount));
+            Set<BlockPos> sowable = new LinkedHashSet<>();
+            for (BlockPos pos : blocksToPlant) {
+                if (sowableAt(pos, true)) {
+                    sowable.add(pos);
+                }
+            }
+            addTasks(tasks, sowable, WorkAction.PLANT, Math.min(MAX_LISTED_PER_ACTION, plantableCount));
         }
         addTasks(tasks, blocksToTill, WorkAction.TILL, MAX_LISTED_PER_ACTION);
         return tasks;
@@ -249,18 +338,13 @@ public class CropFarmBlockEntity extends FarmWorksiteBlockEntity {
 
     private boolean plantAt(BlockPos position) {
         blocksToPlant.remove(position);
-        if (canPlantInto(position)) {
-            for (int slot = 0; slot < plantableInventory.getSlots(); slot++) {
-                ItemStack stack = plantableInventory.getStackInSlot(slot);
-                if (stack.isEmpty()) {
-                    continue;
-                }
-                if (isPlantable(stack)) {
-                    ItemStack clone = stack.copy();
-                    if (tryPlace(clone, position, Direction.UP)) {
-                        plantableInventory.extractItem(slot, 1, false);
-                        return true;
-                    }
+        for (int slot = 0; slot < plantableInventory.getSlots(); slot++) {
+            ItemStack stack = plantableInventory.getStackInSlot(slot);
+            if (canSow(position, stack, true)) {
+                ItemStack clone = stack.copy();
+                if (tryPlace(clone, position, Direction.UP)) {
+                    plantableInventory.extractItem(slot, 1, false);
+                    return true;
                 }
             }
         }
@@ -305,10 +389,12 @@ public class CropFarmBlockEntity extends FarmWorksiteBlockEntity {
     private boolean tryPlant() {
         // the original skipped targets that could not take a plant until one could; the first one that is free is tried
         for (BlockPos position : new ArrayList<>(blocksToPlant)) {
-            if (canPlantInto(position)) {
+            if (sowableAt(position, true)) {
                 return plantAt(position);
             }
-            blocksToPlant.remove(position);
+            if (!sowableAt(position, false)) {
+                blocksToPlant.remove(position); // nothing here can take a seed of the farm; a position that only waits for the season stays
+            }
         }
         return false;
     }

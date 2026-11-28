@@ -38,6 +38,7 @@ public final class VehicleSettings {
     public static int grappleMaxLines = 2;
     public static int grappleTimeoutTicks = 6000;
     public static int grappleSnapDistance = 40;
+    public static int grappleReattachTicks = 1200;
     public static double sinkingCargoFraction = 0.5D;
     public static int sinkingCrateTicks = 6000;
     public static int sinkingCrateMax = 8;

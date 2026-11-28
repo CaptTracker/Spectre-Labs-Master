@@ -187,6 +187,11 @@ public final class ShipCrew {
         return depth >= ShipHelper.MIN_DEPTH ? top : null;
     }
 
+    /** True if the clicked position (or the block above it) holds water, however shallow. */
+    public static boolean isWaterNear(Level level, BlockPos clicked) {
+        return isWater(level, clicked) || isWater(level, clicked.above());
+    }
+
     private static boolean isWater(Level level, BlockPos pos) {
         return level.isLoaded(pos) && level.getFluidState(pos).is(FluidTags.WATER);
     }

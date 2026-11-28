@@ -28,6 +28,7 @@ import java.util.UUID;
  *   <li>once a day: with the chance {@code couple_chance_per_day} a pair with {@code couple_bond_seconds} of shared time, both of morale
  *       {@code couple_min_morale} or better and loaded, becomes a couple (at most one new couple a day); households in a tent move to a free house.</li>
  * </ul>
+ * With the daily schedule off the families still run: homes are claimed (see {@code SettlementLife}) and calm members near each other count as meeting.
  * Any two adult members can become partners: there is no gender in the rules. Children, relatives and members that are still mourning cannot.
  */
 public final class FamilyLife {
@@ -77,12 +78,13 @@ public final class FamilyLife {
 
     private static void countSocialTime(ServerLevel level, Settlement settlement, SettlementFamilies families, long now) {
         List<NpcPlayerOwned> social = new ArrayList<>();
+        boolean scheduled = SettlementConfig.scheduleEnabled;
         for (UUID id : settlement.getMembers().keySet()) {
             if (!isFree(settlement, families, id, now)) {
                 continue;
             }
             NpcPlayerOwned npc = SettlementFamilies.loaded(level, id);
-            if (npc != null && npc.getLastSocialAt() >= 0 && now - npc.getLastSocialAt() <= SOCIAL_WINDOW) {
+            if (npc != null && (scheduled ? npc.getLastSocialAt() >= 0 && now - npc.getLastSocialAt() <= SOCIAL_WINDOW : isFreeToMeet(npc))) {
                 social.add(npc);
             }
         }
@@ -97,6 +99,15 @@ public final class FamilyLife {
                 families.addBond(a.getUUID(), b.getUUID(), gain(a, b));
             }
         }
+    }
+
+    /**
+     * With the daily schedule off nobody goes to a gathering point, so there is no socialising to count. Then members count as meeting when they are awake
+     * and calm: loaded, not alarmed, not fighting, not riding and without orders. Two such members within {@code couple_social_radius} blocks of each other
+     * add shared time, so couples still form while the schedule is off.
+     */
+    private static boolean isFreeToMeet(NpcPlayerOwned npc) {
+        return npc.isAlive() && !npc.isSleeping() && !npc.isAlarmed && npc.getTarget() == null && !npc.isPassenger() && npc.ordersStack.isEmpty();
     }
 
     /** The shared seconds one second together adds: 1, more for each sociable one, less for each loner. */

@@ -543,13 +543,24 @@ public abstract class NpcBase extends PathfinderMob implements IEntityWithComple
      * Should still allow for a combat NPC to attack targets outside his home range.
      */
     public boolean shouldBeAtHome() {
-        if (getTarget() != null || !hasHome()) {
+        if (getTarget() != null) {
+            return false;
+        }
+        if (pausedByStorm()) {
+            return true; // the work goals ask this: outdoor work pauses in a storm (Weather2 integration)
+        }
+        if (!hasHome()) {
             return false;
         }
         if (level().isRainingAt(blockPosition())) {
             setRainedOn(true);
         }
         return shouldSleep() || isWaitingForRainToStop();
+    }
+
+    /** True while a storm warning of the NPC's settlement pauses its outdoor work. Only owned NPCs have a settlement. */
+    protected boolean pausedByStorm() {
+        return false;
     }
 
     private boolean isWaitingForRainToStop() {

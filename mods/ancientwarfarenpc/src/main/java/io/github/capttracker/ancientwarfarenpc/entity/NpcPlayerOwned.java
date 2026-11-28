@@ -5,6 +5,8 @@
 package io.github.capttracker.ancientwarfarenpc.entity;
 
 import io.github.capttracker.ancientwarfare.owner.Owner;
+import io.github.capttracker.ancientwarfarevehicle.entity.ship.ShipHelper;
+import net.minecraft.network.chat.Component;
 import io.github.capttracker.ancientwarfarenpc.faction.AwFactions;
 import io.github.capttracker.spectrefactions.api.ActorId;
 import io.github.capttracker.ancientwarfarenpc.ai.AIHelper;
@@ -77,6 +79,8 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
 
     private Command playerIssuedCommand = Command.NONE;
     private int foodValueRemaining = 0;
+    /** Winter at the position of the NPC as of the last check (Serene Seasons, server side, not saved). */
+    private boolean inWinter = false;
 
     /** Assigned in {@code registerGoals} of the concrete classes (server side only), so no initialiser. */
     @Nullable
@@ -124,6 +128,17 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
     public void setSailOrder(@Nullable BlockPos target, @Nullable java.util.UUID follow) {
         sailTarget = target;
         sailFollow = follow;
+        sailRoute = List.of(); // a plain order: the helmsman plans its own route (NpcAIShipHelm)
+    }
+
+    /** Sends a chat message to the owner if it is online. */
+    public void tellOwner(Component message) {
+        if (level() instanceof net.minecraft.server.level.ServerLevel serverLevel && getOwner() != Owner.EMPTY) {
+            net.minecraft.server.level.ServerPlayer player = serverLevel.getServer().getPlayerList().getPlayer(getOwner().getUUID());
+            if (player != null) {
+                player.sendSystemMessage(message);
+            }
+        }
     }
 
     public void clearSailOrder() {
@@ -359,6 +374,11 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
         return Activity.of(level(), io.github.capttracker.ancientwarfarenpc.trait.TraitEffects.scheduleShift(this));
     }
 
+    @Override
+    protected boolean pausedByStorm() {
+        return io.github.capttracker.ancientwarfarenpc.settlement.StormWarnings.pausesWork(this);
+    }
+
     /** True while the NPC is busy (it has orders, or work); the rain shelter only takes NPCs that are not. */
     public boolean isOnDuty() {
         return !ordersStack.isEmpty() || getActivity() == Activity.WORK;
@@ -438,6 +458,11 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
                     setSailOrder(water, null);
                     return;
                 }
+                if (ShipCrew.isWaterNear(level(), cmd.pos)) {
+                    // water, but too shallow for a ship: say so and keep the crew where it is
+                    tellOwner(Component.translatable("message.ancientwarfarenpc.ship.too_shallow", ShipHelper.MIN_DEPTH));
+                    return;
+                }
             } else if (cmd.type == CommandType.GUARD) {
                 Entity followed = cmd.getEntityTarget(level());
                 if (ShipCrew.vesselOf(followed, helmShip) != null) {
@@ -508,7 +533,9 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
             return byRelation;
         }
         OwnedNpcDefault npcDefault = getNpcDefault();
-        return (npcDefault != null && npcDefault.isTarget(entityTarget)) || AIHelper.isAdditionalEntityToTarget(entityTarget);
+        // the monsters of other mods (Ice and Fire) are on the list of every owned NPC
+        return (npcDefault != null && npcDefault.isTarget(entityTarget)) || AIHelper.isAdditionalEntityToTarget(entityTarget)
+                || io.github.capttracker.ancientwarfarenpc.compat.ModCompat.MONSTERS.get().isMonster(entityTarget);
     }
 
     /**
@@ -577,6 +604,8 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
     private long lastHurtAt = -1L;
     private long lastNearDeathAt = -1L;
     private long lastInnMealAt = -1L;
+    /** Game time of the last hearty meal (Farmer's Delight), -1 for none. Optional in the save. */
+    private long lastHeartyMealAt = -1L;
     private long lastSocialAt = -1L;
     /** Game time of the last new skill rank (rework phase 7), -1 if never (saved). */
     private long lastLevelUpAt = -1L;
@@ -609,6 +638,15 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
 
     public long getLastNearDeathAt() {
         return lastNearDeathAt;
+    }
+
+    public long getLastHeartyMealAt() {
+        return lastHeartyMealAt;
+    }
+
+    /** A hearty meal was eaten now (see {@code HeartyMeals}). */
+    public void onHeartyMeal() {
+        lastHeartyMealAt = level().getGameTime();
     }
 
     public long getLastInnMealAt() {
@@ -847,9 +885,11 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
                 continue;
             }
             while (eaten < amount && !stack.isEmpty()) {
-                if (handler.extractItem(slot, 1, false).isEmpty()) {
+                ItemStack taken = handler.extractItem(slot, 1, false);
+                if (taken.isEmpty()) {
                     break; // the handler refuses to give this item: do not loop forever, try the next slot
                 }
+                io.github.capttracker.ancientwarfarenpc.compat.HeartyMeals.eat(this, taken); // effects and morale of a hearty meal (Farmer's Delight)
                 eaten += val;
                 stack = handler.getStackInSlot(slot);
             }
@@ -864,6 +904,7 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
             int value = AWNPCStatics.getFoodValue(player.getItemInHand(hand));
             if (value > 0) {
                 if (!level().isClientSide) {
+                    io.github.capttracker.ancientwarfarenpc.compat.HeartyMeals.eat(this, player.getItemInHand(hand));
                     player.getItemInHand(hand).shrink(1);
                 }
                 foodValueRemaining += value;
@@ -888,6 +929,13 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
         }
         if (foodValueRemaining > 0 && !isSleeping()) {
             foodValueRemaining = Math.max(0, foodValueRemaining - io.github.capttracker.ancientwarfarenpc.trait.TraitEffects.hungerDrain(this)); // glutton faster, frugal slower
+            if (inWinter && foodValueRemaining > 0) {
+                foodValueRemaining = Math.max(0, foodValueRemaining - io.github.capttracker.ancientwarfarenpc.settlement.Seasons.winterExtraDrain(tickCount)); // a little more food in winter (Serene Seasons)
+            }
+        }
+        if (!level().isClientSide && tickCount % 100 == 7) {
+            inWinter = io.github.capttracker.ancientwarfarenpc.settlement.SettlementConfig.sereneWinterFoodPercent > 0
+                    && io.github.capttracker.ancientwarfarenpc.settlement.Seasons.isWinter(level(), blockPosition());
         }
     }
 
@@ -911,6 +959,7 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
         lastHurtAt = tag.contains("lastHurtAt") ? tag.getLong("lastHurtAt") : -1L;
         lastNearDeathAt = tag.contains("lastNearDeathAt") ? tag.getLong("lastNearDeathAt") : -1L;
         lastInnMealAt = tag.contains("lastInnMealAt") ? tag.getLong("lastInnMealAt") : -1L;
+        lastHeartyMealAt = tag.contains("lastHeartyMealAt") ? tag.getLong("lastHeartyMealAt") : -1L;
         lastSocialAt = tag.contains("lastSocialAt") ? tag.getLong("lastSocialAt") : -1L;
         lastLevelUpAt = tag.contains("lastLevelUpAt") ? tag.getLong("lastLevelUpAt") : -1L;
         starvingTicks = tag.getInt("starvingTicks");
@@ -937,6 +986,9 @@ public abstract class NpcPlayerOwned extends NpcBase implements IKeepFood, Npc {
         tag.putLong("lastHurtAt", lastHurtAt);
         tag.putLong("lastNearDeathAt", lastNearDeathAt);
         tag.putLong("lastInnMealAt", lastInnMealAt);
+        if (lastHeartyMealAt >= 0) {
+            tag.putLong("lastHeartyMealAt", lastHeartyMealAt);
+        }
         tag.putLong("lastSocialAt", lastSocialAt);
         tag.putLong("lastLevelUpAt", lastLevelUpAt);
         tag.putInt("starvingTicks", starvingTicks);

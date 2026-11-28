@@ -7,6 +7,7 @@ package io.github.capttracker.ancientwarfareautomation.block.entity.worksite.fru
 import io.github.capttracker.ancientwarfare.api.WorkAction;
 import io.github.capttracker.ancientwarfare.api.WorkTask;
 import io.github.capttracker.ancientwarfare.util.InventoryTools;
+import io.github.capttracker.ancientwarfareautomation.block.entity.worksite.FarmSeasons;
 import io.github.capttracker.ancientwarfareautomation.block.entity.worksite.FarmWorksiteBlockEntity;
 import io.github.capttracker.ancientwarfareautomation.block.entity.worksite.IWorksiteAction;
 import io.github.capttracker.ancientwarfareautomation.block.entity.worksite.WorksiteActions;
@@ -51,6 +52,8 @@ public class FruitFarmBlockEntity extends FarmWorksiteBlockEntity {
     private final Set<BlockPos> blocksToBoneMeal = new LinkedHashSet<>();
 
     private final IItemHandler inventoryForDrops;
+    /** The game time at which the scan last found a place where a seed fits but the season forbids it (not saved). */
+    private long seasonBlockedAt = Long.MIN_VALUE / 2;
 
     public FruitFarmBlockEntity(BlockPos pos, BlockState state) {
         super(AwAutomationBase.FRUIT_FARM_BE.get(), pos, state);
@@ -101,8 +104,13 @@ public class FruitFarmBlockEntity extends FarmWorksiteBlockEntity {
                 blocksToPick.add(currentPos);
             }
             BlockPos curPos = currentPos; // because streams need effectively final vars
-            InventoryTools.stream(plantableInventory).filter(s -> FruitFarmRegistry.getPlantable(s).canPlant(level, curPos, state))
-                    .forEach(s -> blocksToPlant.add(curPos));
+            InventoryTools.stream(plantableInventory).filter(s -> FruitFarmRegistry.getPlantable(s).canPlant(level, curPos, state)).forEach(s -> {
+                if (FarmSeasons.mayPlant(level, curPos, s)) {
+                    blocksToPlant.add(curPos);
+                } else {
+                    seasonBlockedAt = level.getGameTime(); // a seed that fits here but not in this season (Serene Seasons)
+                }
+            });
             if (canBoneMeal(currentPos, state, fruit)) {
                 blocksToBoneMeal.add(currentPos);
             }
@@ -144,7 +152,7 @@ public class FruitFarmBlockEntity extends FarmWorksiteBlockEntity {
                 continue;
             }
             IFruit fruit = FruitFarmRegistry.getPlantable(stack);
-            if (fruit.canPlant(level, plantPos, stateAtPos) && fruit.plant(level, plantPos)) {
+            if (fruit.canPlant(level, plantPos, stateAtPos) && FarmSeasons.mayPlant(level, plantPos, stack) && fruit.plant(level, plantPos)) {
                 plantableInventory.extractItem(slot, 1, false);
                 return true;
             }
@@ -192,6 +200,12 @@ public class FruitFarmBlockEntity extends FarmWorksiteBlockEntity {
 
     private boolean hasPlantable() {
         return plantableCount > 0;
+    }
+
+    /** A seed fitted a place in the last scans, but the season (Serene Seasons) forbids sowing it: the farm picks and fertilises, and says so. */
+    @Override
+    protected boolean isOutOfSeason() {
+        return FarmSeasons.active() && blocksToPlant.isEmpty() && level != null && level.getGameTime() - seasonBlockedAt < 600L;
     }
 
     @Override

@@ -5,6 +5,7 @@
 package io.github.capttracker.ancientwarfarenpc.settlement.building;
 
 import io.github.capttracker.ancientwarfarenpc.settlement.Settlement;
+import io.github.capttracker.ancientwarfarenpc.settlement.SettlementData;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -29,9 +30,36 @@ public final class BuildingMenuSupport {
     private static final int MAX_DONE_SHOWN = 10;
     private static final int MAX_MISSING_SHOWN = 4;
     private static final int MAX_OPEN_PROJECTS = 40;
+    /** The longest blueprint name (the scanner screen takes 40 characters too). */
+    private static final int MAX_NAME = 40;
     private static final Direction[] FACINGS = {Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST};
 
     private BuildingMenuSupport() {}
+
+    // ---------------------------------------------------------------- the builder notice
+
+    /**
+     * True when builds or take-downs are approved (queued or under construction) but the settlement has no member with the builder role: nobody will do them.
+     * The planner and the posted material needs work as before; the Building tab and the Needs of the hall show the notice.
+     */
+    public static boolean noBuilder(Settlement settlement) {
+        boolean work = false;
+        for (BuildProject project : settlement.getBuilding().getProjects()) {
+            if (project.getStatus() == BuildProject.Status.QUEUED || project.getStatus() == BuildProject.Status.BUILDING) {
+                work = true;
+                break;
+            }
+        }
+        if (!work) {
+            return false;
+        }
+        for (Settlement.Member member : settlement.getMembers().values()) {
+            if (member.type.equals("worker.builder")) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     // ---------------------------------------------------------------- to the screen
 
@@ -43,6 +71,7 @@ public final class BuildingMenuSupport {
         tag.putInt("style", building.getPreferredStyle());
         tag.putString("note", building.getNote());
         tag.putString("noteArg", building.getNoteArg());
+        tag.putBoolean("noBuilder", noBuilder(settlement));
         ListTag plots = new ListTag();
         for (BuildingPlot plot : building.getPlots()) {
             CompoundTag p = new CompoundTag();
@@ -152,6 +181,73 @@ public final class BuildingMenuSupport {
         }
         if (action.contains("queue", Tag.TAG_COMPOUND)) {
             queue(level, settlement, player, action.getCompound("queue"));
+        }
+        if (action.contains("renameBlueprint", Tag.TAG_COMPOUND)) {
+            renameBlueprint(level, player, action.getCompound("renameBlueprint"));
+        }
+        if (action.contains("deleteBlueprint", Tag.TAG_STRING)) {
+            deleteBlueprint(level, player, action.getString("deleteBlueprint"));
+        }
+    }
+
+    /** The blueprint of the id if it exists and belongs to the player; else the player is told why not and null comes back. */
+    private static BuildingDesign ownBlueprint(Player player, String idText) {
+        ResourceLocation id = ResourceLocation.tryParse(idText);
+        BuildingDesign design = id == null ? null : BlueprintStore.get(id);
+        if (design == null || design.getOwner() == null || !design.getOwner().equals(player.getUUID())) {
+            player.displayClientMessage(Component.translatable("guistrings.settlement.build.error.not_your_blueprint"), true);
+            return null;
+        }
+        return design;
+    }
+
+    private static void renameBlueprint(ServerLevel level, ServerPlayer player, CompoundTag tag) {
+        BuildingDesign design = ownBlueprint(player, tag.getString("id"));
+        if (design == null) {
+            return;
+        }
+        StringBuilder clean = new StringBuilder();
+        String raw = tag.getString("name");
+        for (char c : (raw.length() > 4 * MAX_NAME ? raw.substring(0, 4 * MAX_NAME) : raw).toCharArray()) {
+            if (!Character.isISOControl(c)) {
+                clean.append(c);
+            }
+        }
+        String name = clean.toString().trim();
+        if (name.length() > MAX_NAME) {
+            name = name.substring(0, MAX_NAME).trim();
+        }
+        if (name.isEmpty()) {
+            player.displayClientMessage(Component.translatable("guistrings.settlement.build.error.bad_name"), true);
+            return;
+        }
+        try {
+            BlueprintStore.rename(level.getServer(), player.getUUID(), design.getId(), name);
+        } catch (DesignException e) {
+            player.displayClientMessage(Component.literal(e.getMessage()), true);
+            return;
+        }
+        BuildingDesigns.sync(player);
+        player.displayClientMessage(Component.translatable("guistrings.settlement.build.renamed", name), true);
+    }
+
+    private static void deleteBlueprint(ServerLevel level, ServerPlayer player, String idText) {
+        BuildingDesign design = ownBlueprint(player, idText);
+        if (design == null) {
+            return;
+        }
+        // a build of it that is not finished would lose its design (the build is cancelled when its design is gone): refuse
+        for (Settlement other : SettlementData.get(level.getServer()).all()) {
+            for (BuildProject project : other.getBuilding().getProjects()) {
+                if (project.isOpen() && project.getDesignId().equals(design.getId())) {
+                    player.displayClientMessage(Component.translatable("guistrings.settlement.build.error.blueprint_in_use"), true);
+                    return;
+                }
+            }
+        }
+        if (BlueprintStore.delete(level.getServer(), player.getUUID(), design.getId())) {
+            BuildingDesigns.sync(player);
+            player.displayClientMessage(Component.translatable("guistrings.settlement.build.deleted", design.getName()), true);
         }
     }
 

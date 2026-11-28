@@ -675,6 +675,8 @@ public final class AwNpcs {
     }
 
     private static void onCommonSetup(FMLCommonSetupEvent event) {
+        // the optional integrations (Ice and Fire, Weather2): the real implementations are swapped in for the mods that are installed
+        io.github.capttracker.ancientwarfarenpc.compat.ModCompat.init();
         // the items exist now (1.12.2: post-init)
         event.enqueueWork(AwNpcs::loadNpcSubtypeEquipment);
         // rework phase 8: the production sites of the automation module count their product in the storages of the settlement

@@ -207,7 +207,7 @@ public final class SettlementNeeds {
             }
         }
         if (!noWeapon.isEmpty()) {
-            Predicate<ItemStack> sword = stack -> stack.is(ItemTags.SWORDS);
+            Predicate<ItemStack> sword = stack -> stack.is(ItemTags.SWORDS) || stack.getItem() instanceof net.minecraft.world.item.SwordItem;
             int missing = noWeapon.size() - stock.count(sword);
             if (missing > 0) {
                 needs.add(new SettlementNeed("weapon.sword", SettlementNeed.Category.WEAPON, "guistrings.settlement.need.weapon", sword, missing,
@@ -240,7 +240,7 @@ public final class SettlementNeeds {
         // food
         int members = settlement.getMembers().size();
         if (members > 0 && SettlementConfig.demandFoodDays > 0) {
-            long want = (long) Math.ceil(settlement.foodMembers() * SettlementConfig.demandFoodDays * Math.max(1, SettlementConfig.npcDayFoodTicks)); // children count less (phase 10)
+            long want = (long) Math.ceil(settlement.foodMembers() * SettlementConfig.demandFoodDays * Math.max(1, SettlementConfig.npcDayFoodTicks) * Seasons.foodFactor(level, settlement.getHallPos())); // children count less (phase 10); more in winter
             long have = stock.food();
             if (have < want) {
                 int bread = Math.max(1, AWNPCStatics.getFoodValue(new ItemStack(Items.BREAD)));
@@ -412,6 +412,11 @@ public final class SettlementNeeds {
         }
         long expires = ttlTicks > 0 ? level.getGameTime() + ttlTicks : -1L;
         settlement.getPostedNeeds().put(id, new Posted(id, labelKey, matcher, wanted, priority, expires));
+        settlement.setNeedsNext(0L);
+    }
+
+    /** Makes the settlement recount its needs within a second (a soldier put on gear from the storage, so the need for it may be gone). */
+    public static void recount(Settlement settlement) {
         settlement.setNeedsNext(0L);
     }
 

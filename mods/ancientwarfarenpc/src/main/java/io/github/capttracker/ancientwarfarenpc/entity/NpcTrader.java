@@ -213,7 +213,7 @@ public class NpcTrader extends NpcPlayerOwned {
     /** At night in a dimension with a sky, or in the rain. */
     @Override
     public boolean shouldBeAtHome() {
-        return (level().dimensionType().hasSkyLight() && !level().isDay()) || level().isRainingAt(blockPosition());
+        return (level().dimensionType().hasSkyLight() && !level().isDay()) || level().isRainingAt(blockPosition()) || pausedByStorm();
     }
 
     @Override

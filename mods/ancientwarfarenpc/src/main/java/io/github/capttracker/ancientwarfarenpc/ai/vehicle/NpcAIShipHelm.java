@@ -7,8 +7,10 @@ package io.github.capttracker.ancientwarfarenpc.ai.vehicle;
 import io.github.capttracker.ancientwarfarenpc.ai.NpcAI;
 import io.github.capttracker.ancientwarfarenpc.config.AWNPCStatics;
 import io.github.capttracker.ancientwarfarenpc.entity.NpcPlayerOwned;
+import io.github.capttracker.ancientwarfarenpc.trade.SeaDocks;
 import io.github.capttracker.ancientwarfarevehicle.entity.VehicleBase;
 import io.github.capttracker.ancientwarfarevehicle.entity.ship.ShipHelper;
+import io.github.capttracker.ancientwarfarevehicle.entity.ship.ShipRoutePlanner;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -38,6 +40,9 @@ public class NpcAIShipHelm extends NpcAI<NpcPlayerOwned> {
     private final ShipSteering steering = new ShipSteering();
     /** The steering of the flight to a dock (rework phase 11), apart from the one of the orders so that the two do not share their course. */
     private final ShipSteering fleeSteering = new ShipSteering();
+    /** The destination a route was last planned for (or tried for), so that one order is planned once. Not saved: a loaded NPC plans its order again. */
+    @Nullable
+    private BlockPos plannedFor;
 
     public NpcAIShipHelm(NpcPlayerOwned npc) {
         super(npc);
@@ -62,6 +67,7 @@ public class NpcAIShipHelm extends NpcAI<NpcPlayerOwned> {
     @Override
     public void start() {
         steering.reset();
+        plannedFor = null;
     }
 
     @Override
@@ -104,6 +110,11 @@ public class NpcAIShipHelm extends NpcAI<NpcPlayerOwned> {
             steering.reset();
             return; // no order: the ship runs down by itself
         }
+        if (!follow && npc.getSailRoute().isEmpty()) {
+            planRoute(ship, sail);
+        } else if (follow || sail == null) {
+            plannedFor = null;
+        }
         npc.setDoing(follow ? "ship.follow" : "ship.helm", BlockPos.containing(target), Component.empty());
 
         switch (steering.tick(ship, target, follow ? null : npc.getSailRoute(), arrive, follow, AWNPCStatics.shipHelmStuckSeconds)) {
@@ -119,6 +130,24 @@ public class NpcAIShipHelm extends NpcAI<NpcPlayerOwned> {
             }
             case SAILING -> { }
         }
+    }
+
+    /**
+     * A plain Move order (no waypoints yet): plans the route over the water to the clicked spot for the hull's width ({@link ShipRoutePlanner}, the planner of the
+     * sea trade) and keeps it as the sail route, which {@link ShipSteering} then follows. Done once for each destination. When there is no route (or the spot is
+     * too far for the planner) the helmsman falls back to the look-ahead and the owner is told.
+     */
+    private void planRoute(VehicleBase ship, BlockPos sail) {
+        if (sail.equals(plannedFor)) {
+            return;
+        }
+        plannedFor = sail;
+        ShipRoutePlanner.Plan plan = ShipRoutePlanner.planBetween(npc.level(), ship.position(), sail, ship.blockPosition().getY(), SeaDocks.clearanceOf(ship), false);
+        if (plan != null && !plan.route().isEmpty()) {
+            npc.setSailRouteOrder(sail, plan.route());
+            return;
+        }
+        npc.tellOwner(Component.translatable("message.ancientwarfarenpc.ship.no_route", sail.getX(), sail.getY(), sail.getZ()));
     }
 
     /** The vessel to follow: the one of the follow order, else the one the owner's follow order points to; null if there is none (or it is the NPC's own ship). */

@@ -78,7 +78,10 @@ public final class NpcCommand {
             return;
         }
         if (hit instanceof EntityHitResult entityHit) {
-            NpcNetwork.sendToServer(new NpcCommandPayload(type, entityHit.getEntity()));
+            // a hitbox of a multipart creature (the parts of a dragon) is the creature itself
+            Entity whole = io.github.capttracker.ancientwarfarenpc.ai.MonsterRules.wholeOf(entityHit.getEntity());
+            Entity hitEntity = whole != null ? whole : entityHit.getEntity();
+            NpcNetwork.sendToServer(new NpcCommandPayload(type, hitEntity));
         } else if (hit instanceof BlockHitResult blockHit) {
             NpcNetwork.sendToServer(new NpcCommandPayload(type, blockHit.getBlockPos()));
         }

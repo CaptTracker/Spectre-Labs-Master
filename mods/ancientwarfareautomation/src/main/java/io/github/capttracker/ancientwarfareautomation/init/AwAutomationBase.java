@@ -501,6 +501,7 @@ public final class AwAutomationBase {
         modBus.addListener(AWChunkLoader::register);
         modBus.addListener(AwAutomationBase::onCommonSetup);
         WarehouseSetup.registerEvents(modBus);
+        io.github.capttracker.ancientwarfare.compat.CompatLoader.registerCompat(new io.github.capttracker.ancientwarfareautomation.compat.farmersdelight.FarmersDelightFarmCompat()); // Farmer's Delight rice (optional)
         WorksiteEvents.registerEvents(modBus);
 
         // 1.12.2 preInit: the seven registry parsers (the AgriCraft compat is not ported)

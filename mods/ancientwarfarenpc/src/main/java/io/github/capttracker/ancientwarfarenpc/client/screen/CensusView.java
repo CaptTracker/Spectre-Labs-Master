@@ -295,6 +295,10 @@ final class CensusView {
                     if (evt.mButton == 0 && isMouseOverElement(evt.mx, evt.my)) {
                         GuiRender.playClickSound();
                         CensusHighlight.start(entry.id(), displayName(entry), entry.pos(), entry.loaded(), hall);
+                    } else if (evt.mButton == 1 && isMouseOverElement(evt.mx, evt.my) && io.github.capttracker.ancientwarfarenpc.client.MapShare.enabled()) {
+                        // right click: share the position of the member as a map waypoint
+                        GuiRender.playClickSound();
+                        io.github.capttracker.ancientwarfarenpc.client.MapShare.share(displayName(entry), entry.pos());
                     }
                     return true;
                 }
@@ -345,7 +349,7 @@ final class CensusView {
                 BlockPos p = entry.pos();
                 String line = tr(entry.loaded() ? "guistrings.census.where.tooltip" : "guistrings.census.where.tooltip_unloaded", p.getX(), p.getY(), p.getZ(),
                         distance(p, hall), direction(p, hall));
-                return line + "\n" + tr("guistrings.census.click_hint");
+                return line + "\n" + tr("guistrings.census.click_hint") + (io.github.capttracker.ancientwarfarenpc.client.MapShare.enabled() ? "\n" + tr("guistrings.share.census_hint") : "");
             }
             if (col < COL_ROLE) {
                 String traitLine = traitsText(entry.traits());

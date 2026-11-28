@@ -236,6 +236,7 @@ public final class InnApi {
             return false;
         }
         guest.setFoodRemaining(Math.min(guest.getMaxFood(), guest.getFoodRemaining() + mealFood(meal)));
+        io.github.capttracker.ancientwarfarenpc.compat.HeartyMeals.eat(guest, meal);
         level.playSound(null, guest.getX(), guest.getY(), guest.getZ(), SoundEvents.GENERIC_EAT, SoundSource.NEUTRAL, 0.6F, 1.0F);
         settlement.markMealServed(level.getGameTime());
         guest.onInnMeal();

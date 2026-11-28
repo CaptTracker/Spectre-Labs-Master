@@ -11,6 +11,7 @@ import io.github.capttracker.ancientwarfarenpc.npccommand.NpcCommand.CommandType
 import io.github.capttracker.ancientwarfarenpc.settlement.SettlementConfig;
 import io.github.capttracker.ancientwarfarevehicle.entity.SeatRole;
 import io.github.capttracker.ancientwarfarevehicle.entity.VehicleBase;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
@@ -35,6 +36,8 @@ import javax.annotation.Nullable;
  */
 public class NpcAISiegeDuty extends NpcAI<NpcCombat> {
     private static final double FIGHT_DISTANCE_SQ = 64.0D;
+    /** How long a restored duty waits for its vehicle to be loaded (10 seconds). */
+    private static final int LOADING_WAIT_TICKS = 200;
 
     public NpcAISiegeDuty(NpcCombat npc) {
         super(npc);
@@ -52,6 +55,13 @@ public class NpcAISiegeDuty extends NpcAI<NpcCombat> {
             return false;
         }
         SiegeDuty duty = npc.getSiegeDuty();
+        if (duty == null) {
+            CompoundTag saved = npc.takePendingSiegeDuty();
+            if (saved != null) {
+                SiegeOps.restore(npc, saved); // the crew goes on after a reload
+                duty = npc.getSiegeDuty();
+            }
+        }
         if (duty == null) {
             if ((npc.tickCount + npc.getId()) % 40 == 0 && npc.getCurrentCommand().type == CommandType.ATTACK_AREA) {
                 SiegeOps.claim(npc);
@@ -87,6 +97,9 @@ public class NpcAISiegeDuty extends NpcAI<NpcCombat> {
         }
         SiegeJob job = duty.job;
         VehicleBase v = job.vehicle(level);
+        if (v == null && duty.restored && !job.isCancelled() && ++duty.lostTicks < LOADING_WAIT_TICKS) {
+            return; // after a reload the vehicle may load a little later than its crew
+        }
         if (v == null || job.isCancelled()) {
             if (v != null) {
                 leave(v);

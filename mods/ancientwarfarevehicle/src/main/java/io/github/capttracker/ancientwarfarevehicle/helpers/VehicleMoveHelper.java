@@ -60,6 +60,9 @@ public class VehicleMoveHelper implements INBTSerializable<CompoundTag> {
     /** CLIENT, predicted vehicle only: false while the rider steers with the mouse, so the view is not turned along with the vehicle. */
     public boolean riderViewFollows = true;
     private static final int HISTORY_TICKS = 12;
+    /** The shield of a mantlet: how far in front of its middle it stands and how many boxes test its width (see {@link #shieldBlocked}). */
+    private static final double SHIELD_FORWARD = io.github.capttracker.ancientwarfarevehicle.entity.siege.MantletShield.PLANE;
+    private static final int SHIELD_SAMPLES = 7;
     private static final double SNAP_DISTANCE = 0.5D;
     /** The last predicted states (x, y, z, yaw), oldest first. */
     private final java.util.ArrayDeque<double[]> history = new java.util.ArrayDeque<>();
@@ -318,6 +321,12 @@ public class VehicleMoveHelper implements INBTSerializable<CompoundTag> {
             stepHorseDrawn();
             return;
         }
+        boolean shieldGuard = !vehicle.level().isClientSide && vehicle.vehicleType.blocksProjectiles();
+        double guardX = vehicle.getX();
+        double guardY = vehicle.getY();
+        double guardZ = vehicle.getZ();
+        float guardYaw = vehicle.getYRot();
+        boolean guardWasFree = shieldGuard && !shieldBlocked(guardX, guardY, guardZ, guardYaw);
         VehicleMovementType move = vehicle.vehicleType.getMovementType();
         switch (move) {
             case GROUND -> this.applyGroundMotion();
@@ -339,6 +348,41 @@ public class VehicleMoveHelper implements INBTSerializable<CompoundTag> {
             // a siege tower or a mantlet stops dead at a wall (it climbs nothing), the others only lose speed
             forwardMotion *= vehicle.vehicleType.isPushed() ? 0.f : 0.65f;
         }
+        if (guardWasFree && shieldBlocked(vehicle.getX(), vehicle.getY(), vehicle.getZ(), vehicle.getYRot())) {
+            holdShield(guardX, guardY, guardZ, guardYaw);
+        }
+    }
+
+    /**
+     * SERVER: true if the shield of a mantlet (3 blocks wide, in front of its middle) would be inside a block at this place and heading. The box of the entity is only 1.3 blocks wide, so the
+     * shield is tested on its own: seven small boxes along its width, from a little over a step above the ground (it climbs 0.6 blocks, as the box does) to the top of the shield.
+     */
+    private boolean shieldBlocked(double x, double y, double z, float yawDegrees) {
+        double yaw = Math.toRadians(yawDegrees);
+        double s = Math.sin(yaw);
+        double c = Math.cos(yaw);
+        for (int i = 0; i < SHIELD_SAMPLES; i++) {
+            double side = -1.25D + i * (2.5D / (SHIELD_SAMPLES - 1));
+            double cx = x - SHIELD_FORWARD * s + side * c;
+            double cz = z - SHIELD_FORWARD * c - side * s;
+            AABB box = new AABB(cx - 0.23D, y + 0.65D, cz - 0.23D, cx + 0.23D, y + 2.5D, cz + 0.23D);
+            if (vehicle.level().getBlockCollisions(vehicle, box).iterator().hasNext()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** A mantlet whose shield would go into a wall: it keeps the new place with the old heading if that is free (it slides along), else it stays as it was, so the shield never passes into blocks. */
+    private void holdShield(double x, double y, double z, float yaw) {
+        vehicle.setYRot(yaw);
+        if (shieldBlocked(vehicle.getX(), vehicle.getY(), vehicle.getZ(), yaw)) {
+            vehicle.setPos(x, y, z);
+            forwardMotion = 0.f;
+            vehicle.setDeltaMovement(0.0D, vehicle.getDeltaMovement().y, 0.0D);
+        }
+        turnMotion = 0.f;
+        vehicle.horizontalCollision = true;
     }
 
     /** SERVER (rework phase 12): a siege tower with its bridge down (or somebody on its roof) stands still; it only falls to the ground. */

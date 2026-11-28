@@ -11,8 +11,11 @@ import io.github.capttracker.ancientwarfarenpc.settlement.building.BuildJobs;
 import io.github.capttracker.ancientwarfarenpc.settlement.building.BuildProject;
 import io.github.capttracker.ancientwarfarenpc.settlement.building.BuildingDesign;
 import io.github.capttracker.ancientwarfarenpc.settlement.building.DesignCategory;
+import io.github.capttracker.ancientwarfarenpc.settlement.building.RoomScanner;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.BedBlock;
+import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -37,10 +40,13 @@ final class FamilyHomes {
     /** A household that found no home searches again after this many ticks even if the beds did not change. */
     private static final long RESEARCH_TICKS = 600L;
 
+    /** The most rooms one search scans (each scan is a bounded flood fill). */
+    private static final int MAX_ROOM_SCANS = 12;
+
     private FamilyHomes() {}
 
     /** A place that could be a home: the beds, the building (null for loose beds), the kind (0 house, 1 tent, 2 loose beds) and how many sleepers must make room. */
-    record Candidate(@Nullable UUID building, List<BlockPos> beds, int kind, int displaced, double distance) {}
+    record Candidate(@Nullable UUID building, List<BlockPos> beds, int kind, int displaced, double distance, boolean handBuilt) {}
 
     // ---------------------------------------------------------------- buildings
 
@@ -75,6 +81,9 @@ final class FamilyHomes {
 
     /** True if the home of the household is a house (not a tent and not loose beds). */
     static boolean isHouse(Settlement settlement, Household household) {
+        if (household.homeHandBuilt) {
+            return true;
+        }
         BuildProject project = projectOf(settlement, household.homeBuilding);
         BuildingDesign design = project == null ? null : BuildJobs.designOf(project);
         return design != null && design.getCategory() == DesignCategory.HOUSE;
@@ -92,7 +101,7 @@ final class FamilyHomes {
      * when the sleepers that move out find another bed), the nearest to the household first. Null if there is none.
      */
     @Nullable
-    static Candidate best(Settlement settlement, SettlementFamilies families, Household household, int need) {
+    static Candidate best(ServerLevel level, Settlement settlement, SettlementFamilies families, Household household, int need) {
         Set<BlockPos> claimed = families.claimedBeds();
         List<Candidate> candidates = new ArrayList<>();
         Set<BlockPos> inBuildings = new HashSet<>();
@@ -118,7 +127,7 @@ final class FamilyHomes {
             }
             available.sort(Comparator.comparingInt((BlockPos bed) -> ownedByOutsider(settlement, household, bed) ? 1 : 0).thenComparingLong(BlockPos::asLong));
             List<BlockPos> chosen = new ArrayList<>(available.subList(0, need));
-            candidates.add(make(settlement, household, project.getId(), chosen, design.getCategory() == DesignCategory.HOUSE ? 0 : 1, from));
+            candidates.add(make(settlement, household, project.getId(), chosen, design.getCategory() == DesignCategory.HOUSE ? 0 : 1, from, false));
         }
         List<BlockPos> loose = new ArrayList<>();
         for (BlockPos bed : settlement.getBeds()) {
@@ -127,12 +136,19 @@ final class FamilyHomes {
             }
         }
         loose.sort(Comparator.comparingLong(BlockPos::asLong));
+        Set<BlockPos> inRooms = new HashSet<>();
+        if (SettlementConfig.handBuiltHouses) {
+            addRoomCandidates(level, settlement, household, loose, need, from, candidates, inRooms);
+        }
         for (int i = 0; i < loose.size(); i++) {
             for (int j = i + 1; j < loose.size(); j++) {
                 BlockPos a = loose.get(i);
                 BlockPos b = loose.get(j);
+                if (inRooms.contains(a) && inRooms.contains(b)) {
+                    continue; // already offered as a hand-built house
+                }
                 if (Math.abs(a.getX() - b.getX()) <= PAIR_DISTANCE && Math.abs(a.getZ() - b.getZ()) <= PAIR_DISTANCE && Math.abs(a.getY() - b.getY()) <= 2) {
-                    candidates.add(make(settlement, household, null, new ArrayList<>(List.of(a, b)), 2, from));
+                    candidates.add(make(settlement, household, null, new ArrayList<>(List.of(a, b)), 2, from, false));
                 }
             }
         }
@@ -161,6 +177,81 @@ final class FamilyHomes {
         return best;
     }
 
+    /** Whether a bed is inside a room: the cell above its foot or above its head is a cell of the room. */
+    private static boolean bedInRoom(ServerLevel level, RoomScanner.Room room, BlockPos foot) {
+        if (room.contains(foot.above())) {
+            return true;
+        }
+        BlockState state = level.getBlockState(foot);
+        if (state.getBlock() instanceof BedBlock && state.hasProperty(BedBlock.FACING)) {
+            return room.contains(foot.relative(state.getValue(BedBlock.FACING)).above());
+        }
+        return false;
+    }
+
+    /**
+     * Hand-built houses: the loose beds (not in a finished build of the planner) that stand in one enclosed, roofed room with a door (found by
+     * {@link RoomScanner}); a room with two or more beds that no other household claimed and no outsider sleeps in is a house for the family (kind 0, like
+     * a house of the planner). The beds of such a room are added to {@code inRooms} so they are not offered again as loose beds.
+     */
+    private static void addRoomCandidates(ServerLevel level, Settlement settlement, Household household, List<BlockPos> loose, int need, BlockPos from,
+                                          List<Candidate> candidates, Set<BlockPos> inRooms) {
+        Set<BlockPos> handled = new HashSet<>();
+        int scans = 0;
+        for (BlockPos bed : loose) {
+            if (handled.contains(bed) || !level.isLoaded(bed)) {
+                continue;
+            }
+            if (scans++ >= MAX_ROOM_SCANS) {
+                break; // bounded work for each search; the rest is looked at by the next search
+            }
+            handled.add(bed);
+            BlockPos start = RoomScanner.startNear(level, bed);
+            RoomScanner.Room room = start == null ? null : RoomScanner.scan(level, start, SettlementConfig.handBuiltRoomMaxCells);
+            if (room == null) {
+                continue;
+            }
+            List<BlockPos> inside = new ArrayList<>();
+            for (BlockPos other : loose) {
+                if (level.isLoaded(other) && bedInRoom(level, room, other)) {
+                    inside.add(other);
+                    handled.add(other);
+                }
+            }
+            inRooms.addAll(inside);
+            List<BlockPos> free = new ArrayList<>();
+            for (BlockPos other : inside) {
+                if (!ownedByOutsider(settlement, household, other)) {
+                    free.add(other);
+                }
+            }
+            if (free.size() >= need) {
+                free.sort(Comparator.comparingLong(BlockPos::asLong));
+                candidates.add(make(settlement, household, null, new ArrayList<>(free.subList(0, need)), 0, from, true));
+            }
+        }
+    }
+
+    /** Whether the hand-built home of the household is still an enclosed room with a door that holds at least two of its beds. */
+    private static boolean handBuiltStillValid(ServerLevel level, Household household) {
+        if (household.homeBeds.isEmpty() || !level.isLoaded(household.homeBeds.get(0))) {
+            return true; // not loaded: nothing can be said, keep the home
+        }
+        BlockPos first = household.homeBeds.get(0);
+        BlockPos start = RoomScanner.startNear(level, first);
+        RoomScanner.Room room = start == null ? null : RoomScanner.scan(level, start, SettlementConfig.handBuiltRoomMaxCells);
+        if (room == null) {
+            return false;
+        }
+        int inside = 0;
+        for (BlockPos bed : household.homeBeds) {
+            if (level.isLoaded(bed) && bedInRoom(level, room, bed)) {
+                inside++;
+            }
+        }
+        return inside >= 2;
+    }
+
     private static int freeIn(Settlement settlement, Set<BlockPos> claimed, Candidate candidate) {
         int free = 0;
         for (BlockPos bed : candidate.beds()) {
@@ -182,7 +273,7 @@ final class FamilyHomes {
         return c != 0 ? c : Double.compare(a.distance(), b.distance());
     }
 
-    private static Candidate make(Settlement settlement, Household household, @Nullable UUID building, List<BlockPos> beds, int kind, BlockPos from) {
+    private static Candidate make(Settlement settlement, Household household, @Nullable UUID building, List<BlockPos> beds, int kind, BlockPos from, boolean handBuilt) {
         int displaced = 0;
         double distance = 0.0D;
         for (BlockPos bed : beds) {
@@ -191,7 +282,7 @@ final class FamilyHomes {
             }
             distance += Math.sqrt(bed.distSqr(from));
         }
-        return new Candidate(building, beds, kind, displaced, distance / Math.max(1, beds.size()));
+        return new Candidate(building, beds, kind, displaced, distance / Math.max(1, beds.size()), handBuilt);
     }
 
     /** Where the household is: the mean of the last known positions of its members, the hall if none is known. */
@@ -228,7 +319,7 @@ final class FamilyHomes {
             }
             household.searchedBeds = bedCount;
             household.searchedAt = now;
-            Candidate candidate = best(settlement, families, household, 2);
+            Candidate candidate = best(level, settlement, families, household, 2);
             if (candidate != null) {
                 claim(level, settlement, families, household, candidate, true);
             }
@@ -244,6 +335,7 @@ final class FamilyHomes {
         if (household.homeBeds.size() < 2) {
             household.homeBeds.clear();
             household.homeBuilding = null;
+            household.homeHandBuilt = false;
             household.searchedBeds = -1;
             changed = true;
         }
@@ -257,6 +349,7 @@ final class FamilyHomes {
         household.homeBeds.clear();
         household.homeBeds.addAll(candidate.beds());
         household.homeBuilding = candidate.building();
+        household.homeHandBuilt = candidate.handBuilt();
         household.searchedBeds = -1;
         families.dirty();
         applyBeds(settlement, families, household);
@@ -398,6 +491,7 @@ final class FamilyHomes {
             if (!household.isCouple() && household.children.isEmpty() && !household.homeBeds.isEmpty()) {
                 household.homeBeds.clear(); // a survivor on its own gives the home back to the pool
                 household.homeBuilding = null;
+                household.homeHandBuilt = false;
                 household.searchedBeds = -1;
                 families.dirty();
             }
@@ -427,11 +521,20 @@ final class FamilyHomes {
      */
     static void reconsider(ServerLevel level, Settlement settlement, SettlementFamilies families) {
         for (Household household : new ArrayList<>(families.households())) {
+            if (household.hasHome() && household.homeHandBuilt && !handBuiltStillValid(level, household)) {
+                // a wall, the roof or the door was taken down: the room is no house any more
+                household.homeBeds.clear();
+                household.homeBuilding = null;
+                household.homeHandBuilt = false;
+                household.searchedBeds = -1;
+                families.dirty();
+                continue;
+            }
             if (!household.hasHome() || isHouse(settlement, household)) {
                 continue;
             }
             Set<BlockPos> own = new HashSet<>(household.homeBeds);
-            Candidate candidate = best(settlement, families, household, Math.max(2, household.homeBeds.size()));
+            Candidate candidate = best(level, settlement, families, household, Math.max(2, household.homeBeds.size()));
             if (candidate != null && candidate.kind() == 0 && candidate.displaced() == 0 && !own.containsAll(candidate.beds())) {
                 claim(level, settlement, families, household, candidate, false);
                 for (UUID adult : household.adults) {

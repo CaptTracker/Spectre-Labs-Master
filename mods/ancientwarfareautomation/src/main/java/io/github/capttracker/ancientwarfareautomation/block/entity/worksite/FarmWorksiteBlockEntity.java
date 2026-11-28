@@ -4,6 +4,7 @@
  */
 package io.github.capttracker.ancientwarfareautomation.block.entity.worksite;
 
+import io.github.capttracker.ancientwarfare.api.IWorksiteStatus;
 import io.github.capttracker.ancientwarfare.block.BlockRotationHandler.RelativeSide;
 import io.github.capttracker.ancientwarfare.util.BlockTools;
 import io.github.capttracker.ancientwarfare.util.EntityTools;
@@ -51,7 +52,7 @@ import java.util.Queue;
  * original used the day time, which stops when the daylight cycle is off); the resource counts are refreshed after
  * bone meal is used (the original only did that when a handler reported a change).
  */
-public abstract class FarmWorksiteBlockEntity extends InventoryWorksiteBlockEntity {
+public abstract class FarmWorksiteBlockEntity extends InventoryWorksiteBlockEntity implements IWorksiteStatus {
     private static final int PLANTABLE_INVENTORY_SIZE = 3;
     private static final int SIZE = 16;
     private static final int LOGISTICS_PLANTABLE_TARGET = 32;
@@ -133,6 +134,16 @@ public abstract class FarmWorksiteBlockEntity extends InventoryWorksiteBlockEnti
     @Override
     public IItemHandler getDepositInventory() {
         return depositInventory;
+    }
+
+    /** Third round (Serene Seasons): the farm has seeds but may sow none of them in this season. Farms that plant override it. */
+    protected boolean isOutOfSeason() {
+        return false;
+    }
+
+    @Override
+    public String getWaitingFor() {
+        return isOutOfSeason() ? OUT_OF_SEASON : null;
     }
 
     protected boolean isMiscItem(ItemStack stack) {

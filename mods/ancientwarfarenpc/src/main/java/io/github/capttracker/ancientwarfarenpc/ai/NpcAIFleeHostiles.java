@@ -6,9 +6,11 @@ package io.github.capttracker.ancientwarfarenpc.ai;
 
 import com.mojang.logging.LogUtils;
 import io.github.capttracker.ancientwarfare.owner.TeamViewerRegistry;
+import io.github.capttracker.ancientwarfarenpc.compat.ModCompat;
 import io.github.capttracker.ancientwarfarenpc.entity.NpcBase;
 import io.github.capttracker.ancientwarfarenpc.entity.NpcCombat;
 import io.github.capttracker.ancientwarfarenpc.entity.NpcPlayerOwned;
+import io.github.capttracker.ancientwarfarenpc.settlement.SettlementConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.Entity;
@@ -17,6 +19,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.OwnableEntity;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 
@@ -118,8 +121,14 @@ public class NpcAIFleeHostiles extends NpcAI<NpcPlayerOwned> {
         npc.nearbyHostiles.clear();
         nearbySoldiers.clear();
         double range = DISTANCE_FROM_ENTITY * io.github.capttracker.ancientwarfarenpc.trait.TraitEffects.fleeRangeFactor(npc); // a coward runs earlier
-        List<Mob> nearbyHostilesOrFriendlySoldiers = npc.level().getEntitiesOfClass(Mob.class,
-                npc.getBoundingBox().inflate(range, 3.0D, range), hostileOrFriendlyCombatNpcSelector);
+        AABB normalBox = npc.getBoundingBox().inflate(range, 3.0D, range);
+        // a dragon is feared from farther away and from above (Ice and Fire integration)
+        double majorRange = ModCompat.MONSTERS.isActive() ? Math.max(range, SettlementConfig.iceAndFireDragonFleeRange) : range;
+        AABB searchBox = majorRange > range ? npc.getBoundingBox().inflate(majorRange) : normalBox;
+        List<Mob> nearbyHostilesOrFriendlySoldiers = npc.level().getEntitiesOfClass(Mob.class, searchBox, hostileOrFriendlyCombatNpcSelector);
+        if (searchBox != normalBox) {
+            nearbyHostilesOrFriendlySoldiers.removeIf(e -> !MonsterRules.isMajor(e) && !e.getBoundingBox().intersects(normalBox));
+        }
         if (nearbyHostilesOrFriendlySoldiers.isEmpty()) {
             return;
         }

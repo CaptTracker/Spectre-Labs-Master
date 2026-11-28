@@ -5,7 +5,7 @@
 package io.github.capttracker.ancientwarfarenpc.ai.siege;
 
 /**
- * The part one NPC plays in a {@link SiegeJob}: its role and where it is in it. Not saved (the attack order is, and the order's own goal gives a new duty after a load).
+ * The part one NPC plays in a {@link SiegeJob}: its role and where it is in it. Saved with the NPC (see {@link SiegeOps#saveDuty}), so the crew goes on after a reload.
  */
 public final class SiegeDuty {
     /** Where the NPC is in its role. */
@@ -22,6 +22,9 @@ public final class SiegeDuty {
     public int attackDelay = 0;
     public int peekTicks = 0;
     public int coverTicks = 0;
+    /** True for a duty that was brought back from the saved state: the vehicle may still be loading, so its absence is waited out for a while. */
+    public boolean restored = false;
+    public int lostTicks = 0;
 
     public SiegeDuty(SiegeJob job, SiegeRole role) {
         this.job = job;

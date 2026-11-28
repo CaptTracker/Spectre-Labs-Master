@@ -53,6 +53,7 @@ public class NpcInnkeeper extends NpcPlayerOwned {
         goalSelector.addGoal(3, new NpcAIFleeHostiles(this));
         goalSelector.addGoal(3, new NpcAIPlayerOwnedAlarmResponse(this));
         goalSelector.addGoal(4, new NpcAIPlayerOwnedGetFood(this));
+        goalSelector.addGoal(4, new io.github.capttracker.ancientwarfarenpc.ai.owned.NpcAICook(this)); // cooks in a kitchen of the settlement (Farmer's Delight), above the inn work
         goalSelector.addGoal(5, new NpcAIInnkeeper(this));
         goalSelector.addGoal(6, new NpcAIScheduleGoal(this));
         goalSelector.addGoal(7, new NpcAIMoveHome(this, 50F, 3F, 30F, 3F));

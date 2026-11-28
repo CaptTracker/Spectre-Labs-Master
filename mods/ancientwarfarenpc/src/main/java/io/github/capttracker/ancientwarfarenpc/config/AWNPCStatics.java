@@ -98,6 +98,12 @@ public final class AWNPCStatics {
     public static boolean renderFriendlyHealth = true;
     public static boolean renderHostileHealth = true;
     public static boolean renderTeamColors = true;
+    /** Third round, maps: the "Share waypoint" buttons (Xaero's Minimap chat format when that mod is installed). */
+    public static boolean xaeroShareEnabled = true;
+    /** Third round, maps: the JourneyMap plugin (only does anything when JourneyMap is installed). */
+    public static boolean journeyMapEnabled = true;
+    public static boolean journeyMapWaypoints = true;
+    public static boolean journeyMapBorders = true;
 
     // ---- food settings ----
     private static int foodMultiplier = 350;
@@ -144,6 +150,10 @@ public final class AWNPCStatics {
     private static final ModConfigSpec.BooleanValue RENDER_FRIENDLY_HEALTH;
     private static final ModConfigSpec.BooleanValue RENDER_HOSTILE_HEALTH;
     private static final ModConfigSpec.BooleanValue RENDER_TEAM_COLORS;
+    private static final ModConfigSpec.BooleanValue XAERO_SHARE_ENABLED;
+    private static final ModConfigSpec.BooleanValue JOURNEYMAP_ENABLED;
+    private static final ModConfigSpec.BooleanValue JOURNEYMAP_WAYPOINTS;
+    private static final ModConfigSpec.BooleanValue JOURNEYMAP_BORDERS;
 
     public static final ModConfigSpec COMMON_SPEC;
     public static final ModConfigSpec CLIENT_SPEC;
@@ -331,6 +341,15 @@ public final class AWNPCStatics {
         RENDER_FRIENDLY_HEALTH = client.define("render_friendly_health", true);
         RENDER_HOSTILE_HEALTH = client.define("render_hostile_health", true);
         RENDER_TEAM_COLORS = client.define("render_team_colors", true);
+        client.comment("Xaero's Minimap: the Share waypoint buttons on the town hall, census and talk screens. With the mod installed they post a clickable",
+                "waypoint to your own chat; without it they post the coordinates as plain text. Nothing is sent to other players.").push("xaeros_minimap");
+        XAERO_SHARE_ENABLED = client.comment("Show the Share waypoint buttons", "Default = true").define("enabled", true);
+        client.pop();
+        client.comment("JourneyMap: shows the settlements you own or belong to on the map. Only used when JourneyMap is installed.").push("journeymap");
+        JOURNEYMAP_ENABLED = client.comment("Turn the whole JourneyMap integration on or off", "Default = true").define("enabled", true);
+        JOURNEYMAP_WAYPOINTS = client.comment("A waypoint at each settlement hall", "Default = true").define("waypoints", true);
+        JOURNEYMAP_BORDERS = client.comment("The settlement border as a map overlay", "Default = true").define("borders", true);
+        client.pop();
         client.pop();
         CLIENT_SPEC = client.build();
     }
@@ -451,6 +470,10 @@ public final class AWNPCStatics {
         renderFriendlyHealth = RENDER_FRIENDLY_HEALTH.get();
         renderHostileHealth = RENDER_HOSTILE_HEALTH.get();
         renderTeamColors = RENDER_TEAM_COLORS.get();
+        xaeroShareEnabled = XAERO_SHARE_ENABLED.get();
+        journeyMapEnabled = JOURNEYMAP_ENABLED.get();
+        journeyMapWaypoints = JOURNEYMAP_WAYPOINTS.get();
+        journeyMapBorders = JOURNEYMAP_BORDERS.get();
     }
 
     // ---- lookups ----

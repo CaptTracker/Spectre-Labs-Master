@@ -85,6 +85,9 @@ public final class ShipHelper {
     // ---- naval combat (rework phase 11) ----
     /** SERVER: the grappling lines this ship is at either end of (the hooks register themselves). */
     private final List<GrappleHook> lines = new ArrayList<>();
+    /** SERVER: saved grappling lines that wait for the ship at their other end to be loaded, and the loaded ticks left to wait. */
+    private final List<GrappleHook.SavedLine> pendingLines = new ArrayList<>();
+    private int pendingLineTicks = 0;
     /** SERVER: what grappling lines asked this ship to move by this tick (blocks, degrees); applied and cleared by {@link #step}. */
     private double pullX = 0.D;
     private double pullZ = 0.D;
@@ -673,6 +676,9 @@ public final class ShipHelper {
         if (spec == null) {
             return;
         }
+        if (!pendingLines.isEmpty() && !ship.level().isClientSide) {
+            tickPendingLines();
+        }
         updateParts();
         if (havePrev) {
             carryDeck();
@@ -920,8 +926,45 @@ public final class ShipHelper {
         return result;
     }
 
+    /**
+     * SERVER: gives the saved lines their hooks back as soon as the ship at the other end is loaded (either ship of a line may do it: the other then sees the line
+     * and drops its copy). A line whose other ship has not come back within {@code grapple_reattach_ticks} loaded ticks of this ship is dropped.
+     */
+    private void tickPendingLines() {
+        if (!(ship.level() instanceof net.minecraft.server.level.ServerLevel level)) {
+            return;
+        }
+        java.util.Iterator<GrappleHook.SavedLine> it = pendingLines.iterator();
+        while (it.hasNext()) {
+            GrappleHook.SavedLine saved = it.next();
+            UUID otherId = saved.otherThan(ship.getUUID());
+            boolean linked = false;
+            for (GrappleHook hook : lines()) {
+                VehicleBase end = hook.otherThan(ship);
+                if (end != null && end.getUUID().equals(otherId)) {
+                    linked = true;
+                    break;
+                }
+            }
+            if (linked) {
+                it.remove();
+                continue;
+            }
+            if (level.getEntity(otherId) instanceof VehicleBase other && other.isAlive() && !other.isRemoved()) {
+                VehicleBase source = saved.source().equals(ship.getUUID()) ? ship : other;
+                VehicleBase target = source == ship ? other : ship;
+                GrappleHook.restore(source, target, saved);
+                it.remove(); // made, or it cannot be made now (a ship is sinking, the lines are off): either way the saved line is spent
+            }
+        }
+        if (!pendingLines.isEmpty() && --pendingLineTicks <= 0) {
+            pendingLines.clear(); // the other ship never came back
+        }
+    }
+
     /** SERVER: cuts every line of this ship. */
     public void cutAllLines() {
+        pendingLines.clear();
         for (GrappleHook hook : new ArrayList<>(lines)) {
             hook.cut(false);
         }
@@ -1106,6 +1149,20 @@ public final class ShipHelper {
             list.add(entry);
         }
         data.put("hardpoints", list);
+        // grappling lines: written by both ships; the hook entity itself is not saved
+        net.minecraft.nbt.ListTag lineList = new net.minecraft.nbt.ListTag();
+        for (GrappleHook hook : lines()) {
+            GrappleHook.SavedLine saved = hook.snapshot();
+            if (saved != null) {
+                lineList.add(saved.save());
+            }
+        }
+        for (GrappleHook.SavedLine saved : pendingLines) {
+            lineList.add(saved.save());
+        }
+        if (!lineList.isEmpty()) {
+            data.put("lines", lineList);
+        }
         tag.put("ship", data);
     }
 
@@ -1118,6 +1175,14 @@ public final class ShipHelper {
         for (int i = 0; i < list.size() && i < hardpoints.length; i++) {
             hardpoints[i].load(list.getCompound(i));
         }
+        pendingLines.clear();
+        for (net.minecraft.nbt.Tag entry : data.getList("lines", net.minecraft.nbt.Tag.TAG_COMPOUND)) {
+            GrappleHook.SavedLine saved = GrappleHook.SavedLine.load((CompoundTag) entry);
+            if (saved != null) {
+                pendingLines.add(saved);
+            }
+        }
+        pendingLineTicks = pendingLines.isEmpty() ? 0 : VehicleSettings.grappleReattachTicks;
     }
 
     public void writeSpawn(FriendlyByteBuf buffer) {

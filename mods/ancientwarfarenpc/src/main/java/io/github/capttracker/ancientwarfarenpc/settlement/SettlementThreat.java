@@ -4,6 +4,8 @@
  */
 package io.github.capttracker.ancientwarfarenpc.settlement;
 
+import io.github.capttracker.ancientwarfarenpc.ai.MonsterRules;
+import io.github.capttracker.ancientwarfarenpc.compat.ModCompat;
 import io.github.capttracker.ancientwarfarenpc.entity.NpcBase;
 import io.github.capttracker.ancientwarfarenpc.faction.AwFactions;
 import io.github.capttracker.spectrefactions.api.ActorId;
@@ -18,6 +20,7 @@ import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
+import net.neoforged.neoforge.entity.PartEntity;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -61,7 +64,7 @@ public final class SettlementThreat {
         }
         settlement.setThreatClearSince(-1L);
         if (settlement.isAutoAlarmEnabled() && !settlement.isAlarmActive() && !settlement.isAlarmSuppressed()
-                && found.size() >= settlement.getAutoAlarmThreshold()) {
+                && (found.size() >= settlement.getAutoAlarmThreshold() || hasMajorThreat(found))) {
             settlement.setAlarm(true, true);
             announce(level, settlement, found.get(0), found.size());
         }
@@ -69,9 +72,44 @@ public final class SettlementThreat {
 
     private static List<LivingEntity> scan(ServerLevel level, Settlement settlement) {
         int[] b = SettlementLife.landBounds(settlement);
-        AABB box = new AABB(b[0], level.getMinBuildHeight(), b[1], b[2] + 1, level.getMaxBuildHeight(), b[3] + 1);
-        return new ArrayList<>(level.getEntitiesOfClass(LivingEntity.class, box,
-                e -> e.isAlive() && settlement.contains(e.getX(), e.getZ()) && nearSurface(level, e) && isThreat(level, settlement, e)));
+        // a dragon is seen from beyond the border (Ice and Fire integration); everything else counts inside the land only
+        int margin = ModCompat.MONSTERS.isActive() && SettlementConfig.iceAndFireEnabled ? SettlementConfig.iceAndFireDragonAlarmRange : 0;
+        AABB box = new AABB(b[0] - margin, level.getMinBuildHeight(), b[1] - margin, b[2] + 1 + margin, level.getMaxBuildHeight(), b[3] + 1 + margin);
+        List<LivingEntity> found = new ArrayList<>(level.getEntitiesOfClass(LivingEntity.class, box, e -> e.isAlive() && counts(level, settlement, e)));
+        if (ModCompat.MONSTERS.isActive()) {
+            // the hitboxes of a multipart creature are no living entities: each one counts as its parent, once
+            for (PartEntity<?> part : level.getPartEntities()) {
+                if (part.getBoundingBox().intersects(box) && part.getParent() instanceof LivingEntity parent && parent.isAlive() && !found.contains(parent)
+                        && counts(level, settlement, parent)) {
+                    found.add(parent);
+                }
+            }
+        }
+        return found;
+    }
+
+    private static boolean counts(ServerLevel level, Settlement settlement, LivingEntity e) {
+        if (isMajorThreat(e)) {
+            return isThreat(level, settlement, e); // a dragon flies: no land or depth limit
+        }
+        return settlement.contains(e.getX(), e.getZ()) && nearSurface(level, e) && isThreat(level, settlement, e);
+    }
+
+    /** True for a creature that weighs as a major threat (a dragon of Ice and Fire): it is seen from far away and, if the config says so, raises the alarm alone. */
+    public static boolean isMajorThreat(Entity e) {
+        return ModCompat.MONSTERS.get().isMajorThreat(e);
+    }
+
+    private static boolean hasMajorThreat(List<LivingEntity> found) {
+        if (!SettlementConfig.iceAndFireDragonAlarmAlone) {
+            return false;
+        }
+        for (LivingEntity e : found) {
+            if (isMajorThreat(e)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -95,6 +133,10 @@ public final class SettlementThreat {
 
     /** Whether the entity is hostile to the settlement. */
     public static boolean isThreat(ServerLevel level, Settlement settlement, Entity e) {
+        Entity whole = MonsterRules.wholeOf(e); // a hitbox of a multipart creature is its parent
+        if (whole != null) {
+            e = whole;
+        }
         if (e instanceof Player player && (player.isCreative() || player.isSpectator())) {
             return false;
         }
@@ -102,6 +144,7 @@ public final class SettlementThreat {
         if (actor.isPresent()) {
             return AwFactions.relation(level, settlement.getOwnerActor(), actor.get()) == Relation.HOSTILE;
         }
-        return !(e instanceof NpcBase) && e instanceof Enemy;
+        // the creatures of other mods that count as monsters (Ice and Fire): wild ones only, a tamed one has an actor above
+        return !(e instanceof NpcBase) && (e instanceof Enemy || ModCompat.MONSTERS.get().isMonster(e));
     }
 }

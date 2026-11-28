@@ -37,8 +37,14 @@ public final class SettlementLife {
 
     private SettlementLife() {}
 
+    /**
+     * The bed and gathering point upkeep. It runs when the daily schedule is on and also when only the families are on: the beds and the homes of the
+     * families do not depend on the schedule. With the schedule off, the beds are not handed out to members (nobody sleeps by schedule then) and no gathering
+     * points are built; the beds are still found and checked and the households still claim their homes.
+     */
     public static void tick(ServerLevel level, Settlement settlement, boolean scan) {
-        if (!SettlementConfig.scheduleEnabled) {
+        boolean schedule = SettlementConfig.scheduleEnabled;
+        if (!schedule && !SettlementConfig.familiesEnabled) {
             return;
         }
         if (scan) {
@@ -46,8 +52,10 @@ public final class SettlementLife {
         }
         validateBeds(level, settlement);
         io.github.capttracker.ancientwarfarenpc.settlement.family.FamilyLife.claimHomes(level, settlement); // the homes of the families come before the free beds are handed out
-        assignBeds(settlement);
-        rebuildGatherPoints(level, settlement);
+        if (schedule) {
+            assignBeds(settlement);
+            rebuildGatherPoints(level, settlement);
+        }
     }
 
     private static boolean isBedFoot(BlockState state) {
