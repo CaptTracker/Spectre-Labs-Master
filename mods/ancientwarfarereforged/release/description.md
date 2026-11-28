@@ -14,7 +14,7 @@ This one file holds all five Ancient Warfare modules: **Core, Vehicles, Automati
 - Spectre Lib (required)
 - JEI (optional)
 - Jade or WTHIT (optional, for look-at tooltips on NPCs and worksites)
-- Ice and Fire, Weather2 (with CoroUtil), Serene Seasons (with GlitchCore), Farmer's Delight, JourneyMap and Xaero's Minimap (all optional, see Optional mod support)
+- Ice and Fire, Weather2 (with CoroUtil), Serene Seasons (with GlitchCore), Farmer's Delight, Dynamic Trees, JourneyMap and Xaero's Minimap (all optional, see Optional mod support)
 
 ## Settlements
 - Mark out your land with **boundary markers**, with no town hall range limit.
@@ -76,6 +76,7 @@ Nothing below is needed. Each part only works when the other mod is installed, a
 - **Weather2:** settlements warn of severe storms, tornadoes and sandstorms. NPCs go indoors, outdoor work pauses and ship helmsmen head for a dock.
 - **Serene Seasons:** farms only sow what is fertile in the current season, winter makes NPCs eat more and the cold hurts the morale of NPCs without a home, and the hall shows the season.
 - **Farmer's Delight:** farms plant its crops and rice, knives count as tools, hearty meals give NPCs their effects and the innkeeper cooks in a kitchen room you build.
+- **Dynamic Trees:** the lumberjacks of a tree farm cut its trees down so that they really fall, collect the drops and plant its seeds.
 - **Xaero's Minimap:** a Share waypoint button posts a clickable waypoint to your own chat.
 - **JourneyMap:** your settlements show on the map with a waypoint and their border.
 - **Mo' Bends and Dynamic Surroundings:** NPCs work with them as with vanilla mobs; nothing to set up.
@@ -83,7 +84,84 @@ Nothing below is needed. Each part only works when the other mod is installed, a
 ## Good to know
 - Back up your worlds. This is a first release.
 - Config files: `ancientwarfarenpc-settlements.toml` and `ancientwarfareautomation-worksites.toml`. Set `machines_work_alone = true` to bring back worksites that run without NPCs.
-- Known issues are listed in the changelog.
+- Known issues are listed below.
+
+## Controls
+All keys can be rebound in **Options > Controls**. Vehicle keys only act while you ride a vehicle, and the item keys only while you hold an Ancient Warfare item, so they don't clash with your normal keys.
+
+**Driving (every vehicle)**
+| Key | Action |
+|---|---|
+| W / S | Throttle forward / reverse |
+| A / D | Steer (with mouse steering on, A/D turn the hull of vehicles that have a turret) |
+| C | Switch between mouse steering (the vehicle turns where you look) and classic key steering |
+| 1 to 9 | Switch seats on vehicles with more than one seat. On a ship, 1 takes the helm back from an NPC helmsman |
+
+**Weapons (siege engines and ship gun seats)**
+| Key | Action |
+|---|---|
+| Space | Fire |
+| R / F | Aim up / down |
+| Z / X | Turn the turret left / right |
+| T / G | Previous / next ammo |
+| V | Open the ammo selection |
+
+**Siege tower**
+| Key | Action |
+|---|---|
+| W / S in a ladder seat | Climb up / down |
+| B | Lower or raise the drop bridge (driver, ladder or platform seat) |
+
+**Items and worksites**
+| Key | Action |
+|---|---|
+| Z, X, C, V, B | Alt-use keys 1 to 5 for Ancient Warfare items (for example, alt key 1 adds a dock to a Sea Route Chart) |
+| F8 | Show or hide worksite work areas |
+
+**With the mouse**
+| Action | Result |
+|---|---|
+| Right-click a vehicle | Board it |
+| Sneak + right-click a vehicle | Open its inventory (ships: the Stance passive / aggressive button) |
+| Right-click a cart with a lead while leading a horse | Hitch the horse (sneak + right-click with a lead unhitches) |
+| Use a Grappling Hook from your ship at another ship | Throw a line (sneak-use the hook to let go) |
+| Right-click an NPC you don't own, or sneak + right-click your own with an empty hand | Talk to it |
+| Command baton, attack mode at a wall or gate | Start a siege with your towers, mantlets and rams |
+
+## Commands
+| Command | Who | What |
+|---|---|---|
+| `/awsettlement birth`, `age`, `growup`, `families` | Operators | Force a birth, age a child, grow a child up now, list households |
+| `/awcaravan [faction]` | Operators | Call a faction caravan to your settlement by land |
+| `/awcaravan sea [faction]` | Operators | Call a faction trade ship |
+| `/awresearch add/remove <player> <goal>`, `fill <player>`, `clear <player>` | Operators | Give or take research |
+| `/awnpcdebug` | Operators | Toggle the NPC AI debug display |
+
+## Known issues
+**Settlements and production**
+- A recipe switched off is still made when the settlement needs it. Set `demand_enables_recipes = false` for a hard off.
+- Nothing makes copper gear, netherite upgrades, saddles or bundles.
+- Archers don't take arrows from storage: NPC archers shoot without using up arrows, so only bows are handed out.
+- A hand-built house or chapel is found by its walls: an enclosed room with a door (a roof is implied by the size limit, `hand_built_room_max_cells`). Open or very large buildings are not recognised. There are no schools.
+
+**Building**
+- The farmhouse, the lumber camp and the mine entrance need their worksite block (crop farm, tree farm, quarry) in the storage, like the sawmill and the smithy. A planned build waits for it. The farmhouse garden has no water source, and the quarry of the mine entrance follows the normal quarry rules (ladders, digs down).
+- Deleting a blueprint leaves the finished builds of it in the settlement record without a design.
+
+**Ships**
+- A helmsman plans a water route only over loaded chunks and legs the route planner covers; with no route it looks ahead as before and tells you. The spot you click needs water at least 2 blocks deep.
+- Faction NPCs can't take the helm, and they only crew a ship whose helm is held by an ally.
+- NPCs cross between grappled decks with a short leap. Gunners and archers don't board.
+- Sea routes and trade ships only run near a player (in loaded chunks), and legs longer than 256 blocks aren't planned.
+
+**Sieges**
+- The drop bridge is a staircase of flat planks: it reaches a wall top from 3 blocks below to 1 above the platform, and stepping up 1 block needs a jump. After a siege the bridge stays down.
+- NPC siege crews plan routes over open ground only and don't open gates.
+- A mantlet's shield only blocks other entities by being in the way of the mantlet itself; it does not push them.
+- Faction NPCs don't use siege engines yet (there are no faction raids).
+
+**Art**
+- New blocks and items reuse vanilla or existing textures (sawmill, bakery, smithy, tannery, grappling hook, crates, scanner, siege engines). Census problem icons are coloured letters.
 
 ## License and credits
 GPL-3.0-or-later, the same as the original. Source code: https://github.com/CaptTracker/Spectre-Labs-Master

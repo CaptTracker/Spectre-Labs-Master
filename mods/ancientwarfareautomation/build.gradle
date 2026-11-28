@@ -7,6 +7,11 @@ evaluationDependsOn(':ancientwarfarevehicle')
 
 repositories {
     maven { url = 'https://maven.blamejared.com/' }
+    // Dynamic Trees is optional: only its API is needed to compile compat/dynamictrees, its classes are never loaded without the mod.
+    maven {
+        url = 'https://api.modrinth.com/maven'
+        content { includeGroup 'maven.modrinth' }
+    }
 }
 
 dependencies {
@@ -14,6 +19,8 @@ dependencies {
     implementation project(':ancientwarfarevehicle')
     // JEI is optional: the API is only needed to compile compat/jei, the classes are never loaded without JEI.
     compileOnly "mezz.jei:jei-1.21.1-neoforge-api:19.21.0.247"
+    // Dynamic Trees 1.7.2 (NeoForge 1.21.1). The Modrinth maven needs the version id: G4uJ0UA0 = 1.7.2 (the project id is vdjF5PL5).
+    compileOnly "maven.modrinth:dynamictrees:G4uJ0UA0"
 }
 
 // Load the Ancient Warfare modules this one needs in runClient/runServer.

@@ -120,6 +120,8 @@ public final class AWAutomationStatics {
     public static boolean sereneSeasonsEnabled = true;
     /** Farmer's Delight: if false, the farms treat its crops like any other (no rice paddies, no knife for the rice harvest). */
     public static boolean farmersDelightEnabled = true;
+    /** Dynamic Trees: if false, the tree farm treats its trees as plain logs and leaves. */
+    public static boolean dynamicTreesEnabled = true;
     /** Items that a crop farm plants in a flooded cell (one block of water above soil, nothing but air above the water). The default is the rice of Farmer's Delight. */
     public static java.util.List<String> paddyCropItems = java.util.List.of("farmersdelight:rice");
     /** The longest side branch of the quarry's branch mine mode. */
@@ -225,6 +227,7 @@ public final class AWAutomationStatics {
     private static final ModConfigSpec.IntValue TASK_RESCAN_TICKS;
     private static final ModConfigSpec.BooleanValue SERENE_ENABLED;
     private static final ModConfigSpec.BooleanValue FD_ENABLED;
+    private static final ModConfigSpec.BooleanValue DT_ENABLED;
     private static final ModConfigSpec.ConfigValue<List<? extends String>> FD_PADDY_ITEMS;
     private static final ModConfigSpec.IntValue BRANCH_LENGTH;
     private static final ModConfigSpec.IntValue DOCK_RANGE;
@@ -390,6 +393,11 @@ public final class AWAutomationStatics {
                 "The cell must be open to the air above the water. Everything else a crop farm plants is never put into water.")
                 .defineListAllowEmpty("paddy_crop_items", List.of("farmersdelight:rice"), () -> "farmersdelight:rice", o -> o instanceof String);
         server.pop();
+        server.comment("Dynamic Trees (optional integration, server side). Nothing here has an effect without the mod.").push("dynamic_trees");
+        DT_ENABLED = server.comment("Default = true", "If true, the tree farm recognises Dynamic Trees trees, its workers cut them down with Dynamic Trees' own felling (the whole tree falls, the axe wears)",
+                "and it plants Dynamic Trees seeds. If false, the farm handles those trees like any other logs and leaves.")
+                .define("enabled", true);
+        server.pop();
         SERVER_SPEC = server.build();
     }
 
@@ -530,6 +538,7 @@ public final class AWAutomationStatics {
         taskRescanTicks = TASK_RESCAN_TICKS.get();
         sereneSeasonsEnabled = SERENE_ENABLED.get();
         farmersDelightEnabled = FD_ENABLED.get();
+        dynamicTreesEnabled = DT_ENABLED.get();
         paddyCropItems = List.copyOf(FD_PADDY_ITEMS.get().stream().map(String::valueOf).toList());
     }
 

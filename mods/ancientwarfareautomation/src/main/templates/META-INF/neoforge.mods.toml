@@ -44,7 +44,7 @@ description='''${mod_description}'''
     ordering="AFTER"
     side="BOTH"
 
-# Optional integrations (third round). The farms use no class of these mods: Serene Seasons through the core module, Farmer's Delight by registry ids.
+# Optional integrations (third round). The farms use no class of Serene Seasons (through the core module) or Farmer's Delight (registry ids); the tree farm names Dynamic Trees classes only in compat/dynamictrees, loaded when the mod is.
 [[dependencies.${mod_id}]]
     modId="sereneseasons"
     type="optional"
@@ -56,5 +56,12 @@ description='''${mod_description}'''
     modId="farmersdelight"
     type="optional"
     versionRange="[1.3.0,)"
+    ordering="AFTER"
+    side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="dynamictrees"
+    type="optional"
+    versionRange="[1.5.0,)"
     ordering="AFTER"
     side="BOTH"

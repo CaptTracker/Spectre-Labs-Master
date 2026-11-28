@@ -70,6 +70,8 @@ public class TreeFarmRegistry {
     private static final List<ITreeScanner> builtInTreeScanners = new ArrayList<>();
     /** filled by the scanner parser, the first one is tried first */
     private static final List<ITreeScanner> treeScanners = new CopyOnWriteArrayList<>();
+    /** scanners of the optional integrations (Dynamic Trees): they are tried before the data scanners and the built in ones, and are not cleared by a reload */
+    private static final List<ITreeScanner> priorityTreeScanners = new CopyOnWriteArrayList<>();
 
     static {
         builtInSaplings.add(new Sapling(s -> s.getItem() instanceof BlockItem blockItem && blockItem.getBlock() instanceof SaplingBlock, false));
@@ -84,11 +86,26 @@ public class TreeFarmRegistry {
         treeScanners.add(0, treeScanner);
     }
 
+    /** Adds a scanner of an optional integration that takes the trees it matches before any other scanner. */
+    public static void registerPriorityTreeScanner(ITreeScanner treeScanner) {
+        priorityTreeScanners.add(treeScanner);
+    }
+
+    /** Adds a plantable of an optional integration (it stays across data reloads). */
+    public static void registerBuiltInSapling(ISapling sapling) {
+        builtInSaplings.add(sapling);
+    }
+
     public static ITreeScanner getTreeScanner(BlockState state) {
         return getRegisteredTreeScanner(state).orElse(DEFAULT_TREE_SCANNER);
     }
 
     public static Optional<ITreeScanner> getRegisteredTreeScanner(BlockState state) {
+        for (ITreeScanner priority : priorityTreeScanners) {
+            if (priority.matches(state)) {
+                return Optional.of(priority);
+            }
+        }
         Optional<ITreeScanner> fromData = treeScanners.stream().filter(ts -> ts.matches(state)).findFirst();
         if (fromData.isPresent()) {
             return fromData;

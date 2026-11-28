@@ -4,7 +4,7 @@
 # Each upload keeps its release text in <mod dir>/release/:
 #   summary.txt     one-line CurseForge summary
 #   description.md  project page description
-#   changelog.md    changelog for this file
+#   changelog.md    changes since the previous version only (older versions live in release/history/<version>.md)
 #   upload.md       table of upload settings (versions, loader, dependencies, license)
 # The logo comes from docs/branding/<modid>_logo.png when it exists.
 # Output folder per upload: the jar, logo.png, the four text files and RELEASE.md (all of them in one page).

@@ -18,4 +18,12 @@ public interface ITreeScanner {
     ITree scanTree(Level level, BlockPos pos, BlockPos minPos, BlockPos maxPos);
 
     boolean matches(BlockState state);
+
+    /**
+     * True if the staffed workers only cut the trunks of this scanner's trees that have natural leaves (logs without them are a player's build). A scanner of
+     * trees that are no blocks of logs and leaves (Dynamic Trees) says false.
+     */
+    default boolean needsNaturalLeaves() {
+        return true;
+    }
 }

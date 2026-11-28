@@ -123,6 +123,9 @@ public enum WorkTool {
         if (target.is(BlockTags.MINEABLE_WITH_HOE)) {
             return List.of(HOE);
         }
+        if (target.is(BlockTags.LOGS)) {
+            return List.of(AXE); // logs that carry no mineable tag (the branches of Dynamic Trees)
+        }
         return List.of();
     }
 }

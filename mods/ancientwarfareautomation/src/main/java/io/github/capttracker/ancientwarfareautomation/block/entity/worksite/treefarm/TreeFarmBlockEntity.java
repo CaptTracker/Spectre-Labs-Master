@@ -14,6 +14,7 @@ import io.github.capttracker.ancientwarfareautomation.block.entity.worksite.IWor
 import io.github.capttracker.ancientwarfareautomation.block.entity.worksite.WorksiteActions;
 import io.github.capttracker.ancientwarfareautomation.block.entity.worksite.WorksiteMenus;
 import io.github.capttracker.ancientwarfareautomation.block.entity.worksite.WorksiteTools;
+import io.github.capttracker.ancientwarfareautomation.compat.dynamictrees.DynamicTreesSupport;
 import io.github.capttracker.ancientwarfareautomation.init.AwAutomationBase;
 import io.github.capttracker.ancientwarfareautomation.registry.TreeFarmRegistry;
 import net.minecraft.core.BlockPos;
@@ -29,6 +30,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -184,6 +186,9 @@ public class TreeFarmBlockEntity extends FarmWorksiteBlockEntity {
     }
 
     private boolean tryPlantingSapling(BlockPos position, ItemStack stack, ISapling sapling) {
+        if (sapling.plantsItself()) {
+            return level instanceof ServerLevel serverLevel && sapling.plant(serverLevel, position, stack.copy());
+        }
         return sapling.isRightClick() ? BlockTools.placeItemBlockRightClick(stack.copy(), level, position) :
                 tryPlace(stack.copy(), position, Direction.UP) || tryPlace(stack.copy(), position, Direction.DOWN);
     }
@@ -199,6 +204,10 @@ public class TreeFarmBlockEntity extends FarmWorksiteBlockEntity {
         if (state.isAir()) {
             it.remove();
             return false;
+        }
+
+        if (wood && DynamicTreesSupport.isTrunkBranch(state)) {
+            return fellDynamicTree(position, inventoryForDrops, null); // the machine fells it with a virtual axe
         }
 
         IBlockExtraDrop extraDrop = TreeFarmRegistry.getBlockExtraDrop(state);
@@ -244,6 +253,9 @@ public class TreeFarmBlockEntity extends FarmWorksiteBlockEntity {
      * grows with the number of logs ({@link #fellTicks}).
      */
     private boolean fellTree(BlockPos position, IItemHandler drops) {
+        if (DynamicTreesSupport.isTrunkBranch(level.getBlockState(position))) {
+            return fellDynamicTree(position, drops, currentActor);
+        }
         if (!(level instanceof ServerLevel serverLevel) || !level.getBlockState(position).is(BlockTags.LOGS)) {
             trunkBlocksToChop.remove(position);
             return false;
@@ -278,6 +290,27 @@ public class TreeFarmBlockEntity extends FarmWorksiteBlockEntity {
         }
         setChanged();
         return felled;
+    }
+
+    /**
+     * Fells a Dynamic Trees tree with the felling of that mod ({@link DynamicTreesSupport#fell}): the whole tree comes down (with the falling animation unless the
+     * mod's config turns it off), the axe of the worker (or the virtual axe of a machine) wears, and the drops that the falling tree spawns are collected into the
+     * inventory of the farm after the fall. One seed of the species comes with the felling into {@code drops} and the foot of the trunk is remembered for replanting,
+     * as for the saplings of the other trees.
+     */
+    private boolean fellDynamicTree(BlockPos position, IItemHandler drops, @Nullable LivingEntity actor) {
+        DynamicTreesSupport.Felled felled = DynamicTreesSupport.fell(level, position, actor, getFortune(), this, inventoryForDrops);
+        if (felled == null) {
+            trunkBlocksToChop.clear(); // nothing came down: do not retry the same queue on every action, the next scan queues the tree again if it still stands
+            return false;
+        }
+        trunkBlocksToChop.clear();
+        replantSpots.add(felled.foot());
+        if (!felled.seed().isEmpty()) {
+            InventoryTools.insertOrDropItems(drops, List.of(felled.seed()), level, felled.foot());
+        }
+        setChanged();
+        return true;
     }
 
     /** The sapling item that belongs to a log block (oak_log, stripped_oak_wood: oak_sapling; crimson_stem: crimson_fungus), if the farm can plant it. */
@@ -369,7 +402,8 @@ public class TreeFarmBlockEntity extends FarmWorksiteBlockEntity {
     private void addTreeBlocks(BlockState state, BlockPos basePos) {
         level.getProfiler().push("TreeFinder");
 
-        ITree tree = TreeFarmRegistry.getTreeScanner(state).scanTree(level, basePos,
+        ITreeScanner scanner = TreeFarmRegistry.getTreeScanner(state);
+        ITree tree = scanner.scanTree(level, basePos,
                 basePos.offset(-MAX_DISTANCE_TO_INITIAL_CUT_POSITION, 0, -MAX_DISTANCE_TO_INITIAL_CUT_POSITION),
                 basePos.offset(MAX_DISTANCE_TO_INITIAL_CUT_POSITION, 0, MAX_DISTANCE_TO_INITIAL_CUT_POSITION));
         List<BlockPos> leafBlocks = tree.getLeafPositions();
@@ -379,7 +413,7 @@ public class TreeFarmBlockEntity extends FarmWorksiteBlockEntity {
             leafBlocksToChop.addAll(leafBlocks); // the workers leave the leaves to decay
         }
         List<BlockPos> trunkBlocks = tree.getTrunkPositions();
-        if (isStaffed() && trunkBlocks.size() > 1 && !hasNaturalLeaf(leafBlocks)) {
+        if (isStaffed() && scanner.needsNaturalLeaves() && trunkBlocks.size() > 1 && !hasNaturalLeaf(leafBlocks)) {
             trunkBlocks = List.of(); // logs without natural leaves are a player's build: workers leave them alone
         }
         trunkBlocksToChop.addAll(trunkBlocks);
@@ -491,7 +525,7 @@ public class TreeFarmBlockEntity extends FarmWorksiteBlockEntity {
             for (int dz = -2; dz <= 2; dz++) {
                 for (int dy = 0; dy <= 1; dy++) {
                     BlockState state = level.getBlockState(cursor.set(pos.getX() + dx, pos.getY() + dy, pos.getZ() + dz));
-                    if (state.is(BlockTags.LOGS) || state.getBlock() instanceof SaplingBlock) {
+                    if (state.is(BlockTags.LOGS) || state.getBlock() instanceof SaplingBlock || DynamicTreesSupport.isSapling(state)) {
                         return false;
                     }
                 }
@@ -501,13 +535,13 @@ public class TreeFarmBlockEntity extends FarmWorksiteBlockEntity {
     }
 
     private static boolean isPlantedByFarm(BlockState state) {
-        return state.getBlock() instanceof SaplingBlock || TreeFarmRegistry.isPlantable(new ItemStack(state.getBlock().asItem()));
+        return state.getBlock() instanceof SaplingBlock || DynamicTreesSupport.isSapling(state) || TreeFarmRegistry.isPlantable(new ItemStack(state.getBlock().asItem()));
     }
 
     /** Rework phase 3: the surface of a column is the topmost soil block of the tree farm. */
     @Override
     protected boolean isGround(BlockState state, BlockPos pos) {
-        return TreeFarmRegistry.isSoil(state);
+        return TreeFarmRegistry.isSoil(state) || DynamicTreesSupport.isRootySoil(state); // the soil under a Dynamic Trees tree is rooty soil
     }
 
     /** A trunk or a leaf block above the soil is part of a tree standing there. */
@@ -591,7 +625,7 @@ public class TreeFarmBlockEntity extends FarmWorksiteBlockEntity {
     /** A growing plantable of this farm (sapling, mushroom, ...) that accepts bone meal. */
     private boolean canFertilize(BlockPos pos, BlockState state) {
         return state.getBlock() instanceof BonemealableBlock growable && growable.isValidBonemealTarget(level, pos, state)
-                && TreeFarmRegistry.isPlantable(new ItemStack(state.getBlock().asItem()));
+                && (DynamicTreesSupport.isSapling(state) || TreeFarmRegistry.isPlantable(new ItemStack(state.getBlock().asItem())));
     }
 
     private static final IWorksiteAction SHEAR_ACTION = WorksiteActions.full();
